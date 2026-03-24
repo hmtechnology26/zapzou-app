@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "outline": "#6c7b6b",
+              "inverse-primary": "#3de273",
+              "surface-tint": "#006d2f",
+              "secondary-fixed-dim": "#8cd4c7",
+              "secondary": "#1c695f",
+              "primary": "#006d2f",
+              "on-tertiary-fixed": "#380d00",
+              "surface-bright": "#f7f9fc",
+              "outline-variant": "#bbcbb9",
+              "inverse-on-surface": "#eff1f4",
+              "on-secondary-fixed-variant": "#005047",
+              "on-primary-fixed-variant": "#005322",
+              "secondary-fixed": "#a8f0e3",
+              "on-surface-variant": "#3c4a3d",
+              "on-surface": "#191c1e",
+              "surface-variant": "#e0e3e6",
+              "on-secondary": "#ffffff",
+              "primary-fixed-dim": "#3de273",
+              "surface-dim": "#d8dadd",
+              "primary-fixed": "#66ff8e",
+              "surface-container-lowest": "#ffffff",
+              "primary-container": "#25d366",
+              "on-secondary-fixed": "#00201c",
+              "tertiary-fixed": "#ffdbcf",
+              "on-secondary-container": "#226e63",
+              "surface-container": "#eceef1",
+              "tertiary-fixed-dim": "#ffb59b",
+              "surface-container-highest": "#e0e3e6",
+              "on-error": "#ffffff",
+              "surface-container-low": "#f2f4f7",
+              "surface": "#f7f9fc",
+              "on-tertiary-container": "#78351b",
+              "inverse-surface": "#2d3133",
+              "error-container": "#ffdad6",
+              "on-primary": "#ffffff",
+              "on-primary-container": "#005523",
+              "surface-container-high": "#e6e8eb",
+              "on-error-container": "#93000a",
+              "on-tertiary": "#ffffff",
+              "error": "#ba1a1a",
+              "on-background": "#191c1e",
+              "background": "#f7f9fc",
+              "secondary-container": "#a5ede0",
+              "tertiary-container": "#ffa07e",
+              "on-primary-fixed": "#002109",
+              "on-tertiary-fixed-variant": "#763319",
+              "tertiary": "#93492e"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .message-bubble-left {
+            border-bottom-left-radius: 4px;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="sticky top-0 w-full z-50 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md">
+<div class="flex items-center justify-between px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button class="text-green-700 dark:text-green-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors p-2 rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="text-2xl font-bold tracking-tight text-green-700 dark:text-green-400 font-['Inter']">ZapZou</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-green-700 dark:text-green-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors p-2 rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+</div>
+</div>
+</header>
+<main class="max-w-2xl mx-auto px-6 pt-6 space-y-8">
+<!-- Hero Section & Headline -->
+<section class="space-y-2">
+<h2 class="text-3xl font-bold tracking-tight text-on-surface">Perto de você</h2>
+<p class="text-on-surface-variant text-lg">Serviços confiáveis de ambientes próximos</p>
+</section>
+<!-- Map Placeholder -->
+<section class="relative h-64 w-full rounded-3xl overflow-hidden bg-surface-container-highest shadow-inner">
+<img alt="Mapa simplificado da vizinhança" class="w-full h-full object-cover opacity-60 mix-blend-multiply grayscale" data-location="São Paulo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtZewSICefCoHWNfDohoy7pHOSUpl6Y2qGK47sk70MGtDio5v8hKIUl6UsyisKw9riIC382CYrMIYerFvcrkQEvUD2nJQ00GNjiDcx0JXvDgk_Vg1o_O-7HeDRpMxYMkPCniq-WBdnjvhmCRDH4efyaiP7W33az1gf9jX_qSiBjoaHDyLNiQzCIp96bxxfRC-9gbzSSPDaaA5J3yi9YZbSii4YF2V_-KNSRHVPiN4Ae1KUFlzVJkRsFND1TtKuRSIzZfKkDJyq9qwh"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="relative">
+<div class="absolute -top-12 -left-6 bg-primary-container text-on-primary-container px-4 py-2 rounded-full shadow-lg text-sm font-semibold flex items-center gap-2 border-2 border-white">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">location_on</span>
+                        Residencial Aurora
+                    </div>
+<div class="w-12 h-12 bg-primary/20 rounded-full animate-pulse flex items-center justify-center">
+<div class="w-4 h-4 bg-primary rounded-full border-2 border-white"></div>
+</div>
+</div>
+</div>
+<!-- Interactive Overlay -->
+<div class="absolute bottom-4 right-4 bg-surface-container-lowest/90 backdrop-blur-md p-2 rounded-2xl flex flex-col gap-2 shadow-sm border border-outline-variant/10">
+<button class="p-2 hover:bg-surface-container-high rounded-xl transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">add</span>
+</button>
+<button class="p-2 hover:bg-surface-container-high rounded-xl transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">remove</span>
+</button>
+</div>
+</section>
+<!-- Search Chat Style Input -->
+<section class="relative">
+<div class="flex items-center bg-surface-container-highest rounded-full px-6 py-4 gap-4 focus-within:bg-surface-container-lowest focus-within:ring-2 focus-within:ring-primary/10 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-on-surface-variant/60" placeholder="O que você precisa hoje?" type="text"/>
+</div>
+</section>
+<!-- Service Cards (Chat Bubble Style) -->
+<section class="space-y-6">
+<div class="flex items-start gap-3">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex-shrink-0 overflow-hidden border-2 border-white shadow-sm">
+<img alt="Foto de perfil marmiteira" data-alt="Close up of delicious homemade food" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZl6gDNKvWQtsbj0LBr5nPW4povevacqXQyeDbgNzTqVCruDWy4wwK02WZd6uGXs3OY-A9zxNMBl8_Idw9tvbvdjLqK_qtycsg_jZjzNtXjIyWoBVEVRsrWNObbVA6aru8TdaYz_tTRp756OmV3CSy05pgDlcnUGpgtRydVGnLtnECuaJVIJcPsMnuHVaHEUmTrpHoXZsfA6sIfXfMu6N-5mQlmH9_IGEkq4EP2OfpM43Eqb-X5IrtambL3XjoHCZT4Z0pua7_WUMu"/>
+</div>
+<div class="flex-1 bg-surface-container-lowest p-5 rounded-2xl rounded-tl-sm shadow-sm border border-outline-variant/5">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-bold text-on-surface">Marmitas caseiras (200m)</h3>
+<span class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full">NOVO</span>
+</div>
+<p class="text-on-surface-variant text-sm mb-4">Origem: Residencial Aurora</p>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-xs font-bold">4.9</span>
+</div>
+<button class="text-primary font-semibold text-sm hover:underline">Ver Menu</button>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex-shrink-0 overflow-hidden border-2 border-white shadow-sm">
+<img alt="Foto de perfil diarista" data-alt="Smiling professional cleaning person avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJg3-Enyq4YjZhy_r_gD8fou5S0VjdCDIvLdAa6W1uN7Z0_wk4w0NiCC3wZvKS5fwMagYaXQpBcIOAdUlnHYg2d8faN-MOQzZuy2RfUnSZSqxHORK8L2ybobxJLaDTz6FwTy7HUuF6tV3GWx9YdZoW4xfJ8y8SQxlVFfbRltWMNSP_WZ3g46WYzwxvAT4OQXjoCcPh_Rd7ozhFwiMCdjkAroigbeTGhK2V_2VckkErJZnFhmprmk8KBb81t0ox3uRcVDj3f6zRFA39"/>
+</div>
+<div class="flex-1 bg-surface-container-lowest p-5 rounded-2xl rounded-tl-sm shadow-sm border border-outline-variant/5">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-bold text-on-surface">Diarista (350m)</h3>
+<span class="text-on-surface-variant/40 text-[10px] font-medium">10 mins atrás</span>
+</div>
+<p class="text-on-surface-variant text-sm mb-4">Origem: Condomínio Central</p>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="text-xs font-bold">Verificada</span>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-full text-xs font-bold active:scale-95 transition-transform">Contatar</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Trust Card (Asymmetric Layering) -->
+<section class="pt-4">
+<div class="relative bg-secondary text-on-secondary p-8 rounded-[2.5rem] overflow-hidden">
+<div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-secondary-container/20 rounded-full blur-2xl"></div>
+<div class="relative z-10 flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-white">shield_person</span>
+</div>
+<span class="font-bold tracking-tight text-xl">Confiança Total</span>
+</div>
+<p class="text-on-secondary/80 leading-relaxed font-medium">
+                        Confiança: Todos profissionais vêm de ambientes privados. Sua segurança é nossa prioridade na vizinhança.
+                    </p>
+<div class="mt-2">
+<button class="bg-secondary-container text-on-secondary-container px-6 py-3 rounded-full text-sm font-bold flex items-center gap-2 hover:shadow-lg transition-shadow">
+                            Saiba mais sobre segurança
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md shadow-[0_-8px_32px_rgba(0,0,0,0.06)] rounded-t-3xl border-t-[0.5px] border-slate-200/10 px-4 pb-6 pt-3 flex justify-around items-center">
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-1.5 hover:text-green-600 dark:hover:text-green-300 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-[10px] font-medium font-['Inter']">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 rounded-full px-5 py-1.5 transition-all active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="explore" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="text-[10px] font-medium font-['Inter']">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-1.5 hover:text-green-600 dark:hover:text-green-300 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="text-[10px] font-medium font-['Inter']">Post</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-1.5 hover:text-green-600 dark:hover:text-green-300 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+<span class="text-[10px] font-medium font-['Inter']">Places</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-1.5 hover:text-green-600 dark:hover:text-green-300 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-medium font-['Inter']">Profile</span>
+</a>
+</nav>
+</body></html>

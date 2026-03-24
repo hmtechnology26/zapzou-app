@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import 'react-material-symbols/rounded';
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-background text-on-surface min-h-screen;
+  }
+}
+
+@layer components {
+  .glass-nav {
+    @apply bg-white/85 backdrop-blur-xl border-t border-slate-200/10;
+  }
+  
+  .primary-gradient {
+    background: linear-gradient(135deg, #006d2f 0%, #25d366 100%);
+  }
+  
+  .glass-effect {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .chat-bubble-left {
+    border-bottom-left-radius: 4px;
+  }
+  
+  .chat-bubble-right {
+    border-bottom-right-radius: 4px;
+  }
+}
