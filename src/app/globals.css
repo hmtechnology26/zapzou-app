@@ -3,14 +3,26 @@
 @tailwind utilities;
 
 @layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
   html {
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
   
   body {
     @apply bg-background text-on-surface min-h-screen;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    touch-action: manipulation;
+    margin: 0;
   }
 }
 
