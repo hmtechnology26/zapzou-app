@@ -75,12 +75,6 @@ export default function HomePage() {
     <div className={`min-h-screen ${user ? 'pb-32' : 'pb-10'} bg-background`}>
       <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
         <div className="flex items-center gap-3 max-w-7xl mx-auto w-full">
-          <button 
-            onClick={() => router.push('/places')}
-            className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
-          >
-            <Icon icon="menu" size={24} />
-          </button>
           <span className="text-xl font-black text-primary tracking-tight">ZapZou</span>
         </div>
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">

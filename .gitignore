@@ -46,3 +46,9 @@ next-env.d.ts
 # Outros
 coverage
 .vercel
+nul
+
+# Test artifacts
+screenshots
+playwright-report
+test-results

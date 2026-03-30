@@ -3,11 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/Icon';
 import { useApp } from '@/hooks/useApp';
+import { usePublishModal } from '@/contexts/PublishModalContext';
 import { useState, useEffect } from 'react';
 
 export default function MyServicesPage() {
   const router = useRouter();
   const { services, toggleServiceStatus, removeService, user, selectedEnvironments, setSelectedEnvironments } = useApp();
+  const { open } = usePublishModal();
   const [mounted, setMounted] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<typeof services[0] | null>(null);
@@ -19,7 +21,7 @@ export default function MyServicesPage() {
     setMounted(true);
   }, []);
 
-  const openEnvModal = () => {
+  const handleNewService = () => {
     if (!user) {
       router.push('/login');
       return;
@@ -28,9 +30,7 @@ export default function MyServicesPage() {
       router.push('/places');
       return;
     }
-    setTempSelectedEnvs(selectedEnvironments.map(e => e.id));
-    setEnvSearch('');
-    setShowEnvModal(true);
+    open();
   };
 
   const toggleTempEnv = (envId: string) => {
@@ -122,9 +122,9 @@ export default function MyServicesPage() {
         <section className="space-y-4">
           <h2 className="text-sm font-bold text-on-surface-variant px-1">Gerenciar Catálogo</h2>
           
-          {services.length === 0 ? (
+            {services.length === 0 ? (
             <button 
-              onClick={openEnvModal}
+              onClick={handleNewService}
               className="w-full border-2 border-dashed border-outline-variant/30 rounded-3xl p-8 flex flex-col items-center justify-center gap-3 text-on-surface-variant hover:bg-white/50 transition-colors active:scale-[0.98]"
             >
               <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
@@ -187,7 +187,7 @@ export default function MyServicesPage() {
               ))}
 
               <button 
-                onClick={openEnvModal}
+                onClick={handleNewService}
                 className="w-full border-2 border-dashed border-outline-variant/30 rounded-3xl p-8 flex flex-col items-center justify-center gap-3 text-on-surface-variant hover:bg-white/50 transition-colors active:scale-[0.98]"
               >
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">

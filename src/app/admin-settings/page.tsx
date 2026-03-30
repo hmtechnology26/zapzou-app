@@ -27,7 +27,7 @@ export default function AdminSettingsPage() {
           <Icon icon="chevron_right" weight={400} size={24} />
         </button>
         <button onClick={() => router.push('/moderation')} className="w-full flex items-center gap-4 p-4 bg-surface-container-lowest rounded-2xl">
-          <Icon icon=" moderation" weight={400} size={24} className="text-primary" />
+          <Icon icon="admin_panel_settings" weight={400} size={24} className="text-primary" />
           <span className="flex-1 text-left font-medium">Moderação</span>
           <Icon icon="chevron_right" weight={400} size={24} />
         </button>

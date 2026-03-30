@@ -1,73 +1,56 @@
-# React + TypeScript + Vite
+# ZapZou
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Marketplace local de serviços para comunidades (condomínios, igrejas, clubes e associações). Conecta prestadores e clientes, com contato direto via WhatsApp/Instagram.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Next.js 14 (App Router) + React 18 + TypeScript
+- Tailwind CSS
+- Supabase (Auth + PostgreSQL + Storage)
 
-## React Compiler
+## Rodando localmente
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Pré-requisitos:
+- Node.js (recomendado: 18+)
+- npm
 
-## Expanding the ESLint configuration
+Passos:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. Instalar dependências:
+   - `npm install`
+2. Configurar variáveis de ambiente:
+   - copiar `/.env.example` para `/.env`
+   - preencher valores do Supabase
+3. Rodar em dev:
+   - `npm run dev`
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Scripts
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- `npm run dev` — roda o Next em desenvolvimento
+- `npm run build` — build de produção
+- `npm run start` — inicia a aplicação buildada
+- `npm run lint` — lint (ESLint)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Banco (Supabase) e regras
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+As migrations e regras de negócio ficam em `migrations/`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `migrations/001_initial_schema.sql` contém schema, triggers e policies RLS (inclui validações de afiliação, distância e limites de plano).
+- `migrations/002_seed_data.sql` contém seed inicial.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Aplicação típica:
+- executar as migrations no Supabase SQL Editor (ordem numérica).
+
+## Documentação do produto
+
+Os documentos funcionais/arquiteturais estão em `docs/`.
+
+- `docs/1-resumo-sistema.md`
+- `docs/5-arquitetura.md`
+- `docs/faq.md`
+- `docs/rote_fix.md` (roteiro de correções e conformidade do repo)
+
+## Segurança
+
+- Nunca commitar `.env` (use `/.env.example`).
+- Não versionar artefatos de build (`.next/`, `dist/`).

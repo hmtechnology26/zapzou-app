@@ -64,8 +64,16 @@ export default function ExplorePage() {
 
   const handleConfirm = () => {
     if (selectedEnv) {
+      const slug = selectedEnv.name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+
       const newEnv = {
         id: selectedEnv.id,
+        slug,
         name: selectedEnv.name,
         location: selectedEnv.location,
         type: selectedEnv.type as 'church' | 'residential' | 'club' | 'association',

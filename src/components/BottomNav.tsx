@@ -47,7 +47,7 @@ export function BottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur-xl border-t border-slate-200/10 shadow-glass-lg rounded-t-3xl flex justify-around items-center px-4 py-1 pb-safe">
+    <nav className="fixed bottom-0 left-0 w-full z-50 bg-gray-300/90 backdrop-blur-xl border-t border-slate-200/10 shadow-glass-lg rounded-t-3xl flex justify-around items-center px-4 py-1 pb-safe">
       {navItems.map((item) => {
         const isActive = pathname === item.path;
         const isCenter = item.path === '/post';

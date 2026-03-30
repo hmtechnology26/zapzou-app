@@ -109,6 +109,15 @@ export function TopAppBar({
             >
               <Icon icon={rightAction} weight={400} grade={0} size={24} />
             </button>
+            {user?.membershipRole === 'moderator' && (
+              <button
+                onClick={() => router.push('/moderation')}
+                className={`hover:bg-slate-100/50 dark:hover:bg-slate-800/50 rounded-full transition-colors p-2 active:scale-95 duration-200 ${textColor}`}
+                title="Painel de Moderação"
+              >
+                <Icon icon="admin_panel_settings" weight={400} grade={0} size={24} />
+              </button>
+            )}
             <div className="relative">
               <button
                 onClick={onAvatarClick}

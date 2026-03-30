@@ -5,11 +5,14 @@ import type { Service, Environment, Member } from '../types';
 import { supabase } from '../lib/supabase';
 
 export interface User {
+  id: string;
   name: string;
   email: string;
   avatar: string;
   role: 'user' | 'admin';
   plan?: 'free' | 'pro' | 'plus';
+  membershipStatus?: 'active' | 'pending' | 'banned' | null;
+  membershipRole?: 'member' | 'moderator' | null;
 }
 
 interface AppContextType {
@@ -21,18 +24,17 @@ interface AppContextType {
   setSelectedEnvironment: (env: Environment | null) => void;
   updateEnvironment: (id: string, updates: Partial<Environment>) => void;
   services: Service[];
-  toggleServiceStatus: (id: string) => void;
-  addService: (service: Omit<Service, 'id' | 'slug' | 'environments'>) => void;
-  updateService: (id: string, service: Partial<Service>) => void;
-  removeService: (id: string) => void;
-  approveService: (id: string) => void;
-  rejectService: (id: string) => void;
+  toggleServiceStatus: (id: string) => Promise<void>;
+  addService: (service: any) => Promise<void>;
+  updateService: (id: string, service: Partial<Service>) => Promise<void>;
+  removeService: (id: string) => Promise<void>;
+  approveService: (id: string) => Promise<void>;
+  rejectService: (id: string) => Promise<void>;
   members: Member[];
-  addMember: (member: Member) => void;
-  removeMember: (id: string) => void;
-  approveMember: (id: string) => void;
-  rateService: (id: string, stars: number, comment?: string) => void;
+  rateService: (id: string, stars: number, comment?: string) => Promise<void>;
   loading: boolean;
+  requestAffiliation: (envId: string) => Promise<void>;
+  refreshMembership: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -40,26 +42,10 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Login automático desabilitado para testes
-    // if (typeof window !== 'undefined') {
-    //   const saved = localStorage.getItem('zapzou_user');
-    //   if (saved) {
-    //     setUser(JSON.parse(saved));
-    //   }
-    // }
-  }, []);
-
-  const defaultEnvironments = [
-    { id: '1', slug: 'residencial-aurora', name: 'Residencial Aurora', type: 'residential' as const, members: 120, image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=200', isSelected: true },
-    { id: '2', slug: 'condominio-solar', name: 'Condomínio Solar', type: 'residential' as const, members: 85, image: 'https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=200', isSelected: false }
-  ];
-
-  const [selectedEnvironments, setSelectedEnvironments] = useState<Environment[]>(defaultEnvironments);
+  const [selectedEnvironments, setSelectedEnvironments] = useState<Environment[]>([]);
   const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
   const [services, setServices] = useState<Service[]>([]);
-  const [localLoaded, setLocalLoaded] = useState(false);
+  const [members, setMembers] = useState<Member[]>([]);
 
   const generateSlug = (text: string): string => {
     return text
@@ -71,394 +57,305 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedServices = localStorage.getItem('zapzou_services');
-      if (savedServices) {
-        setServices(JSON.parse(savedServices));
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await fetchUserProfile(session.user.id, session.user.email || '');
       } else {
-        setServices([
-          {
-            id: '1',
-            slug: 'marmitas-da-julia',
-            title: 'Marmitas da Julia',
-            description: 'Cozinhamos com o coração para levar até você o verdadeiro sabor da comida caseira com o equilíbrio da linha fit. Ingredientes selecionados diariamente para garantir frescor e saúde na sua mesa.',
-            category: 'Alimentação',
-            image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
-            images: [
-              'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
-              'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800',
-              'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800'
-            ],
-            rating: 4.9,
-            reviews: 128,
-            provider: 'Julia Santos',
-            WhatsApp: '5511999999999',
-            instagram: 'https://instagram.com/marmitasdajulia',
-            status: 'active' as const,
-            isActive: true,
-            environmentId: '1',
-            environmentSlug: 'residencial-aurora',
-            tags: ['Sem Conservantes', 'Opções Veggie'],
-            verified: true,
-            menu: [
-              { id: 'm1', name: 'Marmita Pequena (350g)', description: 'Ideal para um almoço leve', price: 'R$ 25', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200' },
-              { id: 'm2', name: 'Marmita Média (500g)', description: 'Nossa campeã de vendas', price: 'R$ 32', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200' },
-              { id: 'm3', name: 'Combo Semanal (5 un.)', description: 'Praticidade para sua semana', price: 'R$ 145', image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=200' }
-            ]
-          },
-          {
-            id: '2',
-            slug: 'limpeza-residencial',
-            title: 'Limpeza Residencial',
-            description: 'Serviço de limpeza doméstica com produtos ecológicos e biodegradáveis. Deixe sua casa impecável e segura.',
-            category: 'Limpeza',
-            image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800',
-            rating: 4.7,
-            reviews: 45,
-            provider: 'Maria Silva',
-            WhatsApp: '5511888888888',
-            instagram: '@limpezamaria',
-            status: 'active' as const,
-            isActive: true,
-            environmentId: '1',
-            environmentSlug: 'residencial-aurora',
-            verified: true,
-            menu: [
-              { id: 'm4', name: 'Limpeza Completa', description: '2h de serviço', price: 'R$ 120' },
-              { id: 'm5', name: 'Limpeza Rápida', description: '1h de serviço', price: 'R$ 80' }
-            ]
-          },
-          {
-            id: '3',
-            slug: 'dog-walker-pedro',
-            title: 'Dog Walker - Pedro',
-            description: 'Passeios diários para seu cão de estimação.amoroso e responsável.',
-            category: 'Pet Sitting',
-            image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800',
-            rating: 5.0,
-            reviews: 23,
-            provider: 'Pedro Santos',
-            WhatsApp: '5511777777777',
-            status: 'active' as const,
-            isActive: true,
-            environmentId: '1',
-            environmentSlug: 'residencial-aurora',
-            tags: ['Pet Friendly']
-          }
-        ]);
+        setUser(null);
       }
-      const savedEnvs = localStorage.getItem('zapzou_environments');
-      if (savedEnvs) {
-        try {
-          const parsed = JSON.parse(savedEnvs);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setSelectedEnvironments(parsed);
-          }
-        } catch (e) {
-          console.log('Erro ao carregar ambientes');
+      setLoading(false);
+    };
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        await fetchUserProfile(session.user.id, session.user.email || '');
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const fetchUserProfile = async (userId: string, email: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (data && !error) {
+        setUser(prev => ({
+          ...prev,
+          id: userId,
+          name: data.name || 'Usuário',
+          email: email,
+          avatar: data.avatar || '',
+          role: data.role === 'moderator' ? 'admin' : 'user',
+          plan: data.plan || 'free',
+          membershipStatus: prev?.membershipStatus || null,
+          membershipRole: prev?.membershipRole || null
+        }));
+      } else {
+        // Se a tabela users estiver bloqueada, usa dados básicos do auth
+        setUser({
+          id: userId,
+          name: 'Usuário',
+          email: email,
+          avatar: '',
+          role: 'user',
+          plan: 'free',
+          membershipStatus: null,
+          membershipRole: null
+        });
+      }
+    } catch(err) {
+       setUser({
+         id: userId,
+         name: 'Usuário',
+         email: email,
+         avatar: '',
+         role: 'user',
+         plan: 'free',
+         membershipStatus: null,
+         membershipRole: null
+       });
+    }
+  };
+
+  useEffect(() => {
+    async function loadEnvironments() {
+      const { data, error } = await supabase
+        .from('environments')
+        .select('*')
+        .order('name');
+      
+      if (data && !error) {
+        const formatted = data.map((e: any) => ({
+          id: e.id,
+          name: e.name,
+          slug: generateSlug(e.name),
+          type: e.type,
+          members: 0,
+          image: e.image_url || '',
+          isSelected: false,
+          status: e.status,
+          latitude: e.latitude,
+          longitude: e.longitude
+        }));
+        setSelectedEnvironments(formatted);
+        if (formatted.length > 0 && !selectedEnvironment) {
+          setSelectedEnvironment(formatted[0]);
         }
       }
-      setLocalLoaded(true);
     }
+    loadEnvironments();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && localLoaded) {
-      try {
-        const servicesToSave = services.map(s => ({
-          ...s,
-          image: s.image?.length > 500000 ? '' : s.image,
-          images: s.images?.map((img: string) => img.length > 500000 ? '' : img).filter(Boolean)
-        }));
-        localStorage.setItem('zapzou_services', JSON.stringify(servicesToSave));
-      } catch (e) {
-        console.log('localStorage cheio, limpando dados antigos');
-        localStorage.removeItem('zapzou_services');
+    if (selectedEnvironment) {
+      refreshMembership();
+      fetchServices();
+      if (user) {
+        fetchMembers();
       }
     }
-  }, [services, localLoaded]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedEnvironment, user?.id]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && localLoaded) {
-      try {
-        localStorage.setItem('zapzou_environments', JSON.stringify(selectedEnvironments));
-      } catch (e) {
-        console.log('localStorage cheio');
-      }
-    }
-  }, [selectedEnvironments, localLoaded]);
-
-  useEffect(() => {
-    async function init() {
-      try {
-        setLoading(true);
-        
-        const { data: envs, error: envError } = await supabase
-          .from('environments')
-          .select('*')
-          .order('name');
-        
-        if (envs && !envError && envs.length > 0 && selectedEnvironments.length === 0) {
-          const formattedEnvs = envs.map((e: any) => ({
-            id: e.id,
-            name: e.name,
-            slug: generateSlug(e.name),
-            type: e.type,
-            members: 0,
-            image: e.image_url || '',
-            isSelected: false,
-            status: e.status,
-            latitude: e.latitude,
-            longitude: e.longitude
-          }));
-          setSelectedEnvironments(formattedEnvs);
-        }
-
-        const { data: svc, error: svcError } = await supabase
-          .from('services')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (svc && !svcError && svc.length > 0) {
-          const formattedServices = svc.map((s: any) => ({
-            id: s.id,
-            slug: s.slug || generateSlug(s.title),
-            title: s.title,
-            description: s.description,
-            category: s.category,
-            image: s.image_url || '',
-            images: s.images_urls || [],
-            provider: 'User',
-            status: s.status as any,
-            isActive: s.is_active,
-            environmentId: s.environment_id,
-            WhatsApp: s.whatsapp,
-            instagram: s.instagram,
-            frequency: s.frequency,
-            menu: s.menu || [],
-            latitude: s.latitude,
-            longitude: s.longitude
-          }));
-          setServices(formattedServices);
-        }
-      } catch (err) {
-        console.log('Supabase não disponível, usando dados locais');
-      } finally {
-        setLoading(false);
-      }
-    }
-    if (localLoaded) {
-      init();
-    }
-  }, [localLoaded]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && user) {
-      localStorage.setItem('zapzou_user', JSON.stringify(user));
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('zapzou_selected_env');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const env = selectedEnvironments.find(e => e.id === parsed.id);
-        if (env) {
-          setSelectedEnvironment(env);
-        }
-      } else if (selectedEnvironments.length > 0) {
-        setSelectedEnvironment(selectedEnvironments[0]);
-      }
-    }
-  }, [selectedEnvironments]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && selectedEnvironment) {
-      localStorage.setItem('zapzou_selected_env', JSON.stringify(selectedEnvironment));
-    }
-  }, [selectedEnvironment]);
-
-  const [members, setMembers] = useState<Member[]>([
-    { id: '1', name: 'Ricardo Silveira', email: 'ricardo.silva@email.com', unit: 'Torre A • Apto 104', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
-    { id: '2', name: 'Ana Martins', email: 'ana.martins@email.com', unit: 'Torre B • Apto 302', initials: 'AM' },
-    { id: '3', name: 'Beatriz Souza', email: 'beatriz.souza@email.com', unit: 'Torre A • Apto 501', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150' },
-    { id: '4', name: 'Fernando Oliveira', email: 'fernando.oliveira@email.com', unit: 'Torre C • Apto 12', initials: 'FO' },
-    { id: '5', name: 'Marcos Oliveira', email: 'marcos.oliver@email.com', unit: 'Torre C • Apto 402', isPending: true },
-    { id: '6', name: 'Carla Mendes', email: 'carla.mendes@email.com', unit: 'Torre B • Apto 115', isPending: true },
-  ]);
-
-  const updateEnvironment = async (id: string, updates: Partial<Environment>) => {
-    const { error } = await supabase
-      .from('environments')
-      .update({
-        name: updates.name,
-        image_url: updates.image,
-        status: updates.status
-      })
-      .eq('id', id);
+  const refreshMembership = async () => {
+    if (!user?.id || !selectedEnvironment) return;
+    
+    const { data, error } = await supabase
+      .from('environment_members')
+      .select('status, role')
+      .eq('user_id', user.id)
+      .eq('environment_id', selectedEnvironment.id)
+      .maybeSingle();
 
     if (!error) {
-      setSelectedEnvironments(prev => prev.map(env => 
-        env.id === id ? { ...env, ...updates } : env
-      ));
+       setUser(prev => prev ? { 
+         ...prev, 
+         membershipStatus: data?.status || null,
+         membershipRole: data?.role || null 
+       } : null);
+    } else {
+       setUser(prev => prev ? { 
+         ...prev, 
+         membershipStatus: null,
+         membershipRole: null 
+       } : null);
     }
   };
 
-  const toggleServiceStatus = async (id: string) => {
-    const service = services.find(s => s.id === id);
-    if (!service) return;
+  const fetchMembers = async () => {
+      if (!selectedEnvironment) return;
+      const { data, error } = await supabase
+        .from('environment_members')
+        .select('id, user_id, status, role, user_public_profiles(name, avatar_url)')
+        .eq('environment_id', selectedEnvironment.id);
+        
+      if (data && !error) {
+         const mapped = data.map((m: any) => ({
+            id: m.id,
+            userId: m.user_id,
+            name: m.user_public_profiles?.name || 'Usuário',
+            email: '', 
+            avatar: m.user_public_profiles?.avatar_url || '',
+            isPending: m.status === 'pending',
+            role: m.role
+         }));
+         setMembers(mapped);
+      }
+  };
 
-    const { error } = await supabase
+  const fetchServices = async () => {
+    const query = supabase
       .from('services')
-      .update({ is_active: !service.isActive })
-      .eq('id', id);
-
-    if (!error) {
-      setServices(services.map(s => 
-        s.id === id ? { ...s, isActive: !s.isActive } : s
-      ));
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+      
+    const { data, error } = await query;
+    if (data && !error) {
+      const formatted = data.map((s: any) => ({
+        id: s.id,
+        slug: s.slug || generateSlug(s.title),
+        title: s.title,
+        description: s.description,
+        category: s.category,
+        image: s.image_url || '',
+        images: s.images_urls || [],
+        provider: s.provider || 'Prestador',
+        status: s.status as any,
+        isActive: s.is_active,
+        environmentId: s.environment_id,
+        WhatsApp: s.whatsapp,
+        instagram: s.instagram,
+        frequency: s.frequency,
+        menu: s.menu || [],
+        latitude: s.latitude,
+        longitude: s.longitude,
+        rating: s.rating ?? 0,
+        reviews: s.reviews_count ?? 0,
+      }));
+      setServices(formatted);
     }
+  };
+
+  const getCurrentLocation = async (): Promise<{ latitude: number; longitude: number }> => {
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+      throw new Error('Geolocalização indisponível neste dispositivo/navegador.');
+    }
+
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+        (err) => reject(new Error(err.message || 'Falha ao obter localização.')),
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+      );
+    });
+  };
+
+  const requestAffiliation = async (envId: string) => {
+      if (!user?.id) throw new Error("Usuário não logado");
+      const { error } = await supabase
+        .from('environment_members')
+        .insert([{
+           environment_id: envId,
+           user_id: user.id
+        }]);
+      if (error) throw error;
+      await refreshMembership();
   };
 
   const addService = async (service: any) => {
-    const newId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-    const newSlug = generateSlug(service.title);
-    const env = selectedEnvironments.find(e => e.id === service.environmentId);
-    const newServiceWithId = { 
-      ...service, 
-      id: newId, 
-      slug: newSlug,
-      environmentSlug: env?.slug,
-      environments: service.environmentId ? [{ id: service.environmentId, slug: env?.slug || '' }] : []
-    } as Service;
-    
-    setServices(prev => [...prev, newServiceWithId]);
-    
-    try {
-      const { error } = await supabase
-        .from('services')
-        .insert([{
-          title: service.title,
-          description: service.description,
-          category: service.category,
-          image_url: service.image,
-          images_urls: service.images,
-          whatsapp: service.WhatsApp,
-          instagram: service.instagram,
-          frequency: service.frequency,
-          status: service.status,
-          is_active: true,
-          environment_id: service.environmentId,
-          environments: service.environments
-        }]);
+    if (!user) throw new Error("User not found");
+    if (!service?.environmentId) throw new Error('Selecione um ambiente para publicar.');
 
-      if (error) {
-        console.log('Serviço adicionado localmente (Supabase não configurado)');
-      }
-    } catch (err) {
-      console.log('Serviço adicionado localmente');
-    }
+    const location =
+      typeof service?.latitude === 'number' && typeof service?.longitude === 'number'
+        ? { latitude: service.latitude, longitude: service.longitude }
+        : await getCurrentLocation();
+
+    const { error } = await supabase
+      .from('services')
+      .insert([{
+        title: service.title,
+        description: service.description,
+        category: service.category,
+        image_url: service.image,
+        images_urls: service.images ?? [],
+        menu: service.menu ?? [],
+        tags: service.tags ?? [],
+        whatsapp: service.WhatsApp,
+        instagram: service.instagram,
+        frequency: service.frequency,
+        status: service.status || 'active',
+        is_active: true,
+        environment_id: service.environmentId,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        provider_id: user.id,
+      }]);
+
+    if (error) throw error;
+    await fetchServices();
   };
 
   const updateService = async (id: string, updatedFields: Partial<Service>) => {
+    const payload: Record<string, unknown> = {};
+
+    if (updatedFields.title !== undefined) payload.title = updatedFields.title;
+    if (updatedFields.description !== undefined) payload.description = updatedFields.description;
+    if (updatedFields.category !== undefined) payload.category = updatedFields.category;
+    if (updatedFields.image !== undefined) payload.image_url = updatedFields.image;
+    if (updatedFields.images !== undefined) payload.images_urls = updatedFields.images ?? [];
+    if (updatedFields.menu !== undefined) payload.menu = updatedFields.menu ?? [];
+    if (updatedFields.tags !== undefined) payload.tags = updatedFields.tags ?? [];
+    if (updatedFields.price !== undefined) payload.price = updatedFields.price;
+    if (updatedFields.WhatsApp !== undefined) payload.whatsapp = updatedFields.WhatsApp;
+    if (updatedFields.instagram !== undefined) payload.instagram = updatedFields.instagram;
+    if (updatedFields.frequency !== undefined) payload.frequency = updatedFields.frequency;
+    if (updatedFields.status !== undefined) payload.status = updatedFields.status;
+    if (updatedFields.isActive !== undefined) payload.is_active = updatedFields.isActive;
+    if (updatedFields.environmentId !== undefined) payload.environment_id = updatedFields.environmentId;
+    if (updatedFields.latitude !== undefined) payload.latitude = updatedFields.latitude;
+    if (updatedFields.longitude !== undefined) payload.longitude = updatedFields.longitude;
+
     const { error } = await supabase
       .from('services')
-      .update({
-        title: updatedFields.title,
-        description: updatedFields.description,
-        category: updatedFields.category,
-        image_url: updatedFields.image,
-        images_urls: updatedFields.images,
-        whatsapp: updatedFields.WhatsApp,
-        instagram: updatedFields.instagram,
-        frequency: updatedFields.frequency,
-        status: updatedFields.status,
-        is_active: updatedFields.isActive
-      })
+      .update(payload)
       .eq('id', id);
 
-    if (!error) {
-      const updatedSlug = updatedFields.title ? generateSlug(updatedFields.title) : undefined;
-      setServices(services.map(s => 
-        s.id === id ? { ...s, ...updatedFields, slug: updatedSlug || s.slug } : s
-      ));
-    }
+    if (error) throw error;
+    await fetchServices();
   };
 
   const removeService = async (id: string) => {
-    const { error } = await supabase
-      .from('services')
-      .delete()
-      .eq('id', id);
-
-    if (!error) {
-      setServices(services.filter(s => s.id !== id));
-    }
+    const { error } = await supabase.from('services').delete().eq('id', id);
+    if (error) throw error;
+    await fetchServices();
   };
 
-  const approveService = async (id: string) => {
-    const { error } = await supabase
-      .from('services')
-      .update({ status: 'active', is_active: true })
-      .eq('id', id);
-
-    if (!error) {
-      setServices(services.map(s => 
-        s.id === id ? { ...s, status: 'active', isActive: true } : s
-      ));
-    }
+  const toggleServiceStatus = async (id: string) => {
+     const s = services.find(x => x.id === id);
+     if (s) {
+       await updateService(id, { isActive: !s.isActive });
+     }
   };
 
-  const rejectService = async (id: string) => {
-    const { error } = await supabase
-      .from('services')
-      .update({ status: 'rejected', is_active: false })
-      .eq('id', id);
-
-    if (!error) {
-      setServices(services.map(s => 
-        s.id === id ? { ...s, status: 'rejected', isActive: false } : s
-      ));
-    }
+  const updateEnvironment = async (id: string, updates: Partial<Environment>) => {
   };
-
-  const addMember = (member: Member) => {
-    setMembers([...members, { ...member, id: Date.now().toString() }]);
-  };
-
-  const removeMember = (id: string) => {
-    setMembers(members.filter(m => m.id !== id));
-  };
-
-  const approveMember = (id: string) => {
-    setMembers(members.map(m => 
-      m.id === id ? { ...m, isPending: false } : m
-    ));
-  };
-
-  const rateService = async (id: string, stars: number, comment?: string) => {
-    const { error } = await supabase
-      .from('reviews')
-      .insert([{
-        service_id: id,
-        stars,
-        comment: comment || ''
-      }]);
-
-    if (!error) {
-      setServices(services.map(s => {
-        if (s.id === id) {
-          const currentReviews = s.reviews || 0;
-          const currentRating = s.rating || 0;
-          const newReviews = currentReviews + 1;
-          const newRating = Number(((currentRating * currentReviews + stars) / newReviews).toFixed(1));
-          return { ...s, reviews: newReviews, rating: newRating };
-        }
-        return s;
-      }));
-    }
-  };
+  const approveService = async (id: string) => {};
+  const rejectService = async (id: string) => {};
+  const rateService = async (id: string, stars: number, comment?: string) => {};
 
   return (
     <AppContext.Provider value={{
@@ -477,11 +374,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       approveService,
       rejectService,
       members,
-      addMember,
-      removeMember,
-      approveMember,
       rateService,
-      loading
+      loading,
+      requestAffiliation,
+      refreshMembership
     }}>
       {children}
     </AppContext.Provider>
