@@ -2,8 +2,10 @@
 
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/Icon';
+import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
 import { useState, useEffect } from 'react';
+import { MapComponent } from '@/components/GoogleMap';
 
 export default function HomePage() {
   const router = useRouter();
@@ -38,6 +40,8 @@ export default function HomePage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const userAvatar = mounted ? user?.avatar : null;
 
   const handleGetLocation = () => {
     setLocationLoading(true);
@@ -75,7 +79,7 @@ export default function HomePage() {
     <div className={`min-h-screen ${user ? 'pb-32' : 'pb-10'} bg-background`}>
       <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
         <div className="flex items-center gap-3 max-w-7xl mx-auto w-full">
-          <span className="text-xl font-black text-primary tracking-tight">ZapZou</span>
+          <img src="/zapzou_logo.png" alt="ZapZou" className="h-8" />
         </div>
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
           <button 
@@ -84,10 +88,15 @@ export default function HomePage() {
           >
             <Icon icon="search" size={24} />
           </button>
-          {mounted && user?.avatar ? (
+          {user ? (
             <div className="relative">
-              <button onClick={() => router.push('/profile')} className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary shadow-sm hover:scale-105 transition-transform">
-                <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+              <button onClick={() => router.push('/profile')} className="hover:scale-105 transition-transform">
+                <Avatar
+                  src={userAvatar}
+                  name={user?.name}
+                  alt="Avatar"
+                  className="w-10 h-10 border-2 border-primary shadow-sm"
+                />
               </button>
               {user?.plan && user.plan !== 'free' && (
                 <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-md ${
@@ -115,25 +124,29 @@ export default function HomePage() {
           <p className="text-on-surface-variant text-base">Serviços confiáveis de ambientes próximos</p>
         </section>
 
-        <section 
-          className="relative h-56 w-full rounded-3xl overflow-hidden bg-surface-container-highest shadow-inner"
+        {/* sessão do mapa */}
+        
+        {/* <section 
+          className="relative h-56 w-full rounded-3xl overflow-hidden shadow-inner"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary-container/20" />
-          
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative">
-              {selectedEnvironment && (
-                <div className="absolute -top-10 -left-6 bg-primary-container text-on-primary-container px-4 py-2 rounded-full shadow-lg text-sm font-semibold flex items-center gap-2 border-2 border-white z-10">
-                  <Icon icon="location_on" size={16} style={{ fontVariationSettings: "'FILL' 1" }} />
-                  {selectedEnvironment.name}
-                </div>
-              )}
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center animate-pulse">
+          {userLocation ? (
+            <MapComponent 
+              center={userLocation}
+              markers={services
+                .filter(s => s.latitude && s.longitude)
+                .map(s => ({
+                  position: { lat: s.latitude!, lng: s.longitude! },
+                  title: s.title
+                }))}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary-container/20 flex items-center justify-center">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
                 <div className="w-6 h-6 bg-primary rounded-full border-4 border-white shadow-lg"></div>
               </div>
             </div>
-          </div>
-
+          )}
+          
           <button 
             onClick={handleGetLocation}
             disabled={locationLoading}
@@ -142,16 +155,7 @@ export default function HomePage() {
             <Icon icon="my_location" size={18} />
             {locationLoading ? 'Obtendo...' : 'Usar minha localização'}
           </button>
-
-          <div className="absolute bottom-4 right-4 bg-surface-container-lowest/90 backdrop-blur-md p-2 rounded-2xl flex flex-col gap-1 shadow-sm border border-outline-variant/10">
-            <button className="p-2 hover:bg-surface-container-high rounded-xl transition-colors">
-              <Icon icon="add" size={20} className="text-on-surface-variant" />
-            </button>
-            <button className="p-2 hover:bg-surface-container-high rounded-xl transition-colors">
-              <Icon icon="remove" size={20} className="text-on-surface-variant" />
-            </button>
-          </div>
-        </section>
+        </section> */}
 
         <section>
           <div className="flex items-center bg-surface-container-highest rounded-full px-6 py-4 gap-4 focus-within:bg-surface-container-lowest focus-within:ring-2 focus-within:ring-primary/10 transition-all">

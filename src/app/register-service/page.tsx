@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/Icon';
+import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
 import { supabase } from '@/lib/supabase';
 
@@ -19,6 +20,8 @@ function RegisterServiceContent() {
     toggleServiceStatus, 
     user, 
     selectedEnvironment, 
+    selectedEnvironments,
+    setSelectedEnvironment,
     requestAffiliation 
   } = useApp();
   
@@ -37,11 +40,17 @@ function RegisterServiceContent() {
   const [mounted, setMounted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [imagePreviewUrl, setImagePreviewUrl] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
   
   const [menuItems, setMenuItems] = useState<{id?: string; name: string; description: string; price: string; image?: string}[]>([]);
   const [showMenuItemModal, setShowMenuItemModal] = useState(false);
   const [menuItemForm, setMenuItemForm] = useState<{id?: string; name: string; description: string; price: string; image?: string}>({ name: '', description: '', price: '', image: '' });
   const [editingMenuItemIndex, setEditingMenuItemIndex] = useState<number | null>(null);
+  const [menuItemFiles, setMenuItemFiles] = useState<Map<number, File>>(new Map());
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertAction, setAlertAction] = useState<{ label: string; onClick: () => void } | null>(null);
 
   useEffect(() => {
     if (existingService) {
@@ -55,6 +64,14 @@ function RegisterServiceContent() {
       });
       setIsActive(existingService.isActive ?? true);
       setMenuItems(existingService.menu || []);
+      
+      // Load environment for existing service
+      if (existingService.environmentId) {
+        const env = selectedEnvironments.find(e => e.id === existingService.environmentId);
+        if (env) {
+          setSelectedEnvironment(env);
+        }
+      }
     }
   }, [existingService]);
 
@@ -68,6 +85,32 @@ function RegisterServiceContent() {
     };
   }, [imagePreviewUrl]);
 
+  // Verificações de Acesso / Moderação
+  useEffect(() => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    if (!selectedEnvironment) {
+      setAlertTitle('Nenhum ambiente selecionado');
+      setAlertMessage('Selecione um ambiente para continuar.');
+      setAlertAction({ label: 'Selecionar Ambiente', onClick: () => router.push('/places') });
+      setShowAlert(true);
+      return;
+    }
+    if (user.plan === 'free') {
+      const freeServicesCount = services.filter(s => s.provider === user.id).length;
+      if (freeServicesCount >= 2) {
+        setAlertTitle('Limite do Plano Grátis');
+        setAlertMessage('Você já atingiu o limite de 2 serviços do Plano Grátis. Para continuar publicando, contrate o Plano Pró ou Plus.');
+        setAlertAction({ label: 'Ver Planos', onClick: () => router.push('/plans') });
+        setShowAlert(true);
+      }
+    }
+  }, [user, selectedEnvironment]);
+
+  if (!mounted) return null;
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -76,53 +119,119 @@ function RegisterServiceContent() {
     try {
       setErrorMsg('');
       if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
-      setImagePreviewUrl(URL.createObjectURL(file));
-
-      const { data, error } = await supabase.storage
-        .from('zapzou')
-        .upload(`services/${Date.now()}-${Math.random()}`, file);
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('zapzou')
-        .getPublicUrl(data.path);
-
-      setForm({ ...form, image: publicUrl });
-      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
-      setImagePreviewUrl('');
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreviewUrl(previewUrl);
+      setImageFile(file);
+      setForm({ ...form, image: previewUrl });
     } catch (error: any) {
-      setErrorMsg(
-        error?.message ||
-          'Falha ao enviar imagem. Configure o Storage (bucket/policies) para habilitar uploads.',
-      );
+      setErrorMsg(error?.message || 'Erro ao selecionar imagem.');
     } finally {
       setUploading(false);
     }
   };
 
+  const uploadImageToR2 = async (file: File, prefix: string): Promise<string> => {
+    const edgeFunctionUrl = process.env.NEXT_PUBLIC_SUPABASE_EDGE_FUNCTION_URL;
+    const r2PublicUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL;
+    
+    if (!edgeFunctionUrl || !r2PublicUrl) {
+      throw new Error('R2 not configured');
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not authenticated');
+
+    const fileName = `${prefix}/${Date.now()}-${Math.random()}.webp`;
+    
+    const response = await fetch(edgeFunctionUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        path: fileName,
+        contentType: file.type || 'image/webp',
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to get upload URL');
+    }
+
+    const { uploadUrl } = await response.json();
+
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type || 'image/webp' },
+      body: file,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error('Failed to upload to R2');
+    }
+
+    return `${r2PublicUrl}/${fileName}`;
+  };
+
   const handleSubmit = async () => {
-    if (!form.title || !form.WhatsApp) return;
+    console.log('handleSubmit called', { existingService: !!existingService, form, imageFile: !!imageFile, isActive });
+    
+    if (!form.title || !form.WhatsApp) {
+      console.log('Validation failed: missing title or WhatsApp');
+      setErrorMsg('Preencha o nome do serviço e WhatsApp');
+      return;
+    }
+    setUploading(true);
     setErrorMsg('');
 
-    const serviceData = {
-      ...form,
-      WhatsApp: form.WhatsApp ? `55${form.WhatsApp}` : '',
-      isActive: isActive,
-      environmentId: selectedEnvironment?.id || '',
-      menu: menuItems.map((item, idx) => ({ ...item, id: item.id || `menu-${Date.now()}-${idx}` })),
-    };
-
     try {
+      console.log('Starting submit...');
+      
+      let finalImage = form.image;
+      
+      if (imageFile && form.image.startsWith('blob:')) {
+        console.log('Uploading new image...');
+        finalImage = await uploadImageToR2(imageFile, 'services');
+        console.log('Image uploaded:', finalImage);
+      }
+
+      const menuItemsWithImages = await Promise.all(menuItems.map(async (item, index) => {
+        if (item.image && item.image.startsWith('blob:') && menuItemFiles.has(index)) {
+          const file = menuItemFiles.get(index);
+          if (file) {
+            const uploadedUrl = await uploadImageToR2(file, 'menu-items');
+            return { ...item, image: uploadedUrl };
+          }
+        }
+        return item;
+      }));
+
+      const serviceData = {
+        ...form,
+        image: finalImage,
+        WhatsApp: form.WhatsApp ? `55${form.WhatsApp}` : '',
+        isActive: isActive,
+        environmentId: selectedEnvironment?.id || '',
+        menu: menuItemsWithImages.map((item, idx) => ({ ...item, id: item.id || `menu-${Date.now()}-${idx}` })),
+      };
+
+      console.log('Service data:', serviceData);
+      
       if (existingService) {
+        console.log('Updating existing service...');
         await updateService(existingService.id, serviceData);
+        console.log('Service updated successfully');
       } else {
         await addService(serviceData);
       }
       router.push('/');
     } catch (err: any) {
-      console.error(err);
+      console.error('Submit error:', err);
       setErrorMsg(err.message || 'Erro ao publicar serviço. Verifique seus limites de plano ou distância do local.');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -136,6 +245,8 @@ function RegisterServiceContent() {
   const handleAddMenuItem = () => {
     if (menuItemForm.name && menuItemForm.price) {
       const newItem = { ...menuItemForm, id: menuItemForm.id || `menu-${Date.now()}` };
+      const newIndex = menuItems.length;
+      
       if (editingMenuItemIndex !== null) {
         const updatedItems = [...menuItems];
         updatedItems[editingMenuItemIndex] = newItem;
@@ -143,6 +254,13 @@ function RegisterServiceContent() {
         setEditingMenuItemIndex(null);
       } else {
         setMenuItems([...menuItems, newItem]);
+        
+        if (menuItemForm.image && menuItemForm.image.startsWith('blob:')) {
+          const newFiles = new Map(menuItemFiles);
+          const formFile = new File([menuItemForm.image], 'preview', { type: 'image/webp' });
+          newFiles.set(newIndex, formFile);
+          setMenuItemFiles(newFiles);
+        }
       }
       setMenuItemForm({ name: '', description: '', price: '', image: '' });
       setShowMenuItemModal(false);
@@ -173,22 +291,14 @@ function RegisterServiceContent() {
     setUploading(true);
     try {
       setErrorMsg('');
-      const { data, error } = await supabase.storage
-        .from('zapzou')
-        .upload(`menu-items/${Date.now()}-${Math.random()}`, file);
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('zapzou')
-        .getPublicUrl(data.path);
-
-      setMenuItemForm({ ...menuItemForm, image: publicUrl });
+      const previewUrl = URL.createObjectURL(file);
+      setMenuItemForm({ ...menuItemForm, image: previewUrl });
+      
+      const newFiles = new Map(menuItemFiles);
+      newFiles.set(menuItems.length, file);
+      setMenuItemFiles(newFiles);
     } catch (err: any) {
-      setErrorMsg(
-        err?.message ||
-          'Falha ao enviar imagem do item do menu. Configure o Storage para habilitar uploads.',
-      );
+      setErrorMsg(err?.message || 'Erro ao selecionar imagem.');
     } finally {
       setUploading(false);
     }
@@ -202,9 +312,6 @@ function RegisterServiceContent() {
       setErrorMsg(err.message || 'Erro ao solicitar afiliação');
     }
   };
-
-  // Verificações de Acesso / Moderação
-  if (!mounted) return null;
 
   const isChurch = selectedEnvironment?.type === 'church';
   const memStatus = user?.membershipStatus; // 'active', 'pending', or null
@@ -226,9 +333,14 @@ function RegisterServiceContent() {
           </h1>
         </div>
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          {user?.avatar ? (
-            <button onClick={() => router.push('/profile')} className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary shadow-sm hover:scale-105 transition-transform">
-              <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+          {user ? (
+            <button onClick={() => router.push('/profile')} className="hover:scale-105 transition-transform active:scale-95 ml-1">
+              <Avatar
+                src={user.avatar}
+                name={user.name}
+                alt="Avatar"
+                className="w-10 h-10 border-2 border-primary shadow-sm"
+              />
             </button>
           ) : (
             <button 
@@ -518,6 +630,28 @@ function RegisterServiceContent() {
           </div>
         )}
       </main>
+
+      {showAlert && (
+        <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 text-center">
+            <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon icon="error_outline" size={32} className="text-error" />
+            </div>
+            <h3 className="text-lg font-semibold text-on-surface mb-2">{alertTitle}</h3>
+            <p className="text-on-surface-variant text-sm mb-6">{alertMessage}</p>
+            <div className="flex flex-col gap-2">
+              {alertAction && (
+                <button onClick={() => { setShowAlert(false); alertAction.onClick(); }} className="w-full primary-gradient text-white font-bold py-3 rounded-full">
+                  {alertAction.label}
+                </button>
+              )}
+              <button onClick={() => setShowAlert(false)} className="w-full bg-surface-container-high text-on-surface font-medium py-3 rounded-full">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/Icon';
+import { Avatar } from '@/components/Avatar';
 import { TopAppBar } from '@/components/TopAppBar';
 import { useApp } from '@/hooks/useApp';
 import { useState, useEffect } from 'react';
@@ -126,9 +127,14 @@ export default function ExplorePage() {
           <h1 className="text-lg font-semibold tracking-tight text-on-surface">Explorar Ambientes</h1>
         </div>
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          {mounted && user?.avatar ? (
-            <button onClick={() => router.push('/profile')} className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary shadow-sm hover:scale-105 transition-transform">
-              <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+          {mounted && user ? (
+            <button onClick={() => router.push('/profile')} className="hover:scale-105 transition-transform active:scale-95 ml-1">
+              <Avatar
+                src={user.avatar}
+                name={user.name}
+                alt="Avatar"
+                className="w-10 h-10 border-2 border-primary shadow-sm"
+              />
             </button>
           ) : (
             <button 

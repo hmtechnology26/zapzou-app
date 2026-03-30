@@ -1,6 +1,6 @@
 'use client';
 
-import { MaterialSymbol } from 'react-material-symbols';
+import type { CSSProperties } from 'react';
 
 interface IconProps {
   icon: string;
@@ -8,13 +8,13 @@ interface IconProps {
   grade?: number;
   size?: number;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
 export function Icon({ icon, weight = 400, grade = 0, size = 24, className = '', style }: IconProps) {
   return (
     <span 
-      className={`material-symbols-rounded ${className}`}
+      className={`material-symbols ${className}`}
       style={{ 
         fontSize: size, 
         fontVariationSettings: `'wght' ${weight}, 'GRAD' ${grade}`,

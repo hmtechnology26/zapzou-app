@@ -1,11 +1,19 @@
 import './globals.css';
+import 'react-material-symbols/rounded';
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import { ClientOnly } from './client-only';
 import { Providers } from './providers';
 import ProtectedLayout from './layout-client';
 
+const inter = Inter({ subsets: ['latin'], display: 'swap' });
+
 export const metadata: Metadata = {
-  title: 'Zapzou - Marketplace de Serviços',
+  title: 'ZapZou - Marketplace de Serviços',
   description: 'Conecte-se com prestadores de serviços na sua região',
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 export default function RootLayout({
@@ -15,16 +23,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-      </head>
-      <body>
-        <Providers>
-          <ProtectedLayout>{children}</ProtectedLayout>
-        </Providers>
+      <body className={inter.className}>
+        <ClientOnly>
+          <Providers>
+            <ProtectedLayout>{children}</ProtectedLayout>
+          </Providers>
+        </ClientOnly>
       </body>
     </html>
   );

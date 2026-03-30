@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import 'react-material-symbols/rounded';
-
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;

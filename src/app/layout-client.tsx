@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useApp } from '@/hooks/useApp';
 import { BottomNav } from '@/components/BottomNav';
@@ -9,6 +9,7 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useApp();
   const router = useRouter();
   const pathname = usePathname() ?? '';
+  const [hasMounted, setHasMounted] = useState(false);
 
   const isPublicPage = 
     pathname === '/' ||
@@ -16,7 +17,12 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
     pathname === '/search' ||
     pathname === '/places' ||
     pathname.startsWith('/service/') ||
-    pathname.startsWith('/places/');
+    pathname.startsWith('/places/') ||
+    pathname.startsWith('/auth/');
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     if (loading === false && !user && !isPublicPage) {
@@ -32,14 +38,8 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  // Se não tem usuário e não é página pública, retorna null (mas agora só após loading=false)
-  if (!user && !isPublicPage) {
-    console.log('[Layout] Sem acesso - retornando null');
-    return null;
-  }
-
   const tabPaths = ['/', '/places', '/places/', '/my-services', '/profile'];
-  const showBottomNav = pathname && tabPaths.includes(pathname);
+  const showBottomNav = hasMounted && pathname && tabPaths.includes(pathname);
 
   return (
     <div className="min-h-screen">

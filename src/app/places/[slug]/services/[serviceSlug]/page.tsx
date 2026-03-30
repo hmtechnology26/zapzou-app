@@ -2,6 +2,7 @@
 
 import { useRouter, useParams } from 'next/navigation';
 import { Icon } from '@/components/Icon';
+import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
 import { useState, useEffect } from 'react';
 
@@ -193,15 +194,13 @@ export default function ServiceDetailPage() {
             </div>
           )}
 
-          {mounted && user?.avatar ? (
-            <button
-              onClick={() => router.push('/profile')}
-              className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary shadow-sm hover:scale-105 transition-transform"
-            >
-              <img
+          {mounted && user ? (
+            <button onClick={() => router.push('/profile')} className="hover:scale-105 transition-transform active:scale-95 ml-1">
+              <Avatar
                 src={user.avatar}
+                name={user.name}
                 alt="Avatar"
-                className="w-full h-full object-cover"
+                className="w-10 h-10 border-2 border-primary shadow-sm"
               />
             </button>
           ) : (
@@ -310,7 +309,7 @@ export default function ServiceDetailPage() {
                 <span>{service.rating || 'Novo'}</span>
               </div>
               <span>•</span>
-              <span>{service.reviews || 0} avaliações</span>
+              <span>{service.reviews_count || 0} avaliações</span>
               <span>•</span>
               <span className="bg-surface-container-high px-2 py-0.5 rounded-md font-bold">{environment?.name || 'Ambiente'}</span>
             </div>

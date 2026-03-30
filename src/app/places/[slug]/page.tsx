@@ -1,25 +1,81 @@
 'use client';
 
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/Icon';
+import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { type PlaceSearchResult } from '@/lib/maps';
 
 export default function PlaceDetailPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const { selectedEnvironments, services, user } = useApp();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tudo');
+  const [placeFromSearch, setPlaceFromSearch] = useState<PlaceSearchResult | null>(null);
 
   const generateSlug = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   const placeSlug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
+  const placeId = searchParams?.get('placeId');
+
+  useEffect(() => {
+    if (placeId) {
+      const stored = localStorage.getItem(`place_${placeId}`);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setPlaceFromSearch(parsed);
+        } catch (e) {
+          console.error('Failed to parse stored place:', e);
+        }
+      }
+    }
+  }, [placeId]);
+
+  const mapPrimaryTypeToEnvType = (primaryType: string): string => {
+    const typeMap: Record<string, string> = {
+      church: 'church',
+      condominium_complex: 'residential',
+      apartment_building: 'residential',
+      apartment_complex: 'residential',
+      housing_complex: 'residential',
+      shopping_mall: 'club'
+    };
+    return typeMap[primaryType] || 'residential';
+  };
+
+  const getTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      residential: 'Residencial',
+      church: 'Igreja',
+      club: 'Clube',
+      association: 'Associação',
+      apartment_building: 'Prédio',
+      condominium_complex: 'Condomínio',
+      shopping_mall: 'Shopping'
+    };
+    return labels[type] || type;
+  };
+
   const environmentsWithSlug = selectedEnvironments.map(env => ({
     ...env,
     slug: env.slug || generateSlug(env.name)
   }));
   const environment = environmentsWithSlug.find(e => e.slug === placeSlug);
+
+  const effectiveEnvironment = environment || (placeFromSearch ? {
+    id: placeFromSearch.id,
+    slug: generateSlug(placeFromSearch.displayName?.text || ''),
+    name: placeFromSearch.displayName?.text || '',
+    type: mapPrimaryTypeToEnvType(placeFromSearch.primaryType),
+    members: 0,
+    image: '',
+    latitude: placeFromSearch.location?.latitude,
+    longitude: placeFromSearch.location?.longitude,
+  } : null);
 
   const categories = ['Alimentação', 'Limpeza', 'Manutenção', 'Pet Sitting', 'Beleza', 'Tecnologia', 'Outros'];
 
@@ -31,7 +87,7 @@ export default function PlaceDetailPage() {
   const filteredServices = servicesWithSlug.filter(s => {
     const isActive = s.isActive && s.status === 'active';
     const serviceEnvSlug = s.environmentSlug || (s.environmentId ? environmentsWithSlug.find(e => e.id === s.environmentId)?.slug : undefined);
-    const matchesEnv = serviceEnvSlug === placeSlug || s.environmentId === environment?.id;
+    const matchesEnv = serviceEnvSlug === placeSlug || s.environmentId === effectiveEnvironment?.id;
     const matchesSearch = !search ||
       s.title.toLowerCase().includes(search.toLowerCase()) ||
       s.description.toLowerCase().includes(search.toLowerCase());
@@ -40,7 +96,7 @@ export default function PlaceDetailPage() {
     return isActive && matchesEnv && matchesSearch && matchesCategory;
   });
 
-  if (!environment) {
+  if (!effectiveEnvironment) {
     return (
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
         <Icon icon="error_outline" size={48} className="text-outline" />
@@ -61,16 +117,21 @@ export default function PlaceDetailPage() {
             <Icon icon="arrow_back" size={24} />
           </button>
           <div className="flex items-center gap-2">
-            {environment.image && (
-              <img className="w-8 h-8 rounded-full object-cover" src={environment.image} alt={environment.name} />
+            {effectiveEnvironment.image && (
+              <img className="w-8 h-8 rounded-full object-cover" src={effectiveEnvironment.image} alt={effectiveEnvironment.name} />
             )}
-            <h1 className="text-lg font-semibold tracking-tight text-on-surface">{environment.name}</h1>
+            <h1 className="text-lg font-semibold tracking-tight text-on-surface">{effectiveEnvironment.name}</h1>
           </div>
         </div>
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          {user?.avatar ? (
-            <button onClick={() => router.push('/profile')} className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary shadow-sm hover:scale-105 transition-transform">
-              <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+          {user ? (
+            <button onClick={() => router.push('/profile')} className="hover:scale-105 transition-transform active:scale-95 ml-1">
+              <Avatar
+                src={user.avatar}
+                name={user.name}
+                alt="Avatar"
+                className="w-10 h-10 border-2 border-primary shadow-sm"
+              />
             </button>
           ) : (
             <button 

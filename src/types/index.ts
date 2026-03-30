@@ -7,9 +7,10 @@ export interface Service {
   image: string;
   images?: string[];
   rating?: number;
-  reviews?: number;
+  reviews_count?: number;
   price?: string;
   provider: string;
+  provider_id?: string;
   frequency?: string;
   isActive?: boolean;
   WhatsApp?: string;
@@ -25,14 +26,18 @@ export interface Service {
   menu?: MenuItem[];
   latitude?: number;
   longitude?: number;
+  views?: number;
 }
 
 export interface Review {
   id: string;
-  userName: string;
+  service_id?: string;
+  user_id?: string;
+  userName?: string;
+  user_avatar?: string;
   stars: number;
-  comment: string;
-  date: string;
+  comment?: string;
+  created_at?: string;
 }
 
 export interface Environment {

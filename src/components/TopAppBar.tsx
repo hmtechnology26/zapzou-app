@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useApp } from '../hooks/useApp';
 import { Icon } from './Icon';
+import { Avatar } from './Avatar';
 
 interface TopAppBarProps {
   title?: string;
@@ -87,13 +88,13 @@ export function TopAppBar({
                 <Icon icon="home" weight={400} grade={0} size={24} />
               </button>
             )}
-            <h1 className={`font-black text-2xl tracking-tighter ${textColor}`}>ZapZou</h1>
+            <img src="/zapzou_logo.png" alt="ZapZou" className="h-8" />
           </div>
         )}
       </div>
 
       <div className="flex items-center gap-2">
-        {!userAvatar ? (
+        {!user ? (
           <button
             onClick={finalRightAction}
             className="flex items-center gap-2 px-5 py-2.5 rounded-full primary-gradient text-white text-xs font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all"
@@ -121,9 +122,14 @@ export function TopAppBar({
             <div className="relative">
               <button
                 onClick={onAvatarClick}
-                className="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border-2 border-primary shadow-sm hover:scale-105 transition-transform active:scale-95 ml-1"
+                className="hover:scale-105 transition-transform active:scale-95 ml-1"
               >
-                <img src={userAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                <Avatar
+                  src={userAvatar}
+                  name={user?.name}
+                  alt="Avatar"
+                  className="w-10 h-10 border-2 border-primary shadow-sm"
+                />
               </button>
               {user?.plan && user.plan !== 'free' && (
                 <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-md ${

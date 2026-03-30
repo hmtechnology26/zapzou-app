@@ -2,8 +2,13 @@
 
 import { useRouter, useParams } from 'next/navigation';
 import { Icon } from '@/components/Icon';
+import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
-import { useState, useEffect } from 'react';
+import { StarRating } from '@/components/StarRating';
+import { ReviewsList } from '@/components/ReviewsList';
+import { ReviewForm } from '@/components/ReviewForm';
+import { useState, useEffect, useRef } from 'react';
+import type { Review } from '@/types';
 
 export default function ServiceDetailPage() {
   const router = useRouter();
@@ -15,6 +20,9 @@ export default function ServiceDetailPage() {
     selectedEnvironments = [],
     toggleServiceStatus,
     removeService,
+    incrementServiceViews,
+    fetchServiceReviews,
+    addReview,
   } = useApp() || {};
 
   const [mounted, setMounted] = useState(false);
@@ -25,6 +33,10 @@ export default function ServiceDetailPage() {
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [service, setService] = useState<any>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const lastViewIncrementedServiceIdRef = useRef<string | null>(null);
   const minSwipeDistance = 50;
 
   const serviceSlug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
@@ -32,20 +44,41 @@ export default function ServiceDetailPage() {
   const generateSlug = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   useEffect(() => {
+    setMounted(true);
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     if (services.length > 0) {
       const servicesWithSlug = services.map((s: any) => ({
         ...s,
-        slug: s.slug || generateSlug(s.title)
+        slug: s.slug || generateSlug(s.title),
       }));
       const found = servicesWithSlug.find((s: any) => s.slug === serviceSlug || s.id === serviceSlug);
       setService(found);
     }
-    if (!mounted) {
-      setMounted(true);
+  }, [services, serviceSlug]);
+
+  useEffect(() => {
+    if (!service?.id) return;
+    if (lastViewIncrementedServiceIdRef.current === service.id) return;
+    lastViewIncrementedServiceIdRef.current = service.id;
+    void incrementServiceViews(service.id);
+  }, [service?.id, incrementServiceViews]);
+
+  useEffect(() => {
+    if (service?.id) {
+      fetchServiceReviews(service.id).then(setReviews);
     }
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, [services, serviceSlug, mounted]);
+  }, [service?.id]);
+
+  useEffect(() => {
+    if (!service) return;
+    const count = reviews.length;
+    const avg = count > 0 ? reviews.reduce((acc, r) => acc + (r.stars || 0), 0) / count : 0;
+    setService((prev: any) => (prev ? { ...prev, rating: avg, reviews_count: count } : prev));
+  }, [reviews]);
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
@@ -66,6 +99,19 @@ export default function ServiceDetailPage() {
     }
     if (isRightSwipe && service) {
       setCurrentImageIndex((prev) => (prev > 0 ? prev - 1 : allImages.length - 1));
+    }
+  };
+
+  const handleSubmitReview = async (stars: number, comment: string) => {
+    if (!service?.id || !user) return;
+    setIsSubmittingReview(true);
+    try {
+      await addReview(service.id, stars, comment);
+      const updatedReviews = await fetchServiceReviews(service.id, { force: true });
+      setReviews(updatedReviews);
+      setShowReviewForm(false);
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -107,14 +153,16 @@ export default function ServiceDetailPage() {
 
   const handleWhatsApp = () => {
     if (!service?.WhatsApp) return;
-
     window.open(
       `https://wa.me/${formatWhatsApp(service.WhatsApp)}?text=${WhatsAppMessage}`,
       '_blank'
     );
   };
 
-  const isOwner = user && service.provider === user.name;
+  const isOwner = user && service.provider_id === user.id;
+  const hasUserReviewed = user && reviews.some(r => r.user_id === user.id);
+  const reviewsCount = reviews.length;
+  const averageRating = reviewsCount > 0 ? reviews.reduce((acc, r) => acc + (r.stars || 0), 0) / reviewsCount : 0;
 
   const handleToggleStatus = () => {
     toggleServiceStatus(service.id);
@@ -133,6 +181,41 @@ export default function ServiceDetailPage() {
     router.push(`/register-service?id=${service.id}`);
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: service.title,
+      text: `Check out this service: ${service.title}`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          await copyToClipboard(window.location.href);
+        }
+      }
+    } else {
+      await copyToClipboard(window.location.href);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Link copiado!');
+    } catch {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('Link copiado!');
+    }
+  };
+
   return (
     <div className="min-h-screen pb-32 md:pb-12 bg-background text-on-surface">
       <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
@@ -144,12 +227,12 @@ export default function ServiceDetailPage() {
             <Icon icon="arrow_back" size={24} />
           </button>
           <h1 className="text-lg font-semibold tracking-tight text-on-surface">
-            Detalhes do Serviço
+            Detalhes
           </h1>
         </div>
 
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          <button className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary">
+          <button onClick={handleShare} className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary">
             <Icon icon="share" size={24} />
           </button>
 
@@ -192,15 +275,13 @@ export default function ServiceDetailPage() {
             </div>
           )}
 
-          {mounted && user?.avatar ? (
-            <button
-              onClick={() => router.push('/profile')}
-              className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary shadow-sm hover:scale-105 transition-transform"
-            >
-              <img
+          {mounted && user ? (
+            <button onClick={() => router.push('/profile')} className="hover:scale-105 transition-transform active:scale-95 ml-1">
+              <Avatar
                 src={user.avatar}
+                name={user.name}
                 alt="Avatar"
-                className="w-full h-full object-cover"
+                className="w-10 h-10 border-2 border-primary shadow-sm"
               />
             </button>
           ) : (
@@ -216,7 +297,7 @@ export default function ServiceDetailPage() {
       </header>
 
       <main className="mt-16 md:mt-16">
-        <div className="max-w-5xl mx-auto px-4 md:px-8 pt-4">
+        <div className="max-w-3xl mx-auto">
           <section className="relative">
             {allImages.length > 1 ? (
               <div 
@@ -225,15 +306,15 @@ export default function ServiceDetailPage() {
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
               >
-                <div className="overflow-hidden rounded-2xl h-72">
+                <div className="overflow-hidden h-64 md:h-80">
                   <div
-                    className="flex transition-transform duration-300 ease-in-out"
+                    className="flex transition-transform duration-300 ease-in-out h-full"
                     style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
                   >
                     {allImages.map((img: string, idx: number) => (
                       <div
                         key={idx}
-                        className="w-full flex-shrink-0 h-72"
+                        className="w-full flex-shrink-0 h-64 md:h-80"
                       >
                         <img
                           alt={`${service.title} ${idx + 1}`}
@@ -247,176 +328,192 @@ export default function ServiceDetailPage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setCurrentImageIndex((prev) =>
-                      prev > 0 ? prev - 1 : allImages.length - 1
-                    )
-                  }
-                  className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-md rounded-full items-center justify-center shadow-lg"
+                  onClick={() => setCurrentImageIndex((prev) => prev > 0 ? prev - 1 : allImages.length - 1)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 backdrop-blur-md rounded-full items-center justify-center shadow-lg active:scale-90 transition-transform"
                 >
-                  <Icon icon="chevron_left" size={24} />
+                  <Icon icon="chevron_left" size={20} />
                 </button>
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setCurrentImageIndex((prev) =>
-                      prev < allImages.length - 1 ? prev + 1 : 0
-                    )
-                  }
-                  className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-md rounded-full items-center justify-center shadow-lg"
+                  onClick={() => setCurrentImageIndex((prev) => prev < allImages.length - 1 ? prev + 1 : 0)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 backdrop-blur-md rounded-full items-center justify-center shadow-lg active:scale-90 transition-transform"
                 >
-                  <Icon icon="chevron_right" size={24} />
+                  <Icon icon="chevron_right" size={20} />
                 </button>
 
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/10">
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full border border-white/10">
                   {allImages.map((_: string, idx: number) => (
                     <button
                       key={idx}
                       onClick={() => setCurrentImageIndex(idx)}
-                      className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx === currentImageIndex ? 'bg-white w-4' : 'bg-white/50'}`}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentImageIndex ? 'bg-white w-5' : 'bg-white/50 w-1.5'}`}
                     />
                   ))}
                 </div>
               </div>
             ) : (
-              <div className="h-72 rounded-2xl overflow-hidden">
-                <img
-                  alt={service.title}
-                  className="w-full h-full object-cover"
-                  src={service.image}
-                />
+              <div className="h-64 md:h-80 overflow-hidden">
+                <img alt={service.title} className="w-full h-full object-cover" src={service.image} />
               </div>
             )}
 
-            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm z-10 border border-primary/10">
+            <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm z-10">
               <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{service.category}</span>
             </div>
           </section>
 
-          <section className="px-2 pt-6">
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-2xl font-extrabold text-on-surface leading-tight tracking-tight">
-                {service.title}
-              </h2>
-              {service.verified && (
-                <Icon icon="verified" weight={400} size={24} className="text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }} />
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-on-surface-variant font-medium text-sm">
-              <div className="flex items-center text-primary">
-                <Icon icon="star" weight={700} size={16} className="text-sm mr-1" style={{ fontVariationSettings: "'FILL' 1" }} />
-                <span>{service.rating || 'Novo'}</span>
-              </div>
-              <span>•</span>
-              <span>{service.reviews || 0} avaliações</span>
-              <span>•</span>
-              <span className="bg-surface-container-high px-2 py-0.5 rounded-md font-bold">{environment?.name || 'Ambiente'}</span>
-            </div>
-          </section>
-
-          <section className="px-0 mt-6">
-            <div className="bg-surface-container-lowest p-5 rounded-2xl chat-bubble-left shadow-[0_4px_20px_rgba(0,0,0,0.02)] border-l-4 border-primary-container">
-              <p className="text-on-surface-variant leading-relaxed text-[15px]">
-                {service.description}
-              </p>
-              {service.tags && service.tags.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {service.tags.map((tag: string, idx: number) => (
-                    <span key={idx} className="px-3 py-1 bg-surface-container-low rounded-full text-xs font-semibold text-primary">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </section>
-
-          <section className="mt-8 flex gap-3">
-            <button 
-              onClick={handleWhatsApp}
-              className="flex-1 h-12 bg-gradient-to-br from-primary to-primary-container rounded-full flex items-center justify-center gap-2 text-on-primary font-bold active:scale-95 transition-transform shadow-md"
-            >
-              <Icon icon="chat" weight={400} size={24} />
-              Contratar
-            </button>
-            {service.instagram && (
-              <a 
-                href={service.instagram.startsWith('http') ? service.instagram : `https://instagram.com/${service.instagram.replace('@', '')}`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex-1 h-12 rounded-full gap-2 bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] text-white font-bold flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-pink-500/20"
-              >
-                <Icon icon="photo_camera" weight={400} size={24} />
-                Instagram
-              </a>
-            )}
-          </section>
-
-          {menuItems.length > 0 && (
-            <section className="mt-10">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-on-surface tracking-tight">Cardápio / Serviços</h3>
-              </div>
-              <div className="space-y-3">
-                {menuItems.map((item: any) => (
-                  <div key={item.id} className="flex items-center gap-4 bg-surface-container-lowest p-3 rounded-2xl shadow-sm border border-outline-variant/10">
-                    <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-surface-container-high">
-                      {item.image ? (
-                        <img alt={item.name} className="w-full h-full object-cover" src={item.image} />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
-                          <Icon icon="restaurant" size={20} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-on-surface">{item.name}</h4>
-                      <p className="text-xs text-on-surface-variant">{item.description}</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-primary font-extrabold">{item.price}</span>
-                    </div>
+          <div className="px-4 md:px-6 py-4 space-y-4">
+            <section>
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-xl md:text-2xl font-extrabold text-on-surface leading-tight">
+                      {service.title}
+                    </h2>
+                    {service.verified && (
+                      <Icon icon="verified" weight={400} size={22} className="text-primary" style={{ fontVariationSettings: "'FILL' 1" }} />
+                    )}
                   </div>
-                ))}
+                  <p className="text-xs text-on-surface-variant">{environment?.name || 'Ambiente'}</p>
+                </div>
               </div>
             </section>
-          )}
 
-          <section className="mt-12 px-0 mb-8">
-            <h3 className="mb-4 text-lg font-bold text-on-surface tracking-tight">Por que pedir no ZapZou?</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-1 bg-secondary-container/30 p-4 rounded-3xl flex flex-col gap-3">
-                <Icon icon="verified_user" weight={400} size={32} className="text-secondary" />
-                <div>
-                  <p className="font-bold text-secondary text-sm">Segurança</p>
-                  <p className="text-xs text-on-secondary-container/80">Pagamento direto e seguro no delivery.</p>
+            <section className="bg-surface-container-lowest rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    <StarRating rating={averageRating} size={22} />
+                    <span className="font-bold text-on-surface ml-1">{averageRating.toFixed(1)}</span>
+                  </div>
+                  <span className="text-on-surface-variant text-sm">({service.reviews_count || 0} avaliações)</span>
+                </div>
+                <div className="flex items-center gap-1 text-on-surface-variant text-xs">
+                  <Icon icon="visibility" size={14} />
+                  <span>{service.views || 0} visualizações</span>
                 </div>
               </div>
-              <div className="col-span-1 space-y-3">
-                <div className="bg-tertiary-fixed p-4 rounded-3xl flex items-center gap-3">
-                  <Icon icon="local_mall" weight={400} size={24} className="text-tertiary" />
-                  <p className="font-bold text-tertiary text-sm">Curadoria</p>
+
+              {user && !hasUserReviewed && !isOwner && (
+                <button
+                  onClick={() => setShowReviewForm(true)}
+                  className="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                >
+                  <Icon icon="star" size={18} />
+                  Avaliar Serviço
+                </button>
+              )}
+
+              {hasUserReviewed && (
+                <div className="text-center py-2 text-primary text-sm font-medium">
+                  Você já avaliou este serviço
                 </div>
-                <div className="bg-surface-container-high p-4 rounded-3xl flex items-center gap-3">
-                  <Icon icon="group" weight={400} size={24} className="text-on-surface-variant" />
-                  <p className="font-bold text-on-surface-variant text-sm">Vizinhos Reais</p>
+              )}
+
+              {showReviewForm && (
+                <div className="mt-3 pt-3 border-t border-outline-variant/10">
+                  <ReviewForm
+                    onSubmit={handleSubmitReview}
+                    onCancel={() => setShowReviewForm(false)}
+                    isSubmitting={isSubmittingReview}
+                  />
                 </div>
+              )}
+            </section>
+
+            <section>
+              <h3 className="font-bold text-on-surface mb-3">Sobre</h3>
+              <div className="bg-surface-container-lowest p-4 rounded-2xl">
+                <p className="text-on-surface-variant leading-relaxed text-sm">
+                  {service.description}
+                </p>
+                {service.tags && service.tags.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {service.tags.map((tag: string, idx: number) => (
+                      <span key={idx} className="px-3 py-1 bg-surface-container-low rounded-full text-xs font-semibold text-primary">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
-            </div>
-          </section>
+            </section>
+
+            <section className="flex gap-3">
+              <button 
+                onClick={handleWhatsApp}
+                className="flex-1 h-12 bg-gradient-to-br from-primary to-primary-container rounded-full flex items-center justify-center gap-2 text-on-primary font-bold active:scale-95 transition-transform shadow-md"
+              >
+                <Icon icon="chat" weight={400} size={20} />
+                Contratar
+              </button>
+              {service.instagram && (
+                <a 
+                  href={service.instagram.startsWith('http') ? service.instagram : `https://instagram.com/${service.instagram.replace('@', '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 h-12 rounded-full gap-2 bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] text-white font-bold flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-pink-500/20"
+                >
+                  <Icon icon="photo_camera" weight={400} size={20} />
+                  Instagram
+                </a>
+              )}
+            </section>
+
+            {menuItems.length > 0 && (
+              <section>
+                <h3 className="font-bold text-on-surface mb-3">Cardápio / Serviços</h3>
+                <div className="space-y-2">
+                  {menuItems.map((item: any) => (
+                    <div key={item.id} className="flex items-center gap-3 bg-surface-container-lowest p-3 rounded-2xl border border-outline-variant/10">
+                      <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-surface-container-high">
+                        {item.image ? (
+                          <img alt={item.name} className="w-full h-full object-cover" src={item.image} />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
+                            <Icon icon="restaurant" size={18} />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-on-surface text-sm">{item.name}</h4>
+                        <p className="text-xs text-on-surface-variant truncate">{item.description}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <span className="text-primary font-extrabold text-sm">{item.price}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-bold text-on-surface">Avaliações</h3>
+                <span className="text-sm text-on-surface-variant">{reviews.length} avaliações</span>
+              </div>
+              <ReviewsList reviews={reviews} />
+            </section>
+
+            <section className="pb-8">
+              <div className="bg-secondary-container/30 p-5 rounded-3xl relative overflow-hidden">
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Icon icon="verified_user" weight={400} size={24} className="text-secondary" />
+                    <p className="font-bold text-secondary">ZapZou</p>
+                  </div>
+                  <p className="text-sm text-on-secondary-container/80 leading-relaxed">
+                    Conectamos você com profissionais verificados da sua comunidade. Contrate com segurança!
+                  </p>
+                </div>
+                <Icon icon="handshake" weight={400} size={80} className="absolute -right-2 -bottom-4 text-secondary-container/30 pointer-events-none" />
+              </div>
+            </section>
+          </div>
         </div>
       </main>
-
-      {/* <div className="fixed bottom-0 left-0 w-full z-40 px-4 pb-6 pt-4 bg-white/90 backdrop-blur-xl rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
-        <button 
-          onClick={handleWhatsApp}
-          className="w-full h-14 bg-primary text-on-primary rounded-full font-extrabold text-lg flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg shadow-primary/20"
-        >
-          <Icon icon="calendar_today" weight={400} size={24} />
-          Agendar via WhatsApp
-        </button>
-      </div> */}
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
@@ -426,7 +523,7 @@ export default function ServiceDetailPage() {
             </div>
             <h3 className="text-lg font-bold text-on-surface text-center mb-2">Excluir Serviço?</h3>
             <p className="text-sm text-on-surface-variant text-center mb-6">
-              Esta ação não pode ser desfeita. O serviço será removido permanentemente.
+              Esta ação não pode ser desfeita.
             </p>
             <div className="flex gap-3">
               <button
@@ -447,10 +544,7 @@ export default function ServiceDetailPage() {
       )}
 
       {showOptionsMenu && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setShowOptionsMenu(false)}
-        />
+        <div className="fixed inset-0 z-40" onClick={() => setShowOptionsMenu(false)} />
       )}
     </div>
   );

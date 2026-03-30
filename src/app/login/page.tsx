@@ -15,19 +15,22 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      const { error: authError } = await supabase.auth.signInWithOAuth({
+      const { data, error: authError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
       if (authError) {
+        console.error('OAuth error:', authError);
         setError('Erro ao iniciar login com Google. Tente novamente.');
         setLoading(false);
+      } else if (data?.url) {
+        window.location.href = data.url;
       }
-      // Se não houver erro, o Supabase redireciona para o Google automaticamente
     } catch (err: any) {
+      console.error('Login error:', err);
       setError(err.message || 'Erro desconhecido');
       setLoading(false);
     }
@@ -38,11 +41,9 @@ export default function LoginPage() {
       <main className="w-full max-w-md flex flex-col items-center">
         {/* Logo */}
         <div className="mb-12 flex flex-col items-center">
-          <div className="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center mb-6 shadow-sm">
-            <Icon icon="chat" weight={400} grade={0} size={48} className="text-on-primary-container text-5xl" />
-          </div>
-          <h1 className="text-primary font-extrabold text-3xl tracking-tight mb-2">ZapZou</h1>
-          <div className="h-1 w-12 bg-primary-container rounded-full"></div>
+          <img src="/zapzou_logo_vert.png" alt="ZapZou" className="h-36 mb-4" />
+          
+          {/* <div className="h-1 w-12 bg-primary-container rounded-full"></div> */}
         </div>
 
         {/* Card */}

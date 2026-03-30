@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { MaterialSymbol as Icon } from "react-material-symbols";
 import { TopAppBar } from "@/components/TopAppBar";
+import { Avatar } from "@/components/Avatar";
 import { useApp } from "@/hooks/useApp";
 import { useEffect } from "react";
 
@@ -36,20 +37,19 @@ export default function ProfilePage() {
       <main className="pt-20 px-6 max-w-2xl mx-auto">
         <section className="flex flex-col items-center py-8">
           <div className="relative">
-            <img
-              className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
-              src={
-                user?.avatar ||
-                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"
-              }
+            <Avatar
+              src={user?.avatar}
+              name={user?.name}
               alt={user?.name}
+              className="w-24 h-24 border-4 border-white shadow-lg"
+              fallbackClassName="text-2xl"
             />
-            <button
+            {/* <button
               onClick={() => router.push("/edit-profile")}
               className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white shadow-lg"
             >
               <Icon icon="edit" weight={400} grade={0} size={18} />
-            </button>
+            </button> */}
           </div>
           <h2 className="mt-4 font-bold text-xl text-on-surface">
             {user?.name}
@@ -67,7 +67,7 @@ export default function ProfilePage() {
           )}
           <p className="text-on-surface-variant">{user?.email}</p>
         </section>
-        <section className="grid grid-cols-2 gap-4">
+        {/* <section className="grid grid-cols-2 gap-4">
           <div className="bg-surface-container-low rounded-2xl p-6 text-center">
             <span className="text-3xl font-black text-primary">
               {activeServices}
@@ -80,7 +80,7 @@ export default function ProfilePage() {
             </span>
             <p className="text-on-surface-variant text-sm">Total de Serviços</p>
           </div>
-        </section>
+        </section> */}
 
         {user?.plan && user.plan !== "free" && (
           <section className="mt-6">
@@ -123,7 +123,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => router.push("/plans")}
+                  onClick={() => router.push("/plans?returnTo=/profile")}
                   className={`text-xs font-bold px-3 py-1.5 rounded-full ${
                     user.plan === "pro"
                       ? "bg-blue-500 text-white"
@@ -139,7 +139,7 @@ export default function ProfilePage() {
 
         <section className="mt-8 space-y-2">
           <button
-            onClick={() => router.push("/plans")}
+            onClick={() => router.push("/plans?returnTo=/profile")}
             className="w-full flex items-center gap-4 p-4 bg-surface-container-lowest rounded-xl"
           >
             <Icon
@@ -171,7 +171,7 @@ export default function ProfilePage() {
             <span className="flex-1 text-left font-medium">Membros</span>
             <Icon icon="chevron_right" weight={400} grade={0} size={24} />
           </button>
-          <button onClick={() => router.push('/admin-settings')} className="w-full flex items-center gap-4 p-4 bg-surface-container-lowest rounded-xl">
+          <button onClick={() => router.push('/admin/settings')} className="w-full flex items-center gap-4 p-4 bg-surface-container-lowest rounded-xl">
             <Icon icon="settings" weight={400} grade={0} size={24} className="text-primary" />
             <span className="flex-1 text-left font-medium">Configurações</span>
             <Icon icon="chevron_right" weight={400} grade={0} size={24} />

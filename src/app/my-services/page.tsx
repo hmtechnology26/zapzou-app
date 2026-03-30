@@ -2,17 +2,18 @@
 
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/Icon';
+import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
 import { usePublishModal } from '@/contexts/PublishModalContext';
 import { useState, useEffect } from 'react';
 
 export default function MyServicesPage() {
   const router = useRouter();
-  const { services, toggleServiceStatus, removeService, user, selectedEnvironments, setSelectedEnvironments } = useApp();
+  const { userServices, fetchUserServices, services, toggleServiceStatus, removeService, user, selectedEnvironments, setSelectedEnvironments } = useApp();
   const { open } = usePublishModal();
   const [mounted, setMounted] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [serviceToDelete, setServiceToDelete] = useState<typeof services[0] | null>(null);
+  const [serviceToDelete, setServiceToDelete] = useState<typeof userServices[0] | null>(null);
   const [showEnvModal, setShowEnvModal] = useState(false);
   const [tempSelectedEnvs, setTempSelectedEnvs] = useState<string[]>([]);
   const [envSearch, setEnvSearch] = useState('');
@@ -20,6 +21,12 @@ export default function MyServicesPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (mounted && user?.id) {
+      fetchUserServices(user.id);
+    }
+  }, [mounted, user?.id]);
 
   const handleNewService = () => {
     if (!user) {
@@ -52,13 +59,17 @@ export default function MyServicesPage() {
     e.name.toLowerCase().includes(envSearch.toLowerCase())
   );
 
-  const activeServices = services.filter(s => s.isActive).length;
+  const activeServices = userServices.filter(s => s.isActive).length;
+  const totalViews = userServices.reduce((acc, s) => acc + (s.views || 0), 0);
 
   const handleToggleStatus = (serviceId: string) => {
     toggleServiceStatus(serviceId);
+    if (user?.id) {
+      fetchUserServices(user.id);
+    }
   };
 
-  const handleDeleteClick = (service: typeof services[0], e: React.MouseEvent) => {
+  const handleDeleteClick = (service: typeof userServices[0], e: React.MouseEvent) => {
     e.stopPropagation();
     setServiceToDelete(service);
     setShowDeleteModal(true);
@@ -69,6 +80,9 @@ export default function MyServicesPage() {
       removeService(serviceToDelete.id);
       setShowDeleteModal(false);
       setServiceToDelete(null);
+      if (user?.id) {
+        fetchUserServices(user.id);
+      }
     }
   };
 
@@ -85,9 +99,14 @@ export default function MyServicesPage() {
           <h1 className="text-lg font-semibold tracking-tight text-on-surface">Meus Serviços</h1>
         </div>
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          {mounted && user?.avatar ? (
-            <button onClick={() => router.push('/profile')} className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary shadow-sm hover:scale-105 transition-transform">
-              <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+          {mounted && user ? (
+            <button onClick={() => router.push('/profile')} className="hover:scale-105 transition-transform active:scale-95 ml-1">
+              <Avatar
+                src={user.avatar}
+                name={user.name}
+                alt="Avatar"
+                className="w-10 h-10 border-2 border-primary shadow-sm"
+              />
             </button>
           ) : (
             <button 
@@ -114,7 +133,7 @@ export default function MyServicesPage() {
             <Icon icon="visibility" weight={400} size={32} className="text-on-primary-container" style={{ fontVariationSettings: "'FILL' 1" }} />
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Visualizações</p>
-              <p className="text-3xl font-extrabold">148</p>
+              <p className="text-3xl font-extrabold">{totalViews}</p>
             </div>
           </div>
         </section>
@@ -122,7 +141,7 @@ export default function MyServicesPage() {
         <section className="space-y-4">
           <h2 className="text-sm font-bold text-on-surface-variant px-1">Gerenciar Catálogo</h2>
           
-            {services.length === 0 ? (
+            {userServices.length === 0 ? (
             <button 
               onClick={handleNewService}
               className="w-full border-2 border-dashed border-outline-variant/30 rounded-3xl p-8 flex flex-col items-center justify-center gap-3 text-on-surface-variant hover:bg-white/50 transition-colors active:scale-[0.98]"
@@ -137,11 +156,11 @@ export default function MyServicesPage() {
             </button>
           ) : (
             <>
-              {services.map((service) => (
-                <div key={service.id} className="bg-surface-container-lowest rounded-3xl p-4 flex flex-col gap-4 border border-outline-variant/10">
+              {userServices.map((service) => (
+                <div key={service.id} className={`bg-surface-container-lowest rounded-3xl p-4 flex flex-col gap-4 border border-outline-variant/10 ${!service.isActive ? 'opacity-60' : ''}`}>
                   <div className="flex gap-4">
                     <div className="w-24 h-24 rounded-2xl overflow-hidden bg-surface-container flex-shrink-0">
-                      <img className="w-full h-full object-cover" src={service.image || 'https://via.placeholder.com/150'} alt={service.title} />
+                      <img className={`w-full h-full object-cover ${!service.isActive ? 'grayscale' : ''}`} src={service.image || 'https://via.placeholder.com/150'} alt={service.title} />
                     </div>
                     <div className="flex-1 flex flex-col justify-between py-1">
                       <div>

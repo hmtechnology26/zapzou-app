@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { Service, Environment, Member } from '../types';
+import React, { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
+import type { Service, Environment, Member, Review } from '../types';
 import { supabase } from '../lib/supabase';
 
 export interface User {
@@ -24,14 +24,19 @@ interface AppContextType {
   setSelectedEnvironment: (env: Environment | null) => void;
   updateEnvironment: (id: string, updates: Partial<Environment>) => void;
   services: Service[];
+  userServices: Service[];
+  fetchUserServices: (userId: string) => Promise<void>;
   toggleServiceStatus: (id: string) => Promise<void>;
   addService: (service: any) => Promise<void>;
   updateService: (id: string, service: Partial<Service>) => Promise<void>;
   removeService: (id: string) => Promise<void>;
+  incrementServiceViews: (id: string) => Promise<void>;
   approveService: (id: string) => Promise<void>;
   rejectService: (id: string) => Promise<void>;
   members: Member[];
   rateService: (id: string, stars: number, comment?: string) => Promise<void>;
+  fetchServiceReviews: (serviceId: string, opts?: { force?: boolean }) => Promise<Review[]>;
+  addReview: (serviceId: string, stars: number, comment?: string) => Promise<void>;
   loading: boolean;
   requestAffiliation: (envId: string) => Promise<void>;
   refreshMembership: () => Promise<void>;
@@ -45,7 +50,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [selectedEnvironments, setSelectedEnvironments] = useState<Environment[]>([]);
   const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
   const [services, setServices] = useState<Service[]>([]);
+  const [userServices, setUserServices] = useState<Service[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [serviceReviews, setServiceReviews] = useState<Record<string, Review[]>>({});
+  const reviewsHasUserAvatarColumnRef = useRef<boolean | null>(null);
 
   const generateSlug = (text: string): string => {
     return text
@@ -56,12 +64,65 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .replace(/^-|-$/g, '');
   };
 
+  const normalizeAvatarUrl = (value: unknown): string => {
+    if (typeof value !== 'string') return '';
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+    if (trimmed === 'null' || trimmed === 'undefined') return '';
+    return trimmed;
+  };
+
+  const extractAuthProfile = (authUser: any): { name: string; avatar: string } => {
+    const meta = authUser?.user_metadata ?? {};
+    const identities = Array.isArray(authUser?.identities) ? authUser.identities : [];
+    const identityData = identities[0]?.identity_data ?? {};
+
+    const nameRaw =
+      meta?.name ??
+      meta?.full_name ??
+      identityData?.name ??
+      identityData?.full_name ??
+      '';
+
+    const avatarRaw =
+      meta?.avatar_url ??
+      meta?.picture ??
+      identityData?.avatar_url ??
+      identityData?.picture ??
+      '';
+
+    return {
+      name: typeof nameRaw === 'string' ? nameRaw.trim() : '',
+      avatar: normalizeAvatarUrl(avatarRaw),
+    };
+  };
+
+  const isNoRowsFoundError = (error: any): boolean => {
+    // PostgREST "Results contain 0 rows" for .single()
+    return error?.code === 'PGRST116';
+  };
+
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        await fetchUserProfile(session.user.id, session.user.email || '');
+        await fetchUserProfile(session.user.id, session.user.email || '', session.user);
       } else {
+        if (false) {
+          console.warn('User profile fetch failed (non-empty error):', fetchError);
+          setUser((prev) => ({
+            ...prev,
+            id: userId,
+            name: authProfile.name || prev?.name || 'UsuÃ¡rio',
+            email,
+            avatar: authProfile.avatar || prev?.avatar || '',
+            role: prev?.role || 'user',
+            plan: prev?.plan || 'free',
+            membershipStatus: prev?.membershipStatus || null,
+            membershipRole: prev?.membershipRole || null,
+          }));
+          return;
+        }
         setUser(null);
       }
       setLoading(false);
@@ -70,7 +131,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        await fetchUserProfile(session.user.id, session.user.email || '');
+        await fetchUserProfile(session.user.id, session.user.email || '', session.user);
       } else {
         setUser(null);
       }
@@ -81,33 +142,101 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const fetchUserProfile = async (userId: string, email: string) => {
+  const fetchUserProfile = async (userId: string, email: string, authUser?: any) => {
+    const authProfile = extractAuthProfile(authUser);
+    const identityData = Array.isArray(authUser?.identities) ? authUser.identities[0]?.identity_data : null;
+    const userMetadata: Record<string, any> | undefined = authUser
+      ? { ...(authUser.user_metadata || {}), ...(identityData || {}) }
+      : undefined;
     try {
-      const { data, error } = await supabase
+      const { data: existingUser, error: fetchError } = await supabase
         .from('users')
         .select('*')
         .eq('id', userId)
         .single();
       
-      if (data && !error) {
-        setUser(prev => ({
-          ...prev,
-          id: userId,
-          name: data.name || 'Usuário',
-          email: email,
-          avatar: data.avatar || '',
-          role: data.role === 'moderator' ? 'admin' : 'user',
-          plan: data.plan || 'free',
-          membershipStatus: prev?.membershipStatus || null,
-          membershipRole: prev?.membershipRole || null
-        }));
+      console.log('User profile fetch:', { data: existingUser, error: fetchError, userId });
+      
+      if (existingUser && !fetchError) {
+        let avatarToSave = normalizeAvatarUrl(existingUser.avatar);
+        let nameToSave = existingUser.name;
+        
+        if (userMetadata) {
+          const avatarFromAuth = normalizeAvatarUrl(userMetadata.avatar_url || userMetadata.picture || '');
+          if (avatarFromAuth) {
+            avatarToSave = avatarFromAuth;
+          }
+          nameToSave = userMetadata.name || userMetadata.full_name || existingUser.name || 'Usuário';
+          
+          const updates: { avatar?: string; name?: string } = {};
+          if (avatarFromAuth && avatarFromAuth !== existingUser.avatar) {
+            updates.avatar = avatarFromAuth;
+          }
+          if (nameToSave && nameToSave !== existingUser.name) {
+            updates.name = nameToSave;
+          }
+          if (Object.keys(updates).length > 0) {
+            await supabase.from('users').update(updates).eq('id', userId);
+          }
+        }
+        
+        setUser((prev) => {
+          const prevAvatar = prev?.avatar || '';
+          const prevName = prev?.name || '';
+          const prevPlan = prev?.plan || 'free';
+
+          const nextAvatar = normalizeAvatarUrl(avatarToSave) || prevAvatar;
+          const nextName = (nameToSave || '').trim() || prevName || 'Usuário';
+          const nextPlan =
+            (existingUser.plan as User['plan'] | undefined) || prevPlan;
+
+          return {
+            ...prev,
+            id: userId,
+            name: nextName,
+            email: email,
+            avatar: nextAvatar,
+            role: existingUser.role === 'moderator' ? 'admin' : 'user',
+            plan: nextPlan,
+            membershipStatus: prev?.membershipStatus || null,
+            membershipRole: prev?.membershipRole || null,
+          };
+        });
       } else {
-        // Se a tabela users estiver bloqueada, usa dados básicos do auth
+        if (fetchError && !isNoRowsFoundError(fetchError)) {
+          console.warn('User profile fetch failed (non-empty error):', fetchError);
+          setUser((prev) => ({
+            ...prev,
+            id: userId,
+            name: authProfile.name || prev?.name || 'UsuÃ¡rio',
+            email,
+            avatar: authProfile.avatar || prev?.avatar || '',
+            role: prev?.role || 'user',
+            plan: prev?.plan || 'free',
+            membershipStatus: prev?.membershipStatus || null,
+            membershipRole: prev?.membershipRole || null,
+          }));
+          return;
+        }
+        const googleAvatar = normalizeAvatarUrl(userMetadata?.avatar_url || userMetadata?.picture || '');
+        const googleName = userMetadata?.name || userMetadata?.full_name || 'Usuário';
+        
+        const payload: any = { id: userId, email, name: googleName };
+        if (googleAvatar) payload.avatar = googleAvatar;
+
+        const { error: createError } = await supabase
+          .from('users')
+          .upsert(payload);
+        
+        if (createError) {
+          console.error('Error creating user:', createError);
+        }
+        
         setUser({
           id: userId,
-          name: 'Usuário',
+          name: googleName,
           email: email,
-          avatar: '',
+          avatar: googleAvatar || authProfile.avatar,
           role: 'user',
           plan: 'free',
           membershipStatus: null,
@@ -115,11 +244,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         });
       }
     } catch(err) {
+       console.error('Exception fetching user profile:', err);
        setUser({
          id: userId,
          name: 'Usuário',
          email: email,
-         avatar: '',
+         avatar: authProfile.avatar || '',
          role: 'user',
          plan: 'free',
          membershipStatus: null,
@@ -207,7 +337,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             userId: m.user_id,
             name: m.user_public_profiles?.name || 'Usuário',
             email: '', 
-            avatar: m.user_public_profiles?.avatar_url || '',
+            avatar: normalizeAvatarUrl(m.user_public_profiles?.avatar_url || ''),
             isPending: m.status === 'pending',
             role: m.role
          }));
@@ -219,7 +349,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const query = supabase
       .from('services')
       .select('*')
-      .eq('is_active', true)
       .order('created_at', { ascending: false });
       
     const { data, error } = await query;
@@ -233,6 +362,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         image: s.image_url || '',
         images: s.images_urls || [],
         provider: s.provider || 'Prestador',
+        provider_id: s.provider_id,
         status: s.status as any,
         isActive: s.is_active,
         environmentId: s.environment_id,
@@ -243,7 +373,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         latitude: s.latitude,
         longitude: s.longitude,
         rating: s.rating ?? 0,
-        reviews: s.reviews_count ?? 0,
+        reviews_count: s.reviews_count ?? 0,
+        views: s.views ?? 0,
       }));
       setServices(formatted);
     }
@@ -275,15 +406,54 @@ export function AppProvider({ children }: { children: ReactNode }) {
       await refreshMembership();
   };
 
+  const fetchUserServices = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('services')
+      .select('*')
+      .eq('provider_id', userId)
+      .order('created_at', { ascending: false });
+    
+    if (data && !error) {
+      const formatted = data.map((s: any) => ({
+        id: s.id,
+        slug: s.slug || generateSlug(s.title),
+        title: s.title,
+        description: s.description,
+        category: s.category,
+        image: s.image_url || '',
+        images: s.images_urls || [],
+        provider: s.provider || 'Prestador',
+        provider_id: s.provider_id,
+        status: s.status as any,
+        isActive: s.is_active,
+        environmentId: s.environment_id,
+        WhatsApp: s.whatsapp,
+        instagram: s.instagram,
+        frequency: s.frequency,
+        menu: s.menu || [],
+        latitude: s.latitude,
+        longitude: s.longitude,
+        rating: s.rating ?? 0,
+        reviews_count: s.reviews_count ?? 0,
+        views: s.views ?? 0,
+      }));
+      setUserServices(formatted);
+    }
+  };
+
   const addService = async (service: any) => {
+    console.log('addService called', { service, user: !!user });
     if (!user) throw new Error("User not found");
     if (!service?.environmentId) throw new Error('Selecione um ambiente para publicar.');
 
+    console.log('Getting location...');
     const location =
       typeof service?.latitude === 'number' && typeof service?.longitude === 'number'
         ? { latitude: service.latitude, longitude: service.longitude }
         : await getCurrentLocation();
+    console.log('Location obtained:', location);
 
+    console.log('Inserting service...');
     const { error } = await supabase
       .from('services')
       .insert([{
@@ -303,8 +473,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         latitude: location.latitude,
         longitude: location.longitude,
         provider_id: user.id,
+        provider: user.name || 'Prestador',
       }]);
 
+    console.log('Service insert result:', { error });
     if (error) throw error;
     await fetchServices();
   };
@@ -344,10 +516,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await fetchServices();
   };
 
+  const incrementServiceViews = async (id: string) => {
+    const { data, error } = await supabase
+      .from('services')
+      .select('views')
+      .eq('id', id)
+      .single();
+    
+    if (!error && data) {
+      const newViews = (data.views || 0) + 1;
+      await supabase
+        .from('services')
+        .update({ views: newViews })
+        .eq('id', id);
+      setServices(prev => prev.map(s => s.id === id ? { ...s, views: newViews } : s));
+    }
+  };
+
   const toggleServiceStatus = async (id: string) => {
      const s = services.find(x => x.id === id);
      if (s) {
-       await updateService(id, { isActive: !s.isActive });
+       const newStatus = !s.isActive;
+       setServices(services.map(sv => sv.id === id ? { ...sv, isActive: newStatus } : sv));
+       await updateService(id, { isActive: newStatus });
      }
   };
 
@@ -355,7 +546,182 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
   const approveService = async (id: string) => {};
   const rejectService = async (id: string) => {};
-  const rateService = async (id: string, stars: number, comment?: string) => {};
+
+  const withTimeout = async <T,>(promise: PromiseLike<T>, timeoutMs: number, message = 'Tempo esgotado') => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    const timeout = new Promise<never>((_resolve, reject) => {
+      timeoutId = setTimeout(() => reject(new Error(message)), timeoutMs);
+    });
+
+    try {
+      return await Promise.race([Promise.resolve(promise), timeout]);
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
+    }
+  };
+
+  const isMissingColumnError = (err: any, column: string) => {
+    const msg = String(err?.message || '').toLowerCase();
+    const col = column.toLowerCase();
+    return (
+      err?.code === '42703' ||
+      (msg.includes(col) && (msg.includes('does not exist') || msg.includes('schema cache') || msg.includes('column')))
+    );
+  };
+
+  const toUserFriendlyReviewError = (err: any) => {
+    const msg = String(err?.message || '');
+    const msgLower = msg.toLowerCase();
+
+    if (!err) return new Error('Erro ao enviar avaliação');
+    if (err?.code === '23505') return new Error('Você já avaliou este serviço.');
+    if (err?.code === '23503') return new Error('Não foi possível vincular sua avaliação ao usuário/serviço. Saia e entre novamente e tente de novo.');
+    if (err?.code === '22P02') return new Error('Dados inválidos ao enviar avaliação. Atualize a página e tente novamente.');
+    if (err?.code === '42501' || msgLower.includes('row-level security')) {
+      return new Error('Sem permissão para enviar avaliação. Faça login e tente novamente.');
+    }
+    if (err?.code === 'PGRST204' || msgLower.includes('schema cache')) {
+      return new Error('A estrutura de avaliações no Supabase parece desatualizada (schema cache). Rode as migrações e recarregue o schema cache no Supabase.');
+    }
+    if (err instanceof Error) return err;
+    return new Error(msg || 'Erro ao enviar avaliação');
+  };
+
+  const fetchServiceReviews = async (
+    serviceId: string,
+    opts?: { force?: boolean }
+  ): Promise<Review[]> => {
+    if (!opts?.force && serviceReviews[serviceId]) {
+      return serviceReviews[serviceId];
+    }
+
+    const includeAvatarColumn = reviewsHasUserAvatarColumnRef.current !== false;
+    let { data, error } = (await withTimeout(
+      supabase
+        .from('reviews')
+        .select(
+          includeAvatarColumn
+            ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at'
+            : 'id, service_id, user_id, user_name, stars, comment, created_at'
+        )
+        .eq('service_id', serviceId)
+        .order('created_at', { ascending: false }),
+      15000,
+      'Tempo esgotado ao carregar avaliações'
+    )) as any;
+
+    if (error && isMissingColumnError(error, 'user_avatar')) {
+      reviewsHasUserAvatarColumnRef.current = false;
+      ({ data, error } = (await withTimeout(
+        supabase
+          .from('reviews')
+          .select('id, service_id, user_id, user_name, stars, comment, created_at')
+          .eq('service_id', serviceId)
+          .order('created_at', { ascending: false }),
+        15000,
+        'Tempo esgotado ao carregar avaliações'
+      )) as any);
+    }
+
+    if (!error && includeAvatarColumn) {
+      reviewsHasUserAvatarColumnRef.current = true;
+    }
+
+    if (!error && data) {
+      const reviews = data.map(r => ({
+        id: r.id,
+        service_id: r.service_id,
+        user_id: r.user_id,
+        userName: r.user_name,
+        user_avatar: r.user_avatar,
+        stars: r.stars,
+        comment: r.comment,
+        created_at: r.created_at,
+      }));
+      setServiceReviews(prev => ({ ...prev, [serviceId]: reviews }));
+      return reviews;
+    }
+
+    if (error) {
+      console.warn('fetchServiceReviews failed:', error);
+    }
+    return [];
+  };
+
+  const addReview = async (serviceId: string, stars: number, comment?: string) => {
+    if (!user) throw new Error('User must be logged in');
+
+    const basePayload = {
+      service_id: serviceId,
+      user_id: user.id,
+      user_name: user.name,
+      stars,
+      comment: comment || '',
+    };
+    const tryInsert = (payload: typeof basePayload & { user_avatar?: string }) =>
+      supabase.from('reviews').insert(payload).select('id').single();
+
+    let insertResult = await withTimeout(
+      tryInsert(reviewsHasUserAvatarColumnRef.current === false ? basePayload : { ...basePayload, user_avatar: user.avatar }),
+      15000,
+      'Tempo esgotado ao enviar avaliação'
+    );
+
+    let { error } = insertResult as { error: any };
+    if (error && isMissingColumnError(error, 'user_avatar')) {
+      reviewsHasUserAvatarColumnRef.current = false;
+      insertResult = await withTimeout(
+        tryInsert(basePayload),
+        15000,
+        'Tempo esgotado ao enviar avaliação'
+      );
+      ({ error } = insertResult as { error: any });
+    }
+
+    if (!error && reviewsHasUserAvatarColumnRef.current !== false) {
+      reviewsHasUserAvatarColumnRef.current = true;
+    }
+
+    if (error) {
+      console.warn('addReview failed:', error);
+      throw toUserFriendlyReviewError(error);
+    }
+
+    // Invalida cache para forçar refetch com a avaliação recém-criada
+    setServiceReviews(prev => {
+      const next = { ...prev };
+      delete next[serviceId];
+      return next;
+    });
+
+    // Não bloqueia o fluxo do usuário caso a atualização do rating falhe/trave
+    void withTimeout(updateServiceRating(serviceId), 8000).catch(() => {});
+  };
+
+  const updateServiceRating = async (serviceId: string) => {
+    const reviews = serviceReviews[serviceId] || [];
+    const { data } = await supabase
+      .from('reviews')
+      .select('stars')
+      .eq('service_id', serviceId);
+    if (data) {
+      const total = data.length;
+      const avg = total > 0 
+        ? data.reduce((acc, r) => acc + r.stars, 0) / total 
+        : 0;
+      await supabase
+        .from('services')
+        .update({ rating: avg, reviews_count: total })
+        .eq('id', serviceId);
+      setServices(prev => prev.map(s => 
+        s.id === serviceId ? { ...s, rating: avg, reviews_count: total } : s
+      ));
+    }
+  };
+
+  const rateService = async (id: string, stars: number, comment?: string) => {
+    await addReview(id, stars, comment);
+  };
 
   return (
     <AppContext.Provider value={{
@@ -367,14 +733,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setSelectedEnvironment,
       updateEnvironment,
       services,
+      userServices,
+      fetchUserServices,
       toggleServiceStatus,
       addService,
       updateService,
       removeService,
+      incrementServiceViews,
       approveService,
       rejectService,
       members,
       rateService,
+      fetchServiceReviews,
+      addReview,
       loading,
       requestAffiliation,
       refreshMembership

@@ -1,9 +1,29 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/Icon';
+import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
-import { useState } from 'react';
+
+function normalizeReturnTo(value: string | null): string {
+  if (!value) return '';
+
+  const candidates = [value];
+  try {
+    candidates.push(decodeURIComponent(value));
+  } catch {
+    // ignore malformed encodings
+  }
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    if (!candidate.startsWith('/')) continue;
+    if (candidate.startsWith('//')) continue;
+    return candidate;
+  }
+
+  return '';
+}
 
 const plans = [
   {
@@ -13,15 +33,13 @@ const plans = [
     period: 'para sempre',
     description: 'Ideal para começar',
     features: [
-      ' até 1 serviço publicado',
-      'Visibilidade básica',
-      'Perfil simples',
+      'Até 2 serviços publicados',
+      'Apenas 1 ambiente',
       'Suporte por email',
     ],
     notFeatures: [
       'Destaque nos resultados',
       'Badge de verificação',
-      'Estatísticas avançadas',
     ],
     cta: 'Plano Atual',
     popular: false,
@@ -33,12 +51,11 @@ const plans = [
     period: 'por mês',
     description: 'Para profissionais que querem crescer',
     features: [
-      ' até 5 serviços publicados',
-      'Visibilidade prioritária',
-      'Badge de verificação',
-      'Estatísticas básicas',
-      'Suporte prioritário',
-      'Personalização do perfil',
+      'Até 5 serviços publicados',
+      'Mais de 1 ambiente',
+      'Badge de verificação PRÓ',
+      'Suporte prioritário em Até 24h',
+      
     ],
     notFeatures: [
       'Análises avançadas',
@@ -49,18 +66,14 @@ const plans = [
   {
     id: 'plus',
     name: 'PLUS',
-    price: 'R$ 29,90',
+    price: 'R$ 19,90',
     period: 'por mês',
     description: 'Para negócios que querem crescer',
     features: [
-      'Serviços ilimitados',
-      'Máxima visibilidade',
-      'Badge de verificação VIP',
-      'Análises avançadas',
-      'Suporte prioritário 24/7',
-      'Personalização completa',
-      'Promoções exclusivas',
-      'API de integração',
+      'Serviços ilimitados publicados',
+      'Ambientes ilimitados',
+      'Badge de verificação PLUS',
+      'Suporte prioritário - Até 6h',
     ],
     notFeatures: [],
     cta: 'Upgrade para PLUS',
@@ -70,31 +83,72 @@ const plans = [
 
 export default function PlansPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useApp();
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const currentPlan = user?.plan || 'free';
+  const returnTo = normalizeReturnTo(searchParams?.get('returnTo'));
+  const returnToQuery = returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : '';
+
+  const goBack = () => {
+    if (returnTo) {
+      router.replace(returnTo);
+      return;
+    }
+
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+      return;
+    }
+
+    router.replace('/profile');
+  };
 
   const handleSelectPlan = (planId: string) => {
-    setSelectedPlan(planId);
     if (planId === 'free') {
       alert('Você já está no plano FREE!');
-    } else {
-      alert(`Em breve! Plano ${planId.toUpperCase()} será liberado em breve.`);
+      return;
+    }
+    if (planId === currentPlan) {
+      alert('Este já é o seu plano atual.');
+      return;
+    }
+
+    if (planId === 'pro' || planId === 'plus') {
+      router.push(`/plans/${planId}${returnToQuery}`);
+      return;
     }
   };
 
   return (
     <div className="min-h-screen pb-24 md:pb-12 bg-background">
       <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
-        <div className="flex items-center gap-3 max-w-7xl mx-auto w-full">
-          <button 
-            onClick={() => router.back()}
-            className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
-          >
-            <Icon icon="arrow_back" size={24} />
-          </button>
-          <h1 className="text-lg font-semibold tracking-tight text-on-surface">
-            Planos
-          </h1>
+        <div className="flex items-center justify-between max-w-7xl mx-auto w-full">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={goBack}
+              className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
+            >
+              <Icon icon="arrow_back" size={24} />
+            </button>
+            <h1 className="text-lg font-semibold tracking-tight text-on-surface">
+              Planos
+            </h1>
+          </div>
+
+          {user && (
+            <button
+              onClick={() => router.push('/profile')}
+              className="hover:scale-105 transition-transform active:scale-95"
+              aria-label="Abrir perfil"
+            >
+              <Avatar
+                src={user.avatar}
+                name={user.name}
+                alt="Avatar"
+                className="w-10 h-10 border-2 border-primary shadow-sm"
+              />
+            </button>
+          )}
         </div>
       </header>
 
@@ -106,6 +160,11 @@ export default function PlansPage() {
 
         <div className="grid md:grid-cols-3 gap-4 md:gap-6">
           {plans.map((plan) => (
+            (() => {
+              const isCurrent = plan.id === currentPlan;
+              const ctaLabel = isCurrent ? 'Plano Atual' : plan.cta;
+              const isDisabled = isCurrent;
+              return (
             <div 
               key={plan.id}
               className={`relative bg-surface-container-lowest rounded-3xl p-6 flex flex-col ${
@@ -146,15 +205,18 @@ export default function PlansPage() {
 
               <button
                 onClick={() => handleSelectPlan(plan.id)}
+                disabled={isDisabled}
                 className={`w-full py-3 rounded-full font-bold text-sm transition-all ${
                   plan.popular
                     ? 'primary-gradient text-white shadow-lg shadow-primary/20'
                     : 'bg-surface-container-high text-on-surface hover:bg-surface-container-low'
-                }`}
+                } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
-                {plan.cta}
+                {ctaLabel}
               </button>
             </div>
+              );
+            })()
           ))}
         </div>
 
