@@ -113,7 +113,7 @@ export default function LoginPage() {
           </p>
           <div className="mt-8 flex justify-center gap-6">
             <span className="text-on-surface-variant/40 text-[10px] font-bold tracking-tighter uppercase">ZapZou</span>
-            <span className="text-on-surface-variant/40 text-[10px] font-bold tracking-tighter uppercase">© 2025</span>
+            <span className="text-on-surface-variant/40 text-[10px] font-bold tracking-tighter uppercase">© 2026</span>
           </div>
         </footer>
       </main>

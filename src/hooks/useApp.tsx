@@ -36,7 +36,7 @@ interface AppContextType {
   members: Member[];
   rateService: (id: string, stars: number, comment?: string) => Promise<void>;
   fetchServiceReviews: (serviceId: string, opts?: { force?: boolean }) => Promise<Review[]>;
-  addReview: (serviceId: string, stars: number, comment?: string) => Promise<void>;
+  addReview: (serviceId: string, stars: number, comment?: string) => Promise<Review | null>;
   loading: boolean;
   requestAffiliation: (envId: string) => Promise<void>;
   refreshMembership: () => Promise<void>;
@@ -108,21 +108,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         await fetchUserProfile(session.user.id, session.user.email || '', session.user);
       } else {
-        if (false) {
-          console.warn('User profile fetch failed (non-empty error):', fetchError);
-          setUser((prev) => ({
-            ...prev,
-            id: userId,
-            name: authProfile.name || prev?.name || 'UsuÃ¡rio',
-            email,
-            avatar: authProfile.avatar || prev?.avatar || '',
-            role: prev?.role || 'user',
-            plan: prev?.plan || 'free',
-            membershipStatus: prev?.membershipStatus || null,
-            membershipRole: prev?.membershipRole || null,
-          }));
-          return;
-        }
         setUser(null);
       }
       setLoading(false);
@@ -208,7 +193,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setUser((prev) => ({
             ...prev,
             id: userId,
-            name: authProfile.name || prev?.name || 'UsuÃ¡rio',
+            name: authProfile.name || prev?.name || 'Usuário',
             email,
             avatar: authProfile.avatar || prev?.avatar || '',
             role: prev?.role || 'user',
@@ -547,17 +532,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const approveService = async (id: string) => {};
   const rejectService = async (id: string) => {};
 
-  const withTimeout = async <T,>(promise: PromiseLike<T>, timeoutMs: number, message = 'Tempo esgotado') => {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    const timeout = new Promise<never>((_resolve, reject) => {
-      timeoutId = setTimeout(() => reject(new Error(message)), timeoutMs);
-    });
+  const withTimeout = async <T,>(input: PromiseLike<T>, timeoutMs: number, message = 'Tempo esgotado'): Promise<T> => {
+    const promise = Promise.resolve(input);
+    return await new Promise<T>((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        // Evita rejeições "tardias" sem handler após timeout
+        void promise.catch(() => {});
+        reject(new Error(message));
+      }, timeoutMs);
 
-    try {
-      return await Promise.race([Promise.resolve(promise), timeout]);
-    } finally {
-      if (timeoutId) clearTimeout(timeoutId);
-    }
+      promise.then(
+        (value) => {
+          clearTimeout(timeoutId);
+          resolve(value);
+        },
+        (err) => {
+          clearTimeout(timeoutId);
+          reject(err);
+        }
+      );
+    });
   };
 
   const isMissingColumnError = (err: any, column: string) => {
@@ -591,64 +585,86 @@ export function AppProvider({ children }: { children: ReactNode }) {
     serviceId: string,
     opts?: { force?: boolean }
   ): Promise<Review[]> => {
-    if (!opts?.force && serviceReviews[serviceId]) {
-      return serviceReviews[serviceId];
-    }
+    try {
+      if (!opts?.force && serviceReviews[serviceId]) {
+        return serviceReviews[serviceId];
+      }
 
-    const includeAvatarColumn = reviewsHasUserAvatarColumnRef.current !== false;
-    let { data, error } = (await withTimeout(
-      supabase
-        .from('reviews')
-        .select(
-          includeAvatarColumn
-            ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at'
-            : 'id, service_id, user_id, user_name, stars, comment, created_at'
-        )
-        .eq('service_id', serviceId)
-        .order('created_at', { ascending: false }),
-      15000,
-      'Tempo esgotado ao carregar avaliações'
-    )) as any;
+      const includeAvatarColumn = reviewsHasUserAvatarColumnRef.current !== false;
+      let data: any;
+      let error: any;
+      try {
+        ({ data, error } = (await withTimeout(
+          supabase
+            .from('reviews')
+            .select(
+              includeAvatarColumn
+                ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at'
+                : 'id, service_id, user_id, user_name, stars, comment, created_at'
+            )
+            .eq('service_id', serviceId)
+            .order('created_at', { ascending: false })
+            .limit(50),
+          25000,
+          'Tempo esgotado ao carregar avaliações'
+        )) as any);
+      } catch (err) {
+        console.warn('fetchServiceReviews failed (exception/timeout):', err);
+        return serviceReviews[serviceId] || [];
+      }
 
-    if (error && isMissingColumnError(error, 'user_avatar')) {
-      reviewsHasUserAvatarColumnRef.current = false;
-      ({ data, error } = (await withTimeout(
-        supabase
-          .from('reviews')
-          .select('id, service_id, user_id, user_name, stars, comment, created_at')
-          .eq('service_id', serviceId)
-          .order('created_at', { ascending: false }),
-        15000,
-        'Tempo esgotado ao carregar avaliações'
-      )) as any);
-    }
+      if (error && isMissingColumnError(error, 'user_avatar')) {
+        reviewsHasUserAvatarColumnRef.current = false;
+        try {
+          ({ data, error } = (await withTimeout(
+            supabase
+              .from('reviews')
+              .select('id, service_id, user_id, user_name, stars, comment, created_at')
+              .eq('service_id', serviceId)
+              .order('created_at', { ascending: false })
+              .limit(50),
+            25000,
+            'Tempo esgotado ao carregar avaliações'
+          )) as any);
+        } catch (err) {
+          console.warn('fetchServiceReviews failed (exception/timeout):', err);
+          return serviceReviews[serviceId] || [];
+        }
+      }
 
-    if (!error && includeAvatarColumn) {
-      reviewsHasUserAvatarColumnRef.current = true;
-    }
+      if (!error && includeAvatarColumn) {
+        reviewsHasUserAvatarColumnRef.current = true;
+      }
 
-    if (!error && data) {
-      const reviews = data.map(r => ({
-        id: r.id,
-        service_id: r.service_id,
-        user_id: r.user_id,
-        userName: r.user_name,
-        user_avatar: r.user_avatar,
-        stars: r.stars,
-        comment: r.comment,
-        created_at: r.created_at,
-      }));
-      setServiceReviews(prev => ({ ...prev, [serviceId]: reviews }));
-      return reviews;
-    }
+      if (!error && Array.isArray(data)) {
+        const reviews = data.map((r) => ({
+          id: r.id,
+          service_id: r.service_id,
+          user_id: r.user_id,
+          userName: r.user_name,
+          user_avatar: r.user_avatar,
+          stars: r.stars,
+          comment: r.comment,
+          created_at: r.created_at,
+        }));
+        setServiceReviews((prev) => ({ ...prev, [serviceId]: reviews }));
+        return reviews;
+      }
 
-    if (error) {
-      console.warn('fetchServiceReviews failed:', error);
+      if (error) {
+        console.warn('fetchServiceReviews failed:', error);
+      } else if (data) {
+        console.warn('fetchServiceReviews returned unexpected payload:', data);
+      }
+
+      return [];
+    } catch (err) {
+      console.warn('fetchServiceReviews failed (unexpected):', err);
+      return serviceReviews[serviceId] || [];
     }
-    return [];
   };
 
-  const addReview = async (serviceId: string, stars: number, comment?: string) => {
+  const addReview = async (serviceId: string, stars: number, comment?: string): Promise<Review | null> => {
     if (!user) throw new Error('User must be logged in');
 
     const basePayload = {
@@ -658,24 +674,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
       stars,
       comment: comment || '',
     };
-    const tryInsert = (payload: typeof basePayload & { user_avatar?: string }) =>
-      supabase.from('reviews').insert(payload).select('id').single();
+    const selectColumns = (includeAvatar: boolean) =>
+      includeAvatar
+        ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at'
+        : 'id, service_id, user_id, user_name, stars, comment, created_at';
+    const tryInsert = (payload: typeof basePayload & { user_avatar?: string }, includeAvatar: boolean) =>
+      supabase.from('reviews').insert(payload).select(selectColumns(includeAvatar)).single();
 
     let insertResult = await withTimeout(
-      tryInsert(reviewsHasUserAvatarColumnRef.current === false ? basePayload : { ...basePayload, user_avatar: user.avatar }),
+      tryInsert(
+        reviewsHasUserAvatarColumnRef.current === false ? basePayload : { ...basePayload, user_avatar: user.avatar },
+        reviewsHasUserAvatarColumnRef.current !== false
+      ),
       15000,
       'Tempo esgotado ao enviar avaliação'
     );
 
-    let { error } = insertResult as { error: any };
+    let { data, error } = insertResult as { data: any; error: any };
     if (error && isMissingColumnError(error, 'user_avatar')) {
       reviewsHasUserAvatarColumnRef.current = false;
       insertResult = await withTimeout(
-        tryInsert(basePayload),
+        tryInsert(basePayload, false),
         15000,
         'Tempo esgotado ao enviar avaliação'
       );
-      ({ error } = insertResult as { error: any });
+      ({ data, error } = insertResult as { data: any; error: any });
     }
 
     if (!error && reviewsHasUserAvatarColumnRef.current !== false) {
@@ -687,15 +710,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
       throw toUserFriendlyReviewError(error);
     }
 
-    // Invalida cache para forçar refetch com a avaliação recém-criada
-    setServiceReviews(prev => {
-      const next = { ...prev };
-      delete next[serviceId];
-      return next;
-    });
+    const createdReview: Review | null = data
+      ? {
+          id: data.id,
+          service_id: data.service_id,
+          user_id: data.user_id,
+          userName: data.user_name,
+          user_avatar: data.user_avatar ?? user.avatar,
+          stars: data.stars,
+          comment: data.comment,
+          created_at: data.created_at,
+        }
+      : null;
+
+    // Atualiza o cache local imediatamente para evitar refetch bloqueante
+    if (createdReview) {
+      setServiceReviews(prev => {
+        const current = Array.isArray(prev[serviceId]) ? prev[serviceId] : [];
+        const nextForService = [createdReview, ...current.filter(r => r.id !== createdReview.id)];
+        return { ...prev, [serviceId]: nextForService };
+      });
+    } else {
+      setServiceReviews(prev => {
+        const next = { ...prev };
+        delete next[serviceId];
+        return next;
+      });
+    }
 
     // Não bloqueia o fluxo do usuário caso a atualização do rating falhe/trave
     void withTimeout(updateServiceRating(serviceId), 8000).catch(() => {});
+
+    return createdReview;
   };
 
   const updateServiceRating = async (serviceId: string) => {

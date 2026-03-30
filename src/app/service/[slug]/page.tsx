@@ -69,7 +69,7 @@ export default function ServiceDetailPage() {
 
   useEffect(() => {
     if (service?.id) {
-      fetchServiceReviews(service.id).then(setReviews);
+      void fetchServiceReviews(service.id).then(setReviews).catch(() => setReviews([]));
     }
   }, [service?.id]);
 
@@ -106,10 +106,16 @@ export default function ServiceDetailPage() {
     if (!service?.id || !user) return;
     setIsSubmittingReview(true);
     try {
-      await addReview(service.id, stars, comment);
-      const updatedReviews = await fetchServiceReviews(service.id, { force: true });
-      setReviews(updatedReviews);
+      const created = await addReview(service.id, stars, comment);
+      if (created) {
+        setReviews((prev) => [created, ...prev.filter((r) => r.id !== created.id)]);
+      }
       setShowReviewForm(false);
+
+      // Atualiza em segundo plano (não quebra o fluxo se der timeout/erro)
+      void fetchServiceReviews(service.id, { force: true })
+        .then(setReviews)
+        .catch(() => {});
     } finally {
       setIsSubmittingReview(false);
     }
