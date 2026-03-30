@@ -104,18 +104,18 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <footer className="mt-12 text-center px-4">
-          <p className="text-on-surface-variant text-[11px] leading-relaxed max-w-[280px]">
-            Ao continuar, você concorda com nossos{' '}
-            <Link className="text-primary font-semibold hover:underline" href="/terms">Termos de Uso</Link>{' '}
-            e reconhece que leu nossa{' '}
-            <Link className="text-primary font-semibold hover:underline" href="/privacy">Política de Privacidade</Link>.
-          </p>
-          <div className="mt-8 flex justify-center gap-6">
-            <span className="text-on-surface-variant/40 text-[10px] font-bold tracking-tighter uppercase">ZapZou</span>
-            <span className="text-on-surface-variant/40 text-[10px] font-bold tracking-tighter uppercase">© 2026</span>
-          </div>
-        </footer>
+         <footer className="mt-12 text-center px-4">
+           <p className="text-on-surface-variant text-[11px] leading-relaxed max-w-[280px]">
+             Ao continuar, você concorda com nossos{' '}
+             <Link className="text-primary font-semibold hover:underline" href="/terms">Termos de Uso</Link>{' '}
+             e reconhece que leu nossa{' '}
+             <Link className="text-primary font-semibold hover:underline" href="/privacy">Política de Privacidade</Link>.
+           </p>
+           <div className="mt-8 flex justify-center gap-6">
+             <span className="text-on-surface-variant/40 text-[10px] font-bold tracking-tighter uppercase">ZapZou © 2026</span>
+           </div>
+           <span className="text-on-surface-variant/40 text-[10px] font-bold tracking-tighter">Desenvolvido por HM Technology</span>
+         </footer>
       </main>
     </div>
   );
