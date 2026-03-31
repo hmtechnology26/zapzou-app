@@ -14,6 +14,8 @@
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   
   body {
@@ -23,6 +25,35 @@
     overflow-x: hidden;
     touch-action: manipulation;
     margin: 0;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html, body {
+    touch-action: pan-x pan-y;
+    zoom: 1;
+  }
+
+  @media screen and (max-width: 768px) {
+    html, body {
+      touch-action: manipulation;
+      zoom: normal;
+    }
+    
+    * {
+      touch-action: manipulation;
+    }
+    
+    input, textarea, select {
+      font-size: 16px !important;
+    }
+  }
+
+  @media (pointer: coarse) {
+    html, body {
+      touch-action: manipulation;
+    }
   }
 }
 
