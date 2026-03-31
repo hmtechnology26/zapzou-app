@@ -3,7 +3,6 @@ import 'react-material-symbols/rounded';
 import type { Metadata } from 'next';
 import { Providers } from './providers';
 import ProtectedLayout from './layout-client';
-import { ServiceWorkerCleanup } from './service-worker-cleanup';
 
 export const metadata: Metadata = {
   title: 'ZapZou - Marketplace de Serviços',
@@ -18,7 +17,10 @@ export const metadata: Metadata = {
     userScalable: false,
     viewportFit: 'cover',
   },
+  manifest: '/manifest.json',
 };
+
+export const dynamic = 'force-dynamic';
 
 export default function RootLayout({
   children,
@@ -36,7 +38,6 @@ export default function RootLayout({
         <Providers>
           <ProtectedLayout>{children}</ProtectedLayout>
         </Providers>
-        <ServiceWorkerCleanup />
       </body>
     </html>
   );
