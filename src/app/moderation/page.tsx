@@ -220,26 +220,30 @@ export default function ModerationPage() {
                         <Icon icon="person" size={24} className="text-on-surface-variant" />
                       )}
                     </div>
-                    <div className="flex flex-col">
-                      <p className="font-bold text-on-surface capitalize">{member.name}</p>
-                      <p className="text-xs text-on-surface-variant break-all">
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <p className="font-bold text-on-surface capitalize truncate text-sm">{member.name}</p>
+                      <p className="text-[11px] text-on-surface-variant truncate opacity-80 leading-tight">
                         {member.email || 'Email indisponível'}
                       </p>
-                      <p className="text-xs text-on-surface-variant flex items-center gap-1">
-                        <Icon icon="event" size={12} className="opacity-70" />
-                        <span className="font-medium text-xs">Aguardando aprovação</span>
-                      </p>
-                      {member.date ? (
-                        <p className="text-[11px] text-on-surface-variant/80">{member.date}</p>
-                      ) : null}
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="flex items-center gap-1 bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-md border border-amber-100">
+                          <Icon icon="hourglass_empty" size={10} />
+                          Análise
+                        </span>
+                        {member.date && (
+                          <span className="text-[10px] text-on-surface-variant/60 font-medium">
+                            {member.date}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 shrink-0 pl-2">
+                  <div className="flex items-center gap-1.5 shrink-0 pl-3 border-l border-outline-variant/10 ml-3">
                     <button
                       onClick={() => handleReject(member.id)}
                       disabled={actionLoading === member.id}
-                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-error/10 text-error transition-colors disabled:opacity-50"
+                      className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-error/10 text-error transition-all active:scale-95 disabled:opacity-50"
                       title="Recusar"
                     >
                       <Icon icon="close" size={20} />
@@ -247,16 +251,11 @@ export default function ModerationPage() {
                     <button
                       onClick={() => handleApprove(member.id)}
                       disabled={actionLoading === member.id}
-                      className="px-4 h-10 flex items-center gap-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-full font-bold text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50 border border-primary/20"
+                      className="px-4 h-10 flex items-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700 rounded-full font-black text-xs uppercase tracking-tight transition-all shadow-md active:scale-95 disabled:opacity-50"
                     >
-                      {actionLoading === member.id ? (
-                        <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
-                      ) : (
-                        <>
-                          <Icon icon="check" size={18} />
-                          Aprovar
-                        </>
-                      )}
+                      <Icon icon="check" size={18} weight={700} />
+                      <span className="hidden sm:inline">Aprovar</span>
+                      <span className="sm:hidden">OK</span>
                     </button>
                   </div>
                 </div>

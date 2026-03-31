@@ -310,47 +310,85 @@ export default function PlacesPage() {
                   ? backendFavoritePlaces.some((fav) => fav.id === place.id)
                   : favorites.includes(place.id);
 
+                const isCompact = showOnlyFavorites;
+
                 return (
                   <div 
                     key={place.id}
                     onClick={() => handleSelectEnvironment(place.displayName?.text?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || place.id, place)}
-                    className="group/item p-5 rounded-[2rem] flex flex-col gap-4 cursor-pointer bg-surface-container-lowest hover:bg-white hover:shadow-2xl hover:shadow-primary/5 border border-outline-variant/10 transition-all duration-500 active:scale-[0.98] relative overflow-hidden"
+                    className={`group/item rounded-[2.5rem] flex items-center gap-4 cursor-pointer bg-surface-container-lowest hover:bg-white hover:shadow-2xl hover:shadow-primary/5 border border-outline-variant/10 transition-all duration-500 active:scale-[0.98] relative overflow-hidden ${
+                      isCompact ? 'p-3 pr-5' : 'p-5 flex-col gap-4'
+                    }`}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center group-hover/item:scale-110 transition-transform duration-500">
-                        <Icon icon={selectedCategory === 'church' ? 'church' : 'domain'} weight={400} size={28} className="text-primary" />
+                    {!isCompact && (
+                      <div className="flex items-start justify-between">
+                        <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center group-hover/item:scale-110 transition-transform duration-500">
+                          <Icon icon={selectedCategory === 'church' ? 'church' : 'domain'} weight={400} size={28} className="text-primary" />
+                        </div>
+                        <button 
+                          onClick={(e) => void handleToggleFavoriteClick(place, e)}
+                          className="p-2.5 rounded-full bg-surface-container-high hover:bg-primary/10 transition-colors shadow-sm group/fav"
+                        >
+                          <Icon 
+                            icon={isFavorite ? 'star' : 'star_border'} 
+                            size={20} 
+                            weight={700}
+                            className={isFavorite ? 'text-primary scale-110' : 'text-on-surface-variant group-hover/fav:text-primary'}
+                          />
+                        </button>
                       </div>
-                      <button 
-                        onClick={(e) => void handleToggleFavoriteClick(place, e)}
-                        className="p-2.5 rounded-full bg-surface-container-high hover:bg-primary/10 transition-colors shadow-sm group/fav"
-                      >
-                        <Icon 
-                          icon={isFavorite ? 'star' : 'star_border'} 
-                          size={20} 
-                          weight={700}
-                          className={isFavorite ? 'text-primary scale-110' : 'text-on-surface-variant group-hover/fav:text-primary'}
-                        />
-                      </button>
-                    </div>
+                    )}
 
-                    <div className="flex-1">
-                      <h3 className="font-black text-on-surface text-lg leading-tight group-hover/item:text-primary transition-colors">{place.displayName?.text}</h3>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
+                    {isCompact && (
+                      <div className="w-16 h-16 rounded-3xl bg-primary/5 flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform duration-500">
+                        <Icon icon={selectedCategory === 'church' ? 'church' : 'domain'} weight={400} size={32} className="text-primary" />
+                      </div>
+                    )}
+
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-black text-on-surface leading-tight group-hover/item:text-primary transition-colors truncate ${
+                        isCompact ? 'text-base' : 'text-lg'
+                      }`}>{place.displayName?.text}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[9px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
                            {getTypeLabel(place.primaryType)}
                         </span>
                       </div>
-                      <p className="text-xs text-on-surface-variant font-medium line-clamp-2 mt-3 leading-relaxed opacity-70 group-hover/item:opacity-100 transition-opacity">
-                        {place.formattedAddress}
-                      </p>
+                      {!isCompact && (
+                        <p className="text-xs text-on-surface-variant font-medium line-clamp-2 mt-3 leading-relaxed opacity-70 group-hover/item:opacity-100 transition-opacity">
+                          {place.formattedAddress}
+                        </p>
+                      )}
+                      {isCompact && (
+                        <p className="text-[11px] text-on-surface-variant/60 font-medium truncate mt-0.5">
+                          {place.formattedAddress}
+                        </p>
+                      )}
                     </div>
 
-                    <div className="mt-2 pt-4 border-t border-outline-variant/5 flex items-center justify-between">
-                       <span className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-tighter">Tocar para ver serviços</span>
-                       <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center group-hover/item:bg-primary group-hover/item:text-white transition-all transform group-hover/item:translate-x-1">
-                          <Icon icon="arrow_forward" size={16} weight={700} />
-                       </div>
-                    </div>
+                    {!isCompact && (
+                      <div className="mt-2 pt-4 border-t border-outline-variant/5 flex items-center justify-between">
+                         <span className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-tighter">Tocar para ver serviços</span>
+                         <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center group-hover/item:bg-primary group-hover/item:text-white transition-all transform group-hover/item:translate-x-1">
+                            <Icon icon="arrow_forward" size={16} weight={700} />
+                         </div>
+                      </div>
+                    )}
+
+                    {isCompact && (
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={(e) => void handleToggleFavoriteClick(place, e)}
+                          className="p-3 rounded-full bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors group/del"
+                          title="Remover dos favoritos"
+                        >
+                          <Icon icon="delete" size={20} weight={400} />
+                        </button>
+                        <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center group-hover/item:bg-primary group-hover/item:text-white transition-all">
+                           <Icon icon="chevron_right" size={20} weight={700} />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
