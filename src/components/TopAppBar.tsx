@@ -38,10 +38,11 @@ export function TopAppBar({
     setMounted(true);
   }, []);
   
-  const tabPaths = ['/', '/places', '/post', '/my-services', '/profile'];
+  const tabPaths = ['/', '/places', '/post', '/meus-anuncios', '/profile'];
   const userAvatar = mounted ? (propAvatar || user?.avatar) : null;
   const onAvatarClick = propAvatarClick || (() => router.push('/profile'));
   const currentPath = pathname ?? '';
+  const canManageMembers = (user?.managedEnvironmentIds?.length ?? 0) > 0;
 
   const finalRightAction = onRightAction || (() => {
     if (!user) {
@@ -110,7 +111,7 @@ export function TopAppBar({
             >
               <Icon icon={rightAction} weight={400} grade={0} size={24} />
             </button>
-            {user?.membershipRole === 'moderator' && (
+            {canManageMembers && (
               <button
                 onClick={() => router.push('/moderation')}
                 className={`hover:bg-slate-100/50 dark:hover:bg-slate-800/50 rounded-full transition-colors p-2 active:scale-95 duration-200 ${textColor}`}

@@ -12,10 +12,9 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { path: '/', label: 'Início', icon: 'home' },
+  { path: '/', label: 'Serviços', icon: 'home' },
   { path: '/places', label: 'Ambientes', icon: 'explore' },
-  { path: '/post', label: 'Publicar', icon: 'add_circle' },
-  { path: '/my-services', label: 'Meus Serviços', icon: 'storefront' },
+  { path: '/meus-anuncios', label: 'Meus Anúncios', icon: 'storefront' },
   { path: '/profile', label: 'Perfil', icon: 'person' },
 ];
 
@@ -26,28 +25,42 @@ export function BottomNav() {
   const { user, selectedEnvironments } = useApp();
 
   const handleNavClick = (e: React.MouseEvent, itemPath: string) => {
-    // Publicar - precisa estar logado e ter ambientes
     if (itemPath === '/post') {
       e.preventDefault();
+
       if (!user) {
         router.push('/login');
         return;
       }
+
       if (selectedEnvironments.length === 0) {
         router.push('/places');
         return;
       }
+
       open();
     }
-    // Meus Serviços e Perfil - precisa estar logado
-    if ((itemPath === '/my-services' || itemPath === '/profile') && !user) {
+
+    if ((itemPath === '/meus-anuncios' || itemPath === '/profile') && !user) {
       e.preventDefault();
       router.push('/login');
     }
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 bg-gray-300/90 backdrop-blur-xl border-t border-slate-200/10 shadow-glass-lg rounded-t-3xl flex justify-around items-center px-4 py-1 pb-safe">
+    <nav
+      className="
+        fixed bottom-0 left-0 right-0 z-[60]
+        w-full
+        min-h-[72px]
+        bg-white/95 backdrop-blur-xl
+        border-t border-slate-200/70
+        shadow-[0_-8px_30px_rgba(0,0,0,0.08)]
+        rounded-t-3xl
+        flex justify-around items-center
+        px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]
+      "
+    >
       {navItems.map((item) => {
         const isActive = pathname === item.path;
         const isCenter = item.path === '/post';
@@ -57,31 +70,34 @@ export function BottomNav() {
             key={item.path}
             href={item.path}
             onClick={(e) => handleNavClick(e, item.path)}
-            className={`flex flex-col items-center justify-center px-4 py-1 transition-all active:scale-90 duration-150 ${
-              isCenter 
-                ? 'text-primary' 
-                : isActive 
-                  ? 'text-primary' 
+            className={`flex min-w-0 flex-col items-center justify-center px-3 py-1 transition-all active:scale-90 duration-150 ${
+              isCenter
+                ? 'text-primary'
+                : isActive
+                  ? 'text-primary'
                   : 'text-slate-500'
             }`}
           >
             {isCenter ? (
-              <Icon 
-                icon="add_circle" 
-                weight={400} 
-                grade={0} 
+              <Icon
+                icon="add_circle"
+                weight={400}
+                grade={0}
                 size={32}
                 className="text-primary"
               />
             ) : (
-              <Icon 
+              <Icon
                 icon={item.icon}
                 weight={isActive ? 400 : 300}
                 grade={isActive ? 0 : -25}
                 size={24}
               />
             )}
-            <span className="text-[10px] font-medium tracking-wide mt-1">{item.label}</span>
+
+            <span className="mt-1 text-[10px] font-medium tracking-wide text-center leading-tight">
+              {item.label}
+            </span>
           </a>
         );
       })}

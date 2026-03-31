@@ -5,11 +5,13 @@ import { MaterialSymbol as Icon } from "react-material-symbols";
 import { TopAppBar } from "@/components/TopAppBar";
 import { Avatar } from "@/components/Avatar";
 import { useApp } from "@/hooks/useApp";
+import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, services, setUser, loading } = useApp();
+  const { user, services, setUser, loading, selectedEnvironments, setSelectedEnvironment } = useApp();
+  const canManageMembers = (user?.managedEnvironmentIds?.length ?? 0) > 0;
 
   useEffect(() => {
     if (!loading && !user) {
@@ -153,8 +155,23 @@ export default function ProfilePage() {
             <Icon icon="chevron_right" weight={400} grade={0} size={24} />
           </button>
           <button
-            onClick={() => router.push("/my-services")}
-            className="w-full flex items-center gap-4 p-4 bg-surface-container-lowest rounded-xl"
+            onClick={() => {
+              if (!canManageMembers) return;
+              const targetEnvironmentId = user?.managedEnvironmentIds?.[0];
+              if (targetEnvironmentId) {
+                const targetEnvironment = selectedEnvironments.find((env) => env.id === targetEnvironmentId);
+                if (targetEnvironment) {
+                  setSelectedEnvironment(targetEnvironment);
+                }
+              }
+              router.push("/moderation");
+            }}
+            disabled={!canManageMembers}
+            className={`w-full flex items-center gap-4 p-4 bg-surface-container-lowest rounded-xl transition-all ${
+              canManageMembers
+                ? "hover:bg-surface-container-low active:scale-[0.99]"
+                : "opacity-50 cursor-not-allowed"
+            }`}
           >
             <Icon
               icon="storefront"
@@ -163,8 +180,13 @@ export default function ProfilePage() {
               size={24}
               className="text-primary"
             />
-            <span className="flex-1 text-left font-medium">Meus Serviços</span>
-            <Icon icon="chevron_right" weight={400} grade={0} size={24} />
+            <span className="flex-1 text-left font-medium">Gerenciar Membros</span>
+            <Icon
+              icon={canManageMembers ? "chevron_right" : "lock"}
+              weight={400}
+              grade={0}
+              size={24}
+            />
           </button>
           {/* <button onClick={() => router.push('/members')} className="w-full flex items-center gap-4 p-4 bg-surface-container-lowest rounded-xl">
             <Icon icon="group" weight={400} grade={0} size={24} className="text-primary" />
@@ -177,7 +199,8 @@ export default function ProfilePage() {
             <Icon icon="chevron_right" weight={400} grade={0} size={24} />
           </button> */}
           <button
-            onClick={() => {
+            onClick={async () => {
+              await supabase.auth.signOut();
               setUser(null);
               router.push("/login");
             }}

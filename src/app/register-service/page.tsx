@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -6,6 +6,7 @@ import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
 import { supabase } from '@/lib/supabase';
+import { getEnvironmentAvailabilityState } from '@/lib/environment-rules';
 
 const categories = ['Alimentação', 'Limpeza', 'Manutenção', 'Pet Sitting', 'Beleza', 'Tecnologia', 'Outros'];
 
@@ -208,11 +209,32 @@ function RegisterServiceContent() {
         return item;
       }));
 
+      let effectiveMembershipStatus = user?.membershipStatus ?? null;
+      if (selectedEnvironment?.id && user?.id) {
+        const { data: membershipData, error: membershipError } = await supabase
+          .from('environment_members')
+          .select('status')
+          .eq('user_id', user.id)
+          .eq('environment_id', selectedEnvironment.id)
+          .maybeSingle();
+
+        if (!membershipError && membershipData?.status) {
+          effectiveMembershipStatus = membershipData.status;
+        }
+      }
+
+      const environmentAvailability = getEnvironmentAvailabilityState(selectedEnvironment ?? undefined, {
+        membershipStatus: effectiveMembershipStatus,
+      });
+      const nextPublicationStatus = existingService?.status || (environmentAvailability.status === 'pending' ? 'pending' : 'active');
+      const nextIsActive = existingService ? Boolean(existingService.isActive) : nextPublicationStatus === 'active';
+
       const serviceData = {
         ...form,
         image: finalImage,
         WhatsApp: form.WhatsApp ? `55${form.WhatsApp}` : '',
-        isActive: isActive,
+        isActive: nextIsActive,
+        status: nextPublicationStatus,
         environmentId: selectedEnvironment?.id || '',
         menu: menuItemsWithImages.map((item, idx) => ({ ...item, id: item.id || `menu-${Date.now()}-${idx}` })),
       };
@@ -226,7 +248,8 @@ function RegisterServiceContent() {
       } else {
         await addService(serviceData);
       }
-      router.push('/');
+      router.replace('/');
+      router.refresh();
     } catch (err: any) {
       console.error('Submit error:', err);
       setErrorMsg(err.message || 'Erro ao publicar serviço. Verifique seus limites de plano ou distância do local.');
@@ -313,10 +336,9 @@ function RegisterServiceContent() {
     }
   };
 
-  const isChurch = selectedEnvironment?.type === 'church';
-  const memStatus = user?.membershipStatus; // 'active', 'pending', or null
-
-  const isBlocked = isChurch && memStatus !== 'active';
+  const environmentAvailability = getEnvironmentAvailabilityState(selectedEnvironment ?? undefined, {
+    membershipStatus: user?.membershipStatus ?? null,
+  });
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-background">
@@ -374,34 +396,9 @@ function RegisterServiceContent() {
           </div>
         )}
 
-        {isBlocked ? (
-           <div className="flex flex-col items-center justify-center py-10 px-4 text-center bg-surface-container-low rounded-2xl">
-              <Icon icon="lock" size={48} className="text-primary mb-4" />
-              <h2 className="text-xl font-bold text-on-surface mb-2">Restrito para Membros</h2>
-              
-              {memStatus === 'pending' ? (
-                 <>
-                   <p className="text-on-surface-variant mb-6 text-sm">
-                     Sua afiliação neste ambiente está **em análise pela liderança**. Aguarde a aprovação para publicar seus serviços.
-                   </p>
-                   <button className="px-6 py-3 bg-slate-200 text-slate-500 rounded-full font-bold cursor-not-allowed">
-                      Aguardando Liderança
-                   </button>
-                 </>
-              ) : (
-                 <>
-                   <p className="text-on-surface-variant mb-6 text-sm">
-                     Criar anúncios em <b>{selectedEnvironment?.name}</b> requer afiliação na comunidade. Deseja enviar um pedido de entrada?
-                   </p>
-                   {errorMsg && <p className="text-error text-sm mb-4">{errorMsg}</p>}
-                   <button onClick={handleRequestAffiliation} className="px-6 py-3 primary-gradient text-white rounded-full font-bold shadow-lg active:scale-95 transition-all">
-                      Solicitar Afiliação
-                   </button>
-                 </>
-              )}
-           </div>
-        ) : (
+        {selectedEnvironment && (
           <div className="space-y-4 animate-in fade-in duration-500">
+            <div className="space-y-4">
             {errorMsg && (
               <div className="bg-error/10 border border-error/20 p-4 rounded-xl text-error text-sm font-medium">
                 <Icon icon="error" size={18} className="inline mr-2" />
@@ -582,6 +579,7 @@ function RegisterServiceContent() {
               {existingService ? 'Salvar Alterações' : 'Cadastrar Serviço'}
             </button>
           </div>
+        </div>
         )}
 
         {/* Modal Options */}
@@ -663,3 +661,4 @@ export default function RegisterServicePage() {
     </Suspense>
   );
 }
+

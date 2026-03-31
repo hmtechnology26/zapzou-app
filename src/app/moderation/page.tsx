@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/Icon';
 import { useApp } from '@/hooks/useApp';
@@ -8,39 +8,61 @@ import { supabase } from '@/lib/supabase';
 import { TopAppBar } from '@/components/TopAppBar';
 import { BottomNav } from '@/components/BottomNav';
 
+type PendingMember = {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  avatar: string;
+  date: string;
+};
+
 export default function ModerationPage() {
   const router = useRouter();
-  const { user, selectedEnvironment } = useApp();
-  const [pendingMembers, setPendingMembers] = useState<any[]>([]);
+  const { user, selectedEnvironment, selectedEnvironments, setSelectedEnvironment } = useApp();
+  const [pendingMembers, setPendingMembers] = useState<PendingMember[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [accessLoading, setAccessLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/login');
+  const fetchPendingMembers = useCallback(async () => {
+    if (!selectedEnvironment?.id) {
+      setPendingMembers([]);
+      setLoadingMembers(false);
       return;
     }
-    if (user.membershipRole !== 'moderator') {
-      router.push('/');
-      return;
-    }
 
-    fetchPendingMembers();
-  }, [user, selectedEnvironment]);
-
-  const fetchPendingMembers = async () => {
-    if (!selectedEnvironment?.id) return;
     setLoadingMembers(true);
-    
+
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+      'get_pending_environment_members',
+      { p_environment_id: selectedEnvironment.id },
+    );
+
+    if (!rpcError && Array.isArray(rpcData)) {
+      setPendingMembers(
+        rpcData.map((member: any) => ({
+          id: member.id,
+          userId: member.user_id,
+          name: member.name || 'Membro',
+          email: member.email || '',
+          avatar: member.avatar_url || '',
+          date: member.created_at ? new Date(member.created_at).toLocaleDateString('pt-BR') : '',
+        })),
+      );
+      setLoadingMembers(false);
+      return;
+    }
+
     const { data, error } = await supabase
       .from('environment_members')
       .select(`
-        id, 
-        user_id, 
+        id,
+        user_id,
         created_at,
         user_public_profiles (
-           name,
-           avatar_url
+          name,
+          avatar_url
         )
       `)
       .eq('environment_id', selectedEnvironment.id)
@@ -48,18 +70,72 @@ export default function ModerationPage() {
       .order('created_at', { ascending: false });
 
     if (data && !error) {
-      setPendingMembers(data.map((m: any) => ({
-        id: m.id,
-        userId: m.user_id,
-        name: m.user_public_profiles?.name || 'Membro',
-        avatar: m.user_public_profiles?.avatar_url || '',
-        date: new Date(m.created_at).toLocaleDateString('pt-BR')
-      })));
+      setPendingMembers(
+        data.map((member: any) => ({
+          id: member.id,
+          userId: member.user_id,
+          name: member.user_public_profiles?.name || 'Membro',
+          email: '',
+          avatar: member.user_public_profiles?.avatar_url || '',
+          date: member.created_at ? new Date(member.created_at).toLocaleDateString('pt-BR') : '',
+        })),
+      );
     } else {
-      console.error(error);
+      console.error(rpcError || error);
+      setPendingMembers([]);
     }
+
     setLoadingMembers(false);
-  };
+  }, [selectedEnvironment?.id]);
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    if (!selectedEnvironment?.id) {
+      setPendingMembers([]);
+      setLoadingMembers(false);
+      setAccessLoading(false);
+      return;
+    }
+
+    const managedEnvironmentIds = user?.managedEnvironmentIds || [];
+    if (managedEnvironmentIds.length > 0 && !managedEnvironmentIds.includes(selectedEnvironment.id)) {
+      const targetEnvironment = selectedEnvironments.find((env) => managedEnvironmentIds.includes(env.id));
+      if (targetEnvironment) {
+        setSelectedEnvironment(targetEnvironment);
+        return;
+      }
+    }
+
+    const verifyAccess = async () => {
+      setAccessLoading(true);
+
+      const { data, error } = await supabase
+        .from('environment_members')
+        .select('role, status')
+        .eq('user_id', user.id)
+        .eq('environment_id', selectedEnvironment.id)
+        .maybeSingle();
+
+      const canManage = !error && data?.role === 'moderator' && data?.status === 'active';
+
+      if (!canManage) {
+        setPendingMembers([]);
+        setLoadingMembers(false);
+        setAccessLoading(false);
+        router.replace('/profile');
+        return;
+      }
+
+      await fetchPendingMembers();
+      setAccessLoading(false);
+    };
+
+    void verifyAccess();
+  }, [user, selectedEnvironment?.id, selectedEnvironments, fetchPendingMembers, router, setSelectedEnvironment]);
 
   const handleApprove = async (memberId: string) => {
     setActionLoading(memberId);
@@ -67,9 +143,9 @@ export default function ModerationPage() {
       .from('environment_members')
       .update({ status: 'active' })
       .eq('id', memberId);
-      
+
     if (!error) {
-      setPendingMembers(prev => prev.filter(m => m.id !== memberId));
+      setPendingMembers((prev) => prev.filter((member) => member.id !== memberId));
     } else {
       alert('Erro ao aprovar membro: ' + error.message);
     }
@@ -77,15 +153,16 @@ export default function ModerationPage() {
   };
 
   const handleReject = async (memberId: string) => {
-    if (!window.confirm("Deseja realmente recusar este pedido? O registro será excluído.")) return;
+    if (!window.confirm('Deseja realmente recusar este pedido? O registro será excluído.')) return;
+
     setActionLoading(memberId);
     const { error } = await supabase
       .from('environment_members')
       .delete()
       .eq('id', memberId);
-      
+
     if (!error) {
-      setPendingMembers(prev => prev.filter(m => m.id !== memberId));
+      setPendingMembers((prev) => prev.filter((member) => member.id !== memberId));
     } else {
       alert('Erro ao recusar membro: ' + error.message);
     }
@@ -94,12 +171,12 @@ export default function ModerationPage() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <TopAppBar 
-        title="Moderação" 
-        showBack 
-        onBack={() => router.back()} 
+      <TopAppBar
+        title="Moderação"
+        showBack
+        onBack={() => router.back()}
       />
-      
+
       <main className="pt-24 px-4 max-w-2xl mx-auto space-y-6">
         <div className="bg-primary/10 rounded-2xl p-6 mb-6">
           <div className="flex items-center gap-3 text-primary mb-2">
@@ -107,7 +184,7 @@ export default function ModerationPage() {
             <h1 className="text-2xl font-black tracking-tight">Painel do Líder</h1>
           </div>
           <p className="text-on-surface-variant text-sm flex items-center gap-2">
-            Gerencie as pessoas que solicitaram entrada em 
+            Gerencie as pessoas que solicitaram entrada em
             <span className="font-bold text-on-surface bg-primary/10 px-2 py-0.5 rounded-full whitespace-nowrap overflow-hidden text-ellipsis inline-block align-middle max-w-[200px]">
               {selectedEnvironment?.name || 'Comunidade Atual'}
             </span>
@@ -122,7 +199,7 @@ export default function ModerationPage() {
             </span>
           </h2>
 
-          {loadingMembers ? (
+          {accessLoading || loadingMembers ? (
             <div className="flex justify-center p-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
@@ -135,7 +212,10 @@ export default function ModerationPage() {
           ) : (
             <div className="space-y-3">
               {pendingMembers.map((member) => (
-                <div key={member.id} className="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between shadow-sm border border-outline-variant/10">
+                <div
+                  key={member.id}
+                  className="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between shadow-sm border border-outline-variant/10"
+                >
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden flex-shrink-0 border border-outline-variant/20">
                       {member.avatar ? (
@@ -146,15 +226,21 @@ export default function ModerationPage() {
                     </div>
                     <div className="flex flex-col">
                       <p className="font-bold text-on-surface capitalize">{member.name}</p>
+                      <p className="text-xs text-on-surface-variant break-all">
+                        {member.email || 'Email indisponível'}
+                      </p>
                       <p className="text-xs text-on-surface-variant flex items-center gap-1">
                         <Icon icon="event" size={12} className="opacity-70" />
                         <span className="font-medium text-xs">Aguardando aprovação</span>
                       </p>
+                      {member.date ? (
+                        <p className="text-[11px] text-on-surface-variant/80">{member.date}</p>
+                      ) : null}
                     </div>
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0 pl-2">
-                    <button 
+                    <button
                       onClick={() => handleReject(member.id)}
                       disabled={actionLoading === member.id}
                       className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-error/10 text-error transition-colors disabled:opacity-50"
@@ -162,7 +248,7 @@ export default function ModerationPage() {
                     >
                       <Icon icon="close" size={20} />
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleApprove(member.id)}
                       disabled={actionLoading === member.id}
                       className="px-4 h-10 flex items-center gap-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-full font-bold text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50 border border-primary/20"

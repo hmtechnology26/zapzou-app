@@ -1,7 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
 import type { Service, Environment, Member, Review } from '../types';
+import type { PlaceSearchResult } from '@/lib/maps';
 import { supabase } from '../lib/supabase';
 
 export interface User {
@@ -13,6 +14,7 @@ export interface User {
   plan?: 'free' | 'pro' | 'plus';
   membershipStatus?: 'active' | 'pending' | 'banned' | null;
   membershipRole?: 'member' | 'moderator' | null;
+  managedEnvironmentIds?: string[];
 }
 
 interface AppContextType {
@@ -34,6 +36,10 @@ interface AppContextType {
   approveService: (id: string) => Promise<void>;
   rejectService: (id: string) => Promise<void>;
   members: Member[];
+  favoritePlaces: PlaceSearchResult[];
+  fetchFavoritePlaces: () => Promise<void>;
+  storeFavoritePlace: (place: PlaceSearchResult) => Promise<void>;
+  removeFavoritePlace: (placeId: string) => Promise<void>;
   rateService: (id: string, stars: number, comment?: string) => Promise<void>;
   fetchServiceReviews: (serviceId: string, opts?: { force?: boolean }) => Promise<Review[]>;
   addReview: (serviceId: string, stars: number, comment?: string) => Promise<Review | null>;
@@ -54,6 +60,99 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [members, setMembers] = useState<Member[]>([]);
   const [serviceReviews, setServiceReviews] = useState<Record<string, Review[]>>({});
   const reviewsHasUserAvatarColumnRef = useRef<boolean | null>(null);
+  const [favoritePlaces, setFavoritePlaces] = useState<PlaceSearchResult[]>([]);
+
+  const fetchFavoritePlaces = useCallback(async () => {
+    if (!user?.id) {
+      setFavoritePlaces([]);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('user_place_favorites')
+        .select('place_payload')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        const parsed = data
+          .map((row: any) => row.place_payload)
+          .filter((payload): payload is PlaceSearchResult =>
+            payload &&
+            typeof payload === 'object' &&
+            typeof (payload as any).id === 'string'
+          );
+        setFavoritePlaces(parsed);
+      } else if (error) {
+        console.warn('fetchFavoritePlaces failed:', error);
+      }
+    } catch (err) {
+      console.error('fetchFavoritePlaces exception:', err);
+    }
+  }, [user?.id]);
+
+  const storeFavoritePlace = useCallback(async (place: PlaceSearchResult) => {
+    if (!user?.id) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    try {
+      const { error } = await supabase
+        .from('user_place_favorites')
+        .upsert(
+          {
+            user_id: user.id,
+            place_id: place.id,
+            place_payload: place
+          },
+          { onConflict: 'user_id,place_id' }
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      setFavoritePlaces((prev) => {
+        const filtered = prev.filter((existing) => existing.id !== place.id);
+        return [place, ...filtered];
+      });
+    } catch (err) {
+      console.error('storeFavoritePlace failed:', err);
+      throw err;
+    }
+  }, [user?.id]);
+
+  const removeFavoritePlace = useCallback(async (placeId: string) => {
+    if (!user?.id) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('user_place_favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('place_id', placeId);
+
+      if (error) {
+        throw error;
+      }
+
+      setFavoritePlaces((prev) => prev.filter((place) => place.id !== placeId));
+    } catch (err) {
+      console.error('removeFavoritePlace failed:', err);
+      throw err;
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setFavoritePlaces([]);
+      return;
+    }
+    void fetchFavoritePlaces();
+  }, [user?.id, fetchFavoritePlaces]);
 
   const generateSlug = (text: string): string => {
     return text
@@ -102,6 +201,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return error?.code === 'PGRST116';
   };
 
+  const fetchManagedEnvironmentIds = useCallback(async (userId: string): Promise<string[]> => {
+    if (!userId) return [];
+
+    const { data, error } = await supabase
+      .from('environment_members')
+      .select('environment_id')
+      .eq('user_id', userId)
+      .eq('role', 'moderator')
+      .eq('status', 'active');
+
+    if (error || !Array.isArray(data)) {
+      if (error) {
+        console.warn('fetchManagedEnvironmentIds failed:', error);
+      }
+      return [];
+    }
+
+    return data
+      .map((row: any) => row.environment_id)
+      .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0);
+  }, []);
+
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -140,11 +261,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         .eq('id', userId)
         .single();
       
-      console.log('User profile fetch:', { data: existingUser, error: fetchError, userId });
+      //console.log('User profile fetch:', { data: existingUser, error: fetchError, userId });
       
       if (existingUser && !fetchError) {
         let avatarToSave = normalizeAvatarUrl(existingUser.avatar);
         let nameToSave = existingUser.name;
+        const managedEnvironmentIds = await fetchManagedEnvironmentIds(userId);
         
         if (userMetadata) {
           const avatarFromAuth = normalizeAvatarUrl(userMetadata.avatar_url || userMetadata.picture || '');
@@ -185,11 +307,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
             plan: nextPlan,
             membershipStatus: prev?.membershipStatus || null,
             membershipRole: prev?.membershipRole || null,
+            managedEnvironmentIds,
           };
         });
       } else {
         if (fetchError && !isNoRowsFoundError(fetchError)) {
           console.warn('User profile fetch failed (non-empty error):', fetchError);
+          const managedEnvironmentIds = await fetchManagedEnvironmentIds(userId);
           setUser((prev) => ({
             ...prev,
             id: userId,
@@ -200,11 +324,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
             plan: prev?.plan || 'free',
             membershipStatus: prev?.membershipStatus || null,
             membershipRole: prev?.membershipRole || null,
+            managedEnvironmentIds,
           }));
           return;
         }
         const googleAvatar = normalizeAvatarUrl(userMetadata?.avatar_url || userMetadata?.picture || '');
         const googleName = userMetadata?.name || userMetadata?.full_name || 'Usuário';
+        const managedEnvironmentIds = await fetchManagedEnvironmentIds(userId);
         
         const payload: any = { id: userId, email, name: googleName };
         if (googleAvatar) payload.avatar = googleAvatar;
@@ -225,11 +351,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
           role: 'user',
           plan: 'free',
           membershipStatus: null,
-          membershipRole: null
+          membershipRole: null,
+          managedEnvironmentIds,
         });
       }
     } catch(err) {
        console.error('Exception fetching user profile:', err);
+       const managedEnvironmentIds = await fetchManagedEnvironmentIds(userId);
        setUser({
          id: userId,
          name: 'Usuário',
@@ -238,7 +366,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
          role: 'user',
          plan: 'free',
          membershipStatus: null,
-         membershipRole: null
+         membershipRole: null,
+         managedEnvironmentIds,
        });
     }
   };
@@ -254,14 +383,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const formatted = data.map((e: any) => ({
           id: e.id,
           name: e.name,
-          slug: generateSlug(e.name),
+          slug: e.slug || generateSlug(e.name),
           type: e.type,
-          members: 0,
+          members: Number(e.members_count ?? 0),
           image: e.image_url || '',
           isSelected: false,
           status: e.status,
           latitude: e.latitude,
-          longitude: e.longitude
+          longitude: e.longitude,
+          requiresModeratorApproval: Boolean(e.requires_moderator_approval),
+          requiresRadiusValidation: Boolean(e.requires_radius_validation),
         }));
         setSelectedEnvironments(formatted);
         if (formatted.length > 0 && !selectedEnvironment) {
@@ -789,6 +920,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       approveService,
       rejectService,
       members,
+      favoritePlaces,
+      fetchFavoritePlaces,
+      storeFavoritePlace,
+      removeFavoritePlace,
       rateService,
       fetchServiceReviews,
       addReview,

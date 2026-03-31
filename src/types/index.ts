@@ -27,6 +27,8 @@ export interface Service {
   latitude?: number;
   longitude?: number;
   views?: number;
+  availabilityStatus?: 'active' | 'pending';
+  availabilityReason?: string;
 }
 
 export interface Review {
@@ -51,6 +53,8 @@ export interface Environment {
   status?: string;
   latitude?: number;
   longitude?: number;
+  requiresModeratorApproval?: boolean;
+  requiresRadiusValidation?: boolean;
 }
 
 export interface Member {

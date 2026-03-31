@@ -25,6 +25,68 @@ const STRUCTURAL_NAME_HINTS = [
   'centro empresarial'
 ];
 
+const RELIGIOUS_NAME_HINTS = [
+  'igreja',
+  'igrejas',
+  'templo',
+  'templos',
+  'capela',
+  'capelas',
+  'paroquia',
+  'paroquias',
+  'catedral',
+  'catedrais',
+  'santuario',
+  'santuarios',
+  'assembleia',
+  'evangelica',
+  'evangelicas',
+  'catolica',
+  'catolicas',
+  'ministerio',
+  'ministerios',
+  'diocese',
+];
+
+const RELIGIOUS_PRIMARY_TYPES = [
+  'church',
+  'place_of_worship',
+  'cathedral',
+  'chapel',
+  'temple',
+];
+
+const RELIGIOUS_NEARBY_TYPES = [
+  'church',
+  'hindu_temple',
+  'mosque',
+  'synagogue',
+];
+
+const QUERY_VARIANT_STOPWORDS = [
+  'igreja',
+  'igrejas',
+  'templo',
+  'templos',
+  'capela',
+  'capelas',
+  'catedral',
+  'catedrais',
+  'paroquia',
+  'paroquias',
+  'santuario',
+  'santuarios',
+  'condominio',
+  'condominios',
+  'residencial',
+  'residenciais',
+  'shopping',
+  'centro',
+  'comercial',
+];
+
+type PlaceCategory = 'condominium' | 'church';
+
 const NEGATIVE_NAME_HINTS = [
   'administracao',
   'administradora',
@@ -73,6 +135,82 @@ function isBuildingType(type: string | undefined) {
 
 function hasAny(text: string, patterns: string[]) {
   return patterns.some((pattern) => text.includes(pattern));
+}
+
+function buildSearchVariants(query: string, categoryType?: PlaceCategory) {
+  const normalized = normalize(query.trim().replace(/\s+/g, ' '));
+  const tokens = normalized.split(/\s+/).filter(Boolean);
+  const variants = new Set<string>();
+
+  const addVariant = (candidate: string) => {
+    const cleaned = candidate.trim().replace(/\s+/g, ' ');
+    if (cleaned.length >= 2) {
+      variants.add(cleaned);
+    }
+  };
+
+  addVariant(query.trim().replace(/\s+/g, ' '));
+
+  if (tokens.length > 1) {
+    for (let length = Math.min(tokens.length, 3); length >= 2; length -= 1) {
+      addVariant(tokens.slice(tokens.length - length).join(' '));
+    }
+    addVariant(tokens[tokens.length - 1]);
+  }
+
+  const strippedTokens = tokens.filter((token) => !QUERY_VARIANT_STOPWORDS.includes(token));
+  if (strippedTokens.length > 0) {
+    addVariant(strippedTokens.join(' '));
+  }
+
+  if (categoryType === 'church') {
+    const churchTokens = tokens.filter(
+      (token) =>
+        ![
+          'igreja',
+          'igrejas',
+          'templo',
+          'templos',
+          'capela',
+          'capelas',
+          'catedral',
+          'catedrais',
+          'paroquia',
+          'paroquias',
+          'santuario',
+          'santuarios',
+        ].includes(token),
+    );
+    if (churchTokens.length > 0) {
+      addVariant(churchTokens.join(' '));
+    }
+  }
+
+  return Array.from(variants).slice(0, 5);
+}
+
+async function searchPlacesTextVariants(
+  apiKey: string,
+  textQueries: string[],
+  includedType?: string,
+) {
+  const merged: any[] = [];
+  const seen = new Set<string>();
+
+  for (const textQuery of textQueries) {
+    const places = await searchPlacesText(apiKey, textQuery, includedType);
+    for (const place of places) {
+      if (!place?.id || seen.has(place.id)) continue;
+      seen.add(place.id);
+      merged.push(place);
+    }
+
+    if (merged.length >= 20) {
+      break;
+    }
+  }
+
+  return merged;
 }
 
 function inferType(query: string) {
@@ -135,6 +273,10 @@ function isStructuralName(name: string) {
   return hasAny(name, STRUCTURAL_NAME_HINTS) && !hasAny(name, NEGATIVE_NAME_HINTS);
 }
 
+function isReligiousName(name: string) {
+  return hasAny(name, RELIGIOUS_NAME_HINTS);
+}
+
 function scorePlace(place: { displayName?: { text?: string }; formattedAddress?: string; primaryTypeText: string }, query: string) {
   const q = normalize(query);
   const name = extractNameText(place);
@@ -162,6 +304,14 @@ function scorePlace(place: { displayName?: { text?: string }; formattedAddress?:
 
   if (type === 'church' && hasAny(q, ['igreja', 'templo', 'paroquia'])) {
     score += 45;
+  }
+
+  if (RELIGIOUS_PRIMARY_TYPES.includes(type as (typeof RELIGIOUS_PRIMARY_TYPES)[number])) {
+    score += 20;
+  }
+
+  if (isReligiousName(name)) {
+    score += 20;
   }
 
   if (isStructuralName(name)) {
@@ -213,7 +363,8 @@ async function searchPlacesText(apiKey: string, textQuery: string, includedType?
 async function searchPlacesNearby(
   apiKey: string,
   center: { latitude: number; longitude: number },
-  radius: number
+  radius: number,
+  includedTypes?: string[]
 ) {
   const response = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
     method: 'POST',
@@ -224,7 +375,7 @@ async function searchPlacesNearby(
         'places.id,places.displayName,places.formattedAddress,places.primaryType,places.types,places.googleMapsUri,places.location,places.addressComponents'
     },
     body: JSON.stringify({
-      includedTypes: [...BUILDING_PRIMARY_TYPES],
+      includedTypes: includedTypes ?? [...BUILDING_PRIMARY_TYPES],
       maxResultCount: 20,
       rankPreference: 'DISTANCE',
       locationRestriction: {
@@ -256,7 +407,10 @@ export interface PlaceSearchResult {
   neighborhood: string;
 }
 
-export async function searchPlaces(query: string): Promise<PlaceSearchResult[]> {
+export async function searchPlaces(
+  query: string,
+  options?: { categoryType?: PlaceCategory }
+): Promise<PlaceSearchResult[]> {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   
   console.log('[maps] API Key exists:', !!apiKey);
@@ -275,10 +429,29 @@ export async function searchPlaces(query: string): Promise<PlaceSearchResult[]> 
   console.log('[maps] Location scope:', locationScope, 'Explicit type:', explicitType);
 
   let rawPlaces: any[] = [];
+  const categoryType = options?.categoryType;
+  const forcedType =
+    categoryType === 'church'
+      ? 'church'
+      : categoryType === 'condominium'
+        ? 'condominium_complex'
+        : undefined;
 
-  if (locationScope) {
-    console.log('[maps] Searching by location scope...');
-    const seedPlaces = await searchPlacesText(apiKey, query);
+  const queryVariants = buildSearchVariants(query, categoryType);
+  console.log('[maps] Query variants:', queryVariants);
+
+  if (categoryType === 'church') {
+    console.log('[maps] Searching religious places by text...');
+    rawPlaces = await searchPlacesTextVariants(apiKey, queryVariants);
+  } else {
+    console.log('[maps] Searching by place name...');
+    const includedType = forcedType ?? (explicitType || undefined);
+    rawPlaces = await searchPlacesTextVariants(apiKey, queryVariants, includedType);
+  }
+
+  if (rawPlaces.length === 0 && locationScope) {
+    console.log('[maps] Falling back to location scope...');
+    const seedPlaces = await searchPlacesTextVariants(apiKey, queryVariants);
     const seed = seedPlaces.find((place: any) => place.location);
 
     if (!seed?.location) {
@@ -293,11 +466,8 @@ export async function searchPlaces(query: string): Promise<PlaceSearchResult[]> 
       longitude: Number(seed.location.longitude)
     };
 
-    rawPlaces = await searchPlacesNearby(apiKey, center, radius);
-  } else {
-    console.log('[maps] Searching by place name...');
-    const includedType = explicitType || undefined;
-    rawPlaces = await searchPlacesText(apiKey, query, includedType);
+    const nearbyTypes = categoryType === 'church' ? RELIGIOUS_NEARBY_TYPES : undefined;
+    rawPlaces = await searchPlacesNearby(apiKey, center, radius, nearbyTypes);
   }
 
   console.log('[maps] Raw places:', rawPlaces.length);
@@ -324,9 +494,25 @@ export async function searchPlaces(query: string): Promise<PlaceSearchResult[]> 
       };
     })
     .filter((place: any) => {
-      const typeOk = isBuildingType(place.primaryTypeText) || place.primaryTypeText === 'church';
-      const nameOk = isStructuralName(normalize(place.displayNameText));
-      return typeOk && nameOk;
+      const normalizedName = normalize(place.displayNameText);
+      const typeOk =
+        isBuildingType(place.primaryTypeText) ||
+        RELIGIOUS_PRIMARY_TYPES.includes(place.primaryTypeText);
+      const structuralOk = isStructuralName(normalizedName);
+      const religiousOk = isReligiousName(normalizedName);
+      if (categoryType === 'church') {
+        return Boolean(
+          RELIGIOUS_PRIMARY_TYPES.includes(place.primaryTypeText) ||
+            place.primaryTypeText === 'church' ||
+            religiousOk,
+        );
+      }
+
+      if (categoryType === 'condominium') {
+        return Boolean(isBuildingType(place.primaryTypeText) || structuralOk);
+      }
+
+      return (typeOk && (structuralOk || religiousOk)) || religiousOk;
     })
     .sort((a: any, b: any) => scorePlace(b, query) - scorePlace(a, query))
     .map(({ primaryTypeText, displayNameText, ...place }: any) => place);

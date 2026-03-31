@@ -6,6 +6,10 @@ import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
 import { useState, useEffect } from 'react';
 import { type PlaceSearchResult } from '@/lib/maps';
+import {
+  inferEnvironmentTypeFromPlace,
+  inferEnvironmentValidationFlagsFromPlace,
+} from '@/lib/environment-rules';
 
 export default function PlaceDetailPage() {
   const router = useRouter();
@@ -35,22 +39,14 @@ export default function PlaceDetailPage() {
     }
   }, [placeId]);
 
-  const mapPrimaryTypeToEnvType = (primaryType: string): string => {
-    const typeMap: Record<string, string> = {
-      church: 'church',
-      condominium_complex: 'residential',
-      apartment_building: 'residential',
-      apartment_complex: 'residential',
-      housing_complex: 'residential',
-      shopping_mall: 'club'
-    };
-    return typeMap[primaryType] || 'residential';
-  };
-
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
       residential: 'Residencial',
       church: 'Igreja',
+      place_of_worship: 'Igreja',
+      cathedral: 'Catedral',
+      chapel: 'Capela',
+      temple: 'Templo',
       club: 'Clube',
       association: 'Associação',
       apartment_building: 'Prédio',
@@ -70,11 +66,12 @@ export default function PlaceDetailPage() {
     id: placeFromSearch.id,
     slug: generateSlug(placeFromSearch.displayName?.text || ''),
     name: placeFromSearch.displayName?.text || '',
-    type: mapPrimaryTypeToEnvType(placeFromSearch.primaryType),
+    type: inferEnvironmentTypeFromPlace(placeFromSearch.primaryType),
     members: 0,
     image: '',
     latitude: placeFromSearch.location?.latitude,
     longitude: placeFromSearch.location?.longitude,
+    ...inferEnvironmentValidationFlagsFromPlace(placeFromSearch.primaryType),
   } : null);
 
   const categories = ['Alimentação', 'Limpeza', 'Manutenção', 'Pet Sitting', 'Beleza', 'Tecnologia', 'Outros'];

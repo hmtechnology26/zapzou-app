@@ -170,7 +170,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {!search && (
+        {!search ? (
           <section className="space-y-3">
             <h3 className="text-lg font-bold text-on-surface">Serviços próximos</h3>
             <div className="space-y-3">
@@ -209,6 +209,65 @@ export default function HomePage() {
               ))}
               {servicesWithDistance.length === 0 && (
                 <p className="text-center text-on-surface-variant py-8">Nenhum serviço encontrado próximo a você</p>
+              )}
+            </div>
+          </section>
+        ) : (
+          <section className="space-y-3">
+            <h3 className="text-lg font-bold text-on-surface">Resultados da busca</h3>
+            <div className="space-y-3">
+              {servicesWithDistance
+                .filter(service => {
+                  const searchLower = search.toLowerCase().trim();
+                  return (
+                    service.category.toLowerCase().includes(searchLower) ||
+                    service.title.toLowerCase().includes(searchLower) ||
+                    (service.description && service.description.toLowerCase().includes(searchLower))
+                  );
+                })
+                .map((service) => (
+                  <div 
+                    key={service.id}
+                    onClick={() => router.push(`/service/${service.slug}`)}
+                    className="bg-surface-container-lowest p-3 rounded-2xl flex gap-4 items-center cursor-pointer hover:bg-surface-container-low transition-all active:scale-[0.98] border border-outline-variant/5"
+                  >
+                    <div className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
+                      <img 
+                        className="w-full h-full object-cover" 
+                        src={service.image} 
+                        alt={service.title}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[9px] font-bold text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-md">{service.category}</span>
+                        <div className="flex items-center gap-1 text-primary">
+                          <Icon icon="star" size={12} style={{ fontVariationSettings: "'FILL' 1" }} />
+                          <span className="text-[10px] font-extrabold">{service.rating || 'Novo'}</span>
+                        </div>
+                      </div>
+                      <h4 className="font-bold text-on-surface text-sm truncate">{service.title}</h4>
+                      <p className="text-xs text-on-surface-variant truncate">{service.description}</p>
+                      {userLocation && service.distance !== Infinity && (
+                        <p className="text-[10px] text-primary font-medium mt-1">
+                          {service.distance < 1 
+                            ? `${Math.round(service.distance * 1000)}m` 
+                            : `${service.distance.toFixed(1)}km`} de distância
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              {servicesWithDistance
+                .filter(service => {
+                  const searchLower = search.toLowerCase().trim();
+                  return (
+                    service.category.toLowerCase().includes(searchLower) ||
+                    service.title.toLowerCase().includes(searchLower) ||
+                    (service.description && service.description.toLowerCase().includes(searchLower))
+                  );
+                }).length === 0 && (
+                <p className="text-center text-on-surface-variant py-8">Nenhum serviço encontrado para "{search}"</p>
               )}
             </div>
           </section>

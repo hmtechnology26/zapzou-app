@@ -4,8 +4,16 @@ import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/Icon';
 import { useApp } from '@/hooks/useApp';
 import { usePublishModal } from '@/contexts/PublishModalContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import {
+  AUTO_APPROVAL_RADIUS_KM,
+  calculateDistanceKm,
+  inferEnvironmentTypeFromPlace,
+  inferEnvironmentValidationFlagsFromPlace,
+  isWithinAutoApprovalRadius,
+  resolveEnvironmentAccessDecision,
+} from '@/lib/environment-rules';
 import { searchPlaces, type PlaceSearchResult } from '@/lib/maps';
 import type { Environment } from '@/types';
 
@@ -14,11 +22,14 @@ const serviceCategories = ['Alimentação', 'Limpeza', 'Manutenção', 'Pet Sitt
 export function PublishModal() {
   const router = useRouter();
   const { isOpen, close } = usePublishModal();
-  const { user, selectedEnvironment, services, addService, selectedEnvironments, setSelectedEnvironments, requestAffiliation } = useApp();
+  const { user, services, addService, selectedEnvironments, setSelectedEnvironments, setSelectedEnvironment } = useApp();
   
-  const [step, setStep] = useState<'search' | 'form'>('search');
+  const [step, setStep] = useState<'search' | 'radius' | 'moderator' | 'form'>('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
+  const [selectedPlaceDistanceKm, setSelectedPlaceDistanceKm] = useState<number | null>(null);
+  const [selectedPlaceDecision, setSelectedPlaceDecision] = useState<ReturnType<typeof resolveEnvironmentAccessDecision> | null>(null);
+  const [selectedEnvironmentRecord, setSelectedEnvironmentRecord] = useState<Environment | null>(null);
   
   const [form, setForm] = useState({
     serviceName: '',
@@ -100,33 +111,82 @@ export function PublishModal() {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  };
+  const ensureCurrentLocation = useCallback(async () => {
+    if (userLocation) {
+      return userLocation;
+    }
 
-  const mapPrimaryTypeToEnvType = (primaryType: string): string => {
-    const typeMap: Record<string, string> = {
-      church: 'church',
-      condominium_complex: 'residential',
-      apartment_building: 'residential',
-      apartment_complex: 'residential',
-      housing_complex: 'residential',
-      shopping_mall: 'club'
-    };
-    return typeMap[primaryType] || 'residential';
-  };
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      throw new Error('Geolocalização indisponível neste dispositivo.');
+    }
+
+    return new Promise<{ lat: number; lng: number }>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const nextLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setUserLocation(nextLocation);
+          resolve(nextLocation);
+        },
+        (error) => reject(new Error(error.message || 'Falha ao obter sua localização.')),
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+      );
+    });
+  }, [userLocation]);
+
+  const syncEnvironmentMembership = useCallback(
+    async (envId: string, status: 'active' | 'pending') => {
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const { error } = await supabase
+        .from('environment_members')
+        .upsert(
+          {
+            environment_id: envId,
+            user_id: user.id,
+            status,
+            role: 'member',
+          },
+          { onConflict: 'environment_id,user_id' },
+        );
+
+      if (error) {
+        throw error;
+      }
+    },
+    [user],
+  );
+
+  const getEnvironmentMembershipStatus = useCallback(async (envId: string) => {
+    if (!user?.id) return null;
+
+    const { data, error } = await supabase
+      .from('environment_members')
+      .select('status')
+      .eq('user_id', user.id)
+      .eq('environment_id', envId)
+      .maybeSingle();
+
+    if (error) {
+      console.warn('getEnvironmentMembershipStatus failed:', error);
+      return null;
+    }
+
+    return data?.status ?? null;
+  }, [user?.id]);
 
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
       residential: 'Residencial',
       church: 'Igreja',
+      place_of_worship: 'Igreja',
+      cathedral: 'Catedral',
+      chapel: 'Capela',
+      temple: 'Templo',
       club: 'Clube',
       association: 'Associação',
       apartment_building: 'Prédio',
@@ -140,95 +200,229 @@ export function PublishModal() {
     setSelectedPlace(place);
     setUploading(true);
     setErrorMsg('');
+    setSelectedPlaceDistanceKm(null);
+    setSelectedPlaceDecision(null);
 
     try {
-      const placeType = mapPrimaryTypeToEnvType(place.primaryType);
-      const isChurchType = placeType === 'church';
+      const inferredType = inferEnvironmentTypeFromPlace(place.primaryType);
+      const inferredFlags = inferEnvironmentValidationFlagsFromPlace(place.primaryType);
 
       const { data: existingEnv, error: fetchError } = await supabase
         .from('environments')
-        .select('id')
+        .select('*')
         .eq('google_place_id', place.id)
-        .single();
+        .maybeSingle();
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
+      if (fetchError) {
         throw fetchError;
       }
 
-      let envId = existingEnv?.id;
+      let envRecord = existingEnv;
 
-      if (!envId) {
+      if (!envRecord) {
         const slug = place.displayName?.text?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || place.id;
-        
-        const { data: newEnv, error: insertError } = await supabase
+
+        const baseInsertPayload = {
+          name: place.displayName?.text || 'Novo Local',
+          slug,
+          type: inferredType,
+          status: 'active',
+          google_place_id: place.id,
+          latitude: place.location?.latitude,
+          longitude: place.location?.longitude,
+          address: place.formattedAddress,
+        };
+
+        const insertWithFlags = {
+          ...baseInsertPayload,
+          requires_moderator_approval: inferredFlags.requiresModeratorApproval,
+          requires_radius_validation: inferredFlags.requiresRadiusValidation,
+        };
+
+        const firstInsert = await supabase
           .from('environments')
-          .insert({
-            name: place.displayName?.text || 'Novo Local',
-            slug: slug,
-            type: placeType,
-            status: 'active',
-            google_place_id: place.id,
-            latitude: place.location?.latitude,
-            longitude: place.location?.longitude,
-            address: place.formattedAddress,
-          })
-          .select('id')
+          .insert(insertWithFlags)
+          .select('*')
           .single();
 
-        if (insertError) throw insertError;
-        envId = newEnv.id;
+        if (firstInsert.error) {
+          if (firstInsert.error.code === '42703') {
+            const retryInsert = await supabase
+              .from('environments')
+              .insert(baseInsertPayload)
+              .select('*')
+              .single();
+
+            if (retryInsert.error) {
+              throw retryInsert.error;
+            }
+
+            envRecord = retryInsert.data;
+          } else {
+            throw firstInsert.error;
+          }
+        } else {
+          envRecord = firstInsert.data;
+        }
       }
 
-      const membershipStatus = isChurchType ? 'pending' : 'active';
+      const decision = resolveEnvironmentAccessDecision({
+        type: (envRecord.type as Environment['type']) || inferredType,
+        requiresModeratorApproval:
+          envRecord.requires_moderator_approval ?? inferredFlags.requiresModeratorApproval,
+        requiresRadiusValidation:
+          envRecord.requires_radius_validation ?? inferredFlags.requiresRadiusValidation,
+      });
 
-      if (!user) {
-        throw new Error('Usuário não autenticado');
-      }
+      const membershipStatus = await getEnvironmentMembershipStatus(envRecord.id);
+      const effectiveDecision =
+        membershipStatus === 'active'
+          ? {
+              ...decision,
+              mode: 'open' as const,
+            }
+          : decision;
 
-      const { error: memberError } = await supabase
-        .from('environment_members')
-        .upsert({
-          environment_id: envId,
-          user_id: user.id,
-          status: membershipStatus,
-          role: 'member'
-        }, { onConflict: 'environment_id,user_id' });
-
-      if (memberError) throw memberError;
-
-      const newEnv = {
-        id: envId,
-        slug: place.displayName?.text?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || place.id,
-        name: place.displayName?.text || '',
-        type: placeType,
+      const normalizedEnvironment: Environment = {
+        id: envRecord.id,
+        slug: envRecord.slug || place.displayName?.text?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || place.id,
+        name: envRecord.name || place.displayName?.text || '',
+        type: (envRecord.type as Environment['type']) || inferredType,
         members: 1,
         image: '',
-        latitude: place.location?.latitude,
-        longitude: place.location?.longitude,
-        status: 'active',
-      } as Environment & { membershipStatus: 'active' | 'pending' };
+        latitude: envRecord.latitude ?? place.location?.latitude,
+        longitude: envRecord.longitude ?? place.location?.longitude,
+        status: envRecord.status ?? 'active',
+        requiresModeratorApproval: decision.requiresModeratorApproval,
+        requiresRadiusValidation: decision.requiresRadiusValidation,
+      };
 
-      const envExists = selectedEnvironments.find(e => e.id === envId);
-      if (!envExists) {
-        setSelectedEnvironments([...selectedEnvironments, newEnv]);
+      setSelectedPlaceDecision(effectiveDecision);
+      setSelectedEnvironmentRecord(normalizedEnvironment);
+      setSelectedEnvironments((prev) => {
+        const filtered = prev.filter((env) => env.id !== normalizedEnvironment.id);
+        return [normalizedEnvironment, ...filtered];
+      });
+
+      if (effectiveDecision.mode === 'moderator') {
+        setActiveEnvId(null);
+        setStep('moderator');
+        return;
       }
 
-      setActiveEnvId(envId);
+      if (effectiveDecision.mode === 'radius') {
+        const distance = userLocation && place.location
+          ? calculateDistanceKm(
+              userLocation.lat,
+              userLocation.lng,
+              place.location.latitude,
+              place.location.longitude,
+            )
+          : null;
 
-      if (isChurchType) {
-        setAlertTitle('Afiliação Solicitada');
-        setAlertMessage(`Sua solicitação de afiliação em ${place.displayName?.text} está em análise. Você será notificado quando for aprovado.`);
-        setAlertAction({ label: 'Aguardar', onClick: () => {
-          setShowAlert(false);
-          close();
-        }});
-        setShowAlert(true);
-      } else {
-        setStep('form');
+        setSelectedPlaceDistanceKm(distance);
+
+        if (isWithinAutoApprovalRadius(distance)) {
+          await syncEnvironmentMembership(normalizedEnvironment.id, 'active');
+          setActiveEnvId(normalizedEnvironment.id);
+          setSelectedEnvironment(normalizedEnvironment);
+          setStep('form');
+          return;
+        }
+
+        if (!userLocation) {
+          setErrorMsg('Ative a localização para validar o raio de 500m.');
+        }
+        setActiveEnvId(null);
+        setStep('radius');
+        return;
       }
+
+      await syncEnvironmentMembership(normalizedEnvironment.id, 'active');
+      setActiveEnvId(normalizedEnvironment.id);
+      setSelectedEnvironment(normalizedEnvironment);
+      setStep('form');
     } catch (err: any) {
       console.error('Error selecting place:', err);
       setErrorMsg(err.message || 'Erro ao selecionar local. Tente novamente.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRequestModeratorApproval = async () => {
+    if (!selectedEnvironmentRecord) {
+      setErrorMsg('Selecione um ambiente antes de solicitar aprovação.');
+      return;
+    }
+
+    setUploading(true);
+    setErrorMsg('');
+
+    try {
+      await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'pending');
+      setAlertTitle('Aprovação solicitada');
+      setAlertMessage(`Sua solicitação para publicar em ${selectedEnvironmentRecord.name} foi enviada para o moderador.`);
+      setAlertAction({
+        label: 'Entendi',
+        onClick: () => {
+          setShowAlert(false);
+          close();
+        },
+      });
+      setShowAlert(true);
+    } catch (error: any) {
+      console.error('Error requesting moderator approval:', error);
+      setErrorMsg(error?.message || 'Não foi possível solicitar a aprovação do moderador.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleValidateRadius = async () => {
+    if (!selectedEnvironmentRecord) {
+      setErrorMsg('Selecione um ambiente antes de validar o raio.');
+      return;
+    }
+
+    setUploading(true);
+    setErrorMsg('');
+
+    try {
+      const currentLocation = await ensureCurrentLocation();
+
+      if (
+        typeof selectedEnvironmentRecord.latitude !== 'number' ||
+        typeof selectedEnvironmentRecord.longitude !== 'number'
+      ) {
+        throw new Error('Este ambiente não possui coordenadas para validação.');
+      }
+
+      const distance = calculateDistanceKm(
+        currentLocation.lat,
+        currentLocation.lng,
+        selectedEnvironmentRecord.latitude,
+        selectedEnvironmentRecord.longitude,
+      );
+
+      setSelectedPlaceDistanceKm(distance);
+
+      if (!isWithinAutoApprovalRadius(distance)) {
+        setStep('radius');
+        setErrorMsg(
+          `Você precisa estar dentro de ${AUTO_APPROVAL_RADIUS_KM * 1000}m para publicar neste ambiente.`,
+        );
+        return;
+      }
+
+      await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active');
+      setActiveEnvId(selectedEnvironmentRecord.id);
+      setSelectedEnvironment(selectedEnvironmentRecord);
+      setStep('form');
+    } catch (error: any) {
+      console.error('Error validating radius:', error);
+      setErrorMsg(error?.message || 'Não foi possível validar sua localização.');
+      setStep('radius');
     } finally {
       setUploading(false);
     }
@@ -242,6 +436,9 @@ export function PublishModal() {
       setHasSearched(false);
       setSelectedPlace(null);
       setActiveEnvId(null);
+      setSelectedEnvironmentRecord(null);
+      setSelectedPlaceDistanceKm(null);
+      setSelectedPlaceDecision(null);
       setForm({ serviceName: '', category: serviceCategories[0], description: '', WhatsApp: '', instagram: '' });
       setImages([]);
       setImageFiles([]);
@@ -395,7 +592,8 @@ export function PublishModal() {
       setImages([]);
       setImageFiles([]);
       close();
-      router.push('/');
+      router.replace('/');
+      router.refresh();
     } catch(err: any) {
       console.error('Publish error:', err);
       setErrorMsg(err.message || 'Erro ao publicar serviço.');
@@ -414,7 +612,7 @@ export function PublishModal() {
 
   if (!isOpen) return null;
 
-  const currentEnv = selectedEnvironments.find(e => e.id === activeEnvId);
+  const currentEnv = selectedEnvironments.find(e => e.id === activeEnvId) || selectedEnvironmentRecord;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center p-0 md:p-4">
@@ -422,13 +620,23 @@ export function PublishModal() {
         <div className="flex-1 overflow-y-auto">
           <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/10">
             <div className="flex items-center gap-3">
-              {step === 'form' && (
-                <button onClick={() => setStep('search')} className="p-1 -ml-1">
+              {step !== 'search' && (
+                <button
+                  onClick={() => {
+                    setStep('search');
+                    setActiveEnvId(null);
+                    setSelectedEnvironmentRecord(null);
+                    setSelectedPlaceDistanceKm(null);
+                    setSelectedPlaceDecision(null);
+                    setErrorMsg('');
+                  }}
+                  className="p-1 -ml-1"
+                >
                   <Icon icon="arrow_back" size={24} />
                 </button>
               )}
               <h3 className="font-bold text-on-surface text-lg">
-                {step === 'search' ? 'Encontrar Local' : 'Novo Serviço'}
+                {step === 'form' ? 'Novo Serviço' : 'Encontrar Local'}
               </h3>
             </div>
             <button onClick={close} className="p-2 rounded-full hover:bg-surface-container-low">
@@ -436,7 +644,7 @@ export function PublishModal() {
             </button>
           </div>
 
-          {step === 'form' && currentEnv && (
+          {step !== 'search' && currentEnv && (
             <div className="px-6 py-3 bg-surface-container-lowest border-b border-outline-variant/10 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
                 <Icon icon="domain" size={20} className="text-on-surface-variant" />
@@ -482,7 +690,7 @@ export function PublishModal() {
               <div className="flex-1 overflow-y-auto space-y-2">
                 {hasSearched && searchResults.map((place) => {
                   const distance = userLocation && place.location
-                    ? calculateDistance(userLocation.lat, userLocation.lng, place.location.latitude, place.location.longitude)
+                    ? calculateDistanceKm(userLocation.lat, userLocation.lng, place.location.latitude, place.location.longitude)
                     : null;
                   
                   return (
@@ -523,7 +731,7 @@ export function PublishModal() {
                 )}
               </div>
             </div>
-          ) : (
+          ) : step === 'form' ? (
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {errorMsg && (
                 <div className="bg-error/10 border border-error/20 p-4 rounded-xl text-error text-sm font-medium">
@@ -608,6 +816,72 @@ export function PublishModal() {
                     </label>
                   )}
                 </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex h-full flex-col items-center justify-center text-center">
+                <div className="mb-4 text-sm font-bold uppercase tracking-[0.35em] text-error">
+                  {step === 'radius' ? 'STEP 2' : 'STEP 3'}
+                </div>
+                <div className="w-28 h-28 rounded-full border border-dashed border-outline-variant/30 bg-surface-container-lowest flex items-center justify-center mb-5">
+                  <Icon
+                    icon={step === 'radius' ? 'my_location' : 'admin_panel_settings'}
+                    size={56}
+                    className="text-primary"
+                  />
+                </div>
+                <h4 className="text-2xl font-black tracking-tight text-on-surface">
+                  {step === 'radius' ? 'Step 2: Validação de Raio' : 'Step 3: Aprovação Necessária'}
+                </h4>
+                <p className="mt-3 max-w-sm text-sm leading-6 text-on-surface-variant">
+                  {step === 'radius'
+                    ? 'Estamos verificando sua proximidade com o local selecionado. Você precisa estar dentro de 500m para publicar neste ambiente.'
+                    : 'Este ambiente exige aprovação do moderador antes que a opção de publicar seja liberada.'}
+                </p>
+                {selectedPlaceDecision && (
+                  <p className="mt-3 text-xs font-bold uppercase tracking-[0.25em] text-primary/70">
+                    {selectedPlaceDecision.mode === 'moderator'
+                      ? 'Aprovação do moderador'
+                      : selectedPlaceDecision.mode === 'radius'
+                        ? 'Validação por raio'
+                        : 'Acesso livre'}
+                  </p>
+                )}
+                {selectedPlaceDistanceKm !== null && step === 'radius' && (
+                  <p className="mt-3 rounded-full bg-surface-container-high px-4 py-2 text-sm font-semibold text-on-surface">
+                    Distância atual: {selectedPlaceDistanceKm.toFixed(2)}km
+                  </p>
+                )}
+                {errorMsg && (
+                  <div className="mt-4 rounded-2xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
+                    {errorMsg}
+                  </div>
+                )}
+                <button
+                  onClick={step === 'radius' ? handleValidateRadius : handleRequestModeratorApproval}
+                  disabled={uploading}
+                  className="mt-8 w-full max-w-sm rounded-full bg-primary px-5 py-4 font-bold text-white shadow-lg shadow-primary/20 transition active:scale-[0.98] disabled:opacity-60"
+                >
+                  {uploading
+                    ? 'Processando...'
+                    : step === 'radius'
+                      ? 'Requerer Validação de Raio'
+                      : 'Requerer Aprovação do Moderador'}
+                </button>
+                <button
+                  onClick={() => {
+                    setStep('search');
+                    setActiveEnvId(null);
+                    setSelectedEnvironmentRecord(null);
+                    setSelectedPlaceDistanceKm(null);
+                    setSelectedPlaceDecision(null);
+                    setErrorMsg('');
+                  }}
+                  className="mt-3 text-sm font-semibold text-on-surface-variant underline-offset-4 hover:underline"
+                >
+                  Escolher outro local
+                </button>
               </div>
             </div>
           )}
