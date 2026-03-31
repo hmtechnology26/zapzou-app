@@ -190,7 +190,7 @@ export default function ServiceDetailPage() {
   const handleShare = async () => {
     const shareData = {
       title: service.title,
-      text: `Check out this service: ${service.title}`,
+      text: `Confira este serviço: ${service.title}`,
       url: window.location.href,
     };
 
