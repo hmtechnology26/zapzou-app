@@ -46,6 +46,8 @@ interface AppContextType {
   loading: boolean;
   requestAffiliation: (envId: string) => Promise<void>;
   refreshMembership: () => Promise<void>;
+  membershipVersion: number;
+  signalMembershipChange: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -61,6 +63,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [serviceReviews, setServiceReviews] = useState<Record<string, Review[]>>({});
   const reviewsHasUserAvatarColumnRef = useRef<boolean | null>(null);
   const [favoritePlaces, setFavoritePlaces] = useState<PlaceSearchResult[]>([]);
+  const [membershipVersion, setMembershipVersion] = useState(0);
+  const signalMembershipChange = useCallback(() => {
+    setMembershipVersion((prev) => prev + 1);
+  }, []);
 
   const fetchFavoritePlaces = useCallback(async () => {
     if (!user?.id) {
@@ -534,6 +540,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }]);
       if (error) throw error;
       await refreshMembership();
+      signalMembershipChange();
   };
 
   const fetchUserServices = async (userId: string) => {
@@ -961,7 +968,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addReview,
       loading,
       requestAffiliation,
-      refreshMembership
+      refreshMembership,
+      membershipVersion,
+      signalMembershipChange,
     }}>
       {children}
     </AppContext.Provider>

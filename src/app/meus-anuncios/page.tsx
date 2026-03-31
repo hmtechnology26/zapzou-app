@@ -36,7 +36,7 @@ const getStatusRank = (status?: AffiliationRecord['status']) => {
 
 export default function MyAdsPage() {
   const router = useRouter();
-  const { user } = useApp();
+  const { user, membershipVersion } = useApp();
   const { open } = usePublishModal();
   const [mounted, setMounted] = useState(false);
   const [affiliations, setAffiliations] = useState<Record<string, AffiliationRecord>>({});
@@ -110,7 +110,7 @@ export default function MyAdsPage() {
     if (user?.id) {
       fetchUserContexts();
     }
-  }, [user?.id, fetchUserContexts]);
+  }, [user?.id, fetchUserContexts, membershipVersion]);
 
   if (!mounted) return null;
 
@@ -200,7 +200,7 @@ export default function MyAdsPage() {
                       {isActive && (
                         <button 
                           onClick={() => router.push(`/meus-anuncios/${env.id}`)}
-                          className="w-full md:w-auto py-3.5 px-6 rounded-2xl bg-primary text-white font-black uppercase text-xs shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2 hover:brightness-110"
+                          className="w-full md:w-auto min-w-[180px] md:min-w-[220px] max-w-[250px] py-3.5 md:px-8 rounded-2xl bg-primary text-white font-black uppercase text-[10px] md:text-sm shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2 hover:brightness-110 whitespace-nowrap"
                         >
                           <Icon icon="store" size={18} />
                           Gerenciar Catálogo

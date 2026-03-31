@@ -22,7 +22,7 @@ const serviceCategories = ['Alimentação', 'Limpeza', 'Manutenção', 'Pet Sitt
 export function PublishModal() {
   const router = useRouter();
   const { isOpen, close } = usePublishModal();
-  const { user, services, addService, selectedEnvironments, setSelectedEnvironments, setSelectedEnvironment } = useApp();
+  const { user, services, addService, selectedEnvironments, setSelectedEnvironments, setSelectedEnvironment, signalMembershipChange } = useApp();
   
   const [step, setStep] = useState<'search' | 'radius' | 'moderator' | 'form'>('search');
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,6 +50,33 @@ export function PublishModal() {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [alertAction, setAlertAction] = useState<{ label: string; onClick: () => void } | null>(null);
+  const showEnvironmentAddedAlert = useCallback(
+    (envName: string, opts?: { pending?: boolean }) => {
+      const title = opts?.pending ? 'Solicitação enviada' : 'Ambiente vinculado';
+      const message = opts?.pending
+        ? `Sua solicitação para publicar em ${envName} foi enviada ao moderador. Assim que for liberado, você poderá usar o Gerenciar Catálogo.`
+        : `O ambiente ${envName} foi adicionado aos seus ambientes de atuação. Clique em "Gerenciar Catálogo" para criar o anúncio.`;
+      setAlertTitle(title);
+      setAlertMessage(message);
+      setAlertAction({
+        label: 'Ver meus ambientes',
+        onClick: () => {
+          close();
+          router.push('/meus-anuncios');
+        },
+      });
+      setShowAlert(true);
+      setStep('search');
+      setSelectedPlace(null);
+      setSelectedPlaceDecision(null);
+      setSelectedEnvironmentRecord(null);
+      setSelectedPlaceDistanceKm(null);
+      setActiveEnvId(null);
+      setErrorMsg('');
+      setUploading(false);
+    },
+    [close, router],
+  );
   
   const [searchResults, setSearchResults] = useState<PlaceSearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -157,8 +184,10 @@ export function PublishModal() {
       if (error) {
         throw error;
       }
+
+      signalMembershipChange();
     },
-    [user],
+    [user, signalMembershipChange],
   );
 
   const getEnvironmentMembershipStatus = useCallback(async (envId: string) => {
@@ -310,7 +339,6 @@ export function PublishModal() {
             });
             setActiveEnvId(normalizedEnvironment.id);
             setSelectedEnvironment(normalizedEnvironment);
-            setStep('form');
           }
         });
         return;
@@ -339,9 +367,8 @@ export function PublishModal() {
 
         if (isWithinAutoApprovalRadius(distance)) {
           await syncEnvironmentMembership(normalizedEnvironment.id, 'active');
-          setActiveEnvId(normalizedEnvironment.id);
           setSelectedEnvironment(normalizedEnvironment);
-          setStep('form');
+          showEnvironmentAddedAlert(normalizedEnvironment.name);
           return;
         }
 
@@ -354,9 +381,8 @@ export function PublishModal() {
       }
 
       await syncEnvironmentMembership(normalizedEnvironment.id, 'active');
-      setActiveEnvId(normalizedEnvironment.id);
       setSelectedEnvironment(normalizedEnvironment);
-      setStep('form');
+      showEnvironmentAddedAlert(normalizedEnvironment.name);
     } catch (err: any) {
       console.error('Error selecting place:', err);
       setErrorMsg(err.message || 'Erro ao selecionar local. Tente novamente.');
@@ -376,16 +402,7 @@ export function PublishModal() {
 
     try {
       await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'pending');
-      setAlertTitle('Aprovação solicitada');
-      setAlertMessage(`Sua solicitação para publicar em ${selectedEnvironmentRecord.name} foi enviada para o moderador.`);
-      setAlertAction({
-        label: 'Entendi',
-        onClick: () => {
-          setShowAlert(false);
-          close();
-        },
-      });
-      setShowAlert(true);
+      showEnvironmentAddedAlert(selectedEnvironmentRecord.name, { pending: true });
     } catch (error: any) {
       console.error('Error requesting moderator approval:', error);
       setErrorMsg(error?.message || 'Não foi possível solicitar a aprovação do moderador.');
@@ -431,9 +448,8 @@ export function PublishModal() {
       }
 
       await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active');
-      setActiveEnvId(selectedEnvironmentRecord.id);
       setSelectedEnvironment(selectedEnvironmentRecord);
-      setStep('form');
+      showEnvironmentAddedAlert(selectedEnvironmentRecord.name);
     } catch (error: any) {
       console.error('Error validating radius:', error);
       setErrorMsg(error?.message || 'Não foi possível validar sua localização.');
