@@ -3,6 +3,7 @@
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/Avatar';
+import { TopAppBar } from '@/components/TopAppBar';
 import { useApp } from '@/hooks/useApp';
 import { useState, useEffect } from 'react';
 import { type PlaceSearchResult } from '@/lib/maps';
@@ -153,53 +154,18 @@ export default function PlaceDetailPage() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-background">
-      <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
-        <div className="flex items-center gap-3 max-w-7xl mx-auto w-full">
-          <button 
-            onClick={() => router.back()}
-            className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
-          >
-            <Icon icon="arrow_back" size={24} />
-          </button>
+      <TopAppBar 
+        showBack
+        onBack={() => router.back()}
+        leftCustomAction={
           <div className="flex items-center gap-2">
             {effectiveEnvironment.image && (
-              <img className="w-8 h-8 rounded-full object-cover" src={effectiveEnvironment.image} alt={effectiveEnvironment.name} />
+              <img className="w-8 h-8 border border-outline-variant/10 rounded-full object-cover" src={effectiveEnvironment.image} alt={effectiveEnvironment.name} />
             )}
-            <h1 className="text-lg font-semibold tracking-tight text-on-surface">{effectiveEnvironment.name}</h1>
+            <h1 className="text-lg font-black tracking-tight text-on-surface line-clamp-1">{effectiveEnvironment.name}</h1>
           </div>
-        </div>
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          {user ? (
-            <div className="flex items-center gap-3">
-              {membership?.status === 'active' && (
-                <button 
-                  onClick={() => router.push(`/register-service?envId=${effectiveEnvironment.id}`)}
-                  className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full primary-gradient text-white text-xs font-bold shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
-                >
-                  <Icon icon="add" size={18} />
-                  <span>Publicar Serviço</span>
-                </button>
-              )}
-              <button onClick={() => router.push('/profile')} className="hover:scale-105 transition-transform active:scale-95 ml-1">
-                <Avatar
-                  src={user.avatar}
-                  name={user.name}
-                  alt="Avatar"
-                  className="w-10 h-10 border-2 border-primary shadow-sm"
-                />
-              </button>
-            </div>
-          ) : (
-            <button 
-              onClick={() => router.push('/login')}
-              className="flex items-center gap-2 px-4 py-2 rounded-full primary-gradient text-white text-xs font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all"
-            >
-              <Icon icon="login" size={20} />
-              <span>Entrar</span>
-            </button>
-          )}
-        </div>
-      </header>
+        }
+      />
 
       {/* Floating Action Button for mobile */}
       {user && membership?.status === 'active' && (

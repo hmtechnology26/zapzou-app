@@ -186,9 +186,10 @@ export function TopAppBar({
               ) : (
                 <button 
                   onClick={() => router.push('/login')}
-                  className="px-6 py-3 rounded-full primary-gradient text-white text-sm font-black shadow-lg shadow-primary/20 active:scale-95 transition-all hover:brightness-110"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-full primary-gradient text-white text-[13px] font-black shadow-lg shadow-primary/20 active:scale-95 transition-all hover:brightness-110"
                 >
-                  Entrar na Rede
+                  <Icon icon="login" size={18} weight={700} />
+                  <span>Entrar</span>
                 </button>
               )}
             </div>

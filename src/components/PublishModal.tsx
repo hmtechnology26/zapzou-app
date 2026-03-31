@@ -641,8 +641,8 @@ export function PublishModal() {
   const currentEnv = selectedEnvironments.find(e => e.id === activeEnvId) || selectedEnvironmentRecord;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center p-0 md:p-4">
-      <div className="bg-white rounded-t-3xl md:rounded-3xl w-full md:max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-[2.5rem] w-full md:max-w-lg max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
         <div className="flex-1 overflow-y-auto">
           <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/10">
             <div className="flex items-center gap-3">

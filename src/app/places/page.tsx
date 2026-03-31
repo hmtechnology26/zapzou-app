@@ -260,7 +260,7 @@ export default function PlacesPage() {
           </div>
         </div>
 
-        <div className="flex overflow-x-auto pb-6 -mx-4 px-4 gap-3 no-scrollbar scroll-smooth">
+        <div className="grid grid-cols-2 gap-4 mb-10">
           {PLACE_CATEGORIES.map((category) => {
             const isSelected = selectedCategory === category.id;
             return (
@@ -268,7 +268,7 @@ export default function PlacesPage() {
                 key={category.id}
                 type="button"
                 onClick={() => setSelectedCategory(category.id as any)}
-                className={`flex items-center gap-3 px-8 py-4 rounded-2xl whitespace-nowrap font-black text-sm transition-all border shrink-0 shadow-sm ${
+                className={`flex items-center justify-center gap-3 px-4 py-4 rounded-2xl font-black text-sm transition-all border shrink-0 shadow-sm ${
                   isSelected
                     ? 'bg-primary text-white border-primary shadow-xl shadow-primary/20 scale-105 z-10'
                     : 'bg-white text-on-surface-variant border-outline-variant/10 hover:border-primary/40 hover:text-primary active:scale-95'
@@ -359,12 +359,12 @@ export default function PlacesPage() {
         )}
 
         {!hasSearched && !showOnlyFavorites && (
-          <div className="text-center py-24 bg-surface-container-low/20 rounded-[3rem] border-2 border-dashed border-outline-variant/10 mt-10">
-            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-primary/5">
-               <Icon icon="search" weight={700} size={32} className="text-primary/30" />
+          <div className="text-center py-8 bg-surface-container-low/20 rounded-[3rem] border-2 border-dashed border-outline-variant/10 mt-10">
+            <div className="w-10 h-10 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-primary/5">
+               <Icon icon="search" weight={700} size={20} className="text-primary/30" />
             </div>
-            <h3 className="text-xl font-black text-on-surface">Comece sua busca</h3>
-            <p className="text-on-surface-variant font-medium mt-2 max-w-sm mx-auto">
+            <h3 className="text-[14px] font-black text-on-surface">Comece sua busca</h3>
+            <p className="text-[12px] text-on-surface-variant font-medium mt-2 max-w-sm mx-auto">
               Digite o nome do seu {selectedCategory === 'church' ? 'ambiente religioso' : 'condomínio'} para ver quem está anunciando lá.
             </p>
           </div>

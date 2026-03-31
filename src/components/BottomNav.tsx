@@ -67,10 +67,15 @@ export function BottomNav() {
         const isCenter = item.path === '/post';
 
         return (
-          <a
+          <button
             key={item.path}
-            href={item.path}
-            onClick={(e) => handleNavClick(e, item.path)}
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick(e, item.path);
+              if (item.path !== '/post') {
+                router.push(item.path);
+              }
+            }}
             className={`flex min-w-0 flex-col items-center justify-center px-3 py-1 transition-all active:scale-90 duration-150 ${
               isCenter
                 ? 'text-primary'
@@ -99,7 +104,7 @@ export function BottomNav() {
             <span className="mt-1 text-[10px] font-medium tracking-wide text-center leading-tight">
               {item.label}
             </span>
-          </a>
+          </button>
         );
       })}
     </nav>

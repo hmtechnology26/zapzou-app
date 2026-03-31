@@ -138,8 +138,7 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
     !hasSeenLocationPrompt &&
     !isLocationExemptPath;
 
-  const tabPaths = ["/", "/places", "/places/", "/meus-anuncios", "/profile"];
-  const showBottomNav = hasMounted && pathname && tabPaths.includes(pathname);
+  const showBottomNav = hasMounted && pathname ? true : false;
 
   return (
     <div className="min-h-screen">
@@ -174,27 +173,28 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
               </p>
               <button
                 onClick={() => {
-                  try {
-                    window.localStorage.setItem(
-                      LOCATION_PROMPT_STORAGE_KEY,
-                      "true",
-                    );
-                    setHasSeenLocationPrompt(true);
-                  } catch {
-                    setHasSeenLocationPrompt(true);
-                  }
-
                   if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                       () => {
                         // Permission granted, update state
                         setLocationPermission("granted");
+                        try {
+                          window.localStorage.setItem(LOCATION_PROMPT_STORAGE_KEY, "true");
+                        } catch {}
+                        setHasSeenLocationPrompt(true);
                       },
                       () => {
                         // Permission denied
                         setLocationPermission("denied");
+                        try {
+                          window.localStorage.setItem(LOCATION_PROMPT_STORAGE_KEY, "true");
+                        } catch {}
+                        setHasSeenLocationPrompt(true);
                       },
                     );
+                  } else {
+                    // Geolocation not supported
+                    setHasSeenLocationPrompt(true);
                   }
                 }}
                 className="w-full bg-primary text-white font-bold py-3 px-6 mt-6 rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
