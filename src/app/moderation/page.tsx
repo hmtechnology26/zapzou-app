@@ -179,12 +179,15 @@ export default function ModerationPage() {
             <Icon icon="admin_panel_settings" size={32} />
             <h1 className="text-2xl font-black tracking-tight">Painel do Líder</h1>
           </div>
-          <p className="text-on-surface-variant text-sm flex items-center gap-2">
-            Gerencie as pessoas que solicitaram entrada em
-            <span className="font-bold text-on-surface bg-primary/10 px-2 py-0.5 rounded-full whitespace-nowrap overflow-hidden text-ellipsis inline-block align-middle max-w-[200px]">
+          <p className="text-on-surface-variant text-sm flex flex-col gap-1">
+            <span>
+              Gerencie as pessoas que solicitaram entrada em
+            </span>
+
+            <span className="font-bold text-center text-on-surface bg-primary/10 px-2 py-0.5 rounded-full whitespace-nowrap overflow-hidden text-ellipsis inline-block max-w-[200px]">
               {selectedEnvironment?.name || 'Comunidade Atual'}
             </span>
-          </p>
+          </p>  
         </div>
 
         <div>
@@ -246,16 +249,15 @@ export default function ModerationPage() {
                       className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-error/10 text-error transition-all active:scale-95 disabled:opacity-50"
                       title="Recusar"
                     >
-                      <Icon icon="close" size={20} />
+                      <Icon icon="close" size={18} />
                     </button>
                     <button
                       onClick={() => handleApprove(member.id)}
                       disabled={actionLoading === member.id}
-                      className="px-4 h-10 flex items-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700 rounded-full font-black text-xs uppercase tracking-tight transition-all shadow-md active:scale-95 disabled:opacity-50"
+                      className="h-10 flex items-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700 rounded-full font-black text-xs uppercase tracking-tight transition-all shadow-md active:scale-95 disabled:opacity-50"
                     >
-                      <Icon icon="check" size={18} weight={700} />
-                      <span className="hidden sm:inline">Aprovar</span>
-                      <span className="sm:hidden">OK</span>
+                      <Icon icon="check" size={18} weight={400} />
+                      
                     </button>
                   </div>
                 </div>
@@ -264,8 +266,6 @@ export default function ModerationPage() {
           )}
         </div>
       </main>
-
-      <BottomNav />
     </div>
   );
 }
