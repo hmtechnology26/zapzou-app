@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/Icon';
-import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
 import { TopAppBar } from '@/components/TopAppBar';
 import { usePublishModal } from '@/contexts/PublishModalContext';
@@ -34,9 +33,30 @@ const getStatusRank = (status?: AffiliationRecord['status']) => {
   }
 };
 
+const normalizeSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+const normalizeEnvironmentRecord = (env: any): Environment => ({
+  id: env.id,
+  name: env.name,
+  slug: env.slug || normalizeSlug(env.name ?? env.id ?? ''),
+  type: env.type,
+  members: Number(env.members_count ?? 0),
+  image: env.image_url || '',
+  latitude: env.latitude,
+  longitude: env.longitude,
+  requiresModeratorApproval: Boolean(env.requires_moderator_approval),
+  requiresRadiusValidation: Boolean(env.requires_radius_validation),
+});
+
 export default function MyAdsPage() {
   const router = useRouter();
-  const { user, membershipVersion } = useApp();
+  const { user, membershipVersion, selectedEnvironments } = useApp();
   const { open } = usePublishModal();
   const [mounted, setMounted] = useState(false);
   const [affiliations, setAffiliations] = useState<Record<string, AffiliationRecord>>({});
@@ -49,49 +69,70 @@ export default function MyAdsPage() {
     setMounted(true);
   }, []);
 
+  const selectedEnvironmentMap = useMemo(() => {
+    const map: Record<string, Environment> = {};
+    selectedEnvironments.forEach((env) => {
+      map[env.id] = env;
+    });
+    return map;
+  }, [selectedEnvironments]);
+
   const fetchUserContexts = useCallback(async () => {
     if (!user?.id) return;
     setLoadingContexts(true);
     setAffiliationLoading(true);
 
-    // Fetch environments where user has membership
     const { data: membersData, error: membersError } = await supabase
       .from('environment_members')
-      .select('status, role, environment_id, environments(*)')
+      .select('id, status, role, environment_id')
       .eq('user_id', user.id);
 
     if (membersData && !membersError) {
       const affiliationsPayload: Record<string, AffiliationRecord> = {};
       const contextsPayload: Environment[] = [];
+      const missingEnvIds = new Set<string>();
+      const seenEnvIds = new Set<string>();
+      const envCache: Record<string, Environment> = { ...selectedEnvironmentMap };
 
       membersData.forEach((record: any) => {
-        if (record.environments) {
-          const env = record.environments;
-          const normalizedEnv: Environment = {
-            id: env.id,
-            name: env.name,
-            slug: env.slug || env.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
-            type: env.type,
-            members: Number(env.members_count ?? 0),
-            image: env.image_url || '',
-            latitude: env.latitude,
-            longitude: env.longitude,
-            requiresModeratorApproval: Boolean(env.requires_moderator_approval),
-            requiresRadiusValidation: Boolean(env.requires_radius_validation),
-          };
-          
-          affiliationsPayload[env.id] = {
-            id: record.id,
-            environmentId: env.id,
-            role: record.role,
-            status: record.status,
-          };
-          
-          if (record.role === 'member' || record.role === 'moderator') {
-            contextsPayload.push(normalizedEnv);
+        const envId = record.environment_id;
+        if (!envId) return;
+
+        affiliationsPayload[envId] = {
+          id: record.id,
+          environmentId: envId,
+          role: record.role,
+          status: record.status,
+        };
+
+        if (record.role === 'member' || record.role === 'moderator') {
+          const cachedEnv = envCache[envId];
+          if (cachedEnv) {
+            if (!seenEnvIds.has(envId)) {
+              contextsPayload.push(cachedEnv);
+              seenEnvIds.add(envId);
+            }
+          } else {
+            missingEnvIds.add(envId);
           }
         }
       });
+
+      if (missingEnvIds.size > 0) {
+        const { data: missingEnvRecords } = await supabase
+          .from('environments')
+          .select('*')
+          .in('id', Array.from(missingEnvIds));
+
+        missingEnvRecords?.forEach((env) => {
+          const normalizedEnv = normalizeEnvironmentRecord(env);
+          envCache[env.id] = normalizedEnv;
+          if (!seenEnvIds.has(env.id)) {
+            contextsPayload.push(normalizedEnv);
+            seenEnvIds.add(env.id);
+          }
+        });
+      }
 
       setAffiliations(affiliationsPayload);
       setMyContexts(contextsPayload.sort((a, b) => {
@@ -101,10 +142,10 @@ export default function MyAdsPage() {
         return a.name.localeCompare(b.name);
       }));
     }
-    
+
     setLoadingContexts(false);
     setAffiliationLoading(false);
-  }, [user?.id]);
+  }, [user?.id, selectedEnvironmentMap]);
 
   useEffect(() => {
     if (user?.id) {
