@@ -11,7 +11,7 @@ export default function MembersPage() {
 
   return (
     <div className="min-h-screen pb-24">
-      <TopAppBar title="Membros" />
+      <TopAppBar />
       <main className="pt-20 px-6 max-w-2xl mx-auto">
         <div className="space-y-3">
           {members.map(m => (

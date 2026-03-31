@@ -488,11 +488,20 @@ export function PublishModal() {
 
   const uploadImagesToR2 = async (files: File[], prefix: string): Promise<string[]> => {
     console.log('uploadImagesToR2 started', { files: files.length, prefix });
-    const edgeFunctionUrl = process.env.NEXT_PUBLIC_SUPABASE_EDGE_FUNCTION_URL;
+    let edgeFunctionUrl = process.env.NEXT_PUBLIC_SUPABASE_EDGE_FUNCTION_URL;
     const r2PublicUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL;
     
     if (!edgeFunctionUrl || !r2PublicUrl) {
+      console.error('Environment variables missing:', { edgeFunctionUrl, r2PublicUrl });
       throw new Error('R2 não configurado. Contate o administrador.');
+    }
+
+    // Garante que o nome da função esteja no URL
+    if (!edgeFunctionUrl.includes('r2-signed-upload')) {
+        edgeFunctionUrl = edgeFunctionUrl.endsWith('/') 
+            ? `${edgeFunctionUrl}r2-signed-upload` 
+            : `${edgeFunctionUrl}/r2-signed-upload`;
+        console.log('Appended function name to URL:', edgeFunctionUrl);
     }
 
     console.log('Getting session...');
@@ -508,7 +517,7 @@ export function PublishModal() {
       const fileName = `${prefix}/${Date.now()}-${Math.random()}.webp`;
       
       try {
-        console.log('Fetching signed URL...');
+        console.log('Fetching signed URL for:', fileName);
         const response = await fetch(edgeFunctionUrl, {
           method: 'POST',
           headers: {
@@ -521,15 +530,15 @@ export function PublishModal() {
           }),
         });
 
-        console.log('Signed URL response:', response.status);
+        console.log('Signed URL response status:', response.status);
         if (!response.ok) {
-          const error = await response.json();
+          const error = await response.json().catch(() => ({ error: 'Invalid JSON response' }));
           console.error('Error getting signed URL:', error);
           throw new Error(error.error || 'Erro ao obter URL de upload');
         }
 
         const { uploadUrl } = await response.json();
-        console.log('Got upload URL, uploading...');
+        console.log('Got upload URL, starting R2 PUT...');
 
         const uploadResponse = await fetch(uploadUrl, {
           method: 'PUT',
@@ -537,8 +546,10 @@ export function PublishModal() {
           body: file,
         });
 
-        console.log('Upload response:', uploadResponse.status);
+        console.log('Upload response status:', uploadResponse.status);
         if (!uploadResponse.ok) {
+          const errorText = await uploadResponse.text().catch(() => 'No error body');
+          console.error('R2 upload failed:', errorText);
           throw new Error('Falha ao fazer upload da imagem');
         }
 
@@ -834,21 +845,14 @@ export function PublishModal() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6 -mt-12">
               <div className="flex h-full flex-col items-center justify-center text-center">
-                <div className="mb-4 text-sm font-bold uppercase tracking-[0.35em] text-error">
-                  {step === 'radius' ? 'STEP 2' : 'STEP 3'}
-                </div>
-                <div className="w-28 h-28 rounded-full border border-dashed border-outline-variant/30 bg-surface-container-lowest flex items-center justify-center mb-5">
-                  <Icon
-                    icon={step === 'radius' ? 'my_location' : 'admin_panel_settings'}
-                    size={56}
-                    className="text-primary"
-                  />
-                </div>
-                <h4 className="text-2xl font-black tracking-tight text-on-surface">
-                  {step === 'radius' ? 'Step 2: Validação de Raio' : 'Step 3: Aprovação Necessária'}
+                <div className="flex flex-row items-center gap-2">
+                    <Icon icon={step === 'radius' ? 'location_on' : 'admin_panel_settings'} size={36} className="text-primary mt-10" />
+                    <h4 className="text-2xl mt-10 font-black tracking-tight text-on-surface">
+                  {step === 'radius' ? 'Validação de Raio' : 'Aprovação Necessária'}
                 </h4>
+                </div>
                 <p className="mt-3 max-w-sm text-sm leading-6 text-on-surface-variant">
                   {step === 'radius'
                     ? 'Estamos verificando sua proximidade com o local selecionado. Você precisa estar dentro de 500m para publicar neste ambiente.'
@@ -857,7 +861,7 @@ export function PublishModal() {
                 {selectedPlaceDecision && (
                   <p className="mt-3 text-xs font-bold uppercase tracking-[0.25em] text-primary/70">
                     {selectedPlaceDecision.mode === 'moderator'
-                      ? 'Aprovação do moderador'
+                      ? ''
                       : selectedPlaceDecision.mode === 'radius'
                         ? 'Validação por raio'
                         : 'Acesso livre'}
@@ -881,22 +885,10 @@ export function PublishModal() {
                   {uploading
                     ? 'Processando...'
                     : step === 'radius'
-                      ? 'Requerer Validação de Raio'
-                      : 'Requerer Aprovação do Moderador'}
+                      ? 'Requisitar Validação'
+                      : 'Requisitar Aprovação'}
                 </button>
-                <button
-                  onClick={() => {
-                    setStep('search');
-                    setActiveEnvId(null);
-                    setSelectedEnvironmentRecord(null);
-                    setSelectedPlaceDistanceKm(null);
-                    setSelectedPlaceDecision(null);
-                    setErrorMsg('');
-                  }}
-                  className="mt-3 text-sm font-semibold text-on-surface-variant underline-offset-4 hover:underline"
-                >
-                  Escolher outro local
-                </button>
+                
               </div>
             </div>
           )}

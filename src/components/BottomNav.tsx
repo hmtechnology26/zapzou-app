@@ -15,7 +15,8 @@ const navItems: NavItem[] = [
   { path: '/', label: 'Serviços', icon: 'home' },
   { path: '/places', label: 'Ambientes', icon: 'explore' },
   { path: '/meus-anuncios', label: 'Meus Anúncios', icon: 'storefront' },
-  { path: '/profile', label: 'Perfil', icon: 'person' },
+  { path: '/favorites', label: 'Favoritos', icon: 'favorite' },
+  { path: '/contact', label: 'Suporte', icon: 'support_agent' },
 ];
 
 export function BottomNav() {
@@ -41,7 +42,7 @@ export function BottomNav() {
       open();
     }
 
-    if ((itemPath === '/meus-anuncios' || itemPath === '/profile') && !user) {
+    if ((itemPath === '/meus-anuncios' || itemPath === '/favorites' || itemPath === '/contact') && !user) {
       e.preventDefault();
       router.push('/login');
     }
@@ -51,7 +52,7 @@ export function BottomNav() {
     <nav
       className="
         fixed bottom-0 left-0 right-0 z-[60]
-        w-full
+        w-full md:hidden
         min-h-[72px]
         bg-white/95 backdrop-blur-xl
         border-t border-slate-200/70

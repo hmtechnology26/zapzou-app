@@ -171,11 +171,7 @@ export default function ModerationPage() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <TopAppBar
-        title="Moderação"
-        showBack
-        onBack={() => router.back()}
-      />
+      <TopAppBar />
 
       <main className="pt-24 px-4 max-w-2xl mx-auto space-y-6">
         <div className="bg-primary/10 rounded-2xl p-6 mb-6">

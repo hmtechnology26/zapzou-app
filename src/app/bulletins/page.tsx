@@ -6,7 +6,7 @@ import { TopAppBar } from '@/components/TopAppBar';
 export default function BulletinsPage() {
   return (
     <div className="min-h-screen pb-24">
-      <TopAppBar title="Avisos" />
+      <TopAppBar />
       <main className="pt-20 px-6">
         <p className="text-center text-on-surface-variant py-10">Nenhum aviso disponível</p>
       </main>

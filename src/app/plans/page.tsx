@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
+import { TopAppBar } from '@/components/TopAppBar';
 
 function normalizeReturnTo(value: string | null): string {
   if (!value) return '';
@@ -61,7 +62,7 @@ const plans = [
       'Análises avançadas',
     ],
     cta: 'Upgrade para PRÓ',
-    popular: true,
+    popular: false,
   },
   {
     id: 'plus',
@@ -77,7 +78,7 @@ const plans = [
     ],
     notFeatures: [],
     cta: 'Upgrade para PLUS',
-    popular: false,
+    popular: true,
   },
 ];
 
@@ -85,7 +86,7 @@ export default function PlansPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useApp();
-  const currentPlan = user?.plan || 'free';
+  const currentPlan = user?.plan || 'plus';
   const returnTo = normalizeReturnTo(searchParams?.get('returnTo'));
   const returnToQuery = returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : '';
 
@@ -121,36 +122,7 @@ export default function PlansPage() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-12 bg-background">
-      <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
-        <div className="flex items-center justify-between max-w-7xl mx-auto w-full">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={goBack}
-              className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
-            >
-              <Icon icon="arrow_back" size={24} />
-            </button>
-            <h1 className="text-lg font-semibold tracking-tight text-on-surface">
-              Planos
-            </h1>
-          </div>
-
-          {user && (
-            <button
-              onClick={() => router.push('/profile')}
-              className="hover:scale-105 transition-transform active:scale-95"
-              aria-label="Abrir perfil"
-            >
-              <Avatar
-                src={user.avatar}
-                name={user.name}
-                alt="Avatar"
-                className="w-10 h-10 border-2 border-primary shadow-sm"
-              />
-            </button>
-          )}
-        </div>
-      </header>
+      <TopAppBar showBack onBack={() => router.push('/profile')} />
 
       <main className="pt-20 px-4 md:px-8 max-w-4xl mx-auto">
         <div className="text-center mb-8">
@@ -163,7 +135,7 @@ export default function PlansPage() {
             (() => {
               const isCurrent = plan.id === currentPlan;
               const ctaLabel = isCurrent ? 'Plano Atual' : plan.cta;
-              const isDisabled = isCurrent;
+              const isDisabled = true;
               return (
             <div 
               key={plan.id}

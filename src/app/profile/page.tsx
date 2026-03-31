@@ -11,7 +11,6 @@ import { useEffect } from "react";
 export default function ProfilePage() {
   const router = useRouter();
   const { user, services, setUser, loading, selectedEnvironments, setSelectedEnvironment } = useApp();
-  const canManageMembers = (user?.managedEnvironmentIds?.length ?? 0) > 0;
 
   useEffect(() => {
     if (!loading && !user) {
@@ -35,7 +34,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen pb-24">
-      <TopAppBar title="Meu Perfil" />
+      <TopAppBar />
       <main className="pt-20 px-6 max-w-2xl mx-auto">
         <section className="flex flex-col items-center py-8">
           <div className="relative">
@@ -61,7 +60,7 @@ export default function ProfilePage() {
               className={`mt-2 px-3 py-1 rounded-full text-xs font-bold text-white ${
                 user.plan === "pro"
                   ? "bg-gradient-to-r from-blue-500 to-blue-600"
-                  : "bg-gradient-to-r from-purple-500 to-purple-600"
+                  : "bg-gradient-to-r from-green-500 to-green-600"
               }`}
             >
               Plano {user.plan === "pro" ? "PRÓ" : "PLUS"}
@@ -90,14 +89,14 @@ export default function ProfilePage() {
               className={`rounded-3xl p-5 ${
                 user.plan === "pro"
                   ? "bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200"
-                  : "bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200"
+                  : "bg-gradient-to-br from-green-50 to-green-100 border border-green-200"
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      user.plan === "pro" ? "bg-blue-500" : "bg-purple-500"
+                      user.plan === "pro" ? "bg-blue-500" : "bg-green-500"
                     }`}
                   >
                     <Icon
@@ -112,7 +111,7 @@ export default function ProfilePage() {
                       className={`font-bold text-lg ${
                         user.plan === "pro"
                           ? "text-blue-700"
-                          : "text-purple-700"
+                          : "text-green-700"
                       }`}
                     >
                       Plano {user.plan === "pro" ? "PRÓ" : "PLUS"}
@@ -128,8 +127,8 @@ export default function ProfilePage() {
                   onClick={() => router.push("/plans?returnTo=/profile")}
                   className={`text-xs font-bold px-3 py-1.5 rounded-full ${
                     user.plan === "pro"
-                      ? "bg-blue-500 text-white"
-                      : "bg-purple-500 text-white"
+                      ? "bg-green-500 text-white"
+                      : "bg-green-500 text-white"
                   }`}
                 >
                   Alterar
@@ -153,40 +152,6 @@ export default function ProfilePage() {
             />
             <span className="flex-1 text-left font-medium">Planos</span>
             <Icon icon="chevron_right" weight={400} grade={0} size={24} />
-          </button>
-          <button
-            onClick={() => {
-              if (!canManageMembers) return;
-              const targetEnvironmentId = user?.managedEnvironmentIds?.[0];
-              if (targetEnvironmentId) {
-                const targetEnvironment = selectedEnvironments.find((env) => env.id === targetEnvironmentId);
-                if (targetEnvironment) {
-                  setSelectedEnvironment(targetEnvironment);
-                }
-              }
-              router.push("/moderation");
-            }}
-            disabled={!canManageMembers}
-            className={`w-full flex items-center gap-4 p-4 bg-surface-container-lowest rounded-xl transition-all ${
-              canManageMembers
-                ? "hover:bg-surface-container-low active:scale-[0.99]"
-                : "opacity-50 cursor-not-allowed"
-            }`}
-          >
-            <Icon
-              icon="storefront"
-              weight={400}
-              grade={0}
-              size={24}
-              className="text-primary"
-            />
-            <span className="flex-1 text-left font-medium">Gerenciar Membros</span>
-            <Icon
-              icon={canManageMembers ? "chevron_right" : "lock"}
-              weight={400}
-              grade={0}
-              size={24}
-            />
           </button>
           {/* <button onClick={() => router.push('/members')} className="w-full flex items-center gap-4 p-4 bg-surface-container-lowest rounded-xl">
             <Icon icon="group" weight={400} grade={0} size={24} className="text-primary" />

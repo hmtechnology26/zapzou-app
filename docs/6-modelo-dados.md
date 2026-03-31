@@ -26,6 +26,30 @@ Armazena os perfis dos usuários do sistema (criados automaticamente via Google 
 
 ---
 
+### Tabela: `user_public_profiles`
+Armazena perfis públicos de usuários para exibição em avaliações e membros.
+
+| Campo | Tipo | Descrição | Obrigatório |
+|-------|------|------------|--------------|
+| user_id | UUID | ID do usuário (FK users, PK) | Sim |
+| name | VARCHAR(150) | Nome público | Sim |
+| avatar_url | TEXT | URL do avatar público | Não |
+
+---
+
+### Tabela: `user_place_favorites`
+Armazena locais favoritos dos usuários (buscados via Google Places).
+
+| Campo | Tipo | Descrição | Obrigatório |
+|-------|------|------------|--------------|
+| id | UUID | Identificador único | Sim |
+| user_id | UUID | ID do usuário (FK users) | Sim |
+| place_id | VARCHAR(255) | ID do lugar no Google Places | Sim |
+| place_payload | JSONB | Dados completos do lugar | Sim |
+| created_at | TIMESTAMP | Data da favorito | Sim |
+
+---
+
 ### Tabela: `environments`
 Armazena os ambientes (condomínios, igrejas, clubes, associações).
 
@@ -41,6 +65,8 @@ Armazena os ambientes (condomínios, igrejas, clubes, associações).
 | status | ENUM('active', 'inactive') | Status | Sim |
 | latitude | DECIMAL | Latitude (geolocalização) | Não |
 | longitude | DECIMAL | Longitude (geolocalização) | Não |
+| requires_moderator_approval | BOOLEAN | Requer aprovação de moderador | Não |
+| requires_radius_validation | BOOLEAN | Requer validação de localização (500m) | Não |
 | created_at | TIMESTAMP | Data de criação | Sim |
 | updated_at | TIMESTAMP | Última atualização | Não |
 
@@ -56,12 +82,8 @@ Armazena os serviços publicados pelos prestadores.
 | title | VARCHAR(150) | Título do serviço | Sim |
 | description | TEXT | Descrição detalhada | Sim |
 | category | VARCHAR(50) | Categoria (Alimentação, Limpeza, etc) | Sim |
-| image_url | TEXT | URL da imagem principal (large) | Não |
-| images_urls | JSONB | Array de URLs de imagens (todas as versões) | Não |
-| image_thumb_url | TEXT | URL thumbnail (150x150) | Não |
-| image_medium_url | TEXT | URL medium (400x400) | Não |
-| image_original_url | TEXT | URL da imagem original | Não |
-| image_status | VARCHAR(20) | Status do processamento ('processing', 'ready', 'failed') | Não |
+| image_url | TEXT | URL da imagem principal | Não |
+| images_urls | JSONB | Array de URLs de imagens | Não |
 | provider | VARCHAR(150) | Nome do prestador | Sim |
 | provider_id | UUID | ID do prestador (FK users) | Sim |
 | price | VARCHAR(50) | Preço (texto livre) | Não |
@@ -70,12 +92,14 @@ Armazena os serviços publicados pelos prestadores.
 | frequency | VARCHAR(50) | Disponibilidade (diário, semanal) | Não |
 | rating | DECIMAL(2,1) | Nota média (0-5) | Não |
 | reviews_count | INTEGER | Total de avaliações | Não |
+| views | INTEGER | Total de visualizações | Não |
 | tags | JSONB | Array de tags | Não |
 | menu | JSONB | Cardápio/itens com preços | Não |
 | is_active | BOOLEAN | Se está ativo | Sim |
+| status | ENUM('active', 'pending', 'rejected') | Status de moderação | Sim |
 | environment_id | UUID | ID do ambiente (FK environments) | Sim |
-| latitude | DECIMAL | Latitude do prestador (validação) | Não |
-| longitude | DECIMAL | Longitude do prestador (validação) | Não |
+| latitude | DECIMAL | Latitude do prestador | Não |
+| longitude | DECIMAL | Longitude do prestador | Não |
 | last_location_check | TIMESTAMP | Última verificação de localização | Não |
 | created_at | TIMESTAMP | Data de criação | Sim |
 | updated_at | TIMESTAMP | Última atualização | Não |
@@ -97,6 +121,7 @@ Armazena as avaliações dos serviços.
 | service_id | UUID | ID do serviço (FK services) | Sim |
 | user_id | UUID | ID do avaliador (FK users) | Sim |
 | user_name | VARCHAR(150) | Nome do avaliador | Sim |
+| user_avatar | TEXT | URL do avatar do avaliador | Não |
 | stars | INTEGER | Nota (1-5) | Sim |
 | comment | TEXT | Comentário | Não |
 | created_at | TIMESTAMP | Data da avaliação | Sim |
@@ -196,7 +221,75 @@ interface AppState {
 }
 ```
 
-### Estrutura de Service (Frontend)
+### Estrutura de Environment (Frontend)
+```typescript
+interface Environment {
+  id: string;
+  slug: string;
+  name: string;
+  type: 'residential' | 'church' | 'club' | 'association';
+  members: number;
+  image: string;
+  isSelected?: boolean;
+  status?: string;
+  latitude?: number;
+  longitude?: number;
+  requiresModeratorApproval?: boolean;
+  requiresRadiusValidation?: boolean;
+}
+```
+
+### Estrutura de Member (Frontend)
+```typescript
+interface Member {
+  id: string;
+  name: string;
+  email: string;
+  unit?: string;
+  avatar?: string;
+  initials?: string;
+  isPending?: boolean;
+}
+```
+
+### Estrutura de MenuItem (Frontend)
+```typescript
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  image?: string;
+}
+```
+
+### Estrutura de Review (Frontend)
+```typescript
+interface Review {
+  id: string;
+  service_id?: string;
+  user_id?: string;
+  userName?: string;
+  user_avatar?: string;
+  stars: number;
+  comment?: string;
+  created_at?: string;
+}
+```
+
+### Estrutura de PlaceSearchResult (Google Places)
+```typescript
+interface PlaceSearchResult {
+  id: string;
+  displayName: { text: string; languageCode: string };
+  formattedAddress: string;
+  primaryType: string;
+  googleMapsUri: string;
+  location: { latitude: number; longitude: number };
+  city: string;
+  neighborhood: string;
+}
+```
 ```typescript
 interface Service {
   id: string;
@@ -207,9 +300,11 @@ interface Service {
   image: string;
   images?: string[];
   rating?: number;
-  reviews?: number;
+  reviews_count?: number;
+  views?: number;
   price?: string;
   provider: string;
+  provider_id?: string;
   frequency?: string;
   isActive?: boolean;
   WhatsApp?: string;
@@ -218,12 +313,30 @@ interface Service {
   environmentId?: string;
   environmentSlug?: string;
   environments?: { id: string; slug: string }[];
+  reviewList?: Review[];
   verified?: boolean;
   location?: string;
   tags?: string[];
   menu?: MenuItem[];
   latitude?: number;
   longitude?: number;
+  availabilityStatus?: 'active' | 'pending';
+  availabilityReason?: string;
+}
+```
+
+### Estrutura de User (Frontend)
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  role: 'user' | 'admin';
+  plan?: 'free' | 'pro' | 'plus';
+  membershipStatus?: 'active' | 'pending' | 'banned' | null;
+  membershipRole?: 'member' | 'moderator' | null;
+  managedEnvironmentIds?: string[];
 }
 ```
 

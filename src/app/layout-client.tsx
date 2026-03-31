@@ -5,6 +5,36 @@ import { useRouter, usePathname } from "next/navigation";
 import { useApp } from "@/hooks/useApp";
 import { BottomNav } from "@/components/BottomNav";
 
+function ProtectedLayoutSkeleton() {
+  const rows = Array.from({ length: 3 });
+
+  return (
+    <div
+      className="min-h-screen bg-background animate-pulse text-transparent selection-none"
+      aria-busy="true"
+      aria-live="polite"
+    >
+      <header className="fixed inset-x-0 top-0 z-40 h-16 bg-white/60 backdrop-blur-xl border-b border-slate-200/60 flex items-center px-4">
+        <div className="h-6 w-32 rounded-full bg-surface-container-lowest/60" />
+        <div className="ml-auto flex items-center gap-2">
+          <div className="h-10 w-10 rounded-full bg-surface-container-lowest/60" />
+          <div className="h-10 w-16 rounded-full bg-surface-container-lowest/60" />
+        </div>
+      </header>
+      <main className="pt-20 px-4 md:px-8 max-w-2xl mx-auto space-y-4 pb-28">
+        <div className="h-6 w-3/4 rounded-full bg-surface-container-lowest/40" />
+        <div className="h-4 w-1/2 rounded-full bg-surface-container-lowest/40" />
+        {rows.map((_, index) => (
+          <div
+            key={index}
+            className="h-32 rounded-3xl bg-surface-container-lowest/40 border border-outline-variant/20"
+          />
+        ))}
+      </main>
+    </div>
+  );
+}
+
 function ProtectedLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useApp();
   const router = useRouter();
@@ -95,11 +125,7 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   }, [user, loading, isPublicPage, router]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <ProtectedLayoutSkeleton />;
   }
 
   // Show location permission modal if permission not granted and not on exempt page

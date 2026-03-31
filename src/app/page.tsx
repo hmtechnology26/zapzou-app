@@ -4,16 +4,29 @@ import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { MapComponent } from '@/components/GoogleMap';
+import { TopAppBar } from '@/components/TopAppBar';
 
 export default function HomePage() {
   const router = useRouter();
   const { user, selectedEnvironment, selectedEnvironments, services } = useApp();
   const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [mounted, setMounted] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
+
+  // Extract unique categories from active services
+  const availableCategories = useMemo(() => {
+    const cats = new Set<string>();
+    services.forEach(s => {
+      if (s.isActive && s.status === 'active' && s.category) {
+        cats.add(s.category);
+      }
+    });
+    return Array.from(cats).sort();
+  }, [services]);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371;
@@ -26,16 +39,27 @@ export default function HomePage() {
     return R * c;
   };
 
-  const servicesWithDistance = services
-    .filter(s => s.isActive && s.status === 'active')
-    .map(s => {
-      if (s.latitude && s.longitude && userLocation) {
-        const distance = calculateDistance(userLocation.lat, userLocation.lng, s.latitude, s.longitude);
-        return { ...s, distance };
-      }
-      return { ...s, distance: Infinity };
-    })
-    .sort((a, b) => a.distance - b.distance);
+  const servicesWithDistance = useMemo(() => {
+    return services
+      .filter((s) => {
+        const isActive = s.isActive && s.status === "active";
+        const matchesCategory = selectedCategory === 'all' || s.category === selectedCategory;
+        return isActive && matchesCategory;
+      })
+      .map((s) => {
+        if (s.latitude && s.longitude && userLocation) {
+          const distance = calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            s.latitude,
+            s.longitude,
+          );
+          return { ...s, distance };
+        }
+        return { ...s, distance: Infinity };
+      })
+      .sort((a, b) => a.distance - b.distance);
+  }, [services, userLocation, selectedCategory]);
 
   useEffect(() => {
     setMounted(true);
@@ -77,48 +101,9 @@ export default function HomePage() {
 
   return (
     <div className={`min-h-screen ${user ? 'pb-32' : 'pb-10'} bg-background`}>
-      <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
-        <div className="flex items-center gap-3 max-w-7xl mx-auto w-full">
-          <img src="/zapzou_logo.png" alt="ZapZou" className="h-8" />
-        </div>
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          <button 
-            onClick={() => router.push('/search')}
-            className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
-          >
-            <Icon icon="search" size={24} />
-          </button>
-          {user ? (
-            <div className="relative">
-              <button onClick={() => router.push('/profile')} className="hover:scale-105 transition-transform">
-                <Avatar
-                  src={userAvatar}
-                  name={user?.name}
-                  alt="Avatar"
-                  className="w-10 h-10 border-2 border-primary shadow-sm"
-                />
-              </button>
-              {user?.plan && user.plan !== 'free' && (
-                <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-md ${
-                  user.plan === 'pro' ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 'bg-gradient-to-br from-purple-500 to-purple-600'
-                }`}>
-                  {user.plan === 'pro' ? 'PRÓ' : 'PLUS'}
-                </div>
-              )}
-            </div>
-          ) : (
-            <button 
-              onClick={() => router.push('/login')}
-              className="flex items-center gap-2 px-4 py-2 rounded-full primary-gradient text-white text-xs font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all"
-            >
-              <Icon icon="login" size={20} />
-              <span>Entrar</span>
-            </button>
-          )}
-        </div>
-      </header>
+      <TopAppBar />
 
-      <main className="pt-20 px-4 md:px-8 max-w-2xl mx-auto space-y-6 pb-28">
+      <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-8 pb-32">
         <section className="space-y-2">
           <h2 className="text-2xl font-bold tracking-tight text-on-surface">Perto de você</h2>
           <p className="text-on-surface-variant text-base">Serviços confiáveis de ambientes próximos</p>
@@ -157,65 +142,109 @@ export default function HomePage() {
           </button>
         </section> */}
 
-        <section>
-          <div className="flex items-center bg-surface-container-highest rounded-full px-6 py-4 gap-4 focus-within:bg-surface-container-lowest focus-within:ring-2 focus-within:ring-primary/10 transition-all">
-            <Icon icon="search" size={24} className="text-on-surface-variant" />
+        <section className="space-y-6">
+          <div className="flex items-center bg-surface-container-highest rounded-[2.5rem] px-8 py-6 gap-6 focus-within:bg-white focus-within:ring-8 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group">
+            <Icon icon="search" size={28} className="text-primary group-focus-within:scale-110 transition-transform" weight={700} />
             <input 
-              className="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-on-surface-variant/60"
-              placeholder="O que você precisa hoje?"
+              className="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-on-surface-variant/70 font-black text-lg"
+              placeholder="Encontre o que você precisa..."
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+
+          <div className="flex overflow-x-auto pb-4 -mx-4 px-4 gap-3 no-scrollbar scroll-smooth">
+             {[
+               { id: 'all', label: 'Tudo', icon: 'apps' },
+               { id: 'Tecnologia', label: 'Tecnologia', icon: 'terminal' },
+               { id: 'Limpeza', label: 'Limpeza', icon: 'cleaning_services' },
+               { id: 'Construção', label: 'Construção', icon: 'construction' },
+               { id: 'Saúde', label: 'Saúde', icon: 'medical_services' },
+               { id: 'Beleza', label: 'Beleza', icon: 'content_cut' },
+               { id: 'Eventos', label: 'Eventos', icon: 'event' },
+               { id: 'Pet Sitting', label: 'Pet Sitting', icon: 'pets' }
+             ].map((cat) => (
+               <button 
+                 key={cat.id} 
+                 onClick={() => setSelectedCategory(cat.id === 'all' ? 'all' : cat.label)}
+                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl whitespace-nowrap font-black text-xs transition-all border shrink-0 shadow-sm ${
+                   (cat.id === 'all' && selectedCategory === 'all') || (selectedCategory === cat.label)
+                     ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105' 
+                     : 'bg-white text-on-surface-variant border-outline-variant/10 hover:border-primary/40 hover:text-primary active:scale-95'
+                 }`}
+               >
+                 <Icon icon={cat.icon} size={16} weight={(cat.id === 'all' && selectedCategory === 'all') || (selectedCategory === cat.label) ? 700 : 400} />
+                 {cat.label}
+               </button>
+             ))}
+          </div>
         </section>
 
         {!search ? (
-          <section className="space-y-3">
-            <h3 className="text-lg font-bold text-on-surface">Serviços próximos</h3>
-            <div className="space-y-3">
+          <section className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-xl font-black text-on-surface tracking-tight">Serviços próximos</h3>
+              <button onClick={() => router.push('/places')} className="text-xs font-bold text-primary uppercase tracking-wider hover:opacity-70">Ver Ambientes →</button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {servicesWithDistance.slice(0, 6).map((service) => (
                 <div 
                   key={service.id}
                   onClick={() => router.push(`/service/${service.slug}`)}
-                  className="bg-surface-container-lowest p-3 rounded-2xl flex gap-4 items-center cursor-pointer hover:bg-surface-container-low transition-all active:scale-[0.98] border border-outline-variant/5"
+                  className="bg-surface-container-lowest p-4 rounded-[2rem] flex gap-4 items-center cursor-pointer hover:bg-white hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
                 >
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
-                    <img 
-                      className="w-full h-full object-cover" 
-                      src={service.image} 
-                      alt={service.title}
-                    />
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
+                    {service.image ? (
+                      <img 
+                        className="w-full h-full object-cover" 
+                        src={service.image} 
+                        alt={service.title}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-primary/5 flex items-center justify-center">
+                        <Icon icon="image" size={24} className="text-primary/20" />
+                      </div>
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] font-bold text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-md">{service.category}</span>
-                      <div className="flex items-center gap-1 text-primary">
-                        <Icon icon="star" size={12} style={{ fontVariationSettings: "'FILL' 1" }} />
-                        <span className="text-[10px] font-extrabold">{service.rating || 'Novo'}</span>
+                  <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">{service.category}</span>
+                      </div>
+                      <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">{service.title}</h4>
+                      <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">{service.description}</p>
+                    </div>
+                    
+                    <div className="mt-3 flex items-center justify-between">
+                      {userLocation && service.distance !== Infinity && (
+                        <div className="flex items-center gap-1 text-primary">
+                           <Icon icon="location_on" size={12} weight={700} />
+                           <span className="text-[10px] font-bold">
+                             {service.distance < 1 
+                               ? `${Math.round(service.distance * 1000)}m` 
+                               : `${service.distance.toFixed(1)}km`}
+                           </span>
+                        </div>
+                      )}
+                      <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-primary group-hover/card:text-white transition-all duration-300">
+                        <Icon icon="arrow_forward" size={14} weight={700} />
                       </div>
                     </div>
-                    <h4 className="font-bold text-on-surface text-sm truncate">{service.title}</h4>
-                    <p className="text-xs text-on-surface-variant truncate">{service.description}</p>
-                    {userLocation && service.distance !== Infinity && (
-                      <p className="text-[10px] text-primary font-medium mt-1">
-                        {service.distance < 1 
-                          ? `${Math.round(service.distance * 1000)}m` 
-                          : `${service.distance.toFixed(1)}km`} de distância
-                      </p>
-                    )}
                   </div>
                 </div>
               ))}
               {servicesWithDistance.length === 0 && (
-                <p className="text-center text-on-surface-variant py-8">Nenhum serviço encontrado próximo a você</p>
+                <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
+                   Nenhum serviço encontrado próximo a você
+                </div>
               )}
             </div>
           </section>
         ) : (
-          <section className="space-y-3">
-            <h3 className="text-lg font-bold text-on-surface">Resultados da busca</h3>
-            <div className="space-y-3">
+          <section className="space-y-4">
+            <h3 className="text-xl font-black text-on-surface tracking-tight px-1">Resultados da busca</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {servicesWithDistance
                 .filter(service => {
                   const searchLower = search.toLowerCase().trim();
@@ -229,45 +258,59 @@ export default function HomePage() {
                   <div 
                     key={service.id}
                     onClick={() => router.push(`/service/${service.slug}`)}
-                    className="bg-surface-container-lowest p-3 rounded-2xl flex gap-4 items-center cursor-pointer hover:bg-surface-container-low transition-all active:scale-[0.98] border border-outline-variant/5"
+                    className="bg-surface-container-lowest p-4 rounded-[2rem] flex gap-4 items-center cursor-pointer hover:bg-white hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
                   >
-                    <div className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
-                      <img 
-                        className="w-full h-full object-cover" 
-                        src={service.image} 
-                        alt={service.title}
-                      />
+                    <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
+                      {service.image ? (
+                        <img 
+                          className="w-full h-full object-cover" 
+                          src={service.image} 
+                          alt={service.title}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-primary/5 flex items-center justify-center">
+                          <Icon icon="image" size={24} className="text-primary/20" />
+                        </div>
+                      )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[9px] font-bold text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-md">{service.category}</span>
-                        <div className="flex items-center gap-1 text-primary">
-                          <Icon icon="star" size={12} style={{ fontVariationSettings: "'FILL' 1" }} />
-                          <span className="text-[10px] font-extrabold">{service.rating || 'Novo'}</span>
+                    <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">{service.category}</span>
+                        </div>
+                        <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">{service.title}</h4>
+                        <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">{service.description}</p>
+                      </div>
+                      
+                      <div className="mt-3 flex items-center justify-between">
+                        {userLocation && service.distance !== Infinity && (
+                          <div className="flex items-center gap-1 text-primary">
+                             <Icon icon="location_on" size={12} weight={700} />
+                             <span className="text-[10px] font-bold">
+                               {service.distance < 1 
+                                 ? `${Math.round(service.distance * 1000)}m` 
+                                 : `${service.distance.toFixed(1)}km`}
+                             </span>
+                          </div>
+                        )}
+                        <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-primary group-hover/card:text-white transition-all duration-300">
+                          <Icon icon="arrow_forward" size={14} weight={700} />
                         </div>
                       </div>
-                      <h4 className="font-bold text-on-surface text-sm truncate">{service.title}</h4>
-                      <p className="text-xs text-on-surface-variant truncate">{service.description}</p>
-                      {userLocation && service.distance !== Infinity && (
-                        <p className="text-[10px] text-primary font-medium mt-1">
-                          {service.distance < 1 
-                            ? `${Math.round(service.distance * 1000)}m` 
-                            : `${service.distance.toFixed(1)}km`} de distância
-                        </p>
-                      )}
                     </div>
                   </div>
                 ))}
-              {servicesWithDistance
-                .filter(service => {
+              {servicesWithDistance.filter(service => {
                   const searchLower = search.toLowerCase().trim();
                   return (
                     service.category.toLowerCase().includes(searchLower) ||
                     service.title.toLowerCase().includes(searchLower) ||
                     (service.description && service.description.toLowerCase().includes(searchLower))
                   );
-                }).length === 0 && (
-                <p className="text-center text-on-surface-variant py-8">Nenhum serviço encontrado para "{search}"</p>
+              }).length === 0 && (
+                <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
+                   Nenhum serviço encontrado para "{search}"
+                </div>
               )}
             </div>
           </section>

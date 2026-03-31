@@ -9,7 +9,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="min-h-screen pb-24">
-      <TopAppBar title="Configurações Admin" />
+      <TopAppBar />
       <main className="pt-20 px-6 max-w-2xl mx-auto space-y-2">
         <button onClick={() => router.push('/admin/visibility')} className="w-full flex items-center gap-4 p-4 bg-surface-container-lowest rounded-2xl">
           <Icon icon="visibility" weight={400} size={24} className="text-primary" />

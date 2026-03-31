@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -23,9 +23,14 @@ function RegisterServiceContent() {
     selectedEnvironment, 
     selectedEnvironments,
     setSelectedEnvironment,
-    requestAffiliation 
+    requestAffiliation,
+    setSelectedEnvironments
   } = useApp();
+  const [specificMembershipStatus, setSpecificMembershipStatus] = useState<'active' | 'pending' | 'banned' | null>(null);
+  const [loadingMembership, setLoadingMembership] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'uploading' | 'locating' | 'saving'>('idle');
   
+  const envIdFromQuery = searchParams?.get('envId');
   const existingService = serviceId ? services.find(s => s.id === serviceId) : null;
   
   const [form, setForm] = useState({
@@ -80,6 +85,92 @@ function RegisterServiceContent() {
     setMounted(true);
   }, []);
 
+  // Fetch or set correct environment from query param
+  useEffect(() => {
+    if (!mounted || !user) return;
+
+    const resolveEnvironment = async () => {
+      // 1. Prioritize envId from query param (New service flow)
+      if (envIdFromQuery) {
+        console.log('Resolving environment from query param:', envIdFromQuery);
+        
+        // Check if we already have it in selected list
+        let targetEnv = selectedEnvironments.find(e => e.id === envIdFromQuery);
+        
+        if (!targetEnv) {
+          // Fetch from Supabase
+          const { data, error } = await supabase
+            .from('environments')
+            .select('*')
+            .eq('id', envIdFromQuery)
+            .single();
+            
+          if (data && !error) {
+            targetEnv = {
+              id: data.id,
+              name: data.name,
+              slug: data.slug || data.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+              type: data.type,
+              members: Number(data.members_count ?? 0),
+              image: data.image_url || '',
+              status: data.status,
+              latitude: data.latitude,
+              longitude: data.longitude,
+              requiresModeratorApproval: Boolean(data.requires_moderator_approval),
+              requiresRadiusValidation: Boolean(data.requires_radius_validation),
+            } as any;
+            
+            // Add to global list if not there
+            if (!selectedEnvironments.some(e => e.id === targetEnv!.id)) {
+              setSelectedEnvironments(prev => [...prev, targetEnv!]);
+            }
+          }
+        }
+        
+        if (targetEnv) {
+          console.log('Setting selected environment to:', targetEnv.name);
+          setSelectedEnvironment(targetEnv);
+        }
+      } 
+      // 2. Otherwise prioritize existing service's environment (Edit flow)
+      else if (existingService?.environmentId) {
+        const targetEnv = selectedEnvironments.find(e => e.id === existingService.environmentId);
+        if (targetEnv) {
+          setSelectedEnvironment(targetEnv);
+        }
+      }
+    };
+
+    resolveEnvironment();
+  }, [mounted, user, envIdFromQuery, existingService, selectedEnvironments, setSelectedEnvironment, setSelectedEnvironments]);
+
+  // Fetch membership status for THE SELECTED environment specifically
+  useEffect(() => {
+    if (!mounted || !user || !selectedEnvironment?.id) {
+       setSpecificMembershipStatus(null);
+       return;
+    }
+    
+    const fetchSpecificMembership = async () => {
+      setLoadingMembership(true);
+      const { data, error } = await supabase
+        .from('environment_members')
+        .select('status')
+        .eq('user_id', user.id)
+        .eq('environment_id', selectedEnvironment.id)
+        .maybeSingle();
+
+      if (data && !error) {
+        setSpecificMembershipStatus(data.status);
+      } else {
+        setSpecificMembershipStatus(null);
+      }
+      setLoadingMembership(false);
+    };
+
+    fetchSpecificMembership();
+  }, [mounted, user, selectedEnvironment?.id]);
+
   useEffect(() => {
     return () => {
       if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
@@ -88,10 +179,14 @@ function RegisterServiceContent() {
 
   // Verificações de Acesso / Moderação
   useEffect(() => {
-    if (!user) {
-      router.push('/login');
-      return;
+    if (!mounted || !user) return;
+    
+    // Se temos um envId na query, esperamos ele ser resolvido pelo resolveEnvironment
+    // para não mostrar o alerta de "nenhum ambiente selecionado" prematuramente
+    if (envIdFromQuery && !selectedEnvironment) {
+       return;
     }
+
     if (!selectedEnvironment) {
       setAlertTitle('Nenhum ambiente selecionado');
       setAlertMessage('Selecione um ambiente para continuar.');
@@ -99,16 +194,17 @@ function RegisterServiceContent() {
       setShowAlert(true);
       return;
     }
+    
     if (user.plan === 'free') {
-      const freeServicesCount = services.filter(s => s.provider === user.id).length;
-      if (freeServicesCount >= 2) {
+      const userCreatedServices = services.filter(s => s.provider_id === user.id);
+      if (userCreatedServices.length >= 2 && !serviceId) {
         setAlertTitle('Limite do Plano Grátis');
         setAlertMessage('Você já atingiu o limite de 2 serviços do Plano Grátis. Para continuar publicando, contrate o Plano Pró ou Plus.');
         setAlertAction({ label: 'Ver Planos', onClick: () => router.push('/plans') });
         setShowAlert(true);
       }
     }
-  }, [user, selectedEnvironment]);
+  }, [user, selectedEnvironment, mounted, envIdFromQuery, services.length, serviceId, router]);
 
   if (!mounted) return null;
 
@@ -132,48 +228,77 @@ function RegisterServiceContent() {
   };
 
   const uploadImageToR2 = async (file: File, prefix: string): Promise<string> => {
-    const edgeFunctionUrl = process.env.NEXT_PUBLIC_SUPABASE_EDGE_FUNCTION_URL;
+    console.log('uploadImageToR2 started', { fileName: file.name, size: file.size, type: file.type, prefix });
+    let edgeFunctionUrl = process.env.NEXT_PUBLIC_SUPABASE_EDGE_FUNCTION_URL;
     const r2PublicUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
-    if (!edgeFunctionUrl || !r2PublicUrl) {
-      throw new Error('R2 not configured');
+    if (!edgeFunctionUrl || !r2PublicUrl || !supabaseAnonKey) {
+      console.error('Environment variables missing:', { edgeFunctionUrl, r2PublicUrl, hasKey: !!supabaseAnonKey });
+      throw new Error('Configuração do servidor de imagens incompleta.');
+    }
+
+    // Garante que o nome da função esteja no URL
+    if (!edgeFunctionUrl.includes('r2-signed-upload')) {
+        edgeFunctionUrl = edgeFunctionUrl.endsWith('/') 
+            ? `${edgeFunctionUrl}r2-signed-upload` 
+            : `${edgeFunctionUrl}/r2-signed-upload`;
     }
 
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
+    if (!session) throw new Error('Sessão expirada. Por favor, faça login novamente.');
 
-    const fileName = `${prefix}/${Date.now()}-${Math.random()}.webp`;
+    const contentType = file.type || 'image/webp';
+    // Clean fileName for regex
+    const timestamp = Date.now();
+    const randomPart = Math.random().toString(36).substring(7);
+    const fileName = `${prefix}/${timestamp}-${randomPart}.webp`;
     
-    const response = await fetch(edgeFunctionUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        path: fileName,
-        contentType: file.type || 'image/webp',
-      }),
-    });
+    console.log('Requesting signed URL...', { edgeFunctionUrl, path: fileName, contentType });
+    
+    try {
+      const response = await fetch(edgeFunctionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': supabaseAnonKey, // Essential for Supabase Gateway
+        },
+        body: JSON.stringify({
+          path: fileName,
+          contentType: contentType,
+        }),
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to get upload URL');
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Resposta inválida do servidor de upload' }));
+        console.error('Edge function error:', error);
+        throw new Error(error.error || 'Erro ao obter URL de upload');
+      }
+
+      const { uploadUrl } = await response.json();
+      if (!uploadUrl) throw new Error('URL de upload não recebida');
+      
+      console.log('Got signed URL, starting PUT to R2...');
+
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': contentType },
+        body: file,
+      });
+
+      if (!uploadResponse.ok) {
+        console.error('R2 upload failed with status:', uploadResponse.status);
+        throw new Error('Falha no upload para o storage R2');
+      }
+
+      const finalUrl = `${r2PublicUrl}/${fileName}`;
+      console.log('Upload successful! Final URL:', finalUrl);
+      return finalUrl;
+    } catch (err: any) {
+      console.error('Error in uploadImageToR2:', err);
+      throw err;
     }
-
-    const { uploadUrl } = await response.json();
-
-    const uploadResponse = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type || 'image/webp' },
-      body: file,
-    });
-
-    if (!uploadResponse.ok) {
-      throw new Error('Failed to upload to R2');
-    }
-
-    return `${r2PublicUrl}/${fileName}`;
   };
 
   const handleSubmit = async () => {
@@ -186,6 +311,7 @@ function RegisterServiceContent() {
     }
     setUploading(true);
     setErrorMsg('');
+    setSubmitStatus('uploading');
 
     try {
       console.log('Starting submit...');
@@ -223,6 +349,7 @@ function RegisterServiceContent() {
         }
       }
 
+      setSubmitStatus('saving');
       const environmentAvailability = getEnvironmentAvailabilityState(selectedEnvironment ?? undefined, {
         membershipStatus: effectiveMembershipStatus,
       });
@@ -241,6 +368,7 @@ function RegisterServiceContent() {
 
       console.log('Service data:', serviceData);
       
+      setSubmitStatus('locating');
       if (existingService) {
         console.log('Updating existing service...');
         await updateService(existingService.id, serviceData);
@@ -255,6 +383,7 @@ function RegisterServiceContent() {
       setErrorMsg(err.message || 'Erro ao publicar serviço. Verifique seus limites de plano ou distância do local.');
     } finally {
       setUploading(false);
+      setSubmitStatus('idle');
     }
   };
 
@@ -337,7 +466,7 @@ function RegisterServiceContent() {
   };
 
   const environmentAvailability = getEnvironmentAvailabilityState(selectedEnvironment ?? undefined, {
-    membershipStatus: user?.membershipStatus ?? null,
+    membershipStatus: specificMembershipStatus,
   });
 
   return (
@@ -393,6 +522,25 @@ function RegisterServiceContent() {
               )}
               <span className="text-xs font-medium text-on-surface">{selectedEnvironment.name}</span>
             </div>
+            
+            {/* Aviso de disponibilidade */}
+            {environmentAvailability && (
+              <div className={`mt-4 p-3 rounded-xl border flex items-start gap-2 ${
+                environmentAvailability.status === 'pending' 
+                  ? 'bg-amber-50 border-amber-200 text-amber-800' 
+                  : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              }`}>
+                <Icon 
+                  icon={environmentAvailability.status === 'pending' ? 'info' : 'check_circle'} 
+                  size={18} 
+                  className={environmentAvailability.status === 'pending' ? 'text-amber-600 mt-0.5' : 'text-emerald-600 mt-0.5'} 
+                />
+                <div className="flex-1">
+                   <p className="text-xs font-bold">{environmentAvailability.label}</p>
+                   <p className="text-[11px] leading-tight mt-0.5">{environmentAvailability.reason}</p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -576,7 +724,10 @@ function RegisterServiceContent() {
               disabled={!form.title || !form.WhatsApp || uploading}
               className="w-full primary-gradient text-white font-bold py-4 rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {existingService ? 'Salvar Alterações' : 'Cadastrar Serviço'}
+              {submitStatus === 'uploading' ? 'Enviando imagens...' : 
+               submitStatus === 'locating' ? 'Obtendo localização...' : 
+               submitStatus === 'saving' ? 'Salvando serviço...' : 
+               (existingService ? 'Salvar Alterações' : 'Cadastrar Serviço')}
             </button>
           </div>
         </div>
@@ -585,8 +736,7 @@ function RegisterServiceContent() {
         {/* Modal Options */}
         {showMenuItemModal && (
           <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center">
-            <div className="bg-white dark:bg-slate-900 w-full md:w-96 md:rounded-2xl p-6 rounded-t-2xl animate-in slide-in-from-bottom duration-300">
-               {/* modal config omitted for brevity but intact */}
+            <div className="bg-white dark:bg-slate-100 w-full md:w-96 md:rounded-2xl p-6 rounded-t-2xl animate-in slide-in-from-bottom duration-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-on-surface">
                   {editingMenuItemIndex !== null ? 'Editar Opção' : 'Nova Opção'}
@@ -661,4 +811,3 @@ export default function RegisterServicePage() {
     </Suspense>
   );
 }
-

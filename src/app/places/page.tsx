@@ -5,6 +5,7 @@ import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
 import { useState, useEffect, type MouseEvent } from 'react';
+import { TopAppBar } from '@/components/TopAppBar';
 import { searchPlaces, type PlaceSearchResult } from '@/lib/maps';
 import { inferEnvironmentTypeFromPlace } from '@/lib/environment-rules';
 
@@ -232,173 +233,142 @@ export default function PlacesPage() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-background">
-      <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
-        <div className="flex items-center gap-3 max-w-7xl mx-auto w-full">
-          <button 
-            onClick={() => router.back()}
-            className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
-          >
-            <Icon icon="arrow_back" size={24} />
-          </button>
-          <h1 className="text-lg font-semibold tracking-tight text-on-surface">Buscar Locais e Serviços</h1>
-        </div>
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          <div className="relative">
-            <button 
-              onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-              className={`hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary ${showOnlyFavorites ? 'bg-primary/10' : ''}`}
-            >
-              <Icon icon="star" size={26} className={showOnlyFavorites ? 'text-primary' : 'text-on-surface-variant'} />
-              {/* <span className="text-[12px] mx-2 ml-1">{showOnlyFavorites ? 'Todos' : 'Favoritos'}</span> */}
-            </button>
+      <TopAppBar />
+      <main className="mt-24 px-4 md:px-8 max-w-7xl mx-auto pb-32">
+        <section className="mb-10 text-center md:text-left">
+           <h2 className="text-3xl font-black text-on-surface tracking-tighter">Explorar Ambientes</h2>
+           <p className="text-on-surface-variant text-base mt-1 font-medium">Encontre sua comunidade para começar a anunciar</p>
+        </section>
+
+        <div className="relative mb-8">
+          <div className="flex items-center bg-surface-container-highest rounded-[2.5rem] px-8 py-6 gap-6 focus-within:bg-white focus-within:ring-8 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group">
+            <Icon icon="search" size={28} className="text-primary group-focus-within:scale-110 transition-transform" weight={700} />
+            <input 
+              className="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-on-surface-variant/70 font-black text-lg"
+              placeholder={
+                selectedCategory === 'church'
+                  ? 'Nome da igreja, templo ou capela...'
+                  : 'Nome do condomínio ou residencial...'
+              }
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {searchLoading && (
+              <div className="animate-spin rounded-full h-6 w-6 border-4 border-primary border-t-transparent shadow-sm"></div>
+            )}
           </div>
-          {user ? (
-            <div className="relative">
-              <button onClick={() => router.push('/profile')} className="hover:scale-105 transition-transform active:scale-95 ml-1">
-                <Avatar
-                  src={user.avatar}
-                  name={user.name}
-                  alt="Avatar"
-                  className="w-10 h-10 border-2 border-primary shadow-sm"
-                />
-              </button>
-              {user?.plan && user.plan !== 'free' && (
-                <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-md ${
-                  user.plan === 'pro' ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 'bg-gradient-to-br from-purple-500 to-purple-600'
-                }`}>
-                  {user.plan === 'pro' ? 'PRÓ' : 'PLUS'}
-                </div>
-              )}
-            </div>
-          ) : (
-            <button 
-              onClick={() => router.push('/login')}
-              className="flex items-center gap-2 px-4 py-2 rounded-full primary-gradient text-white text-xs font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all"
-            >
-              <Icon icon="login" size={20} />
-              <span>Entrar</span>
-            </button>
-          )}
-        </div>
-      </header>
-
-      <main className="mt-20 px-4 md:px-8 max-w-3xl mx-auto">
-        <div className="relative mb-6">
-          <Icon 
-            icon="search" 
-            weight={400} 
-            size={24} 
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant" 
-          />
-          <input 
-            className="w-full bg-surface-container-highest border-none rounded-full py-4 pl-14 pr-6 focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all text-on-surface placeholder:text-on-surface-variant/60 shadow-inner"
-            placeholder={
-              selectedCategory === 'church'
-                ? 'Buscar igrejas, templos e capelas'
-                : 'Buscar condomínios, residenciais e clubes'
-            }
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          {searchLoading && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent"></div>
-            </div>
-          )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="flex overflow-x-auto pb-6 -mx-4 px-4 gap-3 no-scrollbar scroll-smooth">
           {PLACE_CATEGORIES.map((category) => {
             const isSelected = selectedCategory === category.id;
             return (
               <button
                 key={category.id}
                 type="button"
-                onClick={() => setSelectedCategory(category.id)}
-                className={`group flex flex-col items-center text-center justify-center gap-2 rounded-2xl border px-4 py-4 transition-colors ${
+                onClick={() => setSelectedCategory(category.id as any)}
+                className={`flex items-center gap-3 px-8 py-4 rounded-2xl whitespace-nowrap font-black text-sm transition-all border shrink-0 shadow-sm ${
                   isSelected
-                    ? 'border-primary bg-primary/90 text-white shadow-lg'
-                    : 'border-transparent bg-surface-container-highest text-on-surface'
+                    ? 'bg-primary text-white border-primary shadow-xl shadow-primary/20 scale-105 z-10'
+                    : 'bg-white text-on-surface-variant border-outline-variant/10 hover:border-primary/40 hover:text-primary active:scale-95'
                 }`}
               >
-                <Icon
-                  icon={category.icon}
-                  size={28}
-                  className={`transition-colors ${
-                    isSelected ? 'text-white' : 'text-primary'
-                  }`}
-                />
-                <p className="text-sm font-semibold leading-tight">{category.label}</p>
-                <p className="text-[11px] leading-tight text-on-surface-variant">
-                  {category.description}
-                </p>
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                    isSelected ? 'bg-white/20' : 'bg-primary/10'
+                }`}>
+                  <Icon
+                    icon={category.icon}
+                    size={20}
+                    weight={isSelected ? 700 : 400}
+                    className={isSelected ? 'text-white' : 'text-primary'}
+                  />
+                </div>
+                <span>{category.label}</span>
               </button>
             );
           })}
         </div>
 
         {(hasSearched || showOnlyFavorites) && (
-          <div className="grid gap-3">
-            <p className="text-sm text-on-surface-variant mb-2">
-              {showOnlyFavorites
-                ? favoritePlacesToRender.length > 0
-                  ? `${favoritePlacesToRender.length} favoritos`
-                  : 'Nenhum favorito adicionado'
-                : searchResultsWithDistance.length > 0
-                  ? `${searchResultsWithDistance.length} locais encontrados`
-                  : 'Nenhum local encontrado'}
-            </p>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between px-2">
+              <p className="text-xs font-black uppercase tracking-widest text-primary/60">
+                {showOnlyFavorites
+                  ? favoritePlacesToRender.length > 0
+                    ? `${favoritePlacesToRender.length} favoritos`
+                    : 'Nenhum favorito'
+                  : searchResultsWithDistance.length > 0
+                    ? `${searchResultsWithDistance.length} locais encontrados`
+                    : 'Buscando locais...'}
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {placesToRender.map((place) => {
                 const isFavorite = user
                   ? backendFavoritePlaces.some((fav) => fav.id === place.id)
                   : favorites.includes(place.id);
 
                 return (
-                <div 
-                  key={place.id}
-                  onClick={() => handleSelectEnvironment(place.displayName?.text?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || place.id, place)}
-                  className="p-4 rounded-2xl flex items-center gap-4 cursor-pointer bg-surface-container-lowest hover:bg-surface-container-low border border-transparent hover:border-outline-variant/20 transition-all active:scale-[0.98]"
-                >
-                  <div className="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center">
-                    <Icon icon="location_on" weight={400} size={24} className="text-on-surface-variant" />
+                  <div 
+                    key={place.id}
+                    onClick={() => handleSelectEnvironment(place.displayName?.text?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || place.id, place)}
+                    className="group/item p-5 rounded-[2rem] flex flex-col gap-4 cursor-pointer bg-surface-container-lowest hover:bg-white hover:shadow-2xl hover:shadow-primary/5 border border-outline-variant/10 transition-all duration-500 active:scale-[0.98] relative overflow-hidden"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center group-hover/item:scale-110 transition-transform duration-500">
+                        <Icon icon={selectedCategory === 'church' ? 'church' : 'domain'} weight={400} size={28} className="text-primary" />
+                      </div>
+                      <button 
+                        onClick={(e) => void handleToggleFavoriteClick(place, e)}
+                        className="p-2.5 rounded-full bg-surface-container-high hover:bg-primary/10 transition-colors shadow-sm group/fav"
+                      >
+                        <Icon 
+                          icon={isFavorite ? 'star' : 'star_border'} 
+                          size={20} 
+                          weight={700}
+                          className={isFavorite ? 'text-primary scale-110' : 'text-on-surface-variant group-hover/fav:text-primary'}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex-1">
+                      <h3 className="font-black text-on-surface text-lg leading-tight group-hover/item:text-primary transition-colors">{place.displayName?.text}</h3>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
+                           {getTypeLabel(place.primaryType)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-on-surface-variant font-medium line-clamp-2 mt-3 leading-relaxed opacity-70 group-hover/item:opacity-100 transition-opacity">
+                        {place.formattedAddress}
+                      </p>
+                    </div>
+
+                    <div className="mt-2 pt-4 border-t border-outline-variant/5 flex items-center justify-between">
+                       <span className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-tighter">Tocar para ver serviços</span>
+                       <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center group-hover/item:bg-primary group-hover/item:text-white transition-all transform group-hover/item:translate-x-1">
+                          <Icon icon="arrow_forward" size={16} weight={700} />
+                       </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-on-surface">{place.displayName?.text}</h3>
-                    <p className="text-on-surface-variant text-sm">
-                      {getTypeLabel(place.primaryType)}
-                    </p>
-                    <p className="text-[11px] text-on-surface-variant line-clamp-1 mt-0.5">
-                      {place.formattedAddress}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button 
-                      onClick={(e) => void handleToggleFavoriteClick(place, e)}
-                      className="p-1 rounded-full hover:bg-primary/10 transition-colors"
-                    >
-                      <Icon 
-                        icon={isFavorite ? 'star' : 'star_border'} 
-                        size={20} 
-                        className={isFavorite ? 'text-primary' : 'text-on-surface-variant'}
-                      />
-                    </button>
-                    <Icon icon="chevron_right" weight={400} size={24} className="text-on-surface-variant" />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
 
         {!hasSearched && !showOnlyFavorites && (
-        <div className="text-center py-12 opacity-50">
-          <Icon icon="search" weight={400} size={48} className="mb-2 text-outline mx-auto" />
-          <p className="text-sm capitalize">
-            Busque por {selectedCategory === 'church' ? 'igrejas e templos' : 'condomínios e residenciais'} usando o filtro acima.
-          </p>
-        </div>
-      )}
+          <div className="text-center py-24 bg-surface-container-low/20 rounded-[3rem] border-2 border-dashed border-outline-variant/10 mt-10">
+            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-primary/5">
+               <Icon icon="search" weight={700} size={32} className="text-primary/30" />
+            </div>
+            <h3 className="text-xl font-black text-on-surface">Comece sua busca</h3>
+            <p className="text-on-surface-variant font-medium mt-2 max-w-sm mx-auto">
+              Digite o nome do seu {selectedCategory === 'church' ? 'ambiente religioso' : 'condomínio'} para ver quem está anunciando lá.
+            </p>
+          </div>
+        )}
       </main>
     </div>
   );

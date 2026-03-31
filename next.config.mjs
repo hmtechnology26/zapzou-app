@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  fastRefresh: false,
+  fastRefresh: true,
   experimental: {
     // Work around Windows environments that block child_process spawn during `next build`
     // (Next uses jest-worker; this flips it to worker_threads).
@@ -18,7 +18,7 @@ const nextConfig = {
       },
     ],
   },
-  swcMinify: false,
+  swcMinify: true,
   webpack: (config, { dev, isServer }) => {
     // Avoid generating Trusted Types wrappers around `eval` in dev bundles.
     // Some environments/extensions polyfill `trustedTypes` in a way that breaks

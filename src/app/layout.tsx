@@ -1,9 +1,9 @@
 import './globals.css';
 import 'react-material-symbols/rounded';
 import type { Metadata } from 'next';
-import { ClientOnly } from './client-only';
 import { Providers } from './providers';
 import ProtectedLayout from './layout-client';
+import { ServiceWorkerCleanup } from './service-worker-cleanup';
 
 export const metadata: Metadata = {
   title: 'ZapZou - Marketplace de Serviços',
@@ -32,11 +32,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <ClientOnly>
-          <Providers>
-            <ProtectedLayout>{children}</ProtectedLayout>
-          </Providers>
-        </ClientOnly>
+        <Providers>
+          <ProtectedLayout>{children}</ProtectedLayout>
+        </Providers>
+        <ServiceWorkerCleanup />
       </body>
     </html>
   );

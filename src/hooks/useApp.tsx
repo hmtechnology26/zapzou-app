@@ -290,7 +290,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setUser((prev) => {
           const prevAvatar = prev?.avatar || '';
           const prevName = prev?.name || '';
-          const prevPlan = prev?.plan || 'free';
+          const prevPlan = prev?.plan || 'plus';
 
           const nextAvatar = normalizeAvatarUrl(avatarToSave) || prevAvatar;
           const nextName = (nameToSave || '').trim() || prevName || 'Usuário';
@@ -320,8 +320,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             name: authProfile.name || prev?.name || 'Usuário',
             email,
             avatar: authProfile.avatar || prev?.avatar || '',
+            plan: 'plus',
             role: prev?.role || 'user',
-            plan: prev?.plan || 'free',
             membershipStatus: prev?.membershipStatus || null,
             membershipRole: prev?.membershipRole || null,
             managedEnvironmentIds,
@@ -332,7 +332,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const googleName = userMetadata?.name || userMetadata?.full_name || 'Usuário';
         const managedEnvironmentIds = await fetchManagedEnvironmentIds(userId);
         
-        const payload: any = { id: userId, email, name: googleName };
+        const payload: any = { id: userId, email, name: googleName, plan: 'plus' };
         if (googleAvatar) payload.avatar = googleAvatar;
 
         const { error: createError } = await supabase
@@ -349,7 +349,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           email: email,
           avatar: googleAvatar || authProfile.avatar,
           role: 'user',
-          plan: 'free',
+          plan: 'plus',
           membershipStatus: null,
           membershipRole: null,
           managedEnvironmentIds,
@@ -364,7 +364,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
          email: email,
          avatar: authProfile.avatar || '',
          role: 'user',
-         plan: 'free',
+         plan: 'plus',
          membershipStatus: null,
          membershipRole: null,
          managedEnvironmentIds,
@@ -414,6 +414,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEnvironment, user?.id]);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchFavoritePlaces();
+    }
+  }, [user?.id, fetchFavoritePlaces]);
 
   const refreshMembership = async () => {
     if (!user?.id || !selectedEnvironment) return;
@@ -502,10 +508,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     return new Promise((resolve, reject) => {
+      console.log('Requesting permission for geolocation...');
       navigator.geolocation.getCurrentPosition(
-        (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
-        (err) => reject(new Error(err.message || 'Falha ao obter localização.')),
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+        (pos) => {
+          console.log('Geolocation success:', pos.coords.latitude, pos.coords.longitude);
+          resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+        },
+        (err) => {
+          console.warn('Geolocation failed/denied:', err.code, err.message);
+          // err.code 1 = PERMISSION_DENIED
+          reject(new Error(err.code === 1 ? 'Permissão de localização negada.' : 'Falha ao obter localização.'));
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 },
       );
     });
   };
@@ -562,14 +576,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!user) throw new Error("User not found");
     if (!service?.environmentId) throw new Error('Selecione um ambiente para publicar.');
 
-    console.log('Getting location...');
-    const location =
-      typeof service?.latitude === 'number' && typeof service?.longitude === 'number'
-        ? { latitude: service.latitude, longitude: service.longitude }
-        : await getCurrentLocation();
-    console.log('Location obtained:', location);
+    console.log('Determining location for new service...');
+    let location;
+    try {
+      if (typeof service?.latitude === 'number' && typeof service?.longitude === 'number') {
+        location = { latitude: service.latitude, longitude: service.longitude };
+      } else {
+        location = await getCurrentLocation();
+      }
+    } catch (locErr) {
+      console.warn('Could not get precise location, falling back to environment center:', locErr);
+      const { data: envData } = await supabase
+        .from('environments')
+        .select('latitude, longitude')
+        .eq('id', service.environmentId)
+        .single();
+      
+      if (envData?.latitude && envData?.longitude) {
+        location = { latitude: envData.latitude, longitude: envData.longitude };
+      } else {
+        // Absolute fallback to a default location if everything fails
+        location = { latitude: -30.0346, longitude: -51.2177 }; 
+      }
+    }
 
-    console.log('Inserting service...');
+    console.log('Final location for insert:', location);
+
     const { error } = await supabase
       .from('services')
       .insert([{

@@ -54,9 +54,9 @@ A arquitetura do ZapZou segue um modelo moderno de aplicação web com foco em e
 |---------|------------|--------|
 | Supabase Auth | OAuth (Google) | Autenticação de usuários |
 | Supabase DB | PostgreSQL | Banco de dados relacional |
-| Supabase Storage | Object Storage | Armazenamento de imagens dos serviços (atual) |
-| Cloudflare R2 | S3-compatible | Armazenamento de imagens dos serviços (planejado) |
-| Google Places API | REST | Busca automática de ambientes (planejado) |
+| Supabase Storage | Object Storage | Armazenamento de imagens dos serviços |
+| Cloudflare R2 | S3-compatible | Armazenamento de imagens (futuro) |
+| Google Places API | REST | Busca automática de ambientes (implementado) |
 | Payment Gateway | future | Processamento de pagamentos (a definir) |
 
 ---
@@ -70,27 +70,47 @@ src/
 │   ├── page.tsx            # Homepage
 │   ├── explore/            # Explorar serviços
 │   ├── login/              # Login
-│   ├── my-services/        # Meus serviços
+│   ├── meus-anuncios/      # Meus serviços
 │   ├── places/             # Ambientes
 │   ├── profile/            # Perfil
 │   ├── register-service/   # Criar/editar serviço
 │   ├── service/[slug]/     # Detalhes do serviço
-│   ├── plans/              # Planos
+│   ├── plans/              # Planos (free, pro, plus)
 │   ├── moderation/         # Moderação
-│   ├── admin-settings/     # Configurações administrativas
+│   ├── admin/              # Configurações administrativas
+│   │   ├── settings/       # Configurações admin
+│   │   ├── visibility/     # Visibilidade
+│   │   ├── logo/           # Logo admin
+│   │   └── logs/           # Logs admin
+│   ├── notifications/      # Notificações
+│   ├── favorites/          # Locais favoritos
+│   ├── bulletins/          # Boletins
+│   ├── finances/           # Finanças
+│   ├── members/            # Membros
+│   ├── contact/            # Contato
+│   ├── edit-profile/       # Editar perfil
+│   ├── auth/callback/      # Callback auth
 │   ├── terms/              # Termos de uso
 │   └── privacy/            # Política de privacidade
 ├── components/             # Componentes reutilizáveis
 │   ├── BottomNav.tsx       # Navegação inferior
 │   ├── TopAppBar.tsx       # Barra superior
 │   ├── PublishModal.tsx    # Modal de publicação
-│   └── Icon.tsx            # Wrapper de ícones
+│   ├── Icon.tsx            # Wrapper de ícones
+│   ├── Avatar.tsx          # Avatar de usuário
+│   ├── GoogleMap.tsx       # Componente de mapa
+│   ├── PlanCheckout.tsx    # Checkout de planos
+│   ├── ReviewForm.tsx      # Formulário de avaliações
+│   ├── ReviewsList.tsx     # Lista de avaliações
+│   └── StarRating.tsx      # Componente de rating
 ├── hooks/                  # Custom hooks
 │   └── useApp.tsx          # Context + integrações com Supabase
 ├── contexts/               # React Contexts
 │   └── PublishModalContext.tsx
 ├── lib/                    # Utilitários
-│   └── supabase.ts         # Cliente Supabase
+│   ├── supabase.ts         # Cliente Supabase
+│   ├── maps.ts             # Integração Google Places API
+│   └── environment-rules.ts # Regras de ambientes
 ├── types/                  # TypeScript types
 │   └── index.ts            # Interfaces do sistema
 └── styles/                # Estilos globais
@@ -291,9 +311,7 @@ const getImageForScreen = (width: number) => {
 
 ## 5.10. Integração com Google Places API
 
-> **Status atual (MVP):** ambientes são lidos da tabela `environments` no Supabase.
->
-> **Planejado:** integração com Google Places API para descoberta automática de condomínios, igrejas, clubes e associações.
+> **Status atual:** Ambientes são lidos da tabela `environments` no Supabase, e a integração com Google Places API está **implementada** para descoberta automática de condomínios, igrejas, clubes e associações.
 
 ### Tipos de Local Suportados
 - **establishment** → condomínios, escritórios
@@ -369,6 +387,6 @@ subscriptions (
 |---------|----------|--------|
 | Auth | Supabase + Google OAuth | ✅ Configurado |
 | Database | Supabase PostgreSQL | ✅ Configurado |
-| Storage | Cloudflare R2 | 🔄 A implementar |
-| Places | Google Places API | 🔄 A configurar |
+| Storage | Supabase Storage | ✅ Configurado |
+| Places | Google Places API | ✅ Implementado |
 | Payments | Gateway a definir | 🔄 Preparado |

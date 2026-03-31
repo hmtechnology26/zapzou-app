@@ -15,7 +15,7 @@ export default function SelectEnvironmentsPage() {
 
   return (
     <div className="min-h-screen pb-24">
-      <TopAppBar title="Selecionar Ambientes" />
+      <TopAppBar />
       <main className="pt-20 px-6 max-w-2xl mx-auto">
         <p className="text-on-surface-variant mb-6">Escolha os ambientes onde seus serviços serão visíveis.</p>
         <div className="space-y-3">
