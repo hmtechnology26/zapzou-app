@@ -118,17 +118,20 @@ export function TopAppBar({
           )}
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1 bg-surface-container-low/30 p-1.5 rounded-2xl border border-outline-variant/10 shadow-sm backdrop-blur-sm">
+          <nav className="hidden md:flex items-center gap-1.5 p-1 rounded-2xl">
             {navItems.map((item) => {
-              const isActive = currentPath === item.path;
+              const isActive = item.path === '/' 
+                ? currentPath === '/' 
+                : currentPath === item.path || currentPath.startsWith(item.path + '/');
+                
               return (
                 <button
                   key={item.path}
                   onClick={() => router.push(item.path)}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 ${
+                  className={`px-4 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 relative group ${
                     isActive 
-                      ? 'bg-white text-primary shadow-sm ring-1 ring-black/5' 
-                      : 'text-on-surface-variant hover:bg-white/50 hover:text-primary'
+                      ? 'text-primary' 
+                      : 'text-on-surface-variant hover:text-primary transition-colors'
                   }`}
                 >
                   <Icon icon={item.icon} size={20} weight={isActive ? 700 : 400} />
