@@ -295,7 +295,10 @@ export default function MyAdsPage() {
 
   const myEnvironments = useMemo(() => {
     return allEnvironments
-      .filter((env) => affiliations[env.id])
+      .filter((env) => {
+        const membership = affiliations[env.id];
+        return membership?.role === 'member';
+      })
       .sort((a, b) => {
         const rankA = getStatusRank(affiliations[a.id]?.status);
         const rankB = getStatusRank(affiliations[b.id]?.status);
@@ -488,6 +491,10 @@ export default function MyAdsPage() {
           ) : (
             <div className="space-y-3">
               {myEnvironments.map((env) => {
+                const envFlags = env as Environment & {
+                  requiresModeratorApproval?: boolean;
+                  requiresRadiusValidation?: boolean;
+                };
                 const membership = affiliations[env.id];
                 const isPending = membership?.status === 'pending';
                 const isActive = membership?.status === 'active';
@@ -503,7 +510,7 @@ export default function MyAdsPage() {
                     ? 'Ativo'
                     : 'Bloqueado';
                 const statusMessage = isPending
-                  ? env.requiresModeratorApproval || env.type === 'church'
+                  ? envFlags.requiresModeratorApproval || env.type === 'church'
                     ? 'Seu pedido está aguardando a aprovação do moderador.'
                     : 'Seu pedido está aguardando a validação do raio.'
                   : isActive
@@ -541,14 +548,14 @@ export default function MyAdsPage() {
                     <p className="mt-3 text-sm text-on-surface-variant">{statusMessage}</p>
 
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="text-xs text-on-surface-variant">
-                        <span className="font-semibold text-on-surface">Aprovação:</span>{' '}
-                        {env.requiresModeratorApproval || env.type === 'church'
-                          ? 'Moderador'
-                          : env.requiresRadiusValidation
-                            ? 'Raio automático'
-                            : 'Acesso livre'}
-                      </div>
+                       <div className="text-xs text-on-surface-variant">
+                         <span className="font-semibold text-on-surface">Aprovação:</span>{' '}
+                         {envFlags.requiresModeratorApproval || env.type === 'church'
+                           ? 'Moderador'
+                           : envFlags.requiresRadiusValidation
+                             ? 'Raio automático'
+                             : 'Acesso livre'}
+                       </div>
 
                       {isActive && (
                         <button
@@ -574,18 +581,9 @@ export default function MyAdsPage() {
           <h2 className="text-sm font-bold text-on-surface-variant px-1">Gerenciar Catálogo</h2>
 
           {userServices.length === 0 ? (
-            <button
-              onClick={handleNewService}
-              className="mt-6 w-full border-2 border-dashed border-outline-variant/30 rounded-3xl p-8 flex flex-col items-center justify-center gap-3 text-on-surface-variant hover:bg-white/50 transition-colors active:scale-[0.98]"
-            >
-              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-                <Icon icon="add" weight={400} size={32} className="text-primary" />
-              </div>
-              <div className="text-center">
-                <p className="font-bold">Anunciar Novo Serviço</p>
-                <p className="text-xs opacity-70">Aumente suas vendas hoje mesmo</p>
-              </div>
-            </button>
+            <div className="rounded-3xl border border-dashed border-outline-variant/30 p-8 text-center text-on-surface-variant">
+              Nenhum serviço cadastrado. Use o botão "+" na barra inferior para anunciar.
+            </div>
           ) : (
             <>
               {userServices.map((service) => {
@@ -704,8 +702,8 @@ export default function MyAdsPage() {
       </main>
 
       {showEnvModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center">
-          <div className="bg-white rounded-t-3xl md:rounded-3xl w-full md:max-w-md max-h-[80vh] flex flex-col animate-in slide-in-from-bottom duration-300">
+        <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full md:max-w-md max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-300">
             <div className="p-6 border-b border-outline-variant/10">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-bold text-on-surface text-lg">Publicar em</h3>

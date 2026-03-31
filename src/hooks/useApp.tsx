@@ -261,7 +261,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         .eq('id', userId)
         .single();
       
-      //console.log('User profile fetch:', { data: existingUser, error: fetchError, userId });
+      console.log('User profile fetch:', { data: existingUser, error: fetchError, userId });
       
       if (existingUser && !fetchError) {
         let avatarToSave = normalizeAvatarUrl(existingUser.avatar);

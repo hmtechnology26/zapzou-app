@@ -274,14 +274,7 @@ export function PublishModal() {
           envRecord.requires_radius_validation ?? inferredFlags.requiresRadiusValidation,
       });
 
-      const membershipStatus = await getEnvironmentMembershipStatus(envRecord.id);
-      const effectiveDecision =
-        membershipStatus === 'active'
-          ? {
-              ...decision,
-              mode: 'open' as const,
-            }
-          : decision;
+      const membershipStatusPromise = getEnvironmentMembershipStatus(envRecord.id);
 
       const normalizedEnvironment: Environment = {
         id: envRecord.id,
@@ -297,18 +290,40 @@ export function PublishModal() {
         requiresRadiusValidation: decision.requiresRadiusValidation,
       };
 
-      setSelectedPlaceDecision(effectiveDecision);
+      setSelectedPlaceDecision(decision);
       setSelectedEnvironmentRecord(normalizedEnvironment);
       setSelectedEnvironments((prev) => {
         const filtered = prev.filter((env) => env.id !== normalizedEnvironment.id);
         return [normalizedEnvironment, ...filtered];
       });
 
-      if (effectiveDecision.mode === 'moderator') {
+      if (decision.mode === 'moderator') {
         setActiveEnvId(null);
         setStep('moderator');
+        setUploading(false);
+
+        void membershipStatusPromise.then((membershipStatus) => {
+          if (membershipStatus === 'active') {
+            setSelectedPlaceDecision({
+              ...decision,
+              mode: 'open',
+            });
+            setActiveEnvId(normalizedEnvironment.id);
+            setSelectedEnvironment(normalizedEnvironment);
+            setStep('form');
+          }
+        });
         return;
       }
+
+      const membershipStatus = await membershipStatusPromise;
+      const effectiveDecision =
+        membershipStatus === 'active'
+          ? {
+              ...decision,
+              mode: 'open' as const,
+            }
+          : decision;
 
       if (effectiveDecision.mode === 'radius') {
         const distance = userLocation && place.location

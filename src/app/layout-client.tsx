@@ -13,6 +13,9 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   const [locationPermission, setLocationPermission] = useState<
     "granted" | "denied" | "prompt" | "unknown"
   >("unknown");
+  const [hasSeenLocationPrompt, setHasSeenLocationPrompt] = useState(false);
+
+  const LOCATION_PROMPT_STORAGE_KEY = "zapzou-location-permission-prompted";
 
   const isPublicPage =
     pathname === "/" ||
@@ -26,6 +29,7 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   // Pages that don't require location permission
   const locationExemptPages = [
     "/login",
+    "/places",
     "/register-service",
     "/edit-profile",
     "/meus-anuncios",
@@ -43,6 +47,17 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const storedPrompt = window.localStorage.getItem(
+        LOCATION_PROMPT_STORAGE_KEY,
+      );
+      setHasSeenLocationPrompt(storedPrompt === "true");
+    } catch {
+      setHasSeenLocationPrompt(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -88,8 +103,14 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   }
 
   // Show location permission modal if permission not granted and not on exempt page
+  const isLocationExemptPath = locationExemptPages.some(
+    (page) => pathname === page || pathname.startsWith(`${page}/`),
+  );
+
   const shouldShowLocationModal =
-    locationPermission !== "granted" && !locationExemptPages.includes(pathname);
+    locationPermission !== "granted" &&
+    !hasSeenLocationPrompt &&
+    !isLocationExemptPath;
 
   const tabPaths = ["/", "/places", "/places/", "/meus-anuncios", "/profile"];
   const showBottomNav = hasMounted && pathname && tabPaths.includes(pathname);
@@ -127,6 +148,16 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
               </p>
               <button
                 onClick={() => {
+                  try {
+                    window.localStorage.setItem(
+                      LOCATION_PROMPT_STORAGE_KEY,
+                      "true",
+                    );
+                    setHasSeenLocationPrompt(true);
+                  } catch {
+                    setHasSeenLocationPrompt(true);
+                  }
+
                   if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                       () => {
