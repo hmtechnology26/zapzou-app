@@ -19,10 +19,11 @@ export default function PlaceDetailPage() {
   const searchParams = useSearchParams();
   const { selectedEnvironments, services, user, setSelectedEnvironment, setSelectedEnvironments } = useApp();
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Tudo');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [placeFromSearch, setPlaceFromSearch] = useState<PlaceSearchResult | null>(null);
   const [membership, setMembership] = useState<{ status: 'active' | 'pending' | 'banned' } | null>(null);
   const [membershipLoading, setMembershipLoading] = useState(false);
+  const [memberCount, setMemberCount] = useState<number | null>(null);
 
   const generateSlug = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -120,10 +121,37 @@ export default function PlaceDetailPage() {
       }
     };
 
+    const fetchMemberCount = async () => {
+      if (!effectiveEnvironment?.id) return;
+      try {
+        const { count, error } = await supabase
+          .from('environment_members')
+          .select('*', { count: 'exact', head: true })
+          .eq('environment_id', effectiveEnvironment.id)
+          .eq('status', 'active');
+        
+        if (!error && count !== null) {
+          setMemberCount(count);
+        }
+      } catch (err) {
+        console.error('Error fetching member count:', err);
+      }
+    };
+
+    fetchMemberCount();
     fetchMembership();
   }, [user?.id, effectiveEnvironment?.id]);
 
-  const categories = ['Alimentação', 'Limpeza', 'Manutenção', 'Pet Sitting', 'Beleza', 'Tecnologia', 'Outros'];
+  const categories = [
+    { id: 'all', label: 'Tudo', icon: 'apps' },
+    { id: 'Tecnologia', label: 'Tecnologia', icon: 'terminal' },
+    { id: 'Limpeza', label: 'Limpeza', icon: 'cleaning_services' },
+    { id: 'Construção', label: 'Construção', icon: 'construction' },
+    { id: 'Saúde', label: 'Saúde', icon: 'medical_services' },
+    { id: 'Beleza', label: 'Beleza', icon: 'content_cut' },
+    { id: 'Eventos', label: 'Eventos', icon: 'event' },
+    { id: 'Pet Sitting', label: 'Pet Sitting', icon: 'pets' }
+  ];
 
   const servicesWithSlug = services.map(s => ({
     ...s,
@@ -137,10 +165,11 @@ export default function PlaceDetailPage() {
     const matchesSearch = !search ||
       s.title.toLowerCase().includes(search.toLowerCase()) ||
       s.description.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = selectedCategory === 'Tudo' || s.category === selectedCategory;
-    
-    return isActive && matchesEnv && matchesSearch && matchesCategory;
+    const matchesCategory = selectedCategory === 'all' || s.category === selectedCategory;
+    return matchesEnv && matchesSearch && isActive && matchesCategory;
   });
+
+  const mode = searchParams.get('mode');
 
   if (!effectiveEnvironment) {
     return (
@@ -178,6 +207,54 @@ export default function PlaceDetailPage() {
       )}
 
       <main className="mt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-8 pb-32">
+        {placeId === 'ChIJMxc3c39wGZURn6hZo6QxoZk' && (
+          <div className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-emerald-900 to-emerald-800 p-8 shadow-2xl border border-white/5">
+             <div className="absolute -top-6 -right-6 opacity-40 rotate-12">
+               <img src="/farol_logo.png" alt="Farol Logo" className="w-52 h-auto" />
+             </div>
+             <div className="relative z-10 flex flex-col gap-6">
+               <div className="flex flex-wrap items-center gap-3">
+                 <div className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
+                    <span className="text-[10px] text-white font-black uppercase tracking-[0.2em] flex items-center gap-1.5">
+                      <Icon icon="verified" size={14} className="text-white" />
+                      ministério farol
+                    </span>
+                 </div>
+               </div>
+               
+               <div className="space-y-1">
+                  <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter">Negócios com Propósito</h2>
+                  <p className="text-emerald-100/60 text-base font-medium max-w-lg leading-relaxed">
+                    Plantando princípios eternos para gerar frutos que permanecem!!
+                  </p>
+               </div>
+
+               <div className="flex flex-wrap items-center gap-6 pt-2 border-t border-white/10">
+                 <div className="flex items-center gap-2.5 text-white/90 group cursor-default">
+                   <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                     <Icon icon="location_on" size={16} />
+                   </div>
+                   <span className="text-xs font-bold tracking-tight">Canoas, RS</span>
+                 </div>
+                 <div className="flex items-center gap-2.5 text-white/90 group cursor-default">
+                   <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                     <Icon icon="groups" size={16} />
+                   </div>
+                   <span className="text-xs font-bold tracking-tight">
+                     {memberCount !== null ? `${memberCount} Membros` : 'Carregando...'}
+                   </span>
+                 </div>
+                 <div className="flex items-center gap-2.5 text-white/90 group cursor-default">
+                   <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                     <Icon icon="star" size={16} className="text-amber-300" />
+                   </div>
+                   <span className="text-xs font-bold tracking-tight">Ranking #1</span>
+                 </div>
+               </div>
+             </div>
+          </div>
+        )}
+
         <div className="relative">
           <div className="flex items-center bg-surface-container-highest rounded-[2.5rem] px-8 py-6 gap-6 focus-within:bg-white focus-within:ring-8 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group">
             <Icon icon="search" size={28} className="text-primary group-focus-within:scale-110 transition-transform" weight={700} />
@@ -192,22 +269,23 @@ export default function PlaceDetailPage() {
         </div>
 
         <div className="flex overflow-x-auto pb-4 -mx-4 px-4 gap-3 no-scrollbar scroll-smooth">
-          {categories.map((category) => (
+          {categories.map((cat) => (
             <button 
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`flex items-center gap-2.5 px-8 py-4 rounded-2xl whitespace-nowrap font-black text-sm transition-all border shrink-0 shadow-sm ${
-                selectedCategory === category 
-                  ? 'bg-primary text-white border-primary shadow-xl shadow-primary/20' 
+              key={cat.id} 
+              onClick={() => setSelectedCategory(cat.id === 'all' ? 'all' : cat.label)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl whitespace-nowrap font-black text-xs transition-all border shrink-0 shadow-sm ${
+                selectedCategory === (cat.id === 'all' ? 'all' : cat.label)
+                  ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105' 
                   : 'bg-white text-on-surface-variant border-outline-variant/10 hover:border-primary/40 hover:text-primary active:scale-95'
               }`}
             >
-              {category}
+              <Icon icon={cat.icon} size={16} weight={selectedCategory === (cat.id === 'all' ? 'all' : cat.label) ? 700 : 400} />
+              {cat.label}
             </button>
           ))}
         </div>
 
-        {user && membership === null && !membershipLoading && (
+        {user && membership === null && !membershipLoading && mode === 'join' && (
           <div className="bg-primary/5 border border-primary/10 rounded-[3rem] p-10 flex flex-col items-center text-center gap-4 max-w-2xl mx-auto md:ml-0">
              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/10">
                 <Icon icon="person_add" size={32} className="text-primary" weight={700} />

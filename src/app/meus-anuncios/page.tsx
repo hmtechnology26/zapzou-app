@@ -87,7 +87,7 @@ export default function MyAdsPage() {
             status: record.status,
           };
           
-          if (record.role === 'member') {
+          if (record.role === 'member' || record.role === 'moderator') {
             contextsPayload.push(normalizedEnv);
           }
         }
@@ -130,10 +130,10 @@ export default function MyAdsPage() {
                 Leve seus serviços para novos condomínios e comunidades. Solicite vínculo agora mesmo.
               </p>
               <button 
-                onClick={() => open()}
-                className="mt-8 primary-gradient text-white text-sm rounded-full px-10 py-4.5 font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105"
+                onClick={() => router.push('/places?mode=join')}
+                className="mt-8 uppercase py-2 primary-gradient text-white text-sm rounded-full px-10 py-4.5 font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105"
               >
-                Vincular-se a um novo Ambiente
+                Procurar Ambiente
               </button>
             </div>
         </section>
@@ -143,7 +143,7 @@ export default function MyAdsPage() {
             <h3 className="text-xs font-black uppercase tracking-[0.25em] text-primary/70">
               Ambientes de Atuação
             </h3>
-            <span className="text-[10px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest border border-primary/10">
+            <span className="text-[9px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest border border-primary/10">
               {myContexts.length} Vinculados
             </span>
           </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
@@ -32,6 +32,8 @@ export default function PlacesPage() {
     storeFavoritePlace,
     removeFavoritePlace,
   } = useApp();
+  const searchParams = useSearchParams();
+  const mode = searchParams.get('mode');
   const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState<PlaceSearchResult[]>([]);
@@ -152,12 +154,18 @@ export default function PlacesPage() {
   const placesToRender = showOnlyFavorites ? favoritePlacesToRender : searchResultsWithDistance;
 
   const handleSelectEnvironment = (envSlug: string, place?: PlaceSearchResult) => {
+    const query = new URLSearchParams();
     if (place) {
       localStorage.setItem(`place_${place.id}`, JSON.stringify(place));
-      router.push(`/places/${envSlug}?placeId=${place.id}`);
-    } else {
-      router.push(`/places/${envSlug}`);
+      query.set('placeId', place.id);
     }
+    if (mode) {
+      query.set('mode', mode);
+    }
+
+    const queryString = query.toString();
+    const url = `/places/${envSlug}${queryString ? `?${queryString}` : ''}`;
+    router.push(url);
   };
 
   const handleToggleFavorite = async (place: PlaceSearchResult) => {
