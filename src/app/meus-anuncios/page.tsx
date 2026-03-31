@@ -130,7 +130,7 @@ export default function MyAdsPage() {
                 Leve seus serviços para novos condomínios e comunidades. Solicite vínculo agora mesmo.
               </p>
               <button 
-                onClick={() => router.push('/places?mode=join')}
+                onClick={open}
                 className="mt-8 uppercase py-2 primary-gradient text-white text-sm rounded-full px-10 py-4.5 font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105"
               >
                 Procurar Ambiente
