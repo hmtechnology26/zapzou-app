@@ -230,26 +230,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        await fetchUserProfile(session.user.id, session.user.email || '', session.user);
-      } else {
-        setUser(null);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (isMounted) {
+          if (session?.user) {
+            await fetchUserProfile(session.user.id, session.user.email || '', session.user);
+          } else {
+            setUser(null);
+          }
+        }
+      } catch (err) {
+        console.error('checkUser error:', err);
+        if (isMounted) setUser(null);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-      setLoading(false);
     };
     checkUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        await fetchUserProfile(session.user.id, session.user.email || '', session.user);
-      } else {
-        setUser(null);
+      if (isMounted) {
+        if (session?.user) {
+          await fetchUserProfile(session.user.id, session.user.email || '', session.user);
+        } else {
+          setUser(null);
+        }
       }
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);

@@ -8,7 +8,7 @@ import type { PlaceSearchResult } from '@/lib/maps';
 
 export default function FavoritesPage() {
   const router = useRouter();
-  const { user, favoritePlaces, removeFavoritePlace, loading } = useApp();
+  const { user, favoritePlaces, removeFavoritePlace } = useApp();
 
   const handleSelectEnvironment = (place: PlaceSearchResult) => {
     localStorage.setItem(`place_${place.id}`, JSON.stringify(place));
@@ -23,16 +23,30 @@ export default function FavoritesPage() {
     }
   };
 
-  if (loading) {
+  if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-background pb-24">
+        <TopAppBar />
+        <main className="pt-24 px-4 max-w-2xl mx-auto space-y-6">
+          <div className="bg-emerald-50/60 backdrop-blur-md border border-emerald-100 rounded-[2.5rem] p-6 sm:p-10 flex flex-col items-center text-center gap-4 shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-emerald-100/50 flex items-center justify-center border border-emerald-200 shrink-0">
+              <Icon icon="star" size={32} weight={700} className="text-emerald-700" />
+            </div>
+            <div className="space-y-1 sm:space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-black text-emerald-950 tracking-tighter">Seus Favoritos</h2>
+              <p className="text-xs sm:text-base text-emerald-900/60 font-medium max-w-xs leading-relaxed">
+                Acesse rapidamente os ambientes que você mais frequenta e conferir os serviços disponíveis.
+              </p>
+            </div>
+          </div>
+          <div className="rounded-[3rem] border-2 border-dashed border-emerald-100 py-12 sm:py-16 text-center bg-white/40 backdrop-blur-sm">
+            <Icon icon="explore" size={48} className="mx-auto mb-4 opacity-20 text-emerald-600" />
+            <p className="text-lg font-black text-emerald-950">Vazio por aqui</p>
+            <p className="text-sm text-emerald-900/60 max-w-xs mx-auto mt-2 font-medium px-4">Favorite locais na tela de Ambientes para vê-los aqui.</p>
+          </div>
+        </main>
       </div>
     );
-  }
-
-  if (!user) {
-    return null; // Layout handles redirect
   }
 
   return (

@@ -109,6 +109,12 @@ export default function PlaceDetailPage() {
     onBack: () => router.back(),
   };
 
+  useEffect(() => {
+    if (environment) {
+      setLoadingEnvironment(false);
+    }
+  }, [environment]);
+
   // Set global context
   useEffect(() => {
     if (effectiveEnvironment && effectiveEnvironment.id) {

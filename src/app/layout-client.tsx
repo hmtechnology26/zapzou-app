@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useApp } from "@/hooks/useApp";
 import { BottomNav } from "@/components/BottomNav";
 import { Icon } from "@/components/Icon";
+import { useServiceWorkerCleanup } from "@/app/service-worker-cleanup";
 
 function ProtectedLayoutSkeleton() {
   const rows = Array.from({ length: 3 });
@@ -49,6 +50,7 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   const [showExitModal, setShowExitModal] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const [publicEnvironmentName, setPublicEnvironmentName] = useState<string>("");
+  const [hasConfirmedExit, setHasConfirmedExit] = useState(false);
 
   const LOCATION_PROMPT_STORAGE_KEY = "zapzou-location-permission-prompted";
 
@@ -58,6 +60,7 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
     pathname === "/search" ||
     pathname === "/places" ||
     pathname === "/contact" ||
+    pathname === "/favorites" ||
     pathname.startsWith("/service/") ||
     pathname.startsWith("/places/") ||
     pathname.startsWith("/auth/");
@@ -66,6 +69,7 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   const locationExemptPages = [
     "/login",
     "/places",
+    "/favorites",
     "/register-service",
     "/edit-profile",
     "/meus-anuncios",
@@ -81,6 +85,8 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
     "/admin",
     "/contact",
   ];
+
+  useServiceWorkerCleanup();
 
   useEffect(() => {
     setHasMounted(true);
@@ -131,74 +137,83 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
     }
   }, [user, loading, isPublicPage, router]);
 
-  // Verificar se é uma rota de ambiente público via placeId
+  const placeId = searchParams?.get("placeId");
+  const isPublicEnvironmentView =
+    pathname.startsWith("/places/") && Boolean(placeId);
+
   useEffect(() => {
-    const placeId = searchParams?.get('placeId');
-    if (placeId && pathname.startsWith('/places/')) {
+    if (placeId && pathname.startsWith("/places/")) {
       const stored = localStorage.getItem(`place_${placeId}`);
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
-          setPublicEnvironmentName(parsed.displayName?.text || '');
+          setPublicEnvironmentName(parsed.displayName?.text || "");
         } catch (e) {}
       }
     }
-  }, [pathname, searchParams]);
-
-  const isPublicEnvironmentView = pathname.startsWith('/places/') && searchParams?.get('placeId');
-  
-  // Verificar se o usuário já confirmou saída anteriormente neste ambiente
-  const [hasConfirmedExit, setHasConfirmedExit] = useState(false);
+  }, [pathname, placeId]);
 
   useEffect(() => {
-    if (isPublicEnvironmentView) {
-      const confirmed = localStorage.getItem('zapzou_public_exit_confirmed');
-      setHasConfirmedExit(confirmed === 'true');
-    } else {
+    if (!isPublicEnvironmentView) {
       setHasConfirmedExit(false);
-      localStorage.removeItem('zapzou_public_exit_confirmed');
-    }
-  }, [isPublicEnvironmentView]);
-
-  // Interceptar navegação para mostrar modal de saída
-  const handleNavigation = (e: MouseEvent | React.MouseEvent) => {
-    // Não mostrar modal se já confirmou saída anteriormente
-    if (!isPublicEnvironmentView || !publicEnvironmentName || hasConfirmedExit) return;
-    
-    const target = e.target as HTMLElement;
-    const anchor = target.closest('a');
-    const button = target.closest('button');
-    
-    const href = anchor?.getAttribute('href');
-    
-    // Verificar se é um link interno (exceto /places/)
-    if (href && href.startsWith('/') && !href.startsWith('/places/')) {
-      e.preventDefault();
-      setPendingNavigation(href);
-      setShowExitModal(true);
+      localStorage.removeItem("zapzou_public_exit_confirmed");
       return;
     }
-    
-    // Verificar se é um botão com onClick que usa router
-    if (button && !button.getAttribute('data-exit-modal-ignore')) {
-      const onClick = (button as any).onClick;
-      if (onClick) {
-        // Checar se o onClick envolve router.push
-        const buttonHtml = button.outerHTML || '';
-        if (buttonHtml.includes('router.push') || buttonHtml.includes('onClick=')) {
-          // Presumir que é navegação - mostrar modal
-          e.preventDefault();
-          setPendingNavigation(null); // Navigation will be handled by button's own onClick after modal
-          setShowExitModal(true);
+
+    const confirmed = localStorage.getItem("zapzou_public_exit_confirmed");
+    setHasConfirmedExit(confirmed === "true");
+  }, [isPublicEnvironmentView]);
+
+  const handleNavigation = useCallback(
+    (e: MouseEvent | React.MouseEvent) => {
+      if (!isPublicEnvironmentView || !publicEnvironmentName || hasConfirmedExit) return;
+
+      const target = e.target as HTMLElement;
+      const anchor = target.closest("a");
+      const button = target.closest("button");
+
+      const href = anchor?.getAttribute("href");
+
+      if (href && href.startsWith("/") && !href.startsWith("/places/")) {
+        e.preventDefault();
+        setPendingNavigation(href);
+        setShowExitModal(true);
+        return;
+      }
+
+      if (button && !button.getAttribute("data-exit-modal-ignore")) {
+        const onClick = (button as any).onClick;
+        if (onClick) {
+          const buttonHtml = button.outerHTML || "";
+          if (buttonHtml.includes("router.push") || buttonHtml.includes("onClick=")) {
+            e.preventDefault();
+            setPendingNavigation(null);
+            setShowExitModal(true);
+          }
         }
       }
-    }
-  };
+    },
+    [hasConfirmedExit, isPublicEnvironmentView, publicEnvironmentName],
+  );
 
   useEffect(() => {
-    document.addEventListener('click', handleNavigation);
-    return () => document.removeEventListener('click', handleNavigation);
-  }, [isPublicEnvironmentView, publicEnvironmentName, hasConfirmedExit]);
+    document.addEventListener("click", handleNavigation);
+    return () => document.removeEventListener("click", handleNavigation);
+  }, [handleNavigation]);
+
+  // Always show content for public pages, regardless of loading state
+  if (isPublicPage) {
+    return (
+      <div className="min-h-screen">
+        {children}
+        {hasMounted && pathname && <BottomNav />}
+      </div>
+    );
+  }
+
+  if (loading) {
+    return <ProtectedLayoutSkeleton />;
+  }
 
   if (loading) {
     return <ProtectedLayoutSkeleton />;

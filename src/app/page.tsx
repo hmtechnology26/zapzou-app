@@ -1,28 +1,35 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { Icon } from '@/components/Icon';
-import { Avatar } from '@/components/Avatar';
-import { useApp } from '@/hooks/useApp';
-import { useState, useEffect, useMemo } from 'react';
-import { MapComponent } from '@/components/GoogleMap';
-import { TopAppBar } from '@/components/TopAppBar';
+import { useRouter } from "next/navigation";
+import { Icon } from "@/components/Icon";
+import { Avatar } from "@/components/Avatar";
+import { useApp } from "@/hooks/useApp";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { MapComponent } from "@/components/GoogleMap";
+import { TopAppBar } from "@/components/TopAppBar";
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, selectedEnvironment, selectedEnvironments, services } = useApp();
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState('all');
+  const { user, selectedEnvironment, selectedEnvironments, services } =
+    useApp();
+
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState("all");
   const [mounted, setMounted] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
-  const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterDropdownRef = useRef<HTMLDivElement | null>(null);
 
   const activeServices = useMemo(() => {
-    return services.filter((s) => s.isActive && s.status === 'active');
+    return services.filter((s) => s.isActive && s.status === "active");
   }, [services]);
 
-  // Extract unique categories from active services
   const availableCategories = useMemo(() => {
     const cats = new Set<string>();
     activeServices.forEach((s) => {
@@ -37,7 +44,7 @@ export default function HomePage() {
     const map = new Map<string, { id: string; name: string }>();
     activeServices.forEach((service) => {
       if (!service.environmentId) return;
-      const label = service.environmentName?.trim() || 'Ambiente';
+      const label = service.environmentName?.trim() || "Ambiente";
       if (!map.has(service.environmentId)) {
         map.set(service.environmentId, {
           id: service.environmentId,
@@ -45,26 +52,46 @@ export default function HomePage() {
         });
       }
     });
-    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+    return Array.from(map.values()).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
   }, [activeServices]);
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const selectedEnvironmentName = useMemo(() => {
+    if (selectedEnvironmentId === "all") return "Filtro";
+    return (
+      environmentsWithServices.find((env) => env.id === selectedEnvironmentId)
+        ?.name || "Filtro"
+    );
+  }, [selectedEnvironmentId, environmentsWithServices]);
+
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ) => {
     const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
   const servicesWithDistance = useMemo(() => {
     return activeServices
       .filter((s) => {
-        const matchesCategory = selectedCategory === 'all' || s.category === selectedCategory;
+        const matchesCategory =
+          selectedCategory === "all" || s.category === selectedCategory;
         const matchesEnvironment =
-          selectedEnvironmentId === 'all' || s.environmentId === selectedEnvironmentId;
+          selectedEnvironmentId === "all" ||
+          s.environmentId === selectedEnvironmentId;
         return matchesCategory && matchesEnvironment;
       })
       .map((s) => {
@@ -94,14 +121,37 @@ export default function HomePage() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log('User location obtained:', position.coords.latitude, position.coords.longitude);
-          setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+          console.log(
+            "User location obtained:",
+            position.coords.latitude,
+            position.coords.longitude,
+          );
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
         },
         (err) => {
-          console.log('Geolocation error:', err.code, err.message);
-        }
+          console.log("Geolocation error:", err.code, err.message);
+        },
       );
     }
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterDropdownRef.current &&
+        !filterDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsFilterOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const userAvatar = mounted ? user?.avatar : null;
@@ -111,45 +161,59 @@ export default function HomePage() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
           setLocationLoading(false);
         },
         () => {
           setLocationLoading(false);
-        }
+        },
       );
     } else {
       setLocationLoading(false);
     }
   };
 
-  const environmentsWithSlug = selectedEnvironments.map(env => ({
+  const environmentsWithSlug = selectedEnvironments.map((env) => ({
     ...env,
-    slug: env.slug || env.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    slug:
+      env.slug ||
+      env.name
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, ""),
   }));
 
   const getCategoryIcon = (type: string) => {
     const icons: Record<string, string> = {
-      residential: 'apartment',
-      church: 'church',
-      club: 'clubs',
-      association: 'groups'
+      residential: "apartment",
+      church: "church",
+      club: "clubs",
+      association: "groups",
     };
-    return icons[type] || 'location_on';
+    return icons[type] || "location_on";
   };
 
   return (
-    <div className={`min-h-screen ${user ? 'pb-32' : 'pb-10'} bg-background`}>
+    <div className={`min-h-screen ${user ? "pb-32" : "pb-10"} bg-background`}>
       <TopAppBar />
 
       <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-8 pb-32">
         <section className="mb-10 mt-6 text-center md:text-left">
-          <h2 className="text-3xl font-black text-on-surface tracking-tighter">Perto de você</h2>
-          <p className="text-on-surface-variant text-base mt-1 font-medium">Serviços confiáveis de ambientes próximos</p>
+          <h2 className="text-3xl font-black text-on-surface tracking-tighter">
+            Perto de você
+          </h2>
+          <p className="text-on-surface-variant text-base mt-1 font-medium">
+            Serviços confiáveis de ambientes próximos
+          </p>
         </section>
 
         {/* sessão do mapa */}
-        
+
         {/* <section 
           className="relative h-56 w-full rounded-3xl overflow-hidden shadow-inner"
         >
@@ -182,102 +246,182 @@ export default function HomePage() {
         </section> */}
 
         <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="flex-1 flex items-center bg-surface-container-highest rounded-[2.5rem] px-5 py-3 gap-3 focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group">
-              <Icon icon="search" size={22} className="text-primary group-focus-within:scale-110 transition-transform" weight={500} />
-              <input 
-                className="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-on-surface-variant/70 font-medium text-base"
-                placeholder="Encontre o que você precisa..."
+          <div className="flex items-center gap-2">
+            {/* INPUT */}
+            <div className="flex-1 flex items-center bg-surface-container-highest rounded-[2.5rem] px-4 py-3 gap-2 focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group min-w-0">
+              <Icon
+                icon="search"
+                size={18}
+                className="text-primary group-focus-within:scale-110 transition-transform shrink-0"
+                weight={500}
+              />
+
+              <input
+                className="bg-transparent border-none focus:ring-0 flex-1 min-w-0 text-on-surface placeholder:text-on-surface-variant/70 font-medium text-sm"
+                placeholder="Encontre um serviço..."
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
 
-            <div className="relative inline-flex">
-            <select
-              value={selectedEnvironmentId}
-              onChange={(e) => setSelectedEnvironmentId(e.target.value)}
-              className="appearance-none text-start bg-surface-container-highest border-none rounded-[2.5rem] px-4 py-2.5 pr-10 text-xs font-bold text-on-surface cursor-pointer shadow-md border border-outline-variant/10 focus:outline-none focus:ring-2 focus:ring-primary/20 h-[50px] min-w-[150px]"
-              disabled={environmentsWithServices.length === 0}
+            {/* DROPDOWN CUSTOMIZADO */}
+            <div
+              ref={filterDropdownRef}
+              className="relative flex-shrink-0"
             >
-              <option value="all">TODOS OS AMBIENTES</option>
-              {environmentsWithServices.map((env) => (
-                <option key={env.id} value={env.id}>
-                  {env.name}
-                </option>
-              ))}
-            </select>
-              <Icon 
-                icon="expand_more" 
-                size={18} 
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" 
+              <button
+                type="button"
+                onClick={() =>
+                  environmentsWithServices.length > 0 &&
+                  setIsFilterOpen((prev) => !prev)
+                }
+                disabled={environmentsWithServices.length === 0}
+                className="bg-surface-container-highest rounded-[2.5rem] pl-3 pr-8 py-2.5 text-xs font-bold text-on-surface cursor-pointer shadow-md border border-outline-variant/10 focus:outline-none focus:ring-2 focus:ring-primary/20 h-[44px] max-w-[118px] sm:max-w-[180px] flex items-center truncate disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <span className="truncate">{selectedEnvironmentName}</span>
+              </button>
+
+              <Icon
+                icon="expand_more"
+                size={16}
+                className={`absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none transition-transform ${
+                  isFilterOpen ? "rotate-180" : ""
+                }`}
               />
+
+              {isFilterOpen && (
+                <div className="absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-24px)] rounded-2xl bg-white shadow-2xl border border-outline-variant/10 z-50 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedEnvironmentId("all");
+                      setIsFilterOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
+                      selectedEnvironmentId === "all"
+                        ? "bg-primary/5 text-primary font-bold"
+                        : "hover:bg-surface-container-highest text-on-surface"
+                    }`}
+                  >
+                    Filtro
+                  </button>
+
+                  <div className="max-h-72 overflow-y-auto">
+                    {environmentsWithServices.map((env) => (
+                      <button
+                        key={env.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedEnvironmentId(env.id);
+                          setIsFilterOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 text-sm transition-colors ${
+                          selectedEnvironmentId === env.id
+                            ? "bg-primary/5 text-primary font-bold"
+                            : "hover:bg-surface-container-highest text-on-surface"
+                        }`}
+                      >
+                        {env.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="flex overflow-x-auto pb-4 -mx-4 px-4 gap-3 no-scrollbar scroll-smooth">
-             {[
-               { id: 'all', label: 'Tudo', icon: 'apps' },
-               { id: 'Tecnologia', label: 'Tecnologia', icon: 'terminal' },
-               { id: 'Limpeza', label: 'Limpeza', icon: 'cleaning_services' },
-               { id: 'Construção', label: 'Construção', icon: 'construction' },
-               { id: 'Saúde', label: 'Saúde', icon: 'medical_services' },
-               { id: 'Beleza', label: 'Beleza', icon: 'content_cut' },
-               { id: 'Eventos', label: 'Eventos', icon: 'event' },
-               { id: 'Pet Sitting', label: 'Pet Sitting', icon: 'pets' }
-             ].map((cat) => (
-               <button 
-                 key={cat.id} 
-                 onClick={() => setSelectedCategory(cat.id === 'all' ? 'all' : cat.label)}
-                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl whitespace-nowrap font-black text-xs transition-all border shrink-0 shadow-sm ${
-                   (cat.id === 'all' && selectedCategory === 'all') || (selectedCategory === cat.label)
-                     ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105' 
-                     : 'bg-white text-on-surface-variant border-outline-variant/10 hover:border-primary/40 hover:text-primary active:scale-95'
-                 }`}
-               >
-                 <Icon icon={cat.icon} size={16} weight={(cat.id === 'all' && selectedCategory === 'all') || (selectedCategory === cat.label) ? 700 : 400} />
-                 {cat.label}
-               </button>
-             ))}
+            {[
+              { id: "all", label: "Tudo", icon: "apps" },
+              { id: "Tecnologia", label: "Tecnologia", icon: "terminal" },
+              { id: "Limpeza", label: "Limpeza", icon: "cleaning_services" },
+              { id: "Construção", label: "Construção", icon: "construction" },
+              { id: "Saúde", label: "Saúde", icon: "medical_services" },
+              { id: "Beleza", label: "Beleza", icon: "content_cut" },
+              { id: "Eventos", label: "Eventos", icon: "event" },
+              { id: "Pet Sitting", label: "Pet Sitting", icon: "pets" },
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() =>
+                  setSelectedCategory(cat.id === "all" ? "all" : cat.label)
+                }
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl whitespace-nowrap font-black text-xs transition-all border shrink-0 shadow-sm ${
+                  (cat.id === "all" && selectedCategory === "all") ||
+                  selectedCategory === cat.label
+                    ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105"
+                    : "bg-white text-on-surface-variant border-outline-variant/10 hover:border-primary/40 hover:text-primary active:scale-95"
+                }`}
+              >
+                <Icon
+                  icon={cat.icon}
+                  size={16}
+                  weight={
+                    (cat.id === "all" && selectedCategory === "all") ||
+                    selectedCategory === cat.label
+                      ? 700
+                      : 400
+                  }
+                />
+                {cat.label}
+              </button>
+            ))}
           </div>
         </section>
 
         {!search ? (
           <section className="space-y-4">
             <div className="flex items-center justify-between px-1">
-              <h3 className="text-xl font-black text-on-surface tracking-tight">Serviços próximos</h3>
-              <button onClick={() => router.push('/places')} className="text-xs font-bold text-primary uppercase tracking-wider hover:opacity-70">Ver Ambientes →</button>
+              <h3 className="text-xl font-black text-on-surface tracking-tight">
+                Serviços próximos
+              </h3>
+              <button
+                onClick={() => router.push("/places")}
+                className="text-xs font-bold text-primary uppercase tracking-wider hover:opacity-70"
+              >
+                Ver Ambientes →
+              </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {servicesWithDistance.slice(0, 6).map((service) => (
-                <div 
+                <div
                   key={service.id}
                   onClick={() => router.push(`/service/${service.slug}`)}
                   className="bg-surface-container-lowest p-4 rounded-[2rem] flex gap-4 items-center cursor-pointer hover:bg-white hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
                 >
                   <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
                     {service.image ? (
-                      <img 
-                        className="w-full h-full object-cover" 
-                        src={service.image} 
+                      <img
+                        className="w-full h-full object-cover"
+                        src={service.image}
                         alt={service.title}
                       />
                     ) : (
                       <div className="w-full h-full bg-primary/5 flex items-center justify-center">
-                        <Icon icon="image" size={24} className="text-primary/20" />
+                        <Icon
+                          icon="image"
+                          size={24}
+                          className="text-primary/20"
+                        />
                       </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">{service.category}</span>
+                        <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
+                          {service.category}
+                        </span>
                       </div>
-                      <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">{service.title}</h4>
-                      <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">{service.description}</p>
+                      <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">
+                        {service.title}
+                      </h4>
+                      <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">
+                        {service.description}
+                      </p>
                     </div>
-                    
+
                     <div className="mt-3 flex items-center justify-between">
                       {(userLocation || service.environmentName) && (
                         <div className="flex items-center gap-2">
@@ -285,8 +429,8 @@ export default function HomePage() {
                             <div className="flex items-center gap-1 text-primary">
                               <Icon icon="location_on" size={12} weight={700} />
                               <span className="text-[10px] font-bold">
-                                {service.distance < 1 
-                                  ? `${Math.round(service.distance * 1000)}m` 
+                                {service.distance < 1
+                                  ? `${Math.round(service.distance * 1000)}m`
                                   : `${service.distance.toFixed(1)}km`}
                               </span>
                             </div>
@@ -307,61 +451,78 @@ export default function HomePage() {
               ))}
               {servicesWithDistance.length === 0 && (
                 <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
-                   Nenhum serviço encontrado próximo a você
+                  Nenhum serviço encontrado próximo a você
                 </div>
               )}
             </div>
           </section>
         ) : (
           <section className="space-y-4">
-            <h3 className="text-xl font-black text-on-surface tracking-tight px-1">Resultados da busca</h3>
+            <h3 className="text-xl font-black text-on-surface tracking-tight px-1">
+              Resultados da busca
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {servicesWithDistance
-                .filter(service => {
+                .filter((service) => {
                   const searchLower = search.toLowerCase().trim();
                   return (
                     service.category.toLowerCase().includes(searchLower) ||
                     service.title.toLowerCase().includes(searchLower) ||
-                    (service.description && service.description.toLowerCase().includes(searchLower))
+                    (service.description &&
+                      service.description.toLowerCase().includes(searchLower))
                   );
                 })
                 .map((service) => (
-                  <div 
+                  <div
                     key={service.id}
                     onClick={() => router.push(`/service/${service.slug}`)}
                     className="bg-surface-container-lowest p-4 rounded-[2rem] flex gap-4 items-center cursor-pointer hover:bg-white hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
                   >
                     <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
                       {service.image ? (
-                        <img 
-                          className="w-full h-full object-cover" 
-                          src={service.image} 
+                        <img
+                          className="w-full h-full object-cover"
+                          src={service.image}
                           alt={service.title}
                         />
                       ) : (
                         <div className="w-full h-full bg-primary/5 flex items-center justify-center">
-                          <Icon icon="image" size={24} className="text-primary/20" />
+                          <Icon
+                            icon="image"
+                            size={24}
+                            className="text-primary/20"
+                          />
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">{service.category}</span>
+                          <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
+                            {service.category}
+                          </span>
                         </div>
-                        <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">{service.title}</h4>
-                        <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">{service.description}</p>
+                        <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">
+                          {service.title}
+                        </h4>
+                        <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">
+                          {service.description}
+                        </p>
                       </div>
-                      
+
                       <div className="mt-3 flex items-center justify-between">
                         {(userLocation || service.environmentName) && (
                           <div className="flex items-center gap-2">
                             {userLocation && service.distance !== Infinity && (
                               <div className="flex items-center gap-1 text-primary">
-                                <Icon icon="location_on" size={12} weight={700} />
+                                <Icon
+                                  icon="location_on"
+                                  size={12}
+                                  weight={700}
+                                />
                                 <span className="text-[10px] font-bold">
-                                  {service.distance < 1 
-                                    ? `${Math.round(service.distance * 1000)}m` 
+                                  {service.distance < 1
+                                    ? `${Math.round(service.distance * 1000)}m`
                                     : `${service.distance.toFixed(1)}km`}
                                 </span>
                               </div>
@@ -380,16 +541,17 @@ export default function HomePage() {
                     </div>
                   </div>
                 ))}
-              {servicesWithDistance.filter(service => {
-                  const searchLower = search.toLowerCase().trim();
-                  return (
-                    service.category.toLowerCase().includes(searchLower) ||
-                    service.title.toLowerCase().includes(searchLower) ||
-                    (service.description && service.description.toLowerCase().includes(searchLower))
-                  );
+              {servicesWithDistance.filter((service) => {
+                const searchLower = search.toLowerCase().trim();
+                return (
+                  service.category.toLowerCase().includes(searchLower) ||
+                  service.title.toLowerCase().includes(searchLower) ||
+                  (service.description &&
+                    service.description.toLowerCase().includes(searchLower))
+                );
               }).length === 0 && (
                 <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
-                   Nenhum serviço encontrado para "{search}"
+                  Nenhum serviço encontrado para "{search}"
                 </div>
               )}
             </div>
@@ -403,10 +565,11 @@ export default function HomePage() {
             </div>
             <h3 className="font-bold text-on-surface">Selecione um ambiente</h3>
             <p className="text-sm text-on-surface-variant">
-              Escolha um ambiente acima para ver os serviços disponíveis perto de você
+              Escolha um ambiente acima para ver os serviços disponíveis perto
+              de você
             </p>
-            <button 
-              onClick={() => router.push('/places')}
+            <button
+              onClick={() => router.push("/places")}
               className="mt-2 px-6 py-3 rounded-full primary-gradient text-white font-bold shadow-lg shadow-primary/20"
             >
               Ver ambientes

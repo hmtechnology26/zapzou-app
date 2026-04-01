@@ -46,6 +46,7 @@ export default function PlacesPage() {
   const [selectedCategory, setSelectedCategory] = useState<'condominium' | 'church'>('condominium');
 
   useEffect(() => {
+    console.log('Places page mounted');
     setMounted(true);
   }, []);
 
