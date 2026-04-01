@@ -476,7 +476,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const fetchServices = async () => {
     const query = supabase
       .from('services')
-      .select('*')
+      .select('*, environments(name, slug, latitude, longitude, type)')
       .order('created_at', { ascending: false });
       
     const { data, error } = await query;
@@ -494,12 +494,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         status: s.status as any,
         isActive: s.is_active,
         environmentId: s.environment_id,
+        environmentName: s.environments?.name || '',
+        environmentType: s.environments?.type || '',
+        environmentLatitude: s.environments?.latitude,
+        environmentLongitude: s.environments?.longitude,
         WhatsApp: s.whatsapp,
         instagram: s.instagram,
         frequency: s.frequency,
         menu: s.menu || [],
-        latitude: s.latitude,
-        longitude: s.longitude,
         rating: s.rating ?? 0,
         reviews_count: s.reviews_count ?? 0,
         views: s.views ?? 0,
@@ -568,8 +570,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         instagram: s.instagram,
         frequency: s.frequency,
         menu: s.menu || [],
-        latitude: s.latitude,
-        longitude: s.longitude,
         rating: s.rating ?? 0,
         reviews_count: s.reviews_count ?? 0,
         views: s.views ?? 0,
@@ -582,32 +582,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     console.log('addService called', { service, user: !!user });
     if (!user) throw new Error("User not found");
     if (!service?.environmentId) throw new Error('Selecione um ambiente para publicar.');
-
-    console.log('Determining location for new service...');
-    let location;
-    try {
-      if (typeof service?.latitude === 'number' && typeof service?.longitude === 'number') {
-        location = { latitude: service.latitude, longitude: service.longitude };
-      } else {
-        location = await getCurrentLocation();
-      }
-    } catch (locErr) {
-      console.warn('Could not get precise location, falling back to environment center:', locErr);
-      const { data: envData } = await supabase
-        .from('environments')
-        .select('latitude, longitude')
-        .eq('id', service.environmentId)
-        .single();
-      
-      if (envData?.latitude && envData?.longitude) {
-        location = { latitude: envData.latitude, longitude: envData.longitude };
-      } else {
-        // Absolute fallback to a default location if everything fails
-        location = { latitude: -30.0346, longitude: -51.2177 }; 
-      }
-    }
-
-    console.log('Final location for insert:', location);
 
     const { error } = await supabase
       .from('services')
@@ -625,8 +599,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         status: service.status || 'active',
         is_active: true,
         environment_id: service.environmentId,
-        latitude: location.latitude,
-        longitude: location.longitude,
         provider_id: user.id,
         provider: user.name || 'Prestador',
       }]);
@@ -653,8 +625,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (updatedFields.status !== undefined) payload.status = updatedFields.status;
     if (updatedFields.isActive !== undefined) payload.is_active = updatedFields.isActive;
     if (updatedFields.environmentId !== undefined) payload.environment_id = updatedFields.environmentId;
-    if (updatedFields.latitude !== undefined) payload.latitude = updatedFields.latitude;
-    if (updatedFields.longitude !== undefined) payload.longitude = updatedFields.longitude;
 
     const { error } = await supabase
       .from('services')

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useApp } from "@/hooks/useApp";
 import { BottomNav } from "@/components/BottomNav";
+import { Icon } from "@/components/Icon";
 
 function ProtectedLayoutSkeleton() {
   const rows = Array.from({ length: 3 });
@@ -36,14 +37,18 @@ function ProtectedLayoutSkeleton() {
 }
 
 function ProtectedLayout({ children }: { children: ReactNode }) {
-  const { user, loading } = useApp();
+  const { user, loading, selectedEnvironments } = useApp();
   const router = useRouter();
   const pathname = usePathname() ?? "";
+  const searchParams = useSearchParams();
   const [hasMounted, setHasMounted] = useState(false);
   const [locationPermission, setLocationPermission] = useState<
     "granted" | "denied" | "prompt" | "unknown"
   >("unknown");
   const [hasSeenLocationPrompt, setHasSeenLocationPrompt] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [publicEnvironmentName, setPublicEnvironmentName] = useState<string>("");
 
   const LOCATION_PROMPT_STORAGE_KEY = "zapzou-location-permission-prompted";
 
@@ -52,6 +57,7 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
     pathname === "/login" ||
     pathname === "/search" ||
     pathname === "/places" ||
+    pathname === "/contact" ||
     pathname.startsWith("/service/") ||
     pathname.startsWith("/places/") ||
     pathname.startsWith("/auth/");
@@ -73,6 +79,7 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
     "/notifications",
     "/select-environments",
     "/admin",
+    "/contact",
   ];
 
   useEffect(() => {
@@ -123,6 +130,75 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
       router.push("/login");
     }
   }, [user, loading, isPublicPage, router]);
+
+  // Verificar se é uma rota de ambiente público via placeId
+  useEffect(() => {
+    const placeId = searchParams?.get('placeId');
+    if (placeId && pathname.startsWith('/places/')) {
+      const stored = localStorage.getItem(`place_${placeId}`);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setPublicEnvironmentName(parsed.displayName?.text || '');
+        } catch (e) {}
+      }
+    }
+  }, [pathname, searchParams]);
+
+  const isPublicEnvironmentView = pathname.startsWith('/places/') && searchParams?.get('placeId');
+  
+  // Verificar se o usuário já confirmou saída anteriormente neste ambiente
+  const [hasConfirmedExit, setHasConfirmedExit] = useState(false);
+
+  useEffect(() => {
+    if (isPublicEnvironmentView) {
+      const confirmed = localStorage.getItem('zapzou_public_exit_confirmed');
+      setHasConfirmedExit(confirmed === 'true');
+    } else {
+      setHasConfirmedExit(false);
+      localStorage.removeItem('zapzou_public_exit_confirmed');
+    }
+  }, [isPublicEnvironmentView]);
+
+  // Interceptar navegação para mostrar modal de saída
+  const handleNavigation = (e: MouseEvent | React.MouseEvent) => {
+    // Não mostrar modal se já confirmou saída anteriormente
+    if (!isPublicEnvironmentView || !publicEnvironmentName || hasConfirmedExit) return;
+    
+    const target = e.target as HTMLElement;
+    const anchor = target.closest('a');
+    const button = target.closest('button');
+    
+    const href = anchor?.getAttribute('href');
+    
+    // Verificar se é um link interno (exceto /places/)
+    if (href && href.startsWith('/') && !href.startsWith('/places/')) {
+      e.preventDefault();
+      setPendingNavigation(href);
+      setShowExitModal(true);
+      return;
+    }
+    
+    // Verificar se é um botão com onClick que usa router
+    if (button && !button.getAttribute('data-exit-modal-ignore')) {
+      const onClick = (button as any).onClick;
+      if (onClick) {
+        // Checar se o onClick envolve router.push
+        const buttonHtml = button.outerHTML || '';
+        if (buttonHtml.includes('router.push') || buttonHtml.includes('onClick=')) {
+          // Presumir que é navegação - mostrar modal
+          e.preventDefault();
+          setPendingNavigation(null); // Navigation will be handled by button's own onClick after modal
+          setShowExitModal(true);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('click', handleNavigation);
+    return () => document.removeEventListener('click', handleNavigation);
+  }, [isPublicEnvironmentView, publicEnvironmentName, hasConfirmedExit]);
 
   if (loading) {
     return <ProtectedLayoutSkeleton />;
@@ -213,8 +289,52 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
                     strokeLinejoin="round"
                   />
                 </svg>
-                <span>Conceder permissão de localização</span>
+                  <span>Conceder permissão de localização</span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de saída de ambiente público */}
+      {showExitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-sm mx-4 space-y-6">
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+                <Icon icon="exit_to_app" size={32} className="text-amber-600" />
+              </div>
+              <h2 className="text-xl font-bold text-on-surface">
+                SAIR DO AMBIENTE {publicEnvironmentName.toUpperCase()}?
+              </h2>
+              <p className="text-on-surface-variant text-center mt-2">
+                Você está visualizando um ambiente público. Ao sair, perde o acesso a este ambiente a menos que clique novamente no link.
+              </p>
+              <div className="flex flex-col gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowExitModal(false);
+                    // Se há pendingNavigation, redireciona; senão deixa o clique original seguir
+                    if (pendingNavigation) {
+                      router.push(pendingNavigation);
+                    }
+                    // Armazenar que o usuário confirmou saída para permitir próximas ações
+                    localStorage.setItem('zapzou_public_exit_confirmed', 'true');
+                  }}
+                  className="w-full bg-error text-white font-bold py-3 px-6 rounded-xl hover:bg-error/90 transition-colors"
+                >
+                  SIM, SAIR
+                </button>
+                <button
+                  onClick={() => {
+                    setShowExitModal(false);
+                    setPendingNavigation(null);
+                  }}
+                  className="w-full bg-surface-container-high text-on-surface font-bold py-3 px-6 rounded-xl hover:bg-surface-container-highest transition-colors"
+                >
+                  CANCELAR
+                </button>
+              </div>
             </div>
           </div>
         </div>

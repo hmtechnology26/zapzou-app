@@ -18,7 +18,6 @@ interface TopAppBarProps {
   onAvatarClick?: () => void;
   activePath?: string;
   leftAvatar?: string;
-  leftCustomAction?: React.ReactNode;
 }
 
 interface NavItem {
@@ -46,7 +45,6 @@ export function TopAppBar({
   onMenuClick,
   onAvatarClick: propAvatarClick,
   leftAvatar,
-  leftCustomAction,
 }: TopAppBarProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -84,16 +82,16 @@ export function TopAppBar({
     <header className={`fixed top-0 w-full z-50 ${bgColor} backdrop-blur-xl border-b border-slate-200/5 transition-all duration-300`}>
       <div className="max-w-7xl mx-auto w-full flex items-center justify-between px-4 h-16 md:h-20">
         <div className="flex items-center gap-3 md:gap-8">
-          {showBack && (
-            <button
-              onClick={onBack}
-              className={`hover:bg-slate-100/50 dark:hover:bg-slate-800/50 rounded-full transition-colors p-2 active:scale-95 duration-200 ${textColor}`}
-            >
-              <Icon icon="arrow_back" weight={400} grade={0} size={24} />
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {showBack && (
+              <button
+                onClick={onBack}
+                className={`hover:bg-slate-100/50 dark:hover:bg-slate-800/50 rounded-full transition-colors p-2 active:scale-95 duration-200 ${textColor}`}
+              >
+                <Icon icon="arrow_back" weight={400} grade={0} size={24} />
+              </button>
+            )}
 
-          {!showBack && (
             <div 
               onClick={() => router.push('/')}
               className="flex items-center cursor-pointer group"
@@ -104,7 +102,7 @@ export function TopAppBar({
                 className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]" 
               />
             </div>
-          )}
+          </div>
 
           {title && (
             <div className="flex items-center gap-2 ml-2">

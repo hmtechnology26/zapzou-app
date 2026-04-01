@@ -10,7 +10,7 @@ import { useEffect } from "react";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, services, setUser, loading, selectedEnvironments, setSelectedEnvironment } = useApp();
+  const { user, setUser, loading, setSelectedEnvironments, setSelectedEnvironment } = useApp();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -30,7 +30,21 @@ export default function ProfilePage() {
     return null;
   }
 
-  const activeServices = services.filter((s) => s.isActive).length;
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Logout failed:", error);
+      }
+    } catch (err) {
+      console.error("Unexpected logout error:", err);
+    } finally {
+      setUser(null);
+      setSelectedEnvironments([]);
+      setSelectedEnvironment(null);
+      router.replace("/login");
+    }
+  };
 
   return (
     <div className="min-h-screen pb-24">
@@ -164,11 +178,7 @@ export default function ProfilePage() {
             <Icon icon="chevron_right" weight={400} grade={0} size={24} />
           </button> */}
           <button
-            onClick={async () => {
-              await supabase.auth.signOut();
-              setUser(null);
-              router.push("/login");
-            }}
+            onClick={handleLogout}
             className="w-full flex items-center gap-4 p-4 bg-surface-container-lowest rounded-xl"
           >
             <Icon

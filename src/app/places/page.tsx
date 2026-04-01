@@ -31,6 +31,7 @@ export default function PlacesPage() {
     favoritePlaces: backendFavoritePlaces,
     storeFavoritePlace,
     removeFavoritePlace,
+    selectedEnvironments,
   } = useApp();
   const searchParams = useSearchParams();
   const mode = searchParams.get('mode');
@@ -130,10 +131,12 @@ export default function PlacesPage() {
     return () => clearTimeout(timeoutId);
   }, [search, selectedCategory]);
 
+  const generateSlug = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
   const searchResultsWithDistance = searchResults
     .map(place => ({
       ...place,
-      slug: place.id,
+      slug: generateSlug(place.displayName?.text || place.id),
       name: place.displayName?.text || '',
       type: inferEnvironmentTypeFromPlace(place.primaryType),
       members: 0,
@@ -155,7 +158,15 @@ export default function PlacesPage() {
 
   const handleSelectEnvironment = (envSlug: string, place?: PlaceSearchResult) => {
     const query = new URLSearchParams();
-    if (place) {
+    
+    // Verificar se o ambiente já está cadastrado no banco
+    const existingEnvironment = selectedEnvironments.find(env => {
+      const envSlugFromName = env.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return envSlugFromName === envSlug || env.slug === envSlug;
+    });
+    
+    // Só adicionar placeId se o ambiente NÃO estiver cadastrado no banco
+    if (place && !existingEnvironment) {
       localStorage.setItem(`place_${place.id}`, JSON.stringify(place));
       query.set('placeId', place.id);
     }
@@ -242,10 +253,11 @@ export default function PlacesPage() {
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-background">
       <TopAppBar />
-      <main className="mt-24 px-4 md:px-8 max-w-7xl mx-auto pb-32">
-        <section className="mb-10 text-center md:text-left">
+      <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto pb-32">
+        
+        <section className="mb-10 mt-6 text-center md:text-left">
            <h2 className="text-3xl font-black text-on-surface tracking-tighter">Explorar Ambientes</h2>
-           <p className="text-on-surface-variant text-base mt-1 font-medium">Encontre sua comunidade para começar a anunciar</p>
+           <p className="text-on-surface-variant text-base mt-1 font-medium">Digite o nome do seu ambiente para ver quem está anunciando lá.</p>
         </section>
 
         <div className="relative mb-8">

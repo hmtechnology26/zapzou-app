@@ -17,55 +17,80 @@ export default function PlaceDetailPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const { selectedEnvironments, services, user, setSelectedEnvironment, setSelectedEnvironments } = useApp();
+  const { selectedEnvironments, services, user, setSelectedEnvironment, setSelectedEnvironments, requestAffiliation } = useApp();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [placeFromSearch, setPlaceFromSearch] = useState<PlaceSearchResult | null>(null);
   const [membership, setMembership] = useState<{ status: 'active' | 'pending' | 'banned' } | null>(null);
   const [membershipLoading, setMembershipLoading] = useState(false);
   const [memberCount, setMemberCount] = useState<number | null>(null);
+  const [loadingEnvironment, setLoadingEnvironment] = useState(true);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   const generateSlug = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   const placeSlug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
   const placeId = searchParams?.get('placeId');
 
-  useEffect(() => {
-    if (placeId) {
-      const stored = localStorage.getItem(`place_${placeId}`);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          setPlaceFromSearch(parsed);
-        } catch (e) {
-          console.error('Failed to parse stored place:', e);
-        }
-      }
-    }
-  }, [placeId]);
-
-  const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      residential: 'Residencial',
-      church: 'Igreja',
-      place_of_worship: 'Igreja',
-      cathedral: 'Catedral',
-      chapel: 'Capela',
-      temple: 'Templo',
-      club: 'Clube',
-      association: 'Associação',
-      apartment_building: 'Prédio',
-      condominium_complex: 'Condomínio',
-      shopping_mall: 'Shopping'
-    };
-    return labels[type] || type;
-  };
-
   const environmentsWithSlug = selectedEnvironments.map(env => ({
     ...env,
     slug: env.slug || generateSlug(env.name)
   }));
-  const environment = environmentsWithSlug.find(e => e.slug === placeSlug);
+  
+  const environment = environmentsWithSlug.find(e => e.slug === placeSlug || generateSlug(e.name) === placeSlug);
+
+  // Se encontrou o ambiente no banco, remover o placeId da URL
+  useEffect(() => {
+    if (environment && placeId) {
+      // Remover o placeId da URL quando o ambiente está cadastrado
+      router.replace(`/places/${placeSlug}`, { scroll: false });
+    }
+  }, [environment, placeId, placeSlug]);
+
+  // Se não encontrou no estado local, buscar diretamente do banco
+  useEffect(() => {
+    if (!environment && placeSlug && !placeFromSearch && loadingEnvironment) {
+      const fetchEnvironmentFromDb = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('environments')
+            .select('*')
+            .or(`slug.eq.${placeSlug},name.ilike.${placeSlug.replace(/-/g, ' ')}`)
+            .limit(1)
+            .maybeSingle();
+          
+          if (data && !error) {
+            const envWithSlug = {
+              id: data.id,
+              name: data.name,
+              slug: data.slug || generateSlug(data.name),
+              type: data.type,
+              members: Number(data.members_count ?? 0),
+              image: data.image_url || '',
+              status: data.status,
+              latitude: data.latitude,
+              longitude: data.longitude,
+              requiresModeratorApproval: Boolean(data.requires_moderator_approval),
+              requiresRadiusValidation: Boolean(data.requires_radius_validation),
+            };
+            setSelectedEnvironments(prev => {
+              if (prev.some(e => e.id === envWithSlug.id)) return prev;
+              return [...prev, envWithSlug];
+            });
+          } else {
+            // Ambiente não encontrado no banco - mostrar modal de boas-vindas
+            setShowWelcomeModal(true);
+          }
+        } catch (err) {
+          console.error('Error fetching environment:', err);
+          setShowWelcomeModal(true);
+        } finally {
+          setLoadingEnvironment(false);
+        }
+      };
+      fetchEnvironmentFromDb();
+    }
+  }, [placeSlug, environment, placeFromSearch, placeId, setSelectedEnvironments, loadingEnvironment]);
 
   const effectiveEnvironment = environment || (placeFromSearch ? {
     id: placeFromSearch.id,
@@ -78,6 +103,11 @@ export default function PlaceDetailPage() {
     longitude: placeFromSearch.location?.longitude,
     ...inferEnvironmentValidationFlagsFromPlace(placeFromSearch.primaryType),
   } : null);
+
+  const topBarProps = {
+    showBack: true,
+    onBack: () => router.back(),
+  };
 
   // Set global context
   useEffect(() => {
@@ -171,35 +201,110 @@ export default function PlaceDetailPage() {
 
   const mode = searchParams.get('mode');
 
-  if (!effectiveEnvironment) {
+  // Mostrar loading enquanto busca ambiente
+  if (loadingEnvironment || !placeSlug) {
     return (
-      <div className="min-h-screen flex items-center justify-center flex-col gap-4">
-        <Icon icon="error_outline" size={48} className="text-outline" />
-        <p className="text-on-surface-variant">Ambiente não encontrado</p>
-        <button onClick={() => router.back()} className="text-primary font-bold">Voltar</button>
+      <div className="min-h-screen pb-24 md:pb-8 bg-background">
+        <TopAppBar {...topBarProps} />
+        <main className="mt-20 px-4 md:px-8 max-w-4xl mx-auto flex items-center justify-center pb-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </main>
+      </div>
+    );
+  }
+
+  // Se não encontrou ambiente e não está mostrando modal, mostra erro
+  if (!effectiveEnvironment && !showWelcomeModal) {
+    return (
+      <div className="min-h-screen pb-24 md:pb-8 bg-background">
+        <TopAppBar {...topBarProps} />
+        <main className="mt-20 px-4 md:px-8 max-w-4xl mx-auto flex items-center justify-center flex-col gap-4 pb-32">
+          <Icon icon="error_outline" size={48} className="text-outline" />
+          <p className="text-on-surface-variant">Ambiente não encontrado</p>
+          <button onClick={() => router.back()} className="text-primary font-bold">
+            Voltar
+          </button>
+        </main>
+      </div>
+    );
+  }
+
+  // Se não encontrou ambiente mas tem o modal, mostrar modal inline
+  if (!effectiveEnvironment && showWelcomeModal && placeSlug) {
+    const envName = placeSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const isChurch = placeFromSearch?.primaryType === 'church' || 
+                     placeFromSearch?.primaryType === 'place_of_worship' || 
+                     placeFromSearch?.primaryType === 'cathedral' || 
+                     placeFromSearch?.primaryType === 'chapel' || 
+                     placeFromSearch?.primaryType === 'temple' ||
+                     envName.toLowerCase().includes('igreja') ||
+                     envName.toLowerCase().includes('templo') ||
+                     envName.toLowerCase().includes('capela') ||
+                     envName.toLowerCase().includes('catedral');
+    
+    return (
+      <div className="min-h-screen pb-24 md:pb-8 bg-background">
+        <TopAppBar {...topBarProps} />
+        <main className="mt-20 px-4 md:px-8 max-w-7xl mx-auto space-y-8 pb-32">
+          <div className="flex items-center gap-3">
+            
+          </div>
+          <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+            <div className="text-center">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Icon icon="celebration" size={40} className="text-primary" />
+              </div>
+              <h2 className="text-2xl font-black text-on-surface">
+                SEJA BEM VINDO AO 
+                <br />
+                {envName.toUpperCase()}!
+              </h2>
+              <p className="text-on-surface-variant text-center mt-4">
+                Você é o primeiro a descobrir este ambiente!
+              </p>
+              <p className="text-on-surface-variant text-center mt-4">
+                Seja o primeiro a fazer parte e publicar seus serviços aqui.
+              </p>
+              <div className="p-4 bg-surface-container-lowest rounded-2xl">
+                <p className="text-xs font-black text-primary uppercase tracking-widest mb-2"></p>
+                <ul className="text-sm text-on-surface-variant space-y-2 text-left">
+                  
+                </ul>
+              </div>
+              <div className="flex flex-col gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    router.push('/meus-anuncios');
+                  }}
+                  className="w-full bg-primary text-white font-bold py-4 px-6 rounded-2xl hover:bg-primary/90 transition-colors"
+                >
+                  SEJA O PRIMEIRO A PUBLICAR AQUI
+                </button>
+                <button
+                  onClick={() => {
+                    setShowWelcomeModal(false);
+                    router.back();
+                  }}
+                  className="w-full bg-surface-container-high text-on-surface font-bold py-3 px-6 rounded-2xl hover:bg-surface-container-highest transition-colors"
+                >
+                  VOLTAR
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-background">
-      <TopAppBar 
-        showBack
-        onBack={() => router.back()}
-        leftCustomAction={
-          <div className="flex items-center gap-2">
-            {effectiveEnvironment.image && (
-              <img className="w-8 h-8 border border-outline-variant/10 rounded-full object-cover" src={effectiveEnvironment.image} alt={effectiveEnvironment.name} />
-            )}
-            <h1 className="text-lg font-black tracking-tight text-on-surface line-clamp-1">{effectiveEnvironment.name}</h1>
-          </div>
-        }
-      />
+      <TopAppBar {...topBarProps} />
 
       {/* Floating Action Button for mobile */}
       {user && membership?.status === 'active' && (
         <button 
-          onClick={() => router.push(`/register-service?envId=${effectiveEnvironment.id}`)}
+          onClick={() => router.push(`/register-service?envId=${effectiveEnvironment!.id}`)}
           className="md:hidden fixed bottom-24 right-6 z-50 w-14 h-14 rounded-full primary-gradient text-white shadow-2xl flex items-center justify-center hover:scale-110 active:scale-90 transition-all"
         >
           <Icon icon="add" size={32} />
@@ -207,7 +312,7 @@ export default function PlaceDetailPage() {
       )}
 
       <main className="mt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-8 pb-32">
-        {placeId === 'ChIJMxc3c39wGZURn6hZo6QxoZk' && (
+        {(placeSlug === 'igreja-ministerio-farol' || effectiveEnvironment?.name?.toLowerCase().includes('farol')) && (
           <div className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-emerald-900 to-emerald-800 p-8 shadow-2xl border border-white/5">
              <div className="absolute -top-6 -right-6 opacity-40 rotate-12">
                <img src="/farol_logo.png" alt="Farol Logo" className="w-52 h-auto" />
@@ -251,7 +356,18 @@ export default function PlaceDetailPage() {
                    <span className="text-xs font-bold tracking-tight">Ranking #1</span>
                  </div>
                </div>
-             </div>
+              </div>
+           </div>
+        )}
+
+        {effectiveEnvironment && (
+          <div className="text-center">
+            <p className="text-xs font-black uppercase tracking-widest text-primary/60">
+              Você está vendo os serviços de
+            </p>
+            <h2 className="text-xl font-black text-on-surface mt-1">
+              {effectiveEnvironment.name}
+            </h2>
           </div>
         )}
 
@@ -310,7 +426,7 @@ export default function PlaceDetailPage() {
              </div>
              <div>
                 <h3 className="text-xl font-black text-amber-900 tracking-tight">Acesso em análise</h3>
-                <p className="text-sm text-amber-800 font-medium mt-1">Sua solicitação de vínculo com {effectiveEnvironment.name} está aguardando aprovação.</p>
+                <p className="text-sm text-amber-800 font-medium mt-1">Sua solicitação de vínculo com {effectiveEnvironment!.name} está aguardando aprovação.</p>
              </div>
           </div>
         )}
@@ -355,6 +471,78 @@ export default function PlaceDetailPage() {
           )}
         </div>
       </main>
+
+      {/* Modal de boas-vindas para ambiente não cadastrado */}
+      {showWelcomeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-md space-y-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Icon icon="celebration" size={40} className="text-primary" />
+              </div>
+              <h2 className="text-2xl font-black text-on-surface">
+                SEJA BEM VINDO AO {placeFromSearch?.displayName?.text?.toUpperCase() || placeSlug?.toUpperCase() || 'AMBIENTE'}!
+              </h2>
+              <p className="text-on-surface-variant text-center mt-4">
+                Você é o primeiro a descobrir este ambiente! Seja o primeiro a fazer parte e publicar seus serviços aqui.
+              </p>
+              <div className="mt-6 p-4 bg-surface-container-lowest rounded-2xl">
+                <p className="text-xs font-black text-primary uppercase tracking-widest mb-2">Como funciona?</p>
+                <ul className="text-sm text-on-surface-variant space-y-2 text-left">
+                  <li className="flex items-start gap-2">
+                    <Icon icon="location_on" size={16} className="text-primary mt-0.5" />
+                    <span>Solicite acesso por proximidade ou</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Icon icon="admin_panel_settings" size={16} className="text-primary mt-0.5" />
+                    <span>Peça autorização para um moderador</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="flex flex-col gap-3 mt-6">
+                <button
+                  onClick={async () => {
+                    if (!user) {
+                      router.push('/login');
+                      return;
+                    }
+                    try {
+                      // Criar solicitação de novo ambiente
+                      const envName = placeFromSearch?.displayName?.text || placeSlug || 'Novo Ambiente';
+                      const { error } = await supabase
+                        .from('environment_requests')
+                        .insert([{
+                          name: envName,
+                          place_id: placeId,
+                          requested_by: user.id,
+                          status: 'pending'
+                        }]);
+                      if (error) throw error;
+                      setShowWelcomeModal(false);
+                      alert('Solicitação enviada! Em breve este ambiente será aprovado.');
+                    } catch (err) {
+                      console.error('Error requesting environment:', err);
+                      alert('Erro ao solicitar. Tente novamente.');
+                    }
+                  }}
+                  className="w-full bg-primary text-white font-bold py-4 px-6 rounded-2xl hover:bg-primary/90 transition-colors"
+                >
+                  {user ? 'SOLICITAR ACESSO' : 'FAZER LOGIN PARA SOLICITAR'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowWelcomeModal(false);
+                    router.back();
+                  }}
+                  className="w-full bg-surface-container-high text-on-surface font-bold py-3 px-6 rounded-2xl hover:bg-surface-container-highest transition-colors"
+                >
+                  VOLTAR
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

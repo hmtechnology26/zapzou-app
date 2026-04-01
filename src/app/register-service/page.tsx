@@ -39,14 +39,9 @@ function RegisterServiceContent() {
     category: categories[0],
     WhatsApp: '',
     instagram: '',
-    image: '',
   });
-  const [isActive, setIsActive] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [imagePreviewUrl, setImagePreviewUrl] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [images, setImages] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   
   const [menuItems, setMenuItems] = useState<{id?: string; name: string; description: string; price: string; image?: string}[]>([]);
   const [showMenuItemModal, setShowMenuItemModal] = useState(false);
@@ -57,6 +52,10 @@ function RegisterServiceContent() {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [alertAction, setAlertAction] = useState<{ label: string; onClick: () => void } | null>(null);
+  const [isActive, setIsActive] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     if (existingService) {
@@ -66,8 +65,8 @@ function RegisterServiceContent() {
         category: existingService.category || categories[0],
         WhatsApp: existingService.WhatsApp || '',
         instagram: existingService.instagram || '',
-        image: existingService.image || '',
       });
+      setImages(existingService.images || []);
       setIsActive(existingService.isActive ?? true);
       setMenuItems(existingService.menu || []);
       
@@ -171,12 +170,6 @@ function RegisterServiceContent() {
     fetchSpecificMembership();
   }, [mounted, user, selectedEnvironment?.id]);
 
-  useEffect(() => {
-    return () => {
-      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
-    };
-  }, [imagePreviewUrl]);
-
   // Verificações de Acesso / Moderação
   useEffect(() => {
     if (!mounted || !user) return;
@@ -211,20 +204,34 @@ function RegisterServiceContent() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (images.length >= 5) {
+      setErrorMsg('Máximo de 5 fotos permitidas');
+      return;
+    }
 
     setUploading(true);
     try {
       setErrorMsg('');
-      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
       const previewUrl = URL.createObjectURL(file);
-      setImagePreviewUrl(previewUrl);
-      setImageFile(file);
-      setForm({ ...form, image: previewUrl });
+      setImages([...images, previewUrl]);
+      setImageFiles([...imageFiles, file]);
     } catch (error: any) {
       setErrorMsg(error?.message || 'Erro ao selecionar imagem.');
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const newImages = [...images];
+    const newFiles = [...imageFiles];
+    if (newImages[index].startsWith('blob:')) {
+      URL.revokeObjectURL(newImages[index]);
+    }
+    newImages.splice(index, 1);
+    newFiles.splice(index, 1);
+    setImages(newImages);
+    setImageFiles(newFiles);
   };
 
   const uploadImageToR2 = async (file: File, prefix: string): Promise<string> => {
@@ -302,7 +309,7 @@ function RegisterServiceContent() {
   };
 
   const handleSubmit = async () => {
-    console.log('handleSubmit called', { existingService: !!existingService, form, imageFile: !!imageFile, isActive });
+    console.log('handleSubmit called', { existingService: !!existingService, images, isActive });
     
     if (!form.title || !form.WhatsApp) {
       console.log('Validation failed: missing title or WhatsApp');
@@ -316,13 +323,20 @@ function RegisterServiceContent() {
     try {
       console.log('Starting submit...');
       
-      let finalImage = form.image;
+      const uploadedImages: string[] = [];
       
-      if (imageFile && form.image.startsWith('blob:')) {
-        console.log('Uploading new image...');
-        finalImage = await uploadImageToR2(imageFile, 'services');
-        console.log('Image uploaded:', finalImage);
+      for (let i = 0; i < imageFiles.length; i++) {
+        if (images[i].startsWith('blob:')) {
+          const uploadedUrl = await uploadImageToR2(imageFiles[i], 'services');
+          uploadedImages.push(uploadedUrl);
+          console.log('Image uploaded:', uploadedUrl);
+        } else {
+          uploadedImages.push(images[i]);
+        }
       }
+      
+      const finalImage = uploadedImages[0] || '';
+      const finalImages = uploadedImages;
 
       const menuItemsWithImages = await Promise.all(menuItems.map(async (item, index) => {
         if (item.image && item.image.startsWith('blob:') && menuItemFiles.has(index)) {
@@ -359,6 +373,7 @@ function RegisterServiceContent() {
       const serviceData = {
         ...form,
         image: finalImage,
+        images: finalImages,
         WhatsApp: form.WhatsApp ? `55${form.WhatsApp}` : '',
         isActive: nextIsActive,
         status: nextPublicationStatus,
@@ -555,45 +570,43 @@ function RegisterServiceContent() {
             )}
             
             <div>
-              <label className="text-sm font-medium text-on-surface">Foto do Serviço</label>
-              <div className="mt-2 flex items-center gap-4">
-                <label className="cursor-pointer">
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  <div className="w-24 h-24 rounded-2xl bg-surface-container-lowest border-2 border-dashed border-outline-variant/30 flex items-center justify-center overflow-hidden hover:border-primary transition-colors">
-                    {imagePreviewUrl || form.image ? (
-                      <img src={imagePreviewUrl || form.image} alt="Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="flex flex-col items-center gap-1 text-on-surface-variant">
-                        <Icon icon="add_photo_alternate" weight={400} size={24} />
-                        <span className="text-[10px]">Adicionar</span>
-                      </div>
-                    )}
+              <label className="text-sm font-medium text-on-surface">Fotos do Serviço (até 5)</label>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                {images.map((img, index) => (
+                  <div key={index} className="relative w-20 h-20 rounded-2xl overflow-hidden">
+                    <img src={img} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                    <button 
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white"
+                    >
+                      <Icon icon="close" size={12} />
+                    </button>
                   </div>
-                </label>
+                ))}
+                {images.length < 5 && (
+                  <label className="cursor-pointer">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <div className="w-20 h-20 rounded-2xl bg-surface-container-lowest border-2 border-dashed border-outline-variant/30 flex items-center justify-center overflow-hidden hover:border-primary transition-colors">
+                      <div className="flex flex-col items-center gap-1 text-on-surface-variant">
+                        <Icon icon="add_photo_alternate" weight={400} size={20} />
+                        <span className="text-[8px]">Adicionar</span>
+                      </div>
+                    </div>
+                  </label>
+                )}
                 {uploading && (
                   <div className="flex items-center gap-2 text-on-surface-variant">
                     <Icon icon="cloud_upload" weight={400} size={20} className="animate-pulse" />
                     <span className="text-sm">Enviando...</span>
                   </div>
                 )}
-                {(imagePreviewUrl || form.image) && (
-                  <button 
-                    onClick={() => {
-                      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
-                      setImagePreviewUrl('');
-                      setForm({ ...form, image: '' });
-                    }}
-                    className="text-error text-sm font-medium"
-                  >
-                    Remover
-                  </button>
-                )}
               </div>
+              <p className="text-xs text-on-surface-variant mt-2">{images.length}/5 fotos adicionadas</p>
             </div>
 
             <div>

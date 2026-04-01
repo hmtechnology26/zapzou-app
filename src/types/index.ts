@@ -18,14 +18,16 @@ export interface Service {
   status: 'active' | 'pending' | 'rejected';
   environmentId?: string;
   environmentSlug?: string;
+  environmentName?: string;
+  environmentType?: string;
+  environmentLatitude?: number;
+  environmentLongitude?: number;
   environments?: { id: string; slug: string }[];
   reviewList?: Review[];
   verified?: boolean;
   location?: string;
   tags?: string[];
   menu?: MenuItem[];
-  latitude?: number;
-  longitude?: number;
   views?: number;
   availabilityStatus?: 'active' | 'pending';
   availabilityReason?: string;
@@ -46,7 +48,7 @@ export interface Environment {
   id: string;
   slug: string;
   name: string;
-  type: 'residential' | 'church' | 'club' | 'association';
+  type: string;
   members: number;
   image: string;
   isSelected?: boolean;
