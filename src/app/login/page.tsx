@@ -40,8 +40,8 @@ export default function LoginPage() {
     <div className="flex flex-col min-h-screen items-center justify-center p-6 bg-background">
       <main className="w-full max-w-md flex flex-col items-center">
         {/* Logo */}
-        <div className="mb-12 flex flex-col items-center">
-          <img src="/zapzou_logo_vert.png" alt="ZapZou" className="h-36 mb-4" />
+        <div className="mt-16 mb-8 flex flex-col items-center">
+          <img src="/zapzou_logo_vert.png" alt="ZapZou" className="h-48" />
           
           {/* <div className="h-1 w-12 bg-primary-container rounded-full"></div> */}
         </div>
@@ -66,12 +66,12 @@ export default function LoginPage() {
             id="login-google"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full group flex items-center justify-center gap-4 bg-surface-container-low hover:bg-surface-container-highest transition-all duration-300 py-4 px-6 rounded-full border border-outline-variant/20 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full group flex items-center justify-center gap-2 md:gap-4 bg-surface-container-low hover:bg-[#34A853] text-on-surface hover:text-white transition-all duration-300 py-3 md:py-4 px-4 md:px-6 rounded-full border-2 border-[#34A853]/30 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <div className="w-6 h-6 flex items-center justify-center">
+              <div className="w-5 md:w-6 h-5 md:h-6 flex items-center justify-center group-hover:invert group-hover:brightness-0 group-hover:contrast-200">
                 <svg className="w-full h-full" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -80,7 +80,7 @@ export default function LoginPage() {
                 </svg>
               </div>
             )}
-            <span className="text-on-surface font-semibold text-lg">
+            <span className="text-on-surface font-semibold text-base md:text-lg whitespace-nowrap group-hover:text-white">
               {loading ? 'Redirecionando...' : 'Continuar com Google'}
             </span>
           </button>
