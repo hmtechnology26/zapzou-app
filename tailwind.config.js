@@ -36,7 +36,7 @@ export default {
         'on-error': '#ffffff',
         'on-error-container': '#93000a',
         background: '#f7f9fc',
-        surface: '#f7f9fc',
+        surface: '#e5e5e6ff',
         'surface-dim': '#d8dadd',
         'surface-container-lowest': '#ffffff',
         'surface-container-low': '#f2f4f7',
