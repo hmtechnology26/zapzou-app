@@ -5,11 +5,13 @@ import { MaterialSymbol as Icon } from 'react-material-symbols';
 import { supabase } from '@/lib/supabase';
 import { useState } from 'react';
 import Link from 'next/link';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { theme } = useTheme();
 
   const handleGoogleLogin = async () => {
     setLoading(true);
@@ -41,7 +43,11 @@ export default function LoginPage() {
       <main className="w-full max-w-md flex flex-col items-center">
         {/* Logo */}
         <div className="mt-16 mb-8 flex flex-col items-center">
-          <img src="/conectae_logo_vert.png" alt="Conectae" className="h-48" />
+          <img
+            src={theme === 'dark' ? '/conectae_logo_vert_light.png' : '/conectae_logo_vert.png'}
+            alt="Conectae"
+            className="h-48"
+          />
           
           {/* <div className="h-1 w-12 bg-primary-container rounded-full"></div> */}
         </div>

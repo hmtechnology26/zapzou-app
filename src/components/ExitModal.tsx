@@ -26,7 +26,7 @@ export function ExitModal() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl p-8 w-full max-w-sm mx-4 space-y-6">
+          <div className="bg-surface-container-lowest rounded-2xl p-8 w-full max-w-sm mx-4 space-y-6 border border-outline-variant/10">
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
             <Icon icon="exit_to_app" size={32} className="text-amber-600" />

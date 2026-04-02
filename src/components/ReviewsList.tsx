@@ -21,8 +21,8 @@ export function ReviewsList({ reviews }: ReviewsListProps) {
 
   if (reviews.length === 0) {
     return (
-      <div className="text-center py-8">
-        <Icon icon="rate_review" size={48} className="text-slate-200 mx-auto mb-2" />
+    <div className="text-center py-8">
+      <Icon icon="rate_review" size={48} className="text-outline-variant mx-auto mb-2" />
         <p className="text-on-surface-variant text-sm">Nenhuma avaliação ainda</p>
         <p className="text-on-surface-variant/60 text-xs">Seja o primeiro a avaliar!</p>
       </div>

@@ -54,7 +54,7 @@ function PixQrCode() {
   return (
     <svg
       viewBox="0 0 120 120"
-      className="w-48 h-48 bg-white rounded-2xl p-3 border border-outline-variant/10"
+      className="w-48 h-48 bg-surface-container-lowest rounded-2xl p-3 border border-outline-variant/10"
       aria-label="QR Code Pix"
       role="img"
     >
@@ -252,12 +252,12 @@ export function PlanCheckout({ plan }: { plan: PlanCheckoutConfig }) {
 
   return (
     <div className="min-h-screen pb-24 md:pb-12 bg-background">
-      <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
+      <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-outline-variant/20">
         <div className="flex items-center justify-between max-w-4xl mx-auto w-full">
           <div className="flex items-center gap-3">
             <button
               onClick={goBack}
-              className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
+              className="hover:bg-surface-container-high/70 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
             >
               <Icon icon="arrow_back" size={24} />
             </button>

@@ -116,11 +116,11 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen pb-24 bg-background">
-      <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
+      <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-outline-variant/20">
         <div className="flex items-center gap-3 max-w-7xl mx-auto w-full">
           <button 
             onClick={() => router.back()}
-            className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
+            className="hover:bg-surface-container-high/70 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
           >
             <Icon icon="arrow_back" size={24} />
           </button>
@@ -212,8 +212,8 @@ export default function ExplorePage() {
       </main>
 
       {showConfirmModal && selectedEnv && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl">
+          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-surface-container-lowest rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-outline-variant/10">
             <div className="flex items-center gap-4 mb-4">
               <img className="w-16 h-16 rounded-full object-cover" src={selectedEnv.image} alt={selectedEnv.name} />
               <div>

@@ -658,7 +658,7 @@ export function PublishModal() {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-[2.5rem] w-full md:max-w-lg max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+          <div className="bg-surface-container-lowest rounded-[2.5rem] w-full md:max-w-lg max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-outline-variant/10">
         <div className="flex-1 overflow-y-auto">
           <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/10">
             <div className="flex items-center gap-3">
@@ -935,7 +935,7 @@ export function PublishModal() {
 
       {showAlert && (
         <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6 text-center">
+          <div className="bg-surface-container-lowest rounded-2xl w-full max-w-sm p-6 text-center border border-outline-variant/10">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <Icon icon="info" size={32} className="text-primary" />
             </div>

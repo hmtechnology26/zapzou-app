@@ -238,7 +238,7 @@ export default function HomePage() {
           <button 
             onClick={handleGetLocation}
             disabled={locationLoading}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-lg text-sm font-medium text-primary flex items-center gap-2 hover:bg-primary/5 transition-colors"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-surface-container-lowest px-4 py-2 rounded-full shadow-lg text-sm font-medium text-primary flex items-center gap-2 hover:bg-primary/5 transition-colors"
           >
             <Icon icon="my_location" size={18} />
             {locationLoading ? 'Obtendo...' : 'Usar minha localização'}
@@ -248,7 +248,7 @@ export default function HomePage() {
         <section className="space-y-6">
           <div className="flex items-center gap-2">
             {/* INPUT */}
-            <div className="flex-1 flex items-center bg-surface-container-highest rounded-[2.5rem] px-4 py-3 gap-2 focus-within:bg-white focus-within:ring-4 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group min-w-0">
+            <div className="flex-1 flex items-center bg-surface-container-highest rounded-[2.5rem] px-4 py-3 gap-2 focus-within:bg-surface-container-lowest focus-within:ring-4 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group min-w-0">
               <Icon
                 icon="search"
                 size={18}
@@ -291,7 +291,7 @@ export default function HomePage() {
               />
 
               {isFilterOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-24px)] rounded-2xl bg-white shadow-2xl border border-outline-variant/10 z-50 overflow-hidden">
+                <div className="absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-24px)] rounded-2xl bg-surface-container-lowest shadow-2xl border border-outline-variant/10 z-50 overflow-hidden">
                   <button
                     type="button"
                     onClick={() => {
@@ -300,7 +300,7 @@ export default function HomePage() {
                     }}
                     className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
                       selectedEnvironmentId === "all"
-                        ? "bg-[primary/5] text-primary font-bold"
+                        ? "bg-primary/5 text-primary font-bold"
                         : "hover:bg-surface-container-highest text-on-surface"
                     }`}
                   >
@@ -352,7 +352,7 @@ export default function HomePage() {
                   (cat.id === "all" && selectedCategory === "all") ||
                   selectedCategory === cat.label
                     ? "bg-[#30cc36] text-white border-[#30cc36] shadow-lg shadow-[#30cc36]/20 scale-105"
-                    : "bg-white text-on-surface-variant border-outline-variant/10 hover:border-[#30cc36]/40 hover:text-[#30cc36] active:scale-95"
+                    : "bg-surface-container-lowest text-on-surface-variant border-outline-variant/10 hover:border-[#30cc36]/40 hover:text-[#30cc36] active:scale-95"
                 }`}
               >
                 <Icon
@@ -389,7 +389,7 @@ export default function HomePage() {
                 <div
                   key={service.id}
                   onClick={() => router.push(`/service/${service.slug}`)}
-                  className="bg-surface-container-lowest p-4 rounded-[2rem] flex gap-4 items-center cursor-pointer hover:bg-white hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
+                  className="bg-surface-container-lowest p-4 rounded-[2rem] flex gap-4 items-center cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
                 >
                   <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
                     {service.image ? (
@@ -477,7 +477,7 @@ export default function HomePage() {
                   <div
                     key={service.id}
                     onClick={() => router.push(`/service/${service.slug}`)}
-                    className="bg-surface-container-lowest p-4 rounded-[2rem] flex gap-4 items-center cursor-pointer hover:bg-white hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
+                    className="bg-surface-container-lowest p-4 rounded-[2rem] flex gap-4 items-center cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
                   >
                     <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
                       {service.image ? (

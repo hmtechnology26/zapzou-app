@@ -1,5 +1,5 @@
 // Bump this version whenever you change PWA assets (icons/manifest) so browsers refetch them
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 const STATIC_CACHE = `zapzou-static-${CACHE_VERSION}`;
 const PAGE_CACHE = `zapzou-pages-${CACHE_VERSION}`;
 const CACHE_PREFIX = "zapzou-";
@@ -12,6 +12,10 @@ const PRECACHE_ASSET_URLS = [
   "/apple-touch-icon.png",
   "/pwa-192.png",
   "/pwa-512.png",
+  "/conectae_logo.png",
+  "/conectae_logo_light.png",
+  "/conectae_logo_vert.png",
+  "/conectae_logo_vert_light.png",
 ];
 const STATIC_ASSET_EXTENSIONS = [
   ".css",

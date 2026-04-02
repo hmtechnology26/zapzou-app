@@ -296,7 +296,7 @@ export default function PlacesPage() {
         </section>
 
         <div className="relative mb-8">
-          <div className="flex items-center bg-surface-container-highest rounded-[2.5rem] px-8 py-6 gap-6 focus-within:bg-white focus-within:ring-8 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group">
+          <div className="flex items-center bg-surface-container-highest rounded-[2.5rem] px-8 py-6 gap-6 focus-within:bg-surface-container-lowest focus-within:ring-8 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group">
             <Icon
               icon="search"
               size={28}
@@ -331,7 +331,7 @@ export default function PlacesPage() {
                 className={`flex items-center justify-center gap-3 px-4 py-4 rounded-2xl font-black text-sm transition-all border shrink-0 shadow-sm ${
                   isSelected
                     ? "bg-[#30cc36] text-white border-[#30cc36] shadow-xl shadow-[#30cc36]/20 scale-105 z-10"
-                    : "bg-white text-on-surface-variant border-outline-variant/10 hover:border-[#30cc36]/40 hover:text-[#30cc36] active:scale-95"
+                    : "bg-surface-container-lowest text-on-surface-variant border-outline-variant/10 hover:border-[#30cc36]/40 hover:text-[#30cc36] active:scale-95"
                 }`}
               >
                 <div
@@ -388,7 +388,7 @@ export default function PlacesPage() {
                         place,
                       )
                     }
-                    className={`group/item relative overflow-hidden rounded-[2rem] border border-outline-variant/10 bg-white cursor-pointer transition-all duration-500 active:scale-[0.985] ${
+                    className={`group/item relative overflow-hidden rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest cursor-pointer transition-all duration-500 active:scale-[0.985] ${
                       isCompact
                         ? "flex items-center gap-3 p-3"
                         : "flex flex-col gap-4 p-5 shadow-sm hover:shadow-xl hover:-translate-y-0.5"
@@ -518,7 +518,7 @@ export default function PlacesPage() {
                           onClick={(e) =>
                             void handleToggleFavoriteClick(place, e)
                           }
-                          className="p-3 rounded-full bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors"
+                          className="p-3 rounded-full bg-error/10 text-error hover:bg-error/20 transition-colors"
                           title="Remover dos favoritos"
                         >
                           <Icon icon="delete" size={20} weight={400} />

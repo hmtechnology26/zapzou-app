@@ -229,7 +229,7 @@ export default function ModerationPage() {
                         {member.email || 'Email indisponível'}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="flex items-center gap-1 bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-md border border-amber-100">
+                          <span className="flex items-center gap-1 bg-amber-500/10 text-amber-700 text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-md border border-amber-500/20">
                           <Icon icon="hourglass_empty" size={10} />
                           Análise
                         </span>

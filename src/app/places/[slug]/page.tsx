@@ -337,7 +337,7 @@ export default function PlaceDetailPage() {
              </div>
              <div className="relative z-10 flex flex-col gap-6">
                <div className="flex flex-wrap items-center gap-3">
-                 <div className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
+                  <div className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
                     <span className="text-[10px] text-white font-black uppercase tracking-[0.2em] flex items-center gap-1.5">
                       <Icon icon="verified" size={14} className="text-amber-300" />
                       ministério farol
@@ -390,7 +390,7 @@ export default function PlaceDetailPage() {
         )}
 
         <div className="relative">
-          <div className="flex items-center bg-surface-container-highest rounded-[2.5rem] px-8 py-6 gap-6 focus-within:bg-white focus-within:ring-8 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group">
+            <div className="flex items-center bg-surface-container-highest rounded-[2.5rem] px-8 py-6 gap-6 focus-within:bg-surface-container-lowest focus-within:ring-8 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group">
             <Icon icon="search" size={28} className="text-[#30cc36] group-focus-within:scale-110 transition-transform" weight={700} />
             <input 
               className="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-on-surface-variant/70 font-black text-lg"
@@ -410,7 +410,7 @@ export default function PlaceDetailPage() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl whitespace-nowrap font-black text-xs transition-all border shrink-0 shadow-sm ${
                 selectedCategory === (cat.id === 'all' ? 'all' : cat.label)
                   ? 'bg-[#30cc36] text-white border-[#30cc36] shadow-lg shadow-[#30cc36]/20 scale-105' 
-                  : 'bg-white text-on-surface-variant border-outline-variant/10 hover:border-[#30cc36]/40 hover:text-[#30cc36] active:scale-95'
+                  : 'bg-surface-container-lowest text-on-surface-variant border-outline-variant/10 hover:border-[#30cc36]/40 hover:text-[#30cc36] active:scale-95'
               }`}
             >
               <Icon icon={cat.icon} size={16} weight={selectedCategory === (cat.id === 'all' ? 'all' : cat.label) ? 700 : 400} />
@@ -437,9 +437,9 @@ export default function PlaceDetailPage() {
           </div>
         )}
 
-        {user && membership?.status === 'pending' && (
-          <div className="bg-amber-50 border border-amber-100 rounded-[3rem] p-10 flex flex-col items-center text-center gap-4 max-w-2xl mx-auto md:ml-0">
-             <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center border border-amber-200">
+          {user && membership?.status === 'pending' && (
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-[3rem] p-10 flex flex-col items-center text-center gap-4 max-w-2xl mx-auto md:ml-0">
+               <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
                 <Icon icon="hourglass_empty" size={32} className="text-amber-600" weight={700} />
              </div>
              <div>
@@ -454,7 +454,7 @@ export default function PlaceDetailPage() {
             <div 
               key={service.id}
               onClick={() => router.push(`/places/${placeSlug}/services/${service.slug}`)}
-              className="group/card bg-white p-4 rounded-[2.5rem] flex flex-col gap-5 cursor-pointer hover:shadow-2xl hover:shadow-primary/5 border border-outline-variant/10 transition-all duration-500 active:scale-[0.98] relative overflow-hidden"
+              className="group/card bg-surface-container-lowest p-4 rounded-[2.5rem] flex flex-col gap-5 cursor-pointer hover:shadow-2xl hover:shadow-primary/5 border border-outline-variant/10 transition-all duration-500 active:scale-[0.98] relative overflow-hidden"
             >
               <div className="w-full h-48 rounded-[2rem] overflow-hidden shadow-inner bg-surface-container relative">
                 <img 
@@ -491,9 +491,9 @@ export default function PlaceDetailPage() {
       </main>
 
       {/* Modal de boas-vindas para ambiente não cadastrado */}
-      {showWelcomeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-md space-y-6 animate-in zoom-in-95 duration-200">
+        {showWelcomeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-surface-container-lowest rounded-3xl p-8 w-full max-w-md space-y-6 animate-in zoom-in-95 duration-200">
             <div className="text-center">
               <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <Icon icon="celebration" size={40} className="text-primary" />

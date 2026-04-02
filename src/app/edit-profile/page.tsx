@@ -23,11 +23,11 @@ export default function EditProfilePage() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-background">
-      <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
+      <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-outline-variant/20">
         <div className="flex items-center gap-3 max-w-7xl mx-auto w-full">
           <button 
             onClick={() => router.back()}
-            className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
+            className="hover:bg-surface-container-high/70 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
           >
             <Icon icon="arrow_back" size={24} />
           </button>
@@ -60,13 +60,13 @@ export default function EditProfilePage() {
             src={user?.avatar}
             name={user?.name}
             alt={user?.name || 'Avatar'}
-            className="w-24 h-24 border-4 border-white shadow-lg"
+            className="w-24 h-24 border-4 border-background shadow-lg"
             fallbackClassName="text-2xl"
           />
         </div>
         <div>
           <label className="text-sm font-medium text-on-surface">Nome</label>
-          <input className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2" value={name} onChange={e => setName(e.target.value)} />
+          <input className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface" value={name} onChange={e => setName(e.target.value)} />
         </div>
         <button onClick={handleSave} className="w-full primary-gradient text-white font-bold py-4 rounded-full shadow-lg">Salvar</button>
       </main>

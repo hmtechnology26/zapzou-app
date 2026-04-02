@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useApp } from '../hooks/useApp';
+import { useTheme } from '@/hooks/useTheme';
 import { useExitModal } from '@/contexts/ExitModalContext';
 import { Icon } from './Icon';
 import { Avatar } from './Avatar';
@@ -50,6 +51,7 @@ export function TopAppBar({
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useApp();
+  const { theme, toggleTheme } = useTheme();
   const { checkAndShowExitModal } = useExitModal();
 
   const navItems = useMemo(() => {
@@ -78,7 +80,12 @@ export function TopAppBar({
   });
 
   const textColor = variant === 'primary' ? 'text-white' : 'text-primary';
-  const bgColor = variant === 'primary' ? 'bg-[#30CC36]/85' : 'bg-white/95';
+  const bgColor = variant === 'primary' ? 'bg-[#30CC36]/85' : 'bg-surface-container-lowest/95';
+  const themeButtonClass =
+    variant === 'primary'
+      ? 'bg-white/10 text-white border border-white/20 hover:bg-white/15'
+      : 'bg-surface-container-high/70 text-on-surface hover:bg-surface-container-high';
+  const themeIcon = theme === 'dark' ? 'light_mode' : 'dark_mode';
 
   const handleNavClick = (path: string) => {
     if (checkAndShowExitModal(path)) {
@@ -88,14 +95,14 @@ export function TopAppBar({
   };
 
   return (
-    <header className={`fixed top-0 w-full z-50 ${bgColor} backdrop-blur-xl border-b border-slate-200/5 transition-all duration-300`}>
+    <header className={`fixed top-0 w-full z-50 ${bgColor} backdrop-blur-xl border-b border-outline-variant/20 transition-all duration-300`}>
       <div className="max-w-7xl mx-auto w-full flex items-center justify-between px-4 h-16 md:h-20">
         <div className="flex items-center gap-3 md:gap-8">
           <div className="flex items-center gap-3">
             {showBack && (
               <button
                 onClick={onBack}
-                className={`hover:bg-slate-100/50 dark:hover:bg-slate-800/50 rounded-full transition-colors p-2 active:scale-95 duration-200 ${textColor}`}
+                className={`hover:bg-surface-container-high/70 dark:hover:bg-surface-container-high/70 rounded-full transition-colors p-2 active:scale-95 duration-200 ${textColor}`}
               >
                 <Icon icon="arrow_back" weight={400} grade={0} size={24} />
               </button>
@@ -105,10 +112,10 @@ export function TopAppBar({
               onClick={() => router.push('/')}
               className="flex items-center cursor-pointer group"
             >
-              <img 
-                src="/conectae_logo.png" 
-                alt="Conectae" 
-                className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]" 
+              <img
+                src={theme === 'dark' ? '/conectae_logo_light.png' : '/conectae_logo.png'}
+                alt="Conectae"
+                className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
               />
             </div>
           </div>
@@ -117,7 +124,7 @@ export function TopAppBar({
             <div className="flex items-center gap-2 ml-2">
               <h1 className={`font-semibold text-lg tracking-tight ${textColor} flex items-center gap-2`}>
                 {leftAvatar && (
-                  <img src={leftAvatar} alt="" className="w-7 h-7 rounded-full object-cover border border-slate-200/50 shadow-sm" />
+                  <img src={leftAvatar} alt="" className="w-7 h-7 rounded-full object-cover border border-outline-variant/20 shadow-sm" />
                 )}
                 {title}
               </h1>
@@ -152,18 +159,43 @@ export function TopAppBar({
 
         <div className="flex items-center gap-2 md:gap-4">
           {rightAction === 'search' ? (
-            <button
-               onClick={onRightAction}
-               className="p-3 rounded-full bg-surface-container-high text-primary hover:bg-primary/5 active:scale-95 transition-all shadow-sm"
-            >
-               <Icon icon="search" size={24} weight={700} />
-            </button>
+            <div className="flex items-center gap-2">
+              {mounted && (
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className={`w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-full active:scale-95 transition-all shadow-sm ${themeButtonClass}`}
+                  aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+                  title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+                >
+                  <Icon icon={themeIcon} size={20} weight={700} />
+                </button>
+              )}
+              <button
+                 onClick={onRightAction}
+                 className="p-3 rounded-full bg-surface-container-high text-primary hover:bg-primary/5 active:scale-95 transition-all shadow-sm"
+              >
+                 <Icon icon="search" size={24} weight={700} />
+              </button>
+            </div>
           ) : (
             <div className="flex items-center gap-2 md:gap-4">
+              {mounted && (
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className={`w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-full active:scale-95 transition-all shadow-sm ${themeButtonClass}`}
+                  aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+                  title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+                >
+                  <Icon icon={themeIcon} size={20} weight={700} />
+                </button>
+              )}
+
               {mounted && canManageMembers && (
                 <button 
                   onClick={() => router.push('/moderation')}
-                  className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary active:scale-95 transition-all shadow-sm"
+                className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary active:scale-95 transition-all shadow-sm"
                   title="Moderação"
                 >
                   <Icon icon="admin_panel_settings" size={22} weight={700} />

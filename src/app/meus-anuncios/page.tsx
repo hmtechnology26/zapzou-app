@@ -208,7 +208,7 @@ export default function MyAdsPage() {
                 const isPending = membership?.status === 'pending';
 
                 return (
-                  <article key={env.id} className="bg-white rounded-[2rem] p-5 border border-outline-variant/10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all">
+                  <article key={env.id} className="bg-surface-container-lowest rounded-[2rem] p-5 border border-outline-variant/10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all">
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 rounded-2xl bg-surface-container overflow-hidden flex-shrink-0 shadow-inner">
                         {env.image ? <img src={env.image} alt={env.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-on-surface-variant"><Icon icon="domain" size={28} /></div>}
@@ -217,7 +217,7 @@ export default function MyAdsPage() {
                         <div className="flex flex-wrap items-center gap-2 mb-1.5">
                           <h4 className="font-bold text-on-surface truncate">{env.name}</h4>
                           <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border ${
-                            isActive ? 'bg-[#30CC36]/10 text-[#30CC36] border-[#30CC36]/20' : isPending ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-rose-50 text-rose-700 border-rose-100'
+                            isActive ? 'bg-[#30CC36]/10 text-[#30CC36] border-[#30CC36]/20' : isPending ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-error/10 text-error border-error/20'
                           }`}>
                             {isActive ? 'Ativo' : isPending ? 'Análise' : 'Bloqueado'}
                           </span>
@@ -248,7 +248,7 @@ export default function MyAdsPage() {
                         </button>
                       )}
                       {!isActive && isPending && (
-                        <div className="w-full md:w-auto py-3.5 px-6 rounded-2xl bg-amber-50 text-amber-700 border border-amber-100 text-[10px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2">
+                        <div className="w-full md:w-auto py-3.5 px-6 rounded-2xl bg-amber-500/10 text-amber-700 border border-amber-500/20 text-[10px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2">
                            <Icon icon="hourglass_empty" size={16} />
                            Aguardando Aprovação
                         </div>

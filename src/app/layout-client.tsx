@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useApp } from "@/hooks/useApp";
 import { BottomNav } from "@/components/BottomNav";
@@ -16,10 +16,10 @@ function ProtectedLayoutSkeleton() {
       aria-busy="true"
       aria-live="polite"
     >
-      <header className="fixed inset-x-0 top-0 z-40 h-16 bg-white/60 backdrop-blur-xl border-b border-slate-200/60 flex items-center px-4">
+      <header className="fixed inset-x-0 top-0 z-40 h-16 bg-surface-container-lowest/60 backdrop-blur-xl border-b border-outline-variant/20 flex items-center px-4">
         <div className="h-6 w-32 rounded-full bg-surface-container-lowest/60" />
         <div className="ml-auto flex items-center gap-2">
-          <div className="h-10 w-10 rounded-full bg-surface-container-lowest/60" />
+        <div className="h-10 w-10 rounded-full bg-surface-container-lowest/60" />
           <div className="h-10 w-16 rounded-full bg-surface-container-lowest/60" />
         </div>
       </header>
@@ -162,8 +162,8 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
       {children}
       {showBottomNav && <BottomNav />}
       {shouldShowLocationModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-md mx-4 space-y-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-surface-container-lowest rounded-2xl p-8 w-full max-w-md mx-4 space-y-6">
             <div className="text-center">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <svg

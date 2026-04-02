@@ -53,7 +53,7 @@ export default function FavoritesPage() {
 
         <div className="space-y-3 sm:space-y-4">
           {favoritePlaces.length === 0 ? (
-            <div className="rounded-[3rem] border-2 border-dashed border-[#30CC36]/20 py-12 sm:py-16 text-center bg-white/40 backdrop-blur-sm">
+            <div className="rounded-[3rem] border-2 border-dashed border-[#30CC36]/20 py-12 sm:py-16 text-center bg-surface-container-low/40 backdrop-blur-sm">
                <Icon icon="explore" size={48} className="mx-auto mb-4 opacity-20 text-[#30CC36]" />
                <p className="text-lg font-black text-[#30CC36]">Vazio por aqui</p>
                <p className="text-sm text-[#30CC36]/60 max-w-xs mx-auto mt-2 font-medium px-4">Favorite locais na tela de Ambientes para vê-los aqui.</p>
@@ -70,14 +70,14 @@ export default function FavoritesPage() {
                 <div 
                   key={place.id}
                   onClick={() => handleSelectEnvironment(place)}
-                  className="p-3 sm:p-5 rounded-[2rem] sm:rounded-[2.5rem] flex items-center gap-3 sm:gap-4 cursor-pointer bg-white hover:bg-[#30CC36]/10 border border-outline-variant/10 transition-all active:scale-[0.98] shadow-sm group min-w-0 overflow-hidden"
+                  className="p-3 sm:p-5 rounded-[2rem] sm:rounded-[2.5rem] flex items-center gap-3 sm:gap-4 cursor-pointer bg-surface-container-lowest hover:bg-[#30CC36]/10 border border-outline-variant/10 transition-all active:scale-[0.98] shadow-sm group min-w-0 overflow-hidden"
                 >
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/10 transition-colors">
-                    <Icon icon="location_on" weight={400} size={20} className="text-slate-400 group-hover:text-primary" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-surface-container-highest flex items-center justify-center flex-shrink-0 group-hover:bg-primary/10 transition-colors">
+                    <Icon icon="location_on" weight={400} size={20} className="text-on-surface-variant group-hover:text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-black text-on-surface text-sm sm:text-lg truncate group-hover:text-primary transition-colors">{place.displayName?.text}</h3>
-                    <p className="text-slate-400 text-[10px] sm:text-xs truncate mt-0.5 font-medium opacity-80">
+                    <p className="text-on-surface-variant text-[10px] sm:text-xs truncate mt-0.5 font-medium opacity-80">
                       {place.formattedAddress}
                     </p>
                   </div>
@@ -88,7 +88,7 @@ export default function FavoritesPage() {
                     >
                       <Icon icon="delete" size={20} weight={300} />
                     </button>
-                    <Icon icon="chevron_right" weight={400} size={20} className="text-slate-200" />
+                    <Icon icon="chevron_right" weight={400} size={20} className="text-outline-variant" />
                   </div>
                 </div>
               ))}

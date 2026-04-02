@@ -41,7 +41,7 @@ export function StarRating({
               icon={isFilled ? 'star' : 'star_border'} 
               weight={700} 
               size={size} 
-              className={isFilled ? 'text-amber-400' : 'text-slate-300'}
+        className={isFilled ? 'text-amber-400' : 'text-outline-variant'}
               style={{ fontVariationSettings: "'FILL' 1" }}
             />
           </button>

@@ -64,8 +64,8 @@ export function BottomNav() {
         fixed bottom-0 left-0 right-0 z-[60]
         w-full md:hidden
         min-h-[72px]
-        bg-white/95 backdrop-blur-xl
-        border-t border-slate-200/70
+        bg-surface-container-lowest/95 backdrop-blur-xl
+        border-t border-outline-variant/20
         shadow-[0_-8px_30px_rgba(0,0,0,0.08)]
         rounded-t-3xl
         flex justify-around items-center
@@ -85,7 +85,7 @@ export function BottomNav() {
                 ? 'text-primary'
                 : isActive
                   ? 'text-primary'
-                  : 'text-slate-500'
+                  : 'text-on-surface-variant'
             }`}
           >
             {isCenter ? (

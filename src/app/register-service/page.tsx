@@ -486,11 +486,11 @@ function RegisterServiceContent() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-background">
-      <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
+      <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-outline-variant/20">
         <div className="flex items-center gap-3 max-w-7xl mx-auto w-full">
           <button 
             onClick={() => router.back()}
-            className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
+            className="hover:bg-surface-container-high/70 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
           >
             <Icon icon="arrow_back" size={24} />
           </button>
@@ -527,7 +527,7 @@ function RegisterServiceContent() {
               <Icon icon="location_on" size={20} className="text-primary" weight={700} />
               <span className="font-semibold text-on-surface text-sm">Ambiente alvo:</span>
             </div>
-            <div className="flex items-center gap-2 bg-white rounded-full px-3 py-1.5 shadow-sm inline-flex">
+            <div className="flex items-center gap-2 bg-surface-container-lowest rounded-full px-3 py-1.5 shadow-sm inline-flex">
               {selectedEnvironment.image ? (
                 <img src={selectedEnvironment.image} alt={selectedEnvironment.name} className="w-5 h-5 rounded-full object-cover" />
               ) : (
@@ -542,7 +542,7 @@ function RegisterServiceContent() {
             {environmentAvailability && (
               <div className={`mt-4 p-3 rounded-xl border flex items-start gap-2 ${
                 environmentAvailability.status === 'pending' 
-                  ? 'bg-amber-50 border-amber-200 text-amber-800' 
+                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-700' 
                   : 'bg-[#30CC36]/10 border-[#30CC36]/30 text-[#30CC36]'
               }`}>
                 <Icon 
@@ -682,7 +682,7 @@ function RegisterServiceContent() {
                       onChange={handleToggleActive}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+                    <div className="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-background after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-background after:border-outline-variant after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
                   </label>
                 </div>
               </div>
@@ -749,7 +749,7 @@ function RegisterServiceContent() {
         {/* Modal Options */}
         {showMenuItemModal && (
           <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center">
-            <div className="bg-white dark:bg-slate-100 w-full md:w-96 md:rounded-2xl p-6 rounded-t-2xl animate-in slide-in-from-bottom duration-300">
+            <div className="bg-surface-container-lowest dark:bg-surface-container-lowest w-full md:w-96 md:rounded-2xl p-6 rounded-t-2xl animate-in slide-in-from-bottom duration-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-on-surface">
                   {editingMenuItemIndex !== null ? 'Editar Opção' : 'Nova Opção'}
@@ -794,7 +794,7 @@ function RegisterServiceContent() {
 
       {showAlert && (
         <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6 text-center">
+          <div className="bg-surface-container-lowest rounded-2xl w-full max-w-sm p-6 text-center border border-outline-variant/10">
             <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <Icon icon="error_outline" size={32} className="text-error" />
             </div>

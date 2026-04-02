@@ -108,7 +108,7 @@ export default function EnvironmentCataloguePage() {
           </h3>
 
           {userServicesForEnv.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-outline-variant/30 py-12 text-center text-on-surface-variant bg-white/30">
+            <div className="rounded-3xl border border-dashed border-outline-variant/30 py-12 text-center text-on-surface-variant bg-surface-container-low/30">
                <Icon icon="post_add" size={48} className="mx-auto mb-3 opacity-20" />
                <p className="text-sm font-medium">Você ainda não possui anúncios aqui.</p>
                <p className="text-xs opacity-60">Comece adicionando seu primeiro serviço!</p>
@@ -121,7 +121,7 @@ export default function EnvironmentCataloguePage() {
                 });
 
                 return (
-                  <article key={service.id} className="bg-white rounded-3xl border border-outline-variant/10 shadow-sm overflow-hidden flex flex-col group">
+                  <article key={service.id} className="bg-surface-container-lowest rounded-3xl border border-outline-variant/10 shadow-sm overflow-hidden flex flex-col group">
                     <div className="relative aspect-video w-full overflow-hidden">
                       <img 
                         src={service.image} 
@@ -129,9 +129,9 @@ export default function EnvironmentCataloguePage() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute top-3 left-3 flex gap-2">
-                        <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
-                          service.status === 'active' ? 'bg-[#30CC36] text-white shadow-lg shadow-[#30CC36]/20' : 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
-                        }`}>
+                          <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                            service.status === 'active' ? 'bg-[#30CC36] text-white shadow-lg shadow-[#30CC36]/20' : 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                          }`}>
                           {availability.label}
                         </span>
                       </div>

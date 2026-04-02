@@ -137,11 +137,11 @@ export default function ServiceDetailPage() {
 
   return (
     <div className="min-h-screen pb-32 md:pb-12 bg-background text-on-surface">
-      <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-slate-200">
+      <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-outline-variant/20">
         <div className="flex items-center gap-3 max-w-7xl mx-auto w-full">
           <button
             onClick={() => router.back()}
-            className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
+            className="hover:bg-surface-container-high/70 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
           >
             <Icon icon="arrow_back" size={24} />
           </button>
@@ -151,7 +151,7 @@ export default function ServiceDetailPage() {
         </div>
 
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          <button className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary">
+          <button className="hover:bg-surface-container-high/70 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary">
             <Icon icon="share" size={24} />
           </button>
 
@@ -159,13 +159,13 @@ export default function ServiceDetailPage() {
             <div className="relative">
               <button 
                 onClick={() => setShowOptionsMenu(!showOptionsMenu)}
-                className="hover:bg-slate-100/50 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
+                className="hover:bg-surface-container-high/70 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
               >
                 <Icon icon="more_vert" size={24} />
               </button>
               
               {showOptionsMenu && (
-                <div className="absolute right-0 top-12 w-48 bg-white rounded-xl shadow-lg border border-outline-variant/10 py-2 z-50 animate-in fade-in zoom-in duration-200">
+                <div className="absolute right-0 top-12 w-48 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/10 py-2 z-50 animate-in fade-in zoom-in duration-200">
                   <button
                     onClick={handleEdit}
                     className="w-full px-4 py-3 flex items-center gap-3 hover:bg-surface-container-low transition-colors text-left"
@@ -252,7 +252,7 @@ export default function ServiceDetailPage() {
                       prev > 0 ? prev - 1 : allImages.length - 1
                     )
                   }
-                  className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-md rounded-full items-center justify-center shadow-lg"
+                  className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-surface-container-lowest/90 backdrop-blur-md rounded-full items-center justify-center shadow-lg"
                 >
                   <Icon icon="chevron_left" size={24} />
                 </button>
@@ -264,7 +264,7 @@ export default function ServiceDetailPage() {
                       prev < allImages.length - 1 ? prev + 1 : 0
                     )
                   }
-                  className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-md rounded-full items-center justify-center shadow-lg"
+                  className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-surface-container-lowest/90 backdrop-blur-md rounded-full items-center justify-center shadow-lg"
                 >
                   <Icon icon="chevron_right" size={24} />
                 </button>
@@ -289,7 +289,7 @@ export default function ServiceDetailPage() {
               </div>
             )}
 
-            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm z-10 border border-primary/10">
+            <div className="absolute top-4 right-4 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm z-10 border border-primary/10">
               <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{service.category}</span>
             </div>
           </section>
@@ -410,7 +410,7 @@ export default function ServiceDetailPage() {
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl animate-in zoom-in duration-200">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-sm shadow-2xl animate-in zoom-in duration-200 border border-outline-variant/10">
             <div className="flex items-center justify-center w-14 h-14 rounded-full bg-error/10 mx-auto mb-4">
               <Icon icon="warning" size={32} className="text-error" />
             </div>
