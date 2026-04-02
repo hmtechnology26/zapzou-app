@@ -1,4 +1,5 @@
-const CACHE_VERSION = "v1";
+// Bump this version whenever you change PWA assets (icons/manifest) so browsers refetch them
+const CACHE_VERSION = "v2";
 const STATIC_CACHE = `zapzou-static-${CACHE_VERSION}`;
 const PAGE_CACHE = `zapzou-pages-${CACHE_VERSION}`;
 const CACHE_PREFIX = "zapzou-";
