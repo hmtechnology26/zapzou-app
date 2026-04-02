@@ -13,7 +13,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { path: '/', label: 'Serviços', icon: 'home' },
+  { path: '/', label: 'Anúncios', icon: 'home' },
   { path: '/places', label: 'Ambientes', icon: 'explore' },
   { path: '/meus-anuncios', label: 'Meus Anúncios', icon: 'storefront' },
   { path: '/favorites', label: 'Favoritos', icon: 'favorite' },
@@ -49,7 +49,7 @@ export function BottomNav() {
       return;
     }
 
-    if ((itemPath === '/meus-anuncios' || itemPath === '/favorites' || itemPath === '/contact') && !user) {
+    if ((itemPath === '/meus-anuncios' || itemPath === '/favorites') && !user) {
       e.preventDefault();
       router.push('/login');
       return;
