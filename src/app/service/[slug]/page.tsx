@@ -397,7 +397,7 @@ export default function ServiceDetailPage() {
                 </div>
                 <div className="flex items-center gap-1 text-on-surface-variant text-xs">
                   <Icon icon="visibility" size={14} />
-                  <span>{service.views || 0} visualizações</span>
+                  <span>{service.views || 0}</span>
                 </div>
               </div>
 
