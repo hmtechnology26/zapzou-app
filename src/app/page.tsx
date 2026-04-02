@@ -252,17 +252,17 @@ export default function HomePage() {
               <Icon
                 icon="search"
                 size={18}
-                className="text-primary group-focus-within:scale-110 transition-transform shrink-0"
+                className="text-[#30cc36] group-focus-within:scale-110 transition-transform shrink-0"
                 weight={500}
               />
 
               <input
-                className="bg-transparent border-none focus:ring-0 flex-1 min-w-0 text-on-surface placeholder:text-on-surface-variant/70 font-medium text-sm"
-                placeholder="Encontre um serviço..."
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+  className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 flex-1 min-w-0 text-on-surface placeholder:text-on-surface-variant/70 font-medium text-sm"
+  placeholder="Encontre um serviço..."
+  type="text"
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+/>
             </div>
 
             {/* DROPDOWN CUSTOMIZADO */}
@@ -300,7 +300,7 @@ export default function HomePage() {
                     }}
                     className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
                       selectedEnvironmentId === "all"
-                        ? "bg-primary/5 text-primary font-bold"
+                        ? "bg-[primary/5] text-primary font-bold"
                         : "hover:bg-surface-container-highest text-on-surface"
                     }`}
                   >
@@ -350,8 +350,8 @@ export default function HomePage() {
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl whitespace-nowrap font-black text-xs transition-all border shrink-0 shadow-sm ${
                   (cat.id === "all" && selectedCategory === "all") ||
                   selectedCategory === cat.label
-                    ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105"
-                    : "bg-white text-on-surface-variant border-outline-variant/10 hover:border-primary/40 hover:text-primary active:scale-95"
+                    ? "bg-[#30cc36] text-white border-[#30cc36] shadow-lg shadow-[#30cc36]/20 scale-105"
+                    : "bg-white text-on-surface-variant border-outline-variant/10 hover:border-[#30cc36]/40 hover:text-[#30cc36] active:scale-95"
                 }`}
               >
                 <Icon
@@ -410,11 +410,11 @@ export default function HomePage() {
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">
                           {service.category}
                         </span>
                       </div>
-                      <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">
+                      <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#30cc36] transition-colors">
                         {service.title}
                       </h4>
                       <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">
@@ -428,7 +428,7 @@ export default function HomePage() {
                           {userLocation && service.distance !== Infinity && (
                             <div className="flex items-center gap-1 text-primary">
                               <Icon icon="location_on" size={12} weight={700} />
-                              <span className="text-[10px] font-bold">
+                              <span className="text-[10px] text-[#30cc36] font-bold">
                                 {service.distance < 1
                                   ? `${Math.round(service.distance * 1000)}m`
                                   : `${service.distance.toFixed(1)}km`}
@@ -442,7 +442,7 @@ export default function HomePage() {
                           )}
                         </div>
                       )}
-                      <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-primary group-hover/card:text-white transition-all duration-300">
+                      <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#30cc36] group-hover/card:text-white transition-all duration-300">
                         <Icon icon="arrow_forward" size={14} weight={700} />
                       </div>
                     </div>

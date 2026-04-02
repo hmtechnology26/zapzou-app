@@ -44,6 +44,7 @@ export default function PlacesPage() {
   const [favoritePlaceCache, setFavoritePlaceCache] = useState<Record<string, PlaceSearchResult>>({});
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<'condominium' | 'church'>('condominium');
+  const [forceRefresh, setForceRefresh] = useState(0);
 
   useEffect(() => {
     console.log('Places page mounted');
@@ -192,6 +193,7 @@ export default function PlacesPage() {
       } catch (err) {
         console.error('Erro ao atualizar favorito no backend:', err);
       }
+      setForceRefresh(prev => prev + 1);
       return;
     }
 
@@ -263,9 +265,9 @@ export default function PlacesPage() {
 
         <div className="relative mb-8">
           <div className="flex items-center bg-surface-container-highest rounded-[2.5rem] px-8 py-6 gap-6 focus-within:bg-white focus-within:ring-8 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group">
-            <Icon icon="search" size={28} className="text-primary group-focus-within:scale-110 transition-transform" weight={700} />
+            <Icon icon="search" size={28} className="text-[#30cc36] group-focus-within:scale-110 transition-transform" weight={700} />
             <input 
-              className="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-on-surface-variant/70 font-black text-lg"
+              className="bg-transparent border-none outline-none focus:ring-none w-full text-on-surface placeholder:text-on-surface-variant/70 font-black text-lg"
               placeholder={
                 selectedCategory === 'church'
                   ? 'Nome da igreja, templo ou capela...'
@@ -291,12 +293,12 @@ export default function PlacesPage() {
                 onClick={() => setSelectedCategory(category.id as any)}
                 className={`flex items-center justify-center gap-3 px-4 py-4 rounded-2xl font-black text-sm transition-all border shrink-0 shadow-sm ${
                   isSelected
-                    ? 'bg-primary text-white border-primary shadow-xl shadow-primary/20 scale-105 z-10'
-                    : 'bg-white text-on-surface-variant border-outline-variant/10 hover:border-primary/40 hover:text-primary active:scale-95'
+                    ? 'bg-[#30cc36] text-white border-[#30cc36] shadow-xl shadow-[#30cc36]/20 scale-105 z-10'
+                    : 'bg-white text-on-surface-variant border-outline-variant/10 hover:border-[#30cc36]/40 hover:text-[#30cc36] active:scale-95'
                 }`}
               >
                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
-                    isSelected ? 'bg-white/20' : 'bg-primary/10'
+                    isSelected ? 'bg-white/20' : 'bg-[#30cc36]/10'
                 }`}>
                   <Icon
                     icon={category.icon}
@@ -344,17 +346,17 @@ export default function PlacesPage() {
                     {!isCompact && (
                       <div className="flex items-start justify-between">
                         <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center group-hover/item:scale-110 transition-transform duration-500">
-                          <Icon icon={selectedCategory === 'church' ? 'church' : 'domain'} weight={400} size={28} className="text-primary" />
+                          <Icon icon={selectedCategory === 'church' ? 'church' : 'domain'} weight={300} size={28} className="text-[#30cc36]" />
                         </div>
                         <button 
                           onClick={(e) => void handleToggleFavoriteClick(place, e)}
-                          className="p-2.5 rounded-full bg-surface-container-high hover:bg-primary/10 transition-colors shadow-sm group/fav"
+                          className="p-2 mt-2 ml-3 rounded-full bg-surface-container-high transition-colors shadow-sm group/fav"
                         >
                           <Icon 
                             icon={isFavorite ? 'star' : 'star_border'} 
                             size={20} 
                             weight={700}
-                            className={isFavorite ? 'text-primary scale-110' : 'text-on-surface-variant group-hover/fav:text-primary'}
+                            className={isFavorite ? 'text-[#30cc36]' : 'text-on-surface-variant group-hover/fav:text-on-surface'}
                           />
                         </button>
                       </div>
@@ -362,16 +364,16 @@ export default function PlacesPage() {
 
                     {isCompact && (
                       <div className="w-16 h-16 rounded-3xl bg-primary/5 flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform duration-500">
-                        <Icon icon={selectedCategory === 'church' ? 'church' : 'domain'} weight={400} size={32} className="text-primary" />
+                        <Icon icon={selectedCategory === 'church' ? 'church' : 'domain'} weight={400} size={32} className="text-[#30cc36]" />
                       </div>
                     )}
 
                     <div className="flex-1 min-w-0">
-                      <h3 className={`font-black text-on-surface leading-tight group-hover/item:text-primary transition-colors truncate ${
+                      <h3 className={`font-black text-on-surface leading-tight group-hover/item:text-[#30cc36] transition-colors truncate ${
                         isCompact ? 'text-base' : 'text-lg'
                       }`}>{place.displayName?.text}</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[9px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
+                        <span className="text-[9px] font-black text-on-surface uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">
                            {getTypeLabel(place.primaryType)}
                         </span>
                       </div>
@@ -390,7 +392,7 @@ export default function PlacesPage() {
                     {!isCompact && (
                       <div className="mt-2 pt-4 border-t border-outline-variant/5 flex items-center justify-between">
                          <span className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-tighter">Tocar para ver serviços</span>
-                         <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center group-hover/item:bg-primary group-hover/item:text-white transition-all transform group-hover/item:translate-x-1">
+                         <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center group-hover/item:bg-[#30cc36] group-hover/item:text-white transition-all transform ml-3">
                             <Icon icon="arrow_forward" size={16} weight={700} />
                          </div>
                       </div>

@@ -94,7 +94,7 @@ export default function EnvironmentCataloguePage() {
            </p>
            <button 
              onClick={() => router.push(`/register-service?envId=${currentEnv.id}`)}
-             className="mt-2 px-6 py-3 rounded-full primary-gradient text-white font-bold shadow-lg shadow-primary/20 flex items-center gap-2 active:scale-95 transition-all text-sm"
+             className="mt-2 px-6 py-3 rounded-full bg-[#30cc36] text-white font-bold shadow-lg shadow-[#000000]/40 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all text-sm"
            >
              <Icon icon="add" size={20} />
              Novo Anúncio neste Ambiente
@@ -130,7 +130,7 @@ export default function EnvironmentCataloguePage() {
                       />
                       <div className="absolute top-3 left-3 flex gap-2">
                         <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
-                          service.status === 'active' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                          service.status === 'active' ? 'bg-[#30CC36] text-white shadow-lg shadow-[#30CC36]/20' : 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
                         }`}>
                           {availability.label}
                         </span>

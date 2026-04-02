@@ -15,5 +15,5 @@ We want a safe, respectful and productive environment for everyone.
 
 ## Reporting
 
-Report incidents to `security@zapzou.com.br`.
+Report incidents to `[EMAIL_ADDRESS]`.
 

@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Icon } from './Icon';
 import { usePublishModal } from '@/contexts/PublishModalContext';
 import { useApp } from '@/hooks/useApp';
+import { useExitModal } from '@/contexts/ExitModalContext';
 
 interface NavItem {
   path: string;
@@ -24,6 +25,7 @@ export function BottomNav() {
   const router = useRouter();
   const { open } = usePublishModal();
   const { user, selectedEnvironments } = useApp();
+  const { checkAndShowExitModal } = useExitModal();
 
   const handleNavClick = (e: React.MouseEvent, itemPath: string) => {
     if (itemPath === '/post') {
@@ -40,12 +42,20 @@ export function BottomNav() {
       }
 
       open();
+      return;
+    }
+
+    if (checkAndShowExitModal(itemPath)) {
+      return;
     }
 
     if ((itemPath === '/meus-anuncios' || itemPath === '/favorites' || itemPath === '/contact') && !user) {
       e.preventDefault();
       router.push('/login');
+      return;
     }
+
+    router.push(itemPath);
   };
 
   return (
@@ -69,13 +79,7 @@ export function BottomNav() {
         return (
           <button
             key={item.path}
-            onClick={(e) => {
-              e.preventDefault();
-              handleNavClick(e, item.path);
-              if (item.path !== '/post') {
-                router.push(item.path);
-              }
-            }}
+            onClick={(e) => handleNavClick(e, item.path)}
             className={`flex min-w-0 flex-col items-center justify-center px-3 py-1 transition-all active:scale-90 duration-150 ${
               isCenter
                 ? 'text-primary'

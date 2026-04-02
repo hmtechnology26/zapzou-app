@@ -11,7 +11,7 @@ export default function PrivacyPage() {
 
         <section className="mt-8 space-y-4 text-on-surface">
           <p>
-            Esta Política explica, de forma resumida, como tratamos dados pessoais no ZapZou. Ao usar o aplicativo,
+            Esta Política explica, de forma resumida, como tratamos dados pessoais no Conectae. Ao usar o aplicativo,
             você concorda com este tratamento conforme descrito aqui.
           </p>
 

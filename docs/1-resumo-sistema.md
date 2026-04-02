@@ -2,7 +2,7 @@
 
 ## Visão Geral do Projeto
 
-**ZapZou** é uma plataforma digital de marketplace de serviços local que conecta prestadores de serviços a clientes dentro de suas comunidades vizinhas, como condomínios residenciais, igrejas, clubes e associações.
+**Conectae** é uma plataforma digital de marketplace de serviços local que conecta prestadores de serviços a clientes dentro de suas comunidades vizinhas, como condomínios residenciais, igrejas, clubes e associações.
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-O roadmap do ZapZou define as fases de desenvolvimento e evolução do produto, desde o MVP até a escala completa.
+O roadmap do Conectae define as fases de desenvolvimento e evolução do produto, desde o MVP até a escala completa.
 
 ---
 

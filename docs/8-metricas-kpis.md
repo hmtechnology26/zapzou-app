@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este documento define as métricas e indicadores de performance (KPIs) para medir o sucesso do sistema ZapZou. As métricas estão organizadas em categorias: engajamento, conversão, retenção e negócio.
+Este documento define as métricas e indicadores de performance (KPIs) para medir o sucesso do sistema Conectae. As métricas estão organizadas em categorias: engajamento, conversão, retenção e negócio.
 
 ---
 

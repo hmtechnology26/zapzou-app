@@ -157,8 +157,17 @@ export default function PlaceDetailPage() {
       }
     };
 
+    fetchMembership();
+  }, [user?.id, effectiveEnvironment?.id]);
+
+  // Fetch member count (independent of user)
+  useEffect(() => {
+    if (!effectiveEnvironment?.id) {
+      return;
+    }
+
     const fetchMemberCount = async () => {
-      if (!effectiveEnvironment?.id) return;
+      console.log('[MemberCount] Fetching for environment:', effectiveEnvironment.id);
       try {
         const { count, error } = await supabase
           .from('environment_members')
@@ -166,8 +175,11 @@ export default function PlaceDetailPage() {
           .eq('environment_id', effectiveEnvironment.id)
           .eq('status', 'active');
         
+        console.log('[MemberCount] Result:', { count, error });
         if (!error && count !== null) {
           setMemberCount(count);
+        } else {
+          console.log('[MemberCount] Error or null count:', error);
         }
       } catch (err) {
         console.error('Error fetching member count:', err);
@@ -175,8 +187,7 @@ export default function PlaceDetailPage() {
     };
 
     fetchMemberCount();
-    fetchMembership();
-  }, [user?.id, effectiveEnvironment?.id]);
+  }, [effectiveEnvironment?.id]);
 
   const categories = [
     { id: 'all', label: 'Tudo', icon: 'apps' },
@@ -319,7 +330,7 @@ export default function PlaceDetailPage() {
 
       <main className="mt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-8 pb-32">
         {(placeSlug === 'igreja-ministerio-farol' || effectiveEnvironment?.name?.toLowerCase().includes('farol')) && (
-          <div className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-emerald-900 to-emerald-800 p-8 shadow-2xl border border-white/5">
+          <div className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-[#1a4a19] to-[#259128] p-8 shadow-2xl border border-white/5">
              <div className="absolute -top-6 -right-6 opacity-40 rotate-12">
                <img src="/farol_logo.png" alt="Farol Logo" className="w-52 h-auto" />
              </div>
@@ -327,7 +338,7 @@ export default function PlaceDetailPage() {
                <div className="flex flex-wrap items-center gap-3">
                  <div className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20">
                     <span className="text-[10px] text-white font-black uppercase tracking-[0.2em] flex items-center gap-1.5">
-                      <Icon icon="verified" size={14} className="text-white" />
+                      <Icon icon="verified" size={14} className="text-amber-300" />
                       ministério farol
                     </span>
                  </div>
@@ -335,7 +346,7 @@ export default function PlaceDetailPage() {
                
                <div className="space-y-1">
                   <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter">Negócios com Propósito</h2>
-                  <p className="text-emerald-100/60 text-base font-medium max-w-lg leading-relaxed">
+                  <p className="text-white text-base font-medium max-w-lg leading-relaxed">
                     Plantando princípios eternos para gerar frutos que permanecem!!
                   </p>
                </div>
@@ -355,12 +366,12 @@ export default function PlaceDetailPage() {
                      {memberCount !== null ? `${memberCount} Membros` : 'Carregando...'}
                    </span>
                  </div>
-                 <div className="flex items-center gap-2.5 text-white/90 group cursor-default">
+                 {/* <div className="flex items-center gap-2.5 text-white/90 group cursor-default">
                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                      <Icon icon="star" size={16} className="text-amber-300" />
                    </div>
                    <span className="text-xs font-bold tracking-tight">Ranking #1</span>
-                 </div>
+                 </div> */}
                </div>
               </div>
            </div>
@@ -379,7 +390,7 @@ export default function PlaceDetailPage() {
 
         <div className="relative">
           <div className="flex items-center bg-surface-container-highest rounded-[2.5rem] px-8 py-6 gap-6 focus-within:bg-white focus-within:ring-8 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group">
-            <Icon icon="search" size={28} className="text-primary group-focus-within:scale-110 transition-transform" weight={700} />
+            <Icon icon="search" size={28} className="text-[#30cc36] group-focus-within:scale-110 transition-transform" weight={700} />
             <input 
               className="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-on-surface-variant/70 font-black text-lg"
               placeholder="Buscar serviços..."
@@ -397,8 +408,8 @@ export default function PlaceDetailPage() {
               onClick={() => setSelectedCategory(cat.id === 'all' ? 'all' : cat.label)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl whitespace-nowrap font-black text-xs transition-all border shrink-0 shadow-sm ${
                 selectedCategory === (cat.id === 'all' ? 'all' : cat.label)
-                  ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-105' 
-                  : 'bg-white text-on-surface-variant border-outline-variant/10 hover:border-primary/40 hover:text-primary active:scale-95'
+                  ? 'bg-[#30cc36] text-white border-[#30cc36] shadow-lg shadow-[#30cc36]/20 scale-105' 
+                  : 'bg-white text-on-surface-variant border-outline-variant/10 hover:border-[#30cc36]/40 hover:text-[#30cc36] active:scale-95'
               }`}
             >
               <Icon icon={cat.icon} size={16} weight={selectedCategory === (cat.id === 'all' ? 'all' : cat.label) ? 700 : 400} />

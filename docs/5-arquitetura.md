@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-A arquitetura do ZapZou segue um modelo moderno de aplicação web com foco em escalabilidade, manutenibilidade e experiência mobile-first. O sistema utiliza Next.js para o frontend/backend e Supabase como Backend-as-a-Service.
+A arquitetura do Conectae segue um modelo moderno de aplicação web com foco em escalabilidade, manutenibilidade e experiência mobile-first. O sistema utiliza Next.js para o frontend/backend e Supabase como Backend-as-a-Service.
 
 ---
 
@@ -230,7 +230,7 @@ supabase.from('services').update({ ... }).eq('id', id)
 ## 5.9. Integração com Cloudflare R2
 
 ### Visão Geral
-Atualmente, o ZapZou utiliza **Supabase Storage** para upload e entrega de imagens. A integração com **Cloudflare R2** é **planejada** para reduzir custos e permitir uma camada de distribuição mais eficiente. O R2 oferece:
+Atualmente, o Conectae utiliza **Supabase Storage** para upload e entrega de imagens. A integração com **Cloudflare R2** é **planejada** para reduzir custos e permitir uma camada de distribuição mais eficiente. O R2 oferece:
 - **Zero egress** - Sem custos de transferência de dados
 - **S3-compatible** - Compatibilidade com SDKs e ferramentas S3
 - **CDN global** - Entrega rápida de imagens em qualquer lugar

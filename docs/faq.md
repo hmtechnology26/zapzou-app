@@ -1,12 +1,12 @@
 # FAQ - Perguntas Frequentes
 
-## O que é o ZapZou?
+## O que é o Conectae?
 
-O ZapZou é uma plataforma digital de marketplace de serviços local que conecta prestadores de serviços a clientes dentro de suas comunidades vizinhas, como condomínios residenciais, igrejas, clubes e associações.
+O Conectae é uma plataforma digital de serviços local que conecta prestadores de serviços a clientes dentro de suas comunidades vizinhas, como condomínios residenciais, igrejas, clubes e associações.
 
 ---
 
-## Como funciona o ZapZou?
+## Como funciona o Conectae?
 
 1. **Usuários escolhem seu ambiente** (condomínio, igreja, etc.)
 2. **Prestadores publicam seus serviços** com fotos, descrição e contato
@@ -26,7 +26,7 @@ O ZapZou é uma plataforma digital de marketplace de serviços local que conecta
 
 ## Como me cadastrar?
 
-1. Acesse o app ZapZou
+1. Acesse o app Conectae
 2. Clique em "Entrar"
 3. Faça login com Google
 4. Selecione os ambientes disponíveis
@@ -37,7 +37,7 @@ Observações:
 
 ---
 
-## É gratuito usar o ZapZou?
+## É gratuito usar o Conectae?
 
 **Sim e Não:**
 
@@ -130,7 +130,7 @@ OBS: ISSO É VALIDO APENAS PARA IGREJAS.
 
 ## Como funciona a geolocalização?
 
-Se você permitir o acesso à sua localização, o ZapZou ordenará os serviços por proximidade, mostrando os mais próximos de você primeiro com a distância em metros ou quilômetros.
+Se você permitir o acesso à sua localização, o Conectae ordenará os serviços por proximidade, mostrando os mais próximos de você primeiro com a distância em metros ou quilômetros.
 
 ---
 
@@ -154,9 +154,9 @@ A nota média aparece no serviço e ajuda outros usuários a decidir.
 
 ## Esqueci minha senha, como recupero?
 
-O ZapZou usa autenticação Google. Se você não conseguir acessar sua conta Google, terá dificuldades de acesso. Entre em contato com o suporte.
+O Conectae usa autenticação Google. Se você não conseguir acessar sua conta Google, terá dificuldades de acesso. Entre em contato com o suporte.
 
-OBS: SE O USUÁRIO NAO TIVER CONTA GOOGLE, ELE NAO PODERÁ USAR O APP. NADA PODEREMOS FAZER POIS O ZAPZOU NAO TEM SISTEMA DE CADASTRO DE USUÁRIOS.
+OBS: SE O USUÁRIO NAO TIVER CONTA GOOGLE, ELE NAO PODERÁ USAR O APP. NADA PODEREMOS FAZER POIS O CONECTAE NAO TEM SISTEMA DE CADASTRO DE USUÁRIOS.
 
 ---
 ## Como indentificamos que o usuário está cadastrando o mesmo serviço em contas google diferentes para burlar o pagamento dos planos PRO e PLUS?
@@ -179,19 +179,19 @@ Se houver conteúdo abusivo ou indevido, o serviço pode ser removido por denún
 
 ---
 
-## Posso usar o ZapZou offline?
+## Posso usar o Conectae offline?
 
-Não. O ZapZou precisa de internet para carregar conteúdos, publicar serviços e abrir contatos (WhatsApp/Instagram). Pode existir cache do navegador em alguns cenários, mas não é um modo offline suportado.
-
----
-
-## O ZapZou está disponível em quais cidades?
-
-O ZapZou está em fase piloto e a disponibilidade depende dos ambientes cadastrados (condomínios/igrejas/clubes/associações) no sistema. A expansão para novas regiões ocorre progressivamente.
+Não. O Conectae precisa de internet para carregar conteúdos, publicar serviços e abrir contatos (WhatsApp/Instagram). Pode existir cache do navegador em alguns cenários, mas não é um modo offline suportado.
 
 ---
 
-## Como posso anuncir meu negócio no ZapZou?
+## O Conectae está disponível em quais cidades?
+
+O Conectae está em fase piloto e a disponibilidade depende dos ambientes cadastrados (condomínios/igrejas/clubes/associações) no sistema. A expansão para novas regiões ocorre progressivamente.
+
+---
+
+## Como posso anuncir meu negócio no Conectae?
 
 1. **Plano FREE:** publique até 2 serviços gratuitamente no mesmo ambiente.
 2. **Plano PRÓ:** até 5 serviços + badge de verificação e pode publicar em mais ambientes
@@ -207,9 +207,9 @@ O usuário FREE pode publicar até **2 serviços** e em **1 ambiente**.
 
 ---
 
-## O ZapZou cobra taxa por transação?
+## O Conectae cobra taxa por transação?
 
-**Não.** O ZapZou não cobra taxa sobre serviços contratados. O contato entre prestador e cliente é direto via WhatsApp/Instagram, sem intermediação da plataforma.
+**Não.** O Conectae não cobra taxa sobre serviços contratados. O contato entre prestador e cliente é direto via WhatsApp/Instagram, sem intermediação da plataforma.
 
 ---
 
@@ -221,7 +221,7 @@ Entre em contato através do suporte na página do app. Nós analisaremos e toma
 
 ## Vocês têm aplicativo para celular?
 
-O ZapZou é uma **PWA (Progressive Web App)** e funciona como um aplicativo no celular:
+O Conectae é uma **PWA (Progressive Web App)** e funciona como um aplicativo no celular:
 - Acesse via navegador
 - Adicione à tela inicial
 - Requer internet para funcionar
@@ -254,9 +254,9 @@ O ZapZou é uma **PWA (Progressive Web App)** e funciona como um aplicativo no c
 
 ---
 
-## Posso usar o ZapZou para trabalho freelancer?
+## Posso usar o Conectae para trabalho freelancer?
 
-**Sim!** Muitos profissionais usam o ZapZou para encontrar clientes em suas comunidades. É uma excelente forma de conquistar clientes locais.
+**Sim!** Muitos profissionais usam o Conectae para encontrar clientes em suas comunidades. É uma excelente forma de conquistar clientes locais.
 
 ---
 
@@ -267,7 +267,7 @@ Atualmente, **não** oferecemos API pública para integração.
 
 ## Política de Privacidade
 
-O ZapZou coleta apenas dados necessários para funcionamento:
+O Conectae coleta apenas dados necessários para funcionamento:
 - Nome e email (via Google)
 - Localização (quando necessária para validação de regras de publicação por ambiente)
 - Dados de serviços publicados
@@ -284,4 +284,4 @@ Entre em contato com o suporte solicitando exclusão. Todos os seus dados serão
 
 ## Ainda tem dúvidas?
 
-Entre em contato pelo suporte do app ou email: suporte@zapzou.com.br
+Entre em contato pelo suporte do app ou email: [EMAIL_ADDRESS]

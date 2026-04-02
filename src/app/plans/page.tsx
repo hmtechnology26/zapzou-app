@@ -163,7 +163,7 @@ export default function PlansPage() {
               <div className="flex-1 space-y-2 mb-6">
                 {plan.features.map((feature, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <Icon icon="check_circle" size={18} className="text-green-500 flex-shrink-0 mt-0.5" weight={700} />
+                    <Icon icon="check_circle" size={18} className="text-[#30CC36] flex-shrink-0 mt-0.5" weight={700} />
                     <span className="text-sm text-on-surface">{feature}</span>
                   </div>
                 ))}
@@ -268,7 +268,7 @@ export default function PlansPage() {
                       <Icon icon="star" size={16} className="text-on-surface-variant" weight={400} />
                     </div>
                   </div>
-                  <p className="text-on-surface-variant text-sm mt-2">"Ainda estou começando no mercado de yoga online. O FREE já me ajuda a ter uma presença digital sem custos. Em um mês, já marquei 8 aulas particulares só pelo ZapZou!"</p>
+                  <p className="text-on-surface-variant text-sm mt-2">"Ainda estou começando no mercado de yoga online. O FREE já me ajuda a ter uma presença digital sem custos. Em um mês, já marquei 8 aulas particulares só pelo Conectae!"</p>
                 </div>
               </div>
             </div>

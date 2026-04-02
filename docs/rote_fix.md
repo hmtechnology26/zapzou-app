@@ -1,6 +1,6 @@
 # Roteiro de Correções (rote_fix)
 
-Este documento consolida o checklist de conformidade do repositório **ZapZou** e descreve, para cada item, a **solução recomendada baseada no estado atual do projeto** (código, docs e migrations existentes).
+Este documento consolida o checklist de conformidade do repositório **Conectae** e descreve, para cada item, a **solução recomendada baseada no estado atual do projeto** (código, docs e migrations existentes).
 
 > **Status (repo):** os itens deste roteiro já foram aplicados no código/documentação. Use a lista abaixo como auditoria e referência do porquê das mudanças.
 
@@ -29,9 +29,9 @@ Este documento consolida o checklist de conformidade do repositório **ZapZou** 
 
 ## Checklist detalhado + solução
 
-### 1) [P0] Atualizar README para refletir o ZapZou (Next.js + Supabase)
+### 1) [P0] Atualizar README para refletir o Conectae (Next.js + Supabase)
 
-**Problema (real):** `README.md` é de template Vite, não descreve como rodar o ZapZou.
+**Problema (real):** `README.md` é de template Vite, não descreve como rodar o Conectae.
 
 **Solução proposta:**
 - Reescrever `README.md` com:

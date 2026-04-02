@@ -441,8 +441,8 @@ export async function searchPlaces(
   console.log('[maps] Query variants:', queryVariants);
 
   if (categoryType === 'church') {
-    console.log('[maps] Searching religious places by text...');
-    rawPlaces = await searchPlacesTextVariants(apiKey, queryVariants);
+    console.log('[maps] Searching religious places by text with includedTypes...');
+    rawPlaces = await searchPlacesTextVariants(apiKey, queryVariants, 'church');
   } else {
     console.log('[maps] Searching by place name...');
     const includedType = forcedType ?? (explicitType || undefined);
@@ -470,7 +470,7 @@ export async function searchPlaces(
     rawPlaces = await searchPlacesNearby(apiKey, center, radius, nearbyTypes);
   }
 
-  console.log('[maps] Raw places:', rawPlaces.length);
+  console.log('[maps] Raw places:', rawPlaces.length, rawPlaces.map((p: any) => ({ id: p.id, name: p.displayName?.text, type: p.primaryType })));
 
   const results = rawPlaces
     .map((place: any) => {
@@ -500,6 +500,9 @@ export async function searchPlaces(
         RELIGIOUS_PRIMARY_TYPES.includes(place.primaryTypeText);
       const structuralOk = isStructuralName(normalizedName);
       const religiousOk = isReligiousName(normalizedName);
+      
+      console.log('[maps] Filtering place:', place.displayNameText, 'type:', place.primaryTypeText, 'typeOk:', typeOk, 'structuralOk:', structuralOk, 'religiousOk:', religiousOk, 'categoryType:', categoryType);
+      
       if (categoryType === 'church') {
         return Boolean(
           RELIGIOUS_PRIMARY_TYPES.includes(place.primaryTypeText) ||

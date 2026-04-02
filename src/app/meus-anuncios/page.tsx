@@ -163,8 +163,8 @@ export default function MyAdsPage() {
         <section className="bg-primary/5 border border-primary/10 rounded-[3rem] p-10 shadow-sm text-center relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
             <div className="relative z-10">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-primary/20 group-hover:scale-110 transition-transform duration-500">
-                 <Icon icon="add_location_alt" size={32} className="text-primary" weight={700} />
+              <div className="w-16 h-16 bg-[#30cc36]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-[#30cc36]/20 group-hover:scale-110 transition-transform duration-500">
+                 <Icon icon="add_location_alt" size={32} className="text-[#30cc36]" weight={700} />
               </div>
               <h2 className="text-3xl font-black text-on-surface tracking-tighter">Expandir seu Negócio</h2>
               <p className="text-base text-on-surface-variant max-w-md mx-auto mt-3 font-medium leading-relaxed">
@@ -191,7 +191,7 @@ export default function MyAdsPage() {
 
           {(loadingContexts || affiliationLoading) ? (
             <div className="py-24 flex justify-center flex-col items-center gap-4">
-               <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
+               <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#30cc36] border-t-transparent"></div>
                <p className="text-xs font-black uppercase tracking-widest text-primary/40">Carregando seus locais...</p>
             </div>
           ) : myContexts.length === 0 ? (
@@ -217,7 +217,7 @@ export default function MyAdsPage() {
                         <div className="flex flex-wrap items-center gap-2 mb-1.5">
                           <h4 className="font-bold text-on-surface truncate">{env.name}</h4>
                           <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border ${
-                            isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : isPending ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-rose-50 text-rose-700 border-rose-100'
+                            isActive ? 'bg-[#30CC36]/10 text-[#30CC36] border-[#30CC36]/20' : isPending ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-rose-50 text-rose-700 border-rose-100'
                           }`}>
                             {isActive ? 'Ativo' : isPending ? 'Análise' : 'Bloqueado'}
                           </span>
@@ -241,7 +241,7 @@ export default function MyAdsPage() {
                       {isActive && (
                         <button 
                           onClick={() => router.push(`/meus-anuncios/${env.id}`)}
-                          className="w-full md:w-auto min-w-[180px] md:min-w-[220px] max-w-[250px] py-3.5 md:px-8 rounded-2xl bg-primary text-white font-black uppercase text-[10px] md:text-sm shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2 hover:brightness-110 whitespace-nowrap"
+                          className="w-full md:w-auto min-w-[180px] md:min-w-[220px] max-w-[250px] py-3.5 md:px-8 rounded-2xl bg-[#30cc36] text-white font-black uppercase text-[10px] md:text-sm shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2 hover:brightness-110 whitespace-nowrap"
                         >
                           <Icon icon="store" size={18} />
                           Gerenciar Catálogo

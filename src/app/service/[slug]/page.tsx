@@ -154,7 +154,7 @@ export default function ServiceDetailPage() {
   };
 
   const WhatsAppMessage = encodeURIComponent(
-    `Olá! Vim pelo ZapZou e tenho interesse no serviço:\n\n${service.title}.\nGostaria de mais informações!`
+    `Olá! Vim pelo Conectae e tenho interesse no serviço:\n\n${service.title}.\nGostaria de mais informações!`
   );
 
   const handleWhatsApp = () => {
@@ -508,7 +508,7 @@ export default function ServiceDetailPage() {
                 <div className="relative z-10">
                   <div className="flex items-center gap-2 mb-2">
                     <Icon icon="verified_user" weight={400} size={24} className="text-secondary" />
-                    <p className="font-bold text-secondary">ZapZou</p>
+                    <p className="font-bold text-secondary">Conectae</p>
                   </div>
                   <p className="text-sm text-on-secondary-container/80 leading-relaxed">
                     Conectamos você com profissionais verificados da sua comunidade. Contrate com segurança!

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import React, { useEffect } from 'react';
 import { Icon } from '@/components/Icon';
 import { useApp } from '@/hooks/useApp';
 import { TopAppBar } from '@/components/TopAppBar';
@@ -23,30 +24,14 @@ export default function FavoritesPage() {
     }
   };
 
+  useEffect(() => {
+    if (!user) {
+      router.push('/login?redirect=/favorites');
+    }
+  }, [user, router]);
+
   if (!user) {
-    return (
-      <div className="min-h-screen bg-background pb-24">
-        <TopAppBar />
-        <main className="pt-24 px-4 max-w-2xl mx-auto space-y-6">
-          <div className="bg-emerald-50/60 backdrop-blur-md border border-emerald-100 rounded-[2.5rem] p-6 sm:p-10 flex flex-col items-center text-center gap-4 shadow-sm">
-            <div className="w-16 h-16 rounded-full bg-emerald-100/50 flex items-center justify-center border border-emerald-200 shrink-0">
-              <Icon icon="star" size={32} weight={700} className="text-emerald-700" />
-            </div>
-            <div className="space-y-1 sm:space-y-2">
-              <h2 className="text-2xl sm:text-3xl font-black text-emerald-950 tracking-tighter">Seus Favoritos</h2>
-              <p className="text-xs sm:text-base text-emerald-900/60 font-medium max-w-xs leading-relaxed">
-                Acesse rapidamente os ambientes que você mais frequenta e conferir os serviços disponíveis.
-              </p>
-            </div>
-          </div>
-          <div className="rounded-[3rem] border-2 border-dashed border-emerald-100 py-12 sm:py-16 text-center bg-white/40 backdrop-blur-sm">
-            <Icon icon="explore" size={48} className="mx-auto mb-4 opacity-20 text-emerald-600" />
-            <p className="text-lg font-black text-emerald-950">Vazio por aqui</p>
-            <p className="text-sm text-emerald-900/60 max-w-xs mx-auto mt-2 font-medium px-4">Favorite locais na tela de Ambientes para vê-los aqui.</p>
-          </div>
-        </main>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -54,13 +39,13 @@ export default function FavoritesPage() {
       <TopAppBar />
 
       <main className="pt-24 px-4 max-w-2xl mx-auto space-y-6">
-        <div className="bg-emerald-50/60 backdrop-blur-md border border-emerald-100 rounded-[2.5rem] p-6 sm:p-10 flex flex-col items-center text-center gap-4 shadow-sm">
-           <div className="w-16 h-16 rounded-full bg-emerald-100/50 flex items-center justify-center border border-emerald-200 shrink-0">
-              <Icon icon="star" size={32} weight={700} className="text-emerald-700" />
+        <div className="bg-[#30CC36]/5 border-[#30CC36]/20 rounded-[2.5rem] p-6 sm:p-10 flex flex-col items-center text-center gap-4 shadow-sm">
+           <div className="w-16 h-16 rounded-full bg-[#30CC36]/10 border-[#30CC36]/30 flex items-center justify-center border shrink-0">
+              <Icon icon="star" size={32} weight={700} className="text-[#30CC36]" />
            </div>
            <div className="space-y-1 sm:space-y-2">
-             <h2 className="text-2xl sm:text-3xl font-black text-emerald-950 tracking-tighter">Seus Favoritos</h2>
-             <p className="text-xs sm:text-base text-emerald-900/60 font-medium max-w-xs leading-relaxed">
+             <h2 className="text-2xl sm:text-3xl font-black text-on-surface/90 tracking-tighter">Seus Favoritos</h2>
+             <p className="text-xs sm:text-base text-on-surface/60 font-medium max-w-xs leading-relaxed">
                 Acesse rapidamente os ambientes que você mais frequenta e confira os serviços disponíveis.
              </p>
            </div>
@@ -68,10 +53,10 @@ export default function FavoritesPage() {
 
         <div className="space-y-3 sm:space-y-4">
           {favoritePlaces.length === 0 ? (
-            <div className="rounded-[3rem] border-2 border-dashed border-emerald-100 py-12 sm:py-16 text-center bg-white/40 backdrop-blur-sm">
-               <Icon icon="explore" size={48} className="mx-auto mb-4 opacity-20 text-emerald-600" />
-               <p className="text-lg font-black text-emerald-950">Vazio por aqui</p>
-               <p className="text-sm text-emerald-900/60 max-w-xs mx-auto mt-2 font-medium px-4">Favorite locais na tela de Ambientes para vê-los aqui.</p>
+            <div className="rounded-[3rem] border-2 border-dashed border-[#30CC36]/20 py-12 sm:py-16 text-center bg-white/40 backdrop-blur-sm">
+               <Icon icon="explore" size={48} className="mx-auto mb-4 opacity-20 text-[#30CC36]" />
+               <p className="text-lg font-black text-[#30CC36]">Vazio por aqui</p>
+               <p className="text-sm text-[#30CC36]/60 max-w-xs mx-auto mt-2 font-medium px-4">Favorite locais na tela de Ambientes para vê-los aqui.</p>
                <button 
                  onClick={() => router.push('/places')}
                  className="mt-8 px-10 py-4 rounded-full primary-gradient text-white font-black shadow-xl shadow-primary/20 text-sm active:scale-95 transition-all"
@@ -85,7 +70,7 @@ export default function FavoritesPage() {
                 <div 
                   key={place.id}
                   onClick={() => handleSelectEnvironment(place)}
-                  className="p-3 sm:p-5 rounded-[2rem] sm:rounded-[2.5rem] flex items-center gap-3 sm:gap-4 cursor-pointer bg-white hover:bg-emerald-50/30 border border-outline-variant/10 transition-all active:scale-[0.98] shadow-sm group min-w-0 overflow-hidden"
+                  className="p-3 sm:p-5 rounded-[2rem] sm:rounded-[2.5rem] flex items-center gap-3 sm:gap-4 cursor-pointer bg-white hover:bg-[#30CC36]/10 border border-outline-variant/10 transition-all active:scale-[0.98] shadow-sm group min-w-0 overflow-hidden"
                 >
                   <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/10 transition-colors">
                     <Icon icon="location_on" weight={400} size={20} className="text-slate-400 group-hover:text-primary" />

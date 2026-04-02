@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useApp } from '../hooks/useApp';
+import { useExitModal } from '@/contexts/ExitModalContext';
 import { Icon } from './Icon';
 import { Avatar } from './Avatar';
 
@@ -49,6 +50,7 @@ export function TopAppBar({
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useApp();
+  const { checkAndShowExitModal } = useExitModal();
 
   const navItems = useMemo(() => {
     const items = [...baseNavItems];
@@ -76,7 +78,14 @@ export function TopAppBar({
   });
 
   const textColor = variant === 'primary' ? 'text-white' : 'text-primary';
-  const bgColor = variant === 'primary' ? 'bg-emerald-700/85' : 'bg-white/95';
+  const bgColor = variant === 'primary' ? 'bg-[#30CC36]/85' : 'bg-white/95';
+
+  const handleNavClick = (path: string) => {
+    if (checkAndShowExitModal(path)) {
+      return;
+    }
+    router.push(path);
+  };
 
   return (
     <header className={`fixed top-0 w-full z-50 ${bgColor} backdrop-blur-xl border-b border-slate-200/5 transition-all duration-300`}>
@@ -97,8 +106,8 @@ export function TopAppBar({
               className="flex items-center cursor-pointer group"
             >
               <img 
-                src="/zapzou_logo.png" 
-                alt="ZapZou" 
+                src="/conectae_logo.png" 
+                alt="Conectae" 
                 className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]" 
               />
             </div>
@@ -125,11 +134,11 @@ export function TopAppBar({
               return (
                 <button
                   key={item.path}
-                  onClick={() => router.push(item.path)}
+                  onClick={() => handleNavClick(item.path)}
                   className={`px-4 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 relative group ${
                     isActive 
-                      ? 'text-primary' 
-                      : 'text-on-surface-variant hover:text-primary transition-colors'
+                      ? 'text-[#30cc36]' 
+                      : 'text-on-surface-variant hover:text-[#30cc36] transition-colors'
                   }`}
                 >
                   <Icon icon={item.icon} size={20} weight={isActive ? 700 : 400} />
@@ -174,7 +183,7 @@ export function TopAppBar({
                       className="w-10 h-10 md:w-11 md:h-11 ring-2 ring-primary/20 shadow-sm group-hover:ring-primary transition-all duration-300" 
                     />
                     {user.plan === 'plus' && (
-                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#25D366] rounded-full flex items-center justify-center border-2 border-white">
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#30CC36] rounded-full flex items-center justify-center border-2 border-white">
                         <Icon icon="check" size={10} className="text-white" weight={900} />
                       </div>
                     )}
@@ -187,7 +196,7 @@ export function TopAppBar({
               ) : (
                 <button 
                   onClick={() => router.push('/login')}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-full primary-gradient text-white text-[13px] font-black shadow-lg shadow-primary/20 active:scale-95 transition-all hover:brightness-110"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#30cc36] text-white text-[13px] font-black shadow-lg shadow-primary/20 active:scale-95 transition-all hover:brightness-110"
                 >
                   <Icon icon="login" size={18} weight={700} />
                   <span>Entrar</span>

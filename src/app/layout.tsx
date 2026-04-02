@@ -5,11 +5,13 @@ import { Providers } from './providers';
 import ProtectedLayout from './layout-client';
 
 export const metadata: Metadata = {
-  title: 'ZapZou - Marketplace de Serviços',
-  description: 'Conecte-se com prestadores de serviços na sua região',
+  title: 'Conectae - Hub de Servicos',
+  description: 'Conecte-se com prestadores de servicos na sua regiao',
   icons: {
     icon: '/favicon.png',
+    apple: '/apple-touch-icon.png',
   },
+  themeColor: '#006d2f',
   viewport: {
     width: 'device-width',
     initialScale: 1,

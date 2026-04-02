@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este documento apresenta as histórias de usuário que definem as funcionalidades do sistema ZapZou. Cada story segue o formato: "Como [usuário], quero [ação], para [resultado]".
+Este documento apresenta as histórias de usuário que definem as funcionalidades do sistema Conectae. Cada story segue o formato: "Como [usuário], quero [ação], para [resultado]".
 
 ---
 

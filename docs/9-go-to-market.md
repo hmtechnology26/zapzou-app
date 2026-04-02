@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este documento define a estratégia de lançamento e crescimento do ZapZou, incluindo público inicial, canais de aquisição, mensagens-chave e plano de execução.
+Este documento define a estratégia de lançamento e crescimento do Conectae, incluindo público inicial, canais de aquisição, mensagens-chave e plano de execução.
 
 ---
 

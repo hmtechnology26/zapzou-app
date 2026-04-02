@@ -1,4 +1,4 @@
-# ZapZou
+# Conectae
 
 Marketplace local de serviços para comunidades (condomínios, igrejas, clubes e associações). Conecta prestadores e clientes, com contato direto via WhatsApp/Instagram.
 

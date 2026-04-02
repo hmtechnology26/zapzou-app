@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-O ZapZou atende diferentes tipos de usuários com necessidades distintas. A seguir, as personas identificadas para o sistema.
+O Conectae atende diferentes tipos de usuários com necessidades distintas. A seguir, as personas identificadas para o sistema.
 
 ---
 
@@ -120,7 +120,7 @@ Pessoa responsável por gerenciar uma comunidade religiosa (líder de igreja, pa
 ## 2.4. Administrador da Plataforma (Super Admin)
 
 ### Descrição
-Equipe interna que gerencia a plataforma ZapZou.
+Equipe interna que gerencia a plataforma Conectae.
 
 ### Objetivos
 - Monitorar métricas do sistema

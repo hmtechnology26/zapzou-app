@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este documento define as entidades, atributos e relacionamentos do banco de dados do ZapZou. O modelo utiliza PostgreSQL via Supabase.
+Este documento define as entidades, atributos e relacionamentos do banco de dados do Conectae. O modelo utiliza PostgreSQL via Supabase.
 
 ---
 

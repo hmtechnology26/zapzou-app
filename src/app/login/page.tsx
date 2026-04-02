@@ -41,7 +41,7 @@ export default function LoginPage() {
       <main className="w-full max-w-md flex flex-col items-center">
         {/* Logo */}
         <div className="mt-16 mb-8 flex flex-col items-center">
-          <img src="/zapzou_logo_vert.png" alt="ZapZou" className="h-48" />
+          <img src="/conectae_logo_vert.png" alt="Conectae" className="h-48" />
           
           {/* <div className="h-1 w-12 bg-primary-container rounded-full"></div> */}
         </div>
@@ -49,7 +49,7 @@ export default function LoginPage() {
         {/* Card */}
         <div className="w-full bg-surface-container-lowest rounded-3xl p-8 flex flex-col items-center shadow-sm">
           <div className="text-center mb-10">
-            <h2 className="text-on-surface font-semibold text-2xl mb-3">Seja bem-vindo ao ZapZou</h2>
+            <h2 className="text-on-surface font-semibold text-2xl mb-3">Seja bem-vindo ao Conect<spam className="text-[#30cc36]">ae</spam></h2>
             <p className="text-on-surface-variant text-base leading-relaxed">
               Faça login para acessar os serviços da sua comunidade
             </p>
@@ -66,7 +66,7 @@ export default function LoginPage() {
             id="login-google"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full group flex items-center justify-center gap-2 md:gap-4 bg-surface-container-low hover:bg-[#34A853] text-on-surface hover:text-white transition-all duration-300 py-3 md:py-4 px-4 md:px-6 rounded-full border-2 border-[#34A853]/30 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full group flex items-center justify-center gap-2 md:gap-4 bg-surface-container-low hover:bg-[#30cc36] text-on-surface hover:text-white transition-all duration-300 py-3 md:py-4 px-4 md:px-6 rounded-full border-2 border-[#34A853]/30 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -112,7 +112,7 @@ export default function LoginPage() {
              <Link className="text-primary font-semibold hover:underline" href="/privacy">Política de Privacidade</Link>.
            </p>
            <div className="mt-8 flex justify-center gap-6">
-             <span className="text-on-surface-variant/40 text-[10px] font-bold tracking-tighter uppercase">ZapZou © 2026</span>
+             <span className="text-on-surface-variant/40 text-[10px] font-bold tracking-tighter uppercase">Conectae © 2026</span>
            </div>
            <span className="text-on-surface-variant/40 text-[10px] font-bold tracking-tighter">Desenvolvido por HM Technology</span>
          </footer>

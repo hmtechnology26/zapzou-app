@@ -11,13 +11,13 @@ export default function TermsPage() {
 
         <section className="mt-8 space-y-4 text-on-surface">
           <p>
-            Estes Termos de Uso regem o acesso e o uso do ZapZou. Ao utilizar o aplicativo, você concorda com estes
+            Estes Termos de Uso regem o acesso e o uso do Conectae. Ao utilizar o aplicativo, você concorda com estes
             termos.
           </p>
 
-          <h2 className="mt-6 text-xl font-bold">1. O que é o ZapZou</h2>
+          <h2 className="mt-6 text-xl font-bold">1. O que é o Conectae</h2>
           <p>
-            O ZapZou é um marketplace local de serviços. A plataforma facilita a descoberta de prestadores em ambientes
+            O Conectae é um hub de serviços. A plataforma facilita a descoberta de prestadores em ambientes
             (ex.: condomínios, igrejas, clubes e associações) e oferece meios de contato direto (ex.: WhatsApp/Instagram).
           </p>
 
@@ -32,7 +32,7 @@ export default function TermsPage() {
 
           <h2 className="mt-6 text-xl font-bold">4. Conteúdos e responsabilidade</h2>
           <p>
-            O usuário é responsável pelas informações publicadas e pelo cumprimento de leis aplicáveis. O ZapZou não se
+            O usuário é responsável pelas informações publicadas e pelo cumprimento de leis aplicáveis. O Conectae não se
             responsabiliza por negociações, execução do serviço, pagamentos ou eventuais conflitos entre usuários.
           </p>
 

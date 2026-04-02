@@ -74,7 +74,7 @@ export default function ProfilePage() {
               className={`mt-2 px-3 py-1 rounded-full text-xs font-bold text-white ${
                 user.plan === "pro"
                   ? "bg-gradient-to-r from-blue-500 to-blue-600"
-                  : "bg-gradient-to-r from-green-500 to-green-600"
+                  : "bg-gradient-to-r from-[#30CC36] to-[#259128]"
               }`}
             >
               Plano {user.plan === "pro" ? "PRÓ" : "PLUS"}
@@ -103,14 +103,14 @@ export default function ProfilePage() {
               className={`rounded-3xl p-5 ${
                 user.plan === "pro"
                   ? "bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200"
-                  : "bg-gradient-to-br from-green-50 to-green-100 border border-green-200"
+                  : "bg-gradient-to-br from-[#30CC36]/20 to-[#30CC36]/10 border border-[#30CC36]/30"
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      user.plan === "pro" ? "bg-blue-500" : "bg-green-500"
+                      user.plan === "pro" ? "bg-blue-500" : "bg-[#30CC36]"
                     }`}
                   >
                     <Icon
@@ -125,7 +125,7 @@ export default function ProfilePage() {
                       className={`font-bold text-lg ${
                         user.plan === "pro"
                           ? "text-blue-700"
-                          : "text-green-700"
+                          : "text-[#30CC36]"
                       }`}
                     >
                       Plano {user.plan === "pro" ? "PRÓ" : "PLUS"}
@@ -141,8 +141,8 @@ export default function ProfilePage() {
                   onClick={() => router.push("/plans?returnTo=/profile")}
                   className={`text-xs font-bold px-3 py-1.5 rounded-full ${
                     user.plan === "pro"
-                      ? "bg-green-500 text-white"
-                      : "bg-green-500 text-white"
+                      ? "bg-[#30CC36] text-white"
+                      : "bg-[#30CC36] text-white"
                   }`}
                 >
                   Alterar
@@ -162,10 +162,10 @@ export default function ProfilePage() {
               weight={400}
               grade={0}
               size={24}
-              className="text-primary"
+              className="text-[#30cc36]"
             />
             <span className="flex-1 text-left font-medium">Planos</span>
-            <Icon icon="chevron_right" weight={400} grade={0} size={24} />
+            <Icon icon="chevron_right" weight={400} grade={0} size={24} className="text-[#30cc36]" />
           </button>
           {/* <button onClick={() => router.push('/members')} className="w-full flex items-center gap-4 p-4 bg-surface-container-lowest rounded-xl">
             <Icon icon="group" weight={400} grade={0} size={24} className="text-primary" />

@@ -35,7 +35,7 @@ serve(async (req) => {
 
     if (!path || typeof path !== 'string') throw new Error('Invalid path')
 
-    // Valid path formats for zapzou app
+    // Valid path formats for conectae app
     const servicePathRegex = /^services\/[a-zA-Z0-9_.-]+\.webp$/i;
     const menuItemPathRegex = /^menu-items\/[a-zA-Z0-9_.-]+\.webp$/i;
     const avatarPathRegex = /^avatars\/[a-zA-Z0-9_.-]+$/i;

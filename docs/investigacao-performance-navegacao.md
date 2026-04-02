@@ -1,6 +1,6 @@
 # Investigação de Performance, Navegação e Tela Branca
 
-Este documento detalha a investigação sobre o problema de "tela branca" durante a navegação entre páginas e propõe melhorias de performance e fluidez para o ZapZou.
+Este documento detalha a investigação sobre o problema de "tela branca" durante a navegação entre páginas e propõe melhorias de performance e fluidez para o Conectae.
 
 ## 1. Diagnóstico do Problema: "Tela Branca"
 
@@ -20,7 +20,7 @@ O hard refresh força o navegador a baixar todo o HTML e JS do zero, limpando in
 ### Causa B: Service Workers Fantasmas (PWA)
 Investigamos a configuração de PWA e notamos que **atualmente não há um Service Worker ou Manifest configurado no repositório**.
 
-**O Problema**: Se em versões anteriores o ZapZou utilizou PWA ou se o domínio/IP já hospedou um PWA, o navegador do usuário pode ter um **Service Worker "zumbi"** instalado. 
+**O Problema**: Se em versões anteriores o Conectae utilizou PWA ou se o domínio/IP já hospedou um PWA, o navegador do usuário pode ter um **Service Worker "zumbi"** instalado. 
 - Esse SW pode estar servindo versões cacheadas e obsoletas do `index.html` que apontam para arquivos JS (chunks) que não existem mais no servidor atual.
 - Ao navegar, o Next.js tenta carregar um chunk novo, o SW falha ou retorna 404, e o app quebra.
 - Ctrl+F5 geralmente ignora o Service Worker e busca o recurso direto da rede, resolvendo momentaneamente.

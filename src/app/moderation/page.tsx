@@ -175,16 +175,16 @@ export default function ModerationPage() {
 
       <main className="pt-24 px-4 max-w-2xl mx-auto space-y-6">
         <div className="bg-primary/10 rounded-2xl p-6 mb-6">
-          <div className="flex items-center gap-3 text-primary mb-2">
-            <Icon icon="admin_panel_settings" size={32} />
-            <h1 className="text-2xl font-black tracking-tight">Painel do Líder</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <Icon icon="admin_panel_settings" size={32} className='text-[#30cc36]' />
+            <h1 className="text-2xl font-black text-on-surface-variant tracking-tight">Painel do Líder</h1>
           </div>
           <p className="text-on-surface-variant text-sm flex flex-col gap-1">
             <span>
               Gerencie as pessoas que solicitaram entrada em
             </span>
 
-            <span className="font-bold text-center text-on-surface bg-primary/10 px-2 py-0.5 rounded-full whitespace-nowrap overflow-hidden text-ellipsis inline-block max-w-[200px]">
+            <span className="font-bold text-center text-on-surface mt-1 bg-[#30cc36]/10 px-2 py-0.5 rounded-full whitespace-nowrap overflow-hidden text-ellipsis inline-block max-w-[200px]">
               {selectedEnvironment?.name || 'Comunidade Atual'}
             </span>
           </p>  
@@ -242,7 +242,7 @@ export default function ModerationPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 shrink-0 pl-3 border-l border-outline-variant/10 ml-3">
+                  <div className="flex items-center gap-0.5 shrink-0 pl-3 border-l border-outline-variant/10 ">
                     <button
                       onClick={() => handleReject(member.id)}
                       disabled={actionLoading === member.id}
@@ -254,7 +254,7 @@ export default function ModerationPage() {
                     <button
                       onClick={() => handleApprove(member.id)}
                       disabled={actionLoading === member.id}
-                      className="h-10 flex items-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700 rounded-full font-black text-xs uppercase tracking-tight transition-all shadow-md active:scale-95 disabled:opacity-50"
+                      className="w-10 h-10 flex items-center justify-center bg-[#30CC36] text-white hover:bg-[#259128] rounded-full transition-all shadow-md active:scale-95 disabled:opacity-50"
                     >
                       <Icon icon="check" size={18} weight={400} />
                       

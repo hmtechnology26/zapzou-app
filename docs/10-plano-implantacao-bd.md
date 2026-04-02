@@ -1,6 +1,6 @@
 # 10. Plano de Integração com Banco de Dados Supabase e Fluxo de Moderação
 
-Este documento formaliza o plano "De Ponta a Ponta" para substituir todos os dados *mockados* do ZapZou pela integração oficial com o Supabase (`001_initial_schema.sql`), protegendo a criação de anúncios por meio da afiliação aprovada em ambientes.
+Este documento formaliza o plano "De Ponta a Ponta" para substituir todos os dados *mockados* do Conectae pela integração oficial com o Supabase (`001_initial_schema.sql`), protegendo a criação de anúncios por meio da afiliação aprovada em ambientes.
 
 ---
 
@@ -9,7 +9,7 @@ Este documento formaliza o plano "De Ponta a Ponta" para substituir todos os dad
 Abaixo está o mapeamento da árvore do projeto com a exata localização das alterações:
 
 ```text
-zapzou-app/
+conectae-app/
 ├── docs/
 │   └── 10-plano-implantacao-bd.md       <-- (NOVO) Este documento
 ├── src/
@@ -62,7 +62,7 @@ zapzou-app/
 
 - [ ] **1. Limpeza Base do Estado (`useApp.tsx`)**
   - [ ] Remover vetores inteiros de `mocks` de ambientes, parceiros e anúncios.
-  - [ ] Desligar gatilhos baseados em `localStorage` (zapzou_services, etc.).
+  - [ ] Desligar gatilhos baseados em `localStorage` (conectae_services, etc.).
   - [ ] Configurar função auto-loading para resgatar status dinâmico de `environment_members` e anexá-lo ao `user` contextual.
 
 - [ ] **2. Refatorando as Páginas de Apresentação (Leitura)**

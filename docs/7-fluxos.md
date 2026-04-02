@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este documento descreve os principais fluxos de usuário do sistema ZapZou, detalhando as ações, eventos e respostas do sistema para cada cenário.
+Este documento descreve os principais fluxos de usuário do sistema Conectae, detalhando as ações, eventos e respostas do sistema para cada cenário.
 
 ---
 

@@ -543,12 +543,12 @@ function RegisterServiceContent() {
               <div className={`mt-4 p-3 rounded-xl border flex items-start gap-2 ${
                 environmentAvailability.status === 'pending' 
                   ? 'bg-amber-50 border-amber-200 text-amber-800' 
-                  : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  : 'bg-[#30CC36]/10 border-[#30CC36]/30 text-[#30CC36]'
               }`}>
                 <Icon 
                   icon={environmentAvailability.status === 'pending' ? 'info' : 'check_circle'} 
                   size={18} 
-                  className={environmentAvailability.status === 'pending' ? 'text-amber-600 mt-0.5' : 'text-emerald-600 mt-0.5'} 
+                  className={environmentAvailability.status === 'pending' ? 'text-amber-600 mt-0.5' : 'text-[#30CC36] mt-0.5'} 
                 />
                 <div className="flex-1">
                    <p className="text-xs font-bold">{environmentAvailability.label}</p>

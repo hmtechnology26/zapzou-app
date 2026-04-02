@@ -6,7 +6,7 @@
 
 ## 1. Resumo Executivo
 
-O projeto ZapZou possui integração com o banco de dados Supabase. A integração está **funcional**, porém com algumas pendências de alinhamento entre o banco e o código frontend.
+O projeto Conectae possui integração com o banco de dados Supabase. A integração está **funcional**, porém com algumas pendências de alinhamento entre o banco e o código frontend.
 
 ---
 

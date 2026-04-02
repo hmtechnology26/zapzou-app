@@ -4,7 +4,7 @@
 
 If you believe you have found a security vulnerability, please report it privately.
 
-- Email: `security@zapzou.com.br`
+- Email: `security@conectae.com.br`
 
 Please include:
 - A detailed description of the issue
