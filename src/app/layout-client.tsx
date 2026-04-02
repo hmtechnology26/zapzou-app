@@ -50,16 +50,20 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
 
   const LOCATION_PROMPT_STORAGE_KEY = "zapzou-location-permission-prompted";
 
+  const publicExact = [
+    "/",
+    "/login",
+    "/search",
+    "/places",
+    "/contact",
+    "/favorites",
+  ];
+
+  const publicPrefixes = ["/service/", "/places/", "/auth/"];
+
   const isPublicPage =
-    pathname === "/" ||
-    pathname === "/login" ||
-    pathname === "/search" ||
-    pathname === "/places" ||
-    pathname === "/contact" ||
-    pathname === "/favorites" ||
-    pathname.startsWith("/service/") ||
-    pathname.startsWith("/places/") ||
-    pathname.startsWith("/auth/");
+    publicExact.includes(pathname) ||
+    publicPrefixes.some((prefix) => pathname.startsWith(prefix));
 
   const locationExemptPages = [
     "/login",
