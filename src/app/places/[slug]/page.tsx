@@ -193,6 +193,7 @@ export default function PlaceDetailPage() {
     { id: 'all', label: 'Tudo', icon: 'apps' },
     { id: 'Tecnologia', label: 'Tecnologia', icon: 'terminal' },
     { id: 'Limpeza', label: 'Limpeza', icon: 'cleaning_services' },
+    { id: "Alimentação", label: "Alimentação", icon: "restaurant" },
     { id: 'Construção', label: 'Construção', icon: 'construction' },
     { id: 'Saúde', label: 'Saúde', icon: 'medical_services' },
     { id: 'Beleza', label: 'Beleza', icon: 'content_cut' },
