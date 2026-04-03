@@ -19,7 +19,7 @@ const TYPE_LABELS: Record<Environment['type'], string> = {
 type AffiliationRecord = {
   id: string;
   environmentId: string;
-  role: 'member' | 'moderator' | null;
+  role: 'member' | 'moderator' | 'resident' | 'service_provider' | null;
   status: 'active' | 'pending' | 'banned';
   createdAt?: string;
 };
@@ -105,7 +105,7 @@ export default function MyAdsPage() {
           status: record.status,
         };
 
-        if (record.role === 'member' || record.role === 'moderator') {
+        if (record.role === 'member' || record.role === 'moderator' || record.role === 'resident' || record.role === 'service_provider') {
           const cachedEnv = envCache[envId];
           if (cachedEnv) {
             if (!seenEnvIds.has(envId)) {

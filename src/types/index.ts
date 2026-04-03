@@ -69,6 +69,7 @@ export interface Member {
   avatar?: string;
   initials?: string;
   isPending?: boolean;
+  role?: 'member' | 'moderator' | 'resident' | 'service_provider' | null;
 }
 
 export interface MenuItem {

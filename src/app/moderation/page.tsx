@@ -24,7 +24,7 @@ type ActiveMember = {
   name: string;
   email: string;
   avatar: string;
-  role: 'member' | 'moderator';
+  role: 'member' | 'moderator' | 'resident' | 'service_provider';
   status: 'active' | 'banned';
   createdAt: string;
   unit?: string;

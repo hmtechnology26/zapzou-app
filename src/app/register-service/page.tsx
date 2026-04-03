@@ -6,7 +6,17 @@ import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
 import { supabase } from '@/lib/supabase';
-import { getEnvironmentAvailabilityState } from '@/lib/environment-rules';
+import {
+  calculateDistanceKm,
+  getEnvironmentAvailabilityState,
+  isWithinAutoApprovalRadius,
+} from '@/lib/environment-rules';
+import {
+  countCountableEnvironmentMemberships,
+  getPlanLimits,
+  isPlanAtServiceLimit,
+  type PublicationMode,
+} from '@/lib/plan-rules';
 
 const categories = ['Alimentação', 'Limpeza', 'Manutenção', 'Pet Sitting', 'Beleza', 'Tecnologia', 'Outros'];
 
@@ -27,6 +37,8 @@ function RegisterServiceContent() {
     setSelectedEnvironments
   } = useApp();
   const [specificMembershipStatus, setSpecificMembershipStatus] = useState<'active' | 'pending' | 'banned' | null>(null);
+  const [specificMembershipRole, setSpecificMembershipRole] = useState<'member' | 'moderator' | 'resident' | 'service_provider' | null>(null);
+  const [publicationMode, setPublicationMode] = useState<PublicationMode | null>(null);
   const [loadingMembership, setLoadingMembership] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'uploading' | 'locating' | 'saving'>('idle');
   
@@ -147,6 +159,8 @@ function RegisterServiceContent() {
   useEffect(() => {
     if (!mounted || !user || !selectedEnvironment?.id) {
        setSpecificMembershipStatus(null);
+       setSpecificMembershipRole(null);
+       setPublicationMode(null);
        return;
     }
     
@@ -154,15 +168,33 @@ function RegisterServiceContent() {
       setLoadingMembership(true);
       const { data, error } = await supabase
         .from('environment_members')
-        .select('status')
+        .select('status, role')
         .eq('user_id', user.id)
         .eq('environment_id', selectedEnvironment.id)
         .maybeSingle();
 
       if (data && !error) {
         setSpecificMembershipStatus(data.status);
+        const normalizedRole =
+          data.role === 'service_provider' || data.role === 'resident'
+            ? data.role
+            : data.role === 'moderator'
+              ? 'moderator'
+              : data.role === 'member'
+                ? 'member'
+                : null;
+        setSpecificMembershipRole(normalizedRole);
+        setPublicationMode(
+          normalizedRole === 'service_provider' || normalizedRole === 'resident'
+            ? normalizedRole
+            : normalizedRole === 'member'
+              ? 'resident'
+              : null,
+        );
       } else {
         setSpecificMembershipStatus(null);
+        setSpecificMembershipRole(null);
+        setPublicationMode(null);
       }
       setLoadingMembership(false);
     };
@@ -188,14 +220,16 @@ function RegisterServiceContent() {
       return;
     }
     
-    if (user.plan === 'free') {
-      const userCreatedServices = services.filter(s => s.provider_id === user.id);
-      if (userCreatedServices.length >= 2 && !serviceId) {
-        setAlertTitle('Limite do Plano Grátis');
-        setAlertMessage('Você já atingiu o limite de 2 serviços do Plano Grátis. Para continuar publicando, contrate o Plano Pró ou Plus.');
-        setAlertAction({ label: 'Ver Planos', onClick: () => router.push('/plans') });
-        setShowAlert(true);
-      }
+    const userCreatedServices = services.filter(s => s.provider_id === user.id);
+    if (!serviceId && isPlanAtServiceLimit(user.plan, userCreatedServices.length)) {
+      setAlertTitle(user.plan === 'free' ? 'Limite do Plano Grátis' : 'Limite do Plano Pró');
+      setAlertMessage(
+        user.plan === 'free'
+          ? 'Você já atingiu o limite de 2 serviços do Plano Grátis. Para continuar publicando, contrate o Plano Pró ou Plus.'
+          : 'Você já atingiu o limite de 5 serviços do Plano Pró. Para continuar publicando, faça upgrade para o Plano Plus.',
+      );
+      setAlertAction({ label: 'Ver Planos', onClick: () => router.push('/plans') });
+      setShowAlert(true);
     }
   }, [user, selectedEnvironment, mounted, envIdFromQuery, services.length, serviceId, router]);
 
@@ -308,6 +342,25 @@ function RegisterServiceContent() {
     }
   };
 
+  const ensureCurrentLocation = async (): Promise<{ latitude: number; longitude: number }> => {
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+      throw new Error('Geolocalização indisponível neste dispositivo/navegador.');
+    }
+
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => reject(new Error(error.message || 'Falha ao obter localização.')),
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+      );
+    });
+  };
+
   const handleSubmit = async () => {
     console.log('handleSubmit called', { existingService: !!existingService, images, isActive });
     
@@ -316,6 +369,12 @@ function RegisterServiceContent() {
       setErrorMsg('Preencha o nome do serviço e WhatsApp');
       return;
     }
+
+    if (user?.plan === 'plus' && !publicationMode) {
+      setErrorMsg('Escolha se você reside neste ambiente ou apenas presta serviço nele.');
+      return;
+    }
+
     setUploading(true);
     setErrorMsg('');
     setSubmitStatus('uploading');
@@ -350,25 +409,149 @@ function RegisterServiceContent() {
       }));
 
       let effectiveMembershipStatus = user?.membershipStatus ?? null;
-      if (selectedEnvironment?.id && user?.id) {
-        const { data: membershipData, error: membershipError } = await supabase
-          .from('environment_members')
-          .select('status')
-          .eq('user_id', user.id)
-          .eq('environment_id', selectedEnvironment.id)
-          .maybeSingle();
+      let effectiveMembershipRole = user?.membershipRole ?? null;
+      let currentEnvironmentMemberships: Array<{ environment_id?: string; status?: string }> = [];
 
-        if (!membershipError && membershipData?.status) {
-          effectiveMembershipStatus = membershipData.status;
+      if (selectedEnvironment?.id && user?.id) {
+        const { data: membershipsData, error: membershipsError } = await supabase
+          .from('environment_members')
+          .select('environment_id, status, role')
+          .eq('user_id', user.id);
+
+        if (membershipsError) {
+          throw membershipsError;
+        }
+
+        currentEnvironmentMemberships = (membershipsData || []) as Array<{
+          environment_id?: string;
+          status?: string;
+        }>;
+
+        const currentMembership = currentEnvironmentMemberships.find(
+          (membership) => membership.environment_id === selectedEnvironment.id,
+        ) as (typeof currentEnvironmentMemberships[number] & { role?: string }) | undefined;
+
+        if (currentMembership?.status) {
+          effectiveMembershipStatus = currentMembership.status as any;
+        }
+
+        if (currentMembership?.role) {
+          effectiveMembershipRole = currentMembership.role as any;
         }
       }
 
       setSubmitStatus('saving');
+      const normalizedPublicationMode =
+        publicationMode ||
+        (effectiveMembershipRole === 'service_provider' || effectiveMembershipRole === 'resident'
+          ? effectiveMembershipRole
+          : effectiveMembershipRole === 'member'
+            ? 'resident'
+            : null);
+
       const environmentAvailability = getEnvironmentAvailabilityState(selectedEnvironment ?? undefined, {
         membershipStatus: effectiveMembershipStatus,
+        membershipRole: effectiveMembershipRole as any,
+        userPlan: user?.plan,
+        publicationMode: normalizedPublicationMode,
       });
-      const nextPublicationStatus = existingService?.status || (environmentAvailability.status === 'pending' ? 'pending' : 'active');
-      const nextIsActive = existingService ? Boolean(existingService.isActive) : nextPublicationStatus === 'active';
+
+      if (user?.plan !== 'plus' && !existingService && isPlanAtServiceLimit(user.plan, services.filter((service) => service.provider_id === user.id).length)) {
+        throw new Error(
+          user.plan === 'free'
+            ? 'Você já atingiu o limite de 2 serviços do Plano Grátis.'
+            : 'Você já atingiu o limite de 5 serviços do Plano Pró.',
+        );
+      }
+
+      if (user?.plan !== 'plus' && selectedEnvironment?.id) {
+        const alreadyLinked = currentEnvironmentMemberships.some(
+          (membership) =>
+            membership.environment_id === selectedEnvironment.id &&
+            membership.status !== 'banned',
+        );
+        const environmentLimit = getPlanLimits(user.plan).environments;
+
+        if (!alreadyLinked && typeof environmentLimit === 'number' && countCountableEnvironmentMemberships(currentEnvironmentMemberships) >= environmentLimit) {
+          throw new Error(
+            user.plan === 'free'
+              ? 'Seu plano permite apenas 1 ambiente. Atualize para o Plano Pró ou Plus para adicionar mais.'
+              : 'Seu plano já atingiu o limite de 2 ambientes. Atualize para o Plano Plus para continuar.',
+          );
+        }
+      }
+
+      let nextPublicationStatus = existingService?.status || (environmentAvailability.status === 'pending' ? 'pending' : 'active');
+      let nextIsActive = existingService ? Boolean(existingService.isActive) : nextPublicationStatus === 'active';
+
+      if (user?.plan === 'plus') {
+        const publicationRole = normalizedPublicationMode;
+
+        if (!publicationRole) {
+          throw new Error('Escolha se você reside neste ambiente ou apenas presta serviço nele.');
+        }
+
+        if (publicationRole === 'resident') {
+          const currentLocation = await ensureCurrentLocation();
+
+          if (
+            typeof selectedEnvironment?.latitude !== 'number' ||
+            typeof selectedEnvironment?.longitude !== 'number'
+          ) {
+            throw new Error('Este ambiente não possui coordenadas para validação.');
+          }
+
+          const distance = calculateDistanceKm(
+            currentLocation.latitude,
+            currentLocation.longitude,
+            selectedEnvironment.latitude,
+            selectedEnvironment.longitude,
+          );
+
+          if (!isWithinAutoApprovalRadius(distance)) {
+            throw new Error(`Você precisa estar dentro de 500m para publicar como residente neste ambiente.`);
+          }
+        }
+
+        const alreadyLinked = currentEnvironmentMemberships.some(
+          (membership) =>
+            membership.environment_id === selectedEnvironment?.id &&
+            membership.status !== 'banned',
+        );
+        const envLimit = getPlanLimits(user.plan).environments;
+
+        if (!alreadyLinked && typeof envLimit === 'number' && countCountableEnvironmentMemberships(currentEnvironmentMemberships) >= envLimit) {
+          throw new Error(
+            user.plan === 'free'
+              ? 'Seu plano permite apenas 1 ambiente.'
+              : 'Seu plano já atingiu o limite de ambientes. Faça upgrade para continuar.',
+          );
+        }
+
+        const { error: membershipUpsertError } = await supabase
+          .from('environment_members')
+          .upsert(
+            {
+              environment_id: selectedEnvironment.id,
+              user_id: user.id,
+              status: 'active',
+              role: publicationMode,
+            },
+            { onConflict: 'environment_id,user_id' },
+          );
+
+        if (membershipUpsertError) {
+          throw membershipUpsertError;
+        }
+
+        effectiveMembershipStatus = 'active';
+        effectiveMembershipRole = publicationMode;
+        nextPublicationStatus = existingService?.status || 'active';
+        nextIsActive = existingService ? Boolean(existingService.isActive) : true;
+        setSpecificMembershipStatus('active');
+        setSpecificMembershipRole(publicationMode);
+        setPublicationMode(publicationMode);
+      }
 
       const serviceData = {
         ...form,
@@ -482,6 +665,9 @@ function RegisterServiceContent() {
 
   const environmentAvailability = getEnvironmentAvailabilityState(selectedEnvironment ?? undefined, {
     membershipStatus: specificMembershipStatus,
+    membershipRole: specificMembershipRole,
+    userPlan: user?.plan,
+    publicationMode,
   });
 
   return (
@@ -553,6 +739,43 @@ function RegisterServiceContent() {
                 <div className="flex-1">
                    <p className="text-xs font-bold">{environmentAvailability.label}</p>
                    <p className="text-[11px] leading-tight mt-0.5">{environmentAvailability.reason}</p>
+                </div>
+              </div>
+            )}
+
+            {user?.plan === 'plus' && (
+              <div className="mt-4 rounded-2xl border border-outline-variant/10 bg-surface-container-lowest p-4">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">Como você atua aqui?</p>
+                    <p className="text-[11px] text-on-surface-variant mt-1">Escolha antes de publicar. Resido/Moro/Residência aplica o raio de 500m; Presto Serviço libera a publicação.</p>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => setPublicationMode('resident')}
+                    className={`rounded-2xl border p-4 text-left transition-all ${
+                      publicationMode === 'resident'
+                        ? 'border-primary bg-primary/10 shadow-sm'
+                        : 'border-outline-variant/10 bg-surface-container-low hover:bg-surface-container'
+                    }`}
+                  >
+                    <p className="font-bold text-on-surface">Resido / Moro / Residência</p>
+                    <p className="text-xs text-on-surface-variant mt-1">Usa a regra dos 500m para validar sua localização.</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPublicationMode('service_provider')}
+                    className={`rounded-2xl border p-4 text-left transition-all ${
+                      publicationMode === 'service_provider'
+                        ? 'border-primary bg-primary/10 shadow-sm'
+                        : 'border-outline-variant/10 bg-surface-container-low hover:bg-surface-container'
+                    }`}
+                  >
+                    <p className="font-bold text-on-surface">Presto Serviço</p>
+                    <p className="text-xs text-on-surface-variant mt-1">Publica livremente neste ambiente, sem o raio de 500m.</p>
+                  </button>
                 </div>
               </div>
             )}
@@ -734,7 +957,7 @@ function RegisterServiceContent() {
             
             <button 
               onClick={handleSubmit} 
-              disabled={!form.title || !form.WhatsApp || uploading}
+              disabled={!form.title || !form.WhatsApp || uploading || (user?.plan === 'plus' && !publicationMode)}
               className="w-full primary-gradient text-white font-bold py-4 rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitStatus === 'uploading' ? 'Enviando imagens...' : 

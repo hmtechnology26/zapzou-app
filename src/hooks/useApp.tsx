@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import type { Service, Environment, Member, Review } from '../types';
 import type { PlaceSearchResult } from '@/lib/maps';
 import { supabase } from '../lib/supabase';
+import { countCountableEnvironmentMemberships, getPlanLimits, isPlanAtEnvironmentLimit, type EnvironmentMembershipRole } from '@/lib/plan-rules';
 
 export interface User {
   id: string;
@@ -13,7 +14,7 @@ export interface User {
   role: 'user' | 'admin';
   plan?: 'free' | 'pro' | 'plus';
   membershipStatus?: 'active' | 'pending' | 'banned' | null;
-  membershipRole?: 'member' | 'moderator' | null;
+  membershipRole?: EnvironmentMembershipRole;
   managedEnvironmentIds?: string[];
 }
 
@@ -44,7 +45,13 @@ interface AppContextType {
   fetchServiceReviews: (serviceId: string, opts?: { force?: boolean }) => Promise<Review[]>;
   addReview: (serviceId: string, stars: number, comment?: string, isAnonymous?: boolean) => Promise<Review | null>;
   loading: boolean;
-  requestAffiliation: (envId: string) => Promise<void>;
+  requestAffiliation: (
+    envId: string,
+    options?: {
+      role?: EnvironmentMembershipRole;
+      status?: 'active' | 'pending' | 'banned';
+    },
+  ) => Promise<void>;
   refreshMembership: () => Promise<void>;
   membershipVersion: number;
   signalMembershipChange: () => void;
@@ -641,13 +648,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const requestAffiliation = async (envId: string) => {
+  const requestAffiliation = async (
+    envId: string,
+    options?: {
+      role?: EnvironmentMembershipRole;
+      status?: 'active' | 'pending' | 'banned';
+    },
+  ) => {
       if (!user?.id) throw new Error("Usuário não logado");
+
+      const { data: existingMemberships, error: membershipsError } = await supabase
+        .from('environment_members')
+        .select('environment_id, status')
+        .eq('user_id', user.id);
+
+      if (membershipsError) {
+        throw membershipsError;
+      }
+
+      const currentEnvironmentCount = countCountableEnvironmentMemberships(existingMemberships as any);
+      const alreadyLinked = Array.isArray(existingMemberships)
+        ? existingMemberships.some((membership: any) => membership?.environment_id === envId && membership?.status !== 'banned')
+        : false;
+      const planLimits = getPlanLimits(user.plan);
+
+      if (!alreadyLinked && isPlanAtEnvironmentLimit(user.plan, currentEnvironmentCount)) {
+        const envLimit = planLimits.environments;
+        throw new Error(
+          envLimit === 1
+            ? 'Seu plano permite apenas 1 ambiente. Atualize para o PRÓ ou PLUS para adicionar mais.'
+            : 'Seu plano já atingiu o limite de ambientes. Atualize para o PLUS para continuar.',
+        );
+      }
+
       const { error } = await supabase
         .from('environment_members')
         .insert([{
            environment_id: envId,
-           user_id: user.id
+           user_id: user.id,
+           role: options?.role ?? 'member',
+           status: options?.status ?? 'pending',
         }]);
       if (error) throw error;
       await refreshMembership();

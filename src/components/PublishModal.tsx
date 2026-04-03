@@ -14,6 +14,11 @@ import {
   isWithinAutoApprovalRadius,
   resolveEnvironmentAccessDecision,
 } from '@/lib/environment-rules';
+import {
+  countCountableEnvironmentMemberships,
+  getPlanLimits,
+  isPlanAtServiceLimit,
+} from '@/lib/plan-rules';
 import { searchPlaces, type PlaceSearchResult } from '@/lib/maps';
 import type { Environment } from '@/types';
 
@@ -92,16 +97,18 @@ export function PublishModal() {
         router.push('/login');
         return;
       }
-      if (user.plan === 'free') {
-        const freeServicesCount = services.filter(s => s.provider === user.id).length;
-        if (freeServicesCount >= 2) {
-          close();
-          setAlertTitle('Limite do Plano Grátis');
-          setAlertMessage('Você já atingiu o limite de 2 serviços do Plano Grátis. Para continuar publicando, contrate o Plano Pró ou Plus.');
-          setAlertAction({ label: 'Ver Planos', onClick: () => router.push('/plans') });
-          setShowAlert(true);
-          return;
-        }
+      const userServicesCount = services.filter(s => s.provider_id === user.id).length;
+      if (isPlanAtServiceLimit(user.plan, userServicesCount)) {
+        close();
+        setAlertTitle(user.plan === 'free' ? 'Limite do Plano Grátis' : 'Limite do Plano Pró');
+        setAlertMessage(
+          user.plan === 'free'
+            ? 'Você já atingiu o limite de 2 serviços do Plano Grátis. Para continuar publicando, contrate o Plano Pró ou Plus.'
+            : 'Você já atingiu o limite de 5 serviços do Plano Pró. Para continuar publicando, faça upgrade para o Plano Plus.',
+        );
+        setAlertAction({ label: 'Ver Planos', onClick: () => router.push('/plans') });
+        setShowAlert(true);
+        return;
       }
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -304,6 +311,31 @@ export function PublishModal() {
       });
 
       const membershipStatusPromise = getEnvironmentMembershipStatus(envRecord.id);
+      const { data: userMembershipRows, error: userMembershipsError } = await supabase
+        .from('environment_members')
+        .select('environment_id, status')
+        .eq('user_id', user.id);
+
+      if (userMembershipsError) {
+        throw userMembershipsError;
+      }
+
+      const alreadyLinked = Array.isArray(userMembershipRows)
+        ? userMembershipRows.some(
+            (membership: any) =>
+              membership?.environment_id === envRecord.id && membership?.status !== 'banned',
+          )
+        : false;
+      const currentEnvironmentCount = countCountableEnvironmentMemberships(userMembershipRows as any);
+      const environmentLimit = getPlanLimits(user.plan).environments;
+
+      if (!alreadyLinked && typeof environmentLimit === 'number' && currentEnvironmentCount >= environmentLimit) {
+        throw new Error(
+          user.plan === 'free'
+            ? 'Seu plano permite apenas 1 ambiente. Atualize para o Plano Pró ou Plus para adicionar mais.'
+            : 'Seu plano já atingiu o limite de 2 ambientes. Atualize para o Plano Plus para continuar.',
+        );
+      }
 
       const normalizedEnvironment: Environment = {
         id: envRecord.id,

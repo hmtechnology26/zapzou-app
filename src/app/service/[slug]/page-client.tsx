@@ -512,10 +512,10 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             <section className="pb-8">
               <div className="bg-secondary-container/30 p-5 rounded-3xl relative overflow-hidden">
                 <div className="relative z-10">
-                  <div className="flex items-center gap-2 mb-2">
+                  {/* <div className="flex items-center gap-2 mb-2">
                     <Icon icon="verified_user" weight={400} size={24} className="text-secondary" />
                     <p className="font-bold text-secondary">Conectae</p>
-                  </div>
+                  </div> */}
                   <p className="text-sm text-on-secondary-container/80 leading-relaxed">
                     Conectamos você com profissionais verificados da sua comunidade. Contrate com segurança!
                   </p>

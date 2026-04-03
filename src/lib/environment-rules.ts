@@ -1,4 +1,5 @@
 import type { Environment } from '@/types';
+import type { EnvironmentMembershipRole, PublicationMode, UserPlan } from './plan-rules';
 
 export const AUTO_APPROVAL_RADIUS_KM = 0.5;
 
@@ -8,6 +9,7 @@ export interface EnvironmentAccessDecision {
   mode: EnvironmentAccessMode;
   requiresModeratorApproval: boolean;
   requiresRadiusValidation: boolean;
+  requiresPublicationChoice?: boolean;
 }
 
 export type EnvironmentAvailabilityStatus = 'active' | 'pending';
@@ -67,10 +69,27 @@ export function inferEnvironmentValidationFlagsFromPlace(primaryType: string) {
   return inferEnvironmentValidationFlagsFromType(inferEnvironmentTypeFromPlace(primaryType));
 }
 
+function normalizePublicationRole(role: EnvironmentMembershipRole): PublicationMode | null {
+  if (role === 'service_provider' || role === 'resident') {
+    return role;
+  }
+
+  if (role === 'member') {
+    return 'resident';
+  }
+
+  return null;
+}
+
 export function resolveEnvironmentAccessDecision(
   environment?: Partial<
     Pick<Environment, 'type' | 'requiresModeratorApproval' | 'requiresRadiusValidation'>
   >,
+  options?: {
+    userPlan?: UserPlan;
+    membershipRole?: EnvironmentMembershipRole;
+    publicationMode?: PublicationMode | null;
+  },
 ): EnvironmentAccessDecision {
   const inferredType = environment?.type ?? 'residential';
   const inferredFlags = inferEnvironmentValidationFlagsFromType(inferredType);
@@ -79,6 +98,34 @@ export function resolveEnvironmentAccessDecision(
     environment?.requiresModeratorApproval ?? inferredFlags.requiresModeratorApproval;
   const requiresRadiusValidation =
     environment?.requiresRadiusValidation ?? inferredFlags.requiresRadiusValidation;
+
+  const effectivePublicationMode =
+    options?.publicationMode ?? normalizePublicationRole(options?.membershipRole ?? null);
+
+  if (options?.userPlan === 'plus') {
+    if (effectivePublicationMode === 'service_provider') {
+      return {
+        mode: 'open',
+        requiresModeratorApproval: false,
+        requiresRadiusValidation: false,
+      };
+    }
+
+    if (effectivePublicationMode === 'resident') {
+      return {
+        mode: 'radius',
+        requiresModeratorApproval: false,
+        requiresRadiusValidation: true,
+      };
+    }
+
+    return {
+      mode: requiresModeratorApproval ? 'moderator' : requiresRadiusValidation ? 'radius' : 'open',
+      requiresModeratorApproval,
+      requiresRadiusValidation,
+      requiresPublicationChoice: true,
+    };
+  }
 
   if (requiresModeratorApproval) {
     return {
@@ -115,9 +162,63 @@ export function getEnvironmentAvailabilityState(
     distanceKm?: number | null;
     hasLocation?: boolean;
     membershipStatus?: 'active' | 'pending' | 'banned' | null;
+    membershipRole?: EnvironmentMembershipRole;
+    userPlan?: UserPlan;
+    publicationMode?: PublicationMode | null;
   },
 ): EnvironmentAvailabilityState {
-  const decision = resolveEnvironmentAccessDecision(environment);
+  const decision = resolveEnvironmentAccessDecision(environment, options);
+  const publicationRole = normalizePublicationRole(
+    options?.publicationMode ?? options?.membershipRole ?? null,
+  );
+
+  if (options?.membershipStatus === 'banned') {
+    return {
+      status: 'pending',
+      label: 'Bloqueado',
+      reason: 'Seu acesso foi bloqueado pela liderança deste ambiente.',
+    };
+  }
+
+  if (options?.userPlan === 'plus') {
+    if (!publicationRole) {
+      return {
+        status: 'pending',
+        label: 'Escolha o modo',
+        reason: 'Selecione se você reside neste ambiente ou apenas presta serviço nele.',
+      };
+    }
+
+    if (publicationRole === 'service_provider') {
+      return {
+        status: 'active',
+        label: 'Ativo',
+        reason: 'Você pode publicar livremente neste ambiente.',
+      };
+    }
+
+    if (!options?.hasLocation || options.distanceKm == null) {
+      return {
+        status: 'pending',
+        label: 'Aguardando validação',
+        reason: 'Ative a sua localização para validar o raio de 500m.',
+      };
+    }
+
+    if (isWithinAutoApprovalRadius(options.distanceKm)) {
+      return {
+        status: 'active',
+        label: 'Ativo',
+        reason: `Você está dentro do raio de ${AUTO_APPROVAL_RADIUS_KM * 1000}m.`,
+      };
+    }
+
+    return {
+      status: 'pending',
+      label: 'Fora do raio',
+      reason: `Você precisa estar dentro de ${AUTO_APPROVAL_RADIUS_KM * 1000}m para liberar este ambiente.`,
+    };
+  }
 
   if (options?.membershipStatus === 'active') {
     return {
@@ -128,14 +229,6 @@ export function getEnvironmentAvailabilityState(
   }
 
   if (decision.mode === 'moderator') {
-    if (options?.membershipStatus === 'banned') {
-      return {
-        status: 'pending',
-        label: 'Bloqueado',
-        reason: 'Seu acesso foi bloqueado pela liderança deste ambiente.',
-      };
-    }
-
     return {
       status: 'pending',
       label: 'Aguardando aprovação',
@@ -173,3 +266,4 @@ export function getEnvironmentAvailabilityState(
     reason: 'Este ambiente tem acesso livre para publicar.',
   };
 }
+
