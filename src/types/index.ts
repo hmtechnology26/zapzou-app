@@ -43,6 +43,7 @@ export interface Review {
   comment?: string;
   created_at?: string;
   isAnonymous?: boolean;
+  approved?: boolean;
 }
 
 export interface Environment {

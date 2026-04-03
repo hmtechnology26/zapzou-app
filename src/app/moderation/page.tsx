@@ -43,6 +43,7 @@ type ReviewItem = {
   comment?: string;
   createdAt: string;
   isAnonymous?: boolean;
+  approved?: boolean;
 };
 
 type ServiceItem = {
@@ -365,6 +366,7 @@ export default function ModerationPage() {
             comment: review.comment || '',
             createdAt: review.created_at,
             isAnonymous: review.is_anonymous,
+            approved: review.approved,
           })),
         );
         setLoadingReviews(false);
@@ -380,7 +382,7 @@ export default function ModerationPage() {
 
       const { data: reviewsData, error: reviewsError } = await supabase
         .from('reviews')
-        .select('id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous')
+        .select('id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved')
         .in('service_id', Array.from(serviceMap.keys()))
         .order('created_at', { ascending: false })
         .limit(100);
@@ -398,6 +400,7 @@ export default function ModerationPage() {
             comment: review.comment || '',
             createdAt: review.created_at,
             isAnonymous: review.is_anonymous,
+            approved: review.approved,
           })),
         );
       } else {
@@ -569,6 +572,29 @@ export default function ModerationPage() {
       await fetchStats();
     } catch (err: any) {
       alert('Erro ao excluir avaliação: ' + (err.message || 'Erro desconhecido'));
+    }
+    setActionLoading(null);
+  };
+
+  const handleApproveAnonymousReview = async (reviewId: string) => {
+    if (!window.confirm('Aprovar esta avaliação anónima? Ela será exibida no serviço.')) return;
+
+    setActionLoading(reviewId);
+    try {
+      const { error } = await supabase.rpc('approve_anonymous_review', {
+        p_review_id: reviewId,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setReviews((prev) => prev.map((r) => 
+        r.id === reviewId ? { ...r, approved: true } : r
+      ));
+      await fetchStats();
+    } catch (err: any) {
+      alert('Erro ao aprovar avaliação: ' + (err.message || 'Erro desconhecido'));
     }
     setActionLoading(null);
   };
@@ -1107,6 +1133,16 @@ export default function ModerationPage() {
                             ANÔNIMO
                           </span>
                         )}
+                        {review.isAnonymous && !review.approved && (
+                          <span className="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-orange-300/30 shrink-0">
+                            PENDENTE
+                          </span>
+                        )}
+                        {review.isAnonymous && review.approved && (
+                          <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-300/30 shrink-0">
+                            APROVADO
+                          </span>
+                        )}
                         {!review.isAnonymous && (
                           <span className="text-[10px] text-on-surface-variant/60 shrink-0">
                             {formatDate(review.createdAt)}
@@ -1123,14 +1159,26 @@ export default function ModerationPage() {
                           {renderStars(review.stars)}
                           <span className="text-xs text-on-surface-variant ml-1">({review.stars}/5)</span>
                         </div>
-                        <button
-                          onClick={() => handleDeleteReview(review.id)}
-                          disabled={actionLoading === review.id}
-                          className="text-error hover:bg-error/10 p-2 rounded-full transition-all disabled:opacity-50"
-                          title="Excluir avaliação"
-                        >
-                          <Icon icon="delete" size={18} />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          {review.isAnonymous && !review.approved && (
+                            <button
+                              onClick={() => handleApproveAnonymousReview(review.id)}
+                              disabled={actionLoading === review.id}
+                              className="text-[#30cc36] hover:bg-[#30cc36]/10 p-2 rounded-full transition-all disabled:opacity-50"
+                              title="Aprovar avaliação"
+                            >
+                              <Icon icon="check_circle" size={18} />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteReview(review.id)}
+                            disabled={actionLoading === review.id}
+                            className="text-error hover:bg-error/10 p-2 rounded-full transition-all disabled:opacity-50"
+                            title="Excluir avaliação"
+                          >
+                            <Icon icon="delete" size={18} />
+                          </button>
+                        </div>
                       </div>
                       
                       {review.comment && (

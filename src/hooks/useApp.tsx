@@ -870,10 +870,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
             .from('reviews')
             .select(
               includeAvatarColumn
-                ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous'
-                : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous'
+                ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved'
+                : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved'
             )
             .eq('service_id', serviceId)
+            .or('is_anonymous.is.null,is_anonymous.eq.false,approved.eq.true')
             .order('created_at', { ascending: false })
             .limit(50),
           25000,
@@ -890,8 +891,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ({ data, error } = (await withTimeout(
             supabase
               .from('reviews')
-              .select('id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous')
+              .select('id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved')
               .eq('service_id', serviceId)
+              .or('is_anonymous.is.null,is_anonymous.eq.false,approved.eq.true')
               .order('created_at', { ascending: false })
               .limit(50),
             25000,
@@ -918,6 +920,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           comment: r.comment,
           created_at: r.created_at,
           isAnonymous: r.is_anonymous,
+          approved: r.approved,
         }));
         setServiceReviews((prev) => ({ ...prev, [serviceId]: reviews }));
         return reviews;
@@ -947,11 +950,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       stars,
       comment: comment || '',
       is_anonymous: isAnonymous,
+      approved: isAnonymous ? false : true,  // Avaliações anónimas precisam de aprovação
     };
     const selectColumns = (includeAvatar: boolean) =>
       includeAvatar
-        ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous'
-        : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous';
+        ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved'
+        : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved';
     const tryInsert = (payload: typeof basePayload, includeAvatar: boolean) =>
       supabase.from('reviews').insert(payload).select(selectColumns(includeAvatar)).single();
 
@@ -995,6 +999,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           comment: data.comment,
           created_at: data.created_at,
           isAnonymous: data.is_anonymous,
+          approved: data.approved,
         }
       : null;
 
