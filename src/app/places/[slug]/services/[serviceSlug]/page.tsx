@@ -12,20 +12,33 @@ async function getServiceContext(placeSlug: string, serviceSlug: string) {
   const supabase = createPublicSupabaseClient();
   if (!supabase) return null;
 
-  const { data } = await supabase
-    .from('services')
-    .select('title, slug, description, image_url, environment_id, status, is_active, environments(name, slug)')
-    .or(`slug.eq.${serviceSlug},id.eq.${serviceSlug}`)
-    .limit(1)
-    .maybeSingle();
+  try {
+    const { data: bySlug } = await supabase
+      .from('services')
+      .select('title, slug, description, image_url, environment_id, status, is_active, environments(name, slug)')
+      .eq('slug', serviceSlug)
+      .maybeSingle();
 
-  if (!data) return null;
+    const service = bySlug
+      ? bySlug
+      : await supabase
+          .from('services')
+          .select('title, slug, description, image_url, environment_id, status, is_active, environments(name, slug)')
+          .eq('id', serviceSlug)
+          .maybeSingle()
+          .then(({ data }) => data ?? null);
 
-  const environmentSlug = data.environments?.slug || placeSlug;
-  return {
-    ...data,
-    environmentSlug,
-  };
+    if (!service) return null;
+
+    const environmentSlug = service.environments?.slug || placeSlug;
+    return {
+      ...service,
+      environmentSlug,
+    };
+  } catch (error) {
+    console.warn('getServiceContext failed:', error);
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -61,11 +74,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const ctx = await getServiceContext(params.slug, params.serviceSlug);
+  const siteUrl = getSiteUrl();
   const serviceTitle = ctx?.title || humanizeSlug(params.serviceSlug) || 'Servico';
   const placeTitle = ctx?.environments?.name || humanizeSlug(params.slug) || 'Ambiente';
   const description =
     ctx?.description ||
     'Veja os detalhes do servico dentro do ambiente e entre em contato com facilidade.';
+  const canonical = `${siteUrl}/places/${params.slug}/services/${params.serviceSlug}`;
 
   const seoContent = (
     <section className="mx-auto max-w-5xl px-4 pt-24 pb-2">

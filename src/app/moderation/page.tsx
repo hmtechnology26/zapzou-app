@@ -42,6 +42,7 @@ type ReviewItem = {
   stars: number;
   comment?: string;
   createdAt: string;
+  isAnonymous?: boolean;
 };
 
 type ServiceItem = {
@@ -363,6 +364,7 @@ export default function ModerationPage() {
             stars: review.stars || 0,
             comment: review.comment || '',
             createdAt: review.created_at,
+            isAnonymous: review.is_anonymous,
           })),
         );
         setLoadingReviews(false);
@@ -378,7 +380,7 @@ export default function ModerationPage() {
 
       const { data: reviewsData, error: reviewsError } = await supabase
         .from('reviews')
-        .select('id, service_id, user_id, user_name, user_avatar, stars, comment, created_at')
+        .select('id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous')
         .in('service_id', Array.from(serviceMap.keys()))
         .order('created_at', { ascending: false })
         .limit(100);
@@ -395,6 +397,7 @@ export default function ModerationPage() {
             stars: review.stars || 0,
             comment: review.comment || '',
             createdAt: review.created_at,
+            isAnonymous: review.is_anonymous,
           })),
         );
       } else {
@@ -1071,22 +1074,44 @@ export default function ModerationPage() {
               reviews.map((review) => (
                 <div
                   key={review.id}
-                  className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-outline-variant/10"
+                  className={`bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-outline-variant/10 ${review.isAnonymous ? 'border-amber-300/30 bg-amber-50/30' : ''}`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center overflow-hidden border border-outline-variant/20 shrink-0">
-                      {review.userAvatar ? (
-                        <img src={review.userAvatar} alt={review.userName} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                      ) : (
-                        <Icon icon="person" size={20} className="text-on-surface-variant" />
-                      )}
-                    </div>
+                    {review.isAnonymous ? (
+                      <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center overflow-hidden border border-amber-300/30 shrink-0">
+                        <Icon icon="visibility_off" size={18} className="text-amber-600" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center overflow-hidden border border-outline-variant/20 shrink-0">
+                        {review.userAvatar ? (
+                          <img src={review.userAvatar} alt={review.userName} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                        ) : (
+                          <Icon icon="person" size={20} className="text-on-surface-variant" />
+                        )}
+                      </div>
+                    )}
                     <div className="flex flex-col flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-1">
-                        <p className="font-semibold text-on-surface text-sm truncate">{review.userName}</p>
-                        <span className="text-[10px] text-on-surface-variant/60 shrink-0">
-                          {formatDate(review.createdAt)}
-                        </span>
+                        <p className="font-semibold text-on-surface text-sm truncate flex items-center gap-2">
+                          {review.isAnonymous ? (
+                            <>
+                              <Icon icon="visibility_off" size={14} className="text-amber-600" />
+                              <span className="text-amber-700">Anônimo</span>
+                            </>
+                          ) : (
+                            review.userName
+                          )}
+                        </p>
+                        {review.isAnonymous && (
+                          <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-300/30 shrink-0">
+                            ANÔNIMO
+                          </span>
+                        )}
+                        {!review.isAnonymous && (
+                          <span className="text-[10px] text-on-surface-variant/60 shrink-0">
+                            {formatDate(review.createdAt)}
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-on-surface-variant mb-2 flex items-center gap-1">
                         <Icon icon="storefront" size={12} className="text-blue-500" />

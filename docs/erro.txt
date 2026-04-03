@@ -1,832 +1,520 @@
-installHook.js:1 Warning: The result of getServerSnapshot should be cached to avoid an infinite loop Error Component Stack
-    at ExitModalProvider (ExitModalContext.tsx:24:37)
-    at AppProvider (useApp.tsx:55:31)
-    at Providers (providers.tsx:9:29)
-    at body (<anonymous>)
-    at html (<anonymous>)
-    at RootLayout [Server] (<anonymous>)
-    at RedirectErrorBoundary (redirect-boundary.js:74:9)
-    at RedirectBoundary (redirect-boundary.js:82:11)
-    at NotFoundErrorBoundary (not-found-boundary.js:76:9)
-    at NotFoundBoundary (not-found-boundary.js:84:11)
-    at DevRootNotFoundBoundary (dev-root-not-found-boundary.js:33:11)
-    at ReactDevOverlay (ReactDevOverlay.js:87:9)
-    at HotReload (hot-reloader-client.js:321:11)
-    at Router (app-router.js:207:11)
-    at ErrorBoundaryHandler (error-boundary.js:113:9)
-    at ErrorBoundary (error-boundary.js:160:11)
-    at AppRouter (app-router.js:585:13)
-    at ServerRoot (app-index.js:112:27)
-    at Root (app-index.js:117:11)
-overrideMethod @ installHook.js:1
-window.console.error @ app-index.js:33
-console.error @ hydration-error-info.js:63
-printWarning @ react-dom.development.js:94
-error @ react-dom.development.js:68
-mountSyncExternalStore @ react-dom.development.js:11855
-useSyncExternalStore @ react-dom.development.js:13357
-useSyncExternalStore @ react.development.js:2563
-useServerSnapshot @ ExitModalContext.tsx:17
-ExitModalProvider @ ExitModalContext.tsx:27
-renderWithHooks @ react-dom.development.js:11121
-mountIndeterminateComponent @ react-dom.development.js:16869
-beginWork$1 @ react-dom.development.js:18458
-beginWork @ react-dom.development.js:26927
-performUnitOfWork @ react-dom.development.js:25748
-workLoopConcurrent @ react-dom.development.js:25734
-renderRootConcurrent @ react-dom.development.js:25690
-performConcurrentWorkOnRoot @ react-dom.development.js:24504
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-ExitModalContext.tsx:55 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-installHook.js:1 [ExitModal] Rendering, pathname: /places/igreja-ministerio-farol
-react-dom.development.js:26793 Uncaught Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
-    at throwIfInfiniteUpdateLoopDetected (react-dom.development.js:26793:11)
-    at getRootForUpdatedFiber (react-dom.development.js:7627:3)
-    at enqueueConcurrentRenderForLane (react-dom.development.js:7549:10)
-    at forceStoreRerender (react-dom.development.js:12049:14)
-    at updateStoreInstance (react-dom.development.js:12018:5)
-    at commitHookEffectListMount (react-dom.development.js:21102:23)
-    at commitHookPassiveMountEffects (react-dom.development.js:23154:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23259:11)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-throwIfInfiniteUpdateLoopDetected @ react-dom.development.js:26793
-getRootForUpdatedFiber @ react-dom.development.js:7627
-enqueueConcurrentRenderForLane @ react-dom.development.js:7549
-forceStoreRerender @ react-dom.development.js:12049
-updateStoreInstance @ react-dom.development.js:12018
-commitHookEffectListMount @ react-dom.development.js:21102
-commitHookPassiveMountEffects @ react-dom.development.js:23154
-commitPassiveMountOnFiber @ react-dom.development.js:23259
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23267
-commitPassiveMountEffects @ react-dom.development.js:23225
-flushPassiveEffectsImpl @ react-dom.development.js:26497
-flushPassiveEffects @ react-dom.development.js:26438
-commitRootImpl @ react-dom.development.js:26337
-commitRoot @ react-dom.development.js:26077
-performSyncWorkOnRoot @ react-dom.development.js:24925
-flushSyncWorkAcrossRoots_impl @ react-dom.development.js:7758
-flushSyncWorkOnAllRoots @ react-dom.development.js:7718
-flushPassiveEffectsImpl @ react-dom.development.js:26518
-flushPassiveEffects @ react-dom.development.js:26438
-eval @ react-dom.development.js:26172
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-redirect-boundary.js:57 Uncaught Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
-    at throwIfInfiniteUpdateLoopDetected (react-dom.development.js:26793:11)
-    at getRootForUpdatedFiber (react-dom.development.js:7627:3)
-    at enqueueConcurrentRenderForLane (react-dom.development.js:7549:10)
-    at forceStoreRerender (react-dom.development.js:12049:14)
-    at updateStoreInstance (react-dom.development.js:12018:5)
-    at commitHookEffectListMount (react-dom.development.js:21102:23)
-    at commitHookPassiveMountEffects (react-dom.development.js:23154:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23259:11)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-throwIfInfiniteUpdateLoopDetected @ react-dom.development.js:26793
-getRootForUpdatedFiber @ react-dom.development.js:7627
-enqueueConcurrentRenderForLane @ react-dom.development.js:7549
-forceStoreRerender @ react-dom.development.js:12049
-updateStoreInstance @ react-dom.development.js:12018
-commitHookEffectListMount @ react-dom.development.js:21102
-commitHookPassiveMountEffects @ react-dom.development.js:23154
-commitPassiveMountOnFiber @ react-dom.development.js:23259
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23267
-commitPassiveMountEffects @ react-dom.development.js:23225
-flushPassiveEffectsImpl @ react-dom.development.js:26497
-flushPassiveEffects @ react-dom.development.js:26438
-commitRootImpl @ react-dom.development.js:26337
-commitRoot @ react-dom.development.js:26077
-performSyncWorkOnRoot @ react-dom.development.js:24925
-flushSyncWorkAcrossRoots_impl @ react-dom.development.js:7758
-flushSyncWorkOnAllRoots @ react-dom.development.js:7718
-flushPassiveEffectsImpl @ react-dom.development.js:26518
-flushPassiveEffects @ react-dom.development.js:26438
-eval @ react-dom.development.js:26172
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-not-found-boundary.js:37 Uncaught Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
-    at throwIfInfiniteUpdateLoopDetected (react-dom.development.js:26793:11)
-    at getRootForUpdatedFiber (react-dom.development.js:7627:3)
-    at enqueueConcurrentRenderForLane (react-dom.development.js:7549:10)
-    at forceStoreRerender (react-dom.development.js:12049:14)
-    at updateStoreInstance (react-dom.development.js:12018:5)
-    at commitHookEffectListMount (react-dom.development.js:21102:23)
-    at commitHookPassiveMountEffects (react-dom.development.js:23154:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23259:11)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-throwIfInfiniteUpdateLoopDetected @ react-dom.development.js:26793
-getRootForUpdatedFiber @ react-dom.development.js:7627
-enqueueConcurrentRenderForLane @ react-dom.development.js:7549
-forceStoreRerender @ react-dom.development.js:12049
-updateStoreInstance @ react-dom.development.js:12018
-commitHookEffectListMount @ react-dom.development.js:21102
-commitHookPassiveMountEffects @ react-dom.development.js:23154
-commitPassiveMountOnFiber @ react-dom.development.js:23259
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23267
-commitPassiveMountEffects @ react-dom.development.js:23225
-flushPassiveEffectsImpl @ react-dom.development.js:26497
-flushPassiveEffects @ react-dom.development.js:26438
-commitRootImpl @ react-dom.development.js:26337
-commitRoot @ react-dom.development.js:26077
-performSyncWorkOnRoot @ react-dom.development.js:24925
-flushSyncWorkAcrossRoots_impl @ react-dom.development.js:7758
-flushSyncWorkOnAllRoots @ react-dom.development.js:7718
-flushPassiveEffectsImpl @ react-dom.development.js:26518
-flushPassiveEffects @ react-dom.development.js:26438
-eval @ react-dom.development.js:26172
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-redirect-boundary.js:57 Uncaught Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
-    at throwIfInfiniteUpdateLoopDetected (react-dom.development.js:26793:11)
-    at getRootForUpdatedFiber (react-dom.development.js:7627:3)
-    at enqueueConcurrentRenderForLane (react-dom.development.js:7549:10)
-    at forceStoreRerender (react-dom.development.js:12049:14)
-    at updateStoreInstance (react-dom.development.js:12018:5)
-    at commitHookEffectListMount (react-dom.development.js:21102:23)
-    at commitHookPassiveMountEffects (react-dom.development.js:23154:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23259:11)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-throwIfInfiniteUpdateLoopDetected @ react-dom.development.js:26793
-getRootForUpdatedFiber @ react-dom.development.js:7627
-enqueueConcurrentRenderForLane @ react-dom.development.js:7549
-forceStoreRerender @ react-dom.development.js:12049
-updateStoreInstance @ react-dom.development.js:12018
-commitHookEffectListMount @ react-dom.development.js:21102
-commitHookPassiveMountEffects @ react-dom.development.js:23154
-commitPassiveMountOnFiber @ react-dom.development.js:23259
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23267
-commitPassiveMountEffects @ react-dom.development.js:23225
-flushPassiveEffectsImpl @ react-dom.development.js:26497
-flushPassiveEffects @ react-dom.development.js:26438
-commitRootImpl @ react-dom.development.js:26337
-commitRoot @ react-dom.development.js:26077
-performSyncWorkOnRoot @ react-dom.development.js:24925
-flushSyncWorkAcrossRoots_impl @ react-dom.development.js:7758
-flushSyncWorkOnAllRoots @ react-dom.development.js:7718
-flushPassiveEffectsImpl @ react-dom.development.js:26518
-flushPassiveEffects @ react-dom.development.js:26438
-eval @ react-dom.development.js:26172
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-not-found-boundary.js:37 Uncaught Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
-    at throwIfInfiniteUpdateLoopDetected (react-dom.development.js:26793:11)
-    at getRootForUpdatedFiber (react-dom.development.js:7627:3)
-    at enqueueConcurrentRenderForLane (react-dom.development.js:7549:10)
-    at forceStoreRerender (react-dom.development.js:12049:14)
-    at updateStoreInstance (react-dom.development.js:12018:5)
-    at commitHookEffectListMount (react-dom.development.js:21102:23)
-    at commitHookPassiveMountEffects (react-dom.development.js:23154:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23259:11)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23256:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-    at recursivelyTraversePassiveMountEffects (react-dom.development.js:23237:7)
-    at commitPassiveMountOnFiber (react-dom.development.js:23370:9)
-throwIfInfiniteUpdateLoopDetected @ react-dom.development.js:26793
-getRootForUpdatedFiber @ react-dom.development.js:7627
-enqueueConcurrentRenderForLane @ react-dom.development.js:7549
-forceStoreRerender @ react-dom.development.js:12049
-updateStoreInstance @ react-dom.development.js:12018
-commitHookEffectListMount @ react-dom.development.js:21102
-commitHookPassiveMountEffects @ react-dom.development.js:23154
-commitPassiveMountOnFiber @ react-dom.development.js:23259
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23256
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23370
-recursivelyTraversePassiveMountEffects @ react-dom.development.js:23237
-commitPassiveMountOnFiber @ react-dom.development.js:23267
-commitPassiveMountEffects @ react-dom.development.js:23225
-flushPassiveEffectsImpl @ react-dom.development.js:26497
-flushPassiveEffects @ react-dom.development.js:26438
-commitRootImpl @ react-dom.development.js:26337
-commitRoot @ react-dom.development.js:26077
-performSyncWorkOnRoot @ react-dom.development.js:24925
-flushSyncWorkAcrossRoots_impl @ react-dom.development.js:7758
-flushSyncWorkOnAllRoots @ react-dom.development.js:7718
-flushPassiveEffectsImpl @ react-dom.development.js:26518
-flushPassiveEffects @ react-dom.development.js:26438
-eval @ react-dom.development.js:26172
-workLoop @ scheduler.development.js:256
-flushWork @ scheduler.development.js:225
-performWorkUntilDeadline @ scheduler.development.js:534
-installHook.js:1 The above error occurred in the <NotFoundErrorBoundary> component:
+main-app.js:1847 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+react-server-dom-webpack-client.browser.development.js:1855 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+redirect-boundary.js:57 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+redirect-boundary.js:57 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+redirect-boundary.js:57 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+not-found-boundary.js:37 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+redirect-boundary.js:57 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+not-found-boundary.js:37 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+react-server-dom-webpack-client.browser.development.js:1855 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+redirect-boundary.js:57 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+redirect-boundary.js:57 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+redirect-boundary.js:57 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+not-found-boundary.js:37 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+redirect-boundary.js:57 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+not-found-boundary.js:37 Uncaught Error: canonical is not defined
+    at Page (webpack-internal:///(rsc)/./src/app/places/[slug]/page.tsx:108:14)
+resolveErrorDev @ react-server-dom-webpack-client.browser.development.js:1855
+processFullRow @ react-server-dom-webpack-client.browser.development.js:1928
+processBinaryChunk @ react-server-dom-webpack-client.browser.development.js:2078
+progress @ react-server-dom-webpack-client.browser.development.js:2159
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+progress @ react-server-dom-webpack-client.browser.development.js:2160
+Promise.then
+startReadingFromStream @ react-server-dom-webpack-client.browser.development.js:2167
+createFromReadableStream @ react-server-dom-webpack-client.browser.development.js:2172
+eval @ app-index.js:108
+(app-pages-browser)/./node_modules/next/dist/client/app-index.js @ main-app.js:244
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+fn @ webpack.js:343
+eval @ app-next-dev.js:9
+eval @ app-bootstrap.js:57
+loadScriptsInSequence @ app-bootstrap.js:23
+appBootstrap @ app-bootstrap.js:56
+eval @ app-next-dev.js:8
+(app-pages-browser)/./node_modules/next/dist/client/app-next-dev.js @ main-app.js:266
+options.factory @ webpack.js:687
+__webpack_require__ @ webpack.js:37
+__webpack_exec__ @ main-app.js:2007
+(anonymous) @ main-app.js:2008
+webpackJsonpCallback @ webpack.js:1359
+(anonymous) @ main-app.js:9
+app-index.js:33 The above error occurred in the <NotFoundErrorBoundary> component:
 
-    at ExitModalProvider (webpack-internal:///(app-pages-browser)/./src/contexts/ExitModalContext.tsx:25:11)
-    at AppProvider (webpack-internal:///(app-pages-browser)/./src/hooks/useApp.tsx:16:11)
-    at Providers (webpack-internal:///(app-pages-browser)/./src/app/providers.tsx:18:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at InnerLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:243:11)
+    at RedirectErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:74:9)
+    at RedirectBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/redirect-boundary.js:82:11)
+    at NotFoundErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:76:9)
+    at NotFoundBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/not-found-boundary.js:84:11)
+    at LoadingBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:349:11)
+    at ErrorBoundary (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/error-boundary.js:160:11)
+    at InnerScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:153:9)
+    at ScrollAndFocusHandler (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:228:11)
+    at RenderFromTemplateContext (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/render-from-template-context.js:16:44)
+    at OuterLayoutRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/layout-router.js:370:11)
+    at div
+    at ProtectedLayout (webpack-internal:///(app-pages-browser)/./src/app/layout-client.tsx:103:11)
+    at PublishModalProvider (webpack-internal:///(app-pages-browser)/./src/contexts/PublishModalContext.tsx:14:11)
+    at ExitModalProvider (webpack-internal:///(app-pages-browser)/./src/contexts/ExitModalContext.tsx:16:11)
+    at AppProvider (webpack-internal:///(app-pages-browser)/./src/hooks/useApp.tsx:17:11)
+    at ThemeProvider (webpack-internal:///(app-pages-browser)/./src/contexts/ThemeContext.tsx:17:11)
+    at Providers (webpack-internal:///(app-pages-browser)/./src/app/providers.tsx:20:11)
     at body
     at html
     at RootLayout (Server)
@@ -843,11 +531,10 @@ installHook.js:1 The above error occurred in the <NotFoundErrorBoundary> compone
     at AppRouter (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/app-router.js:585:13)
     at ServerRoot (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:112:27)
     at Root (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/app-index.js:117:11)
+    at ReactDevOverlay (webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/components/react-dev-overlay/app/ReactDevOverlay.js:87:9)
 
 React will try to recreate this component tree from scratch using the error boundary you provided, ReactDevOverlay.
-overrideMethod @ installHook.js:1
 window.console.error @ app-index.js:33
-console.error @ hydration-error-info.js:63
 logCapturedError @ react-dom.development.js:15295
 callback @ react-dom.development.js:15357
 callCallback @ react-dom.development.js:8696
@@ -887,16 +574,16 @@ commitLayoutEffectOnFiber @ react-dom.development.js:21577
 recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
 commitLayoutEffectOnFiber @ react-dom.development.js:21577
 recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
+commitLayoutEffectOnFiber @ react-dom.development.js:21418
+recursivelyTraverseLayoutEffects @ react-dom.development.js:22926
 commitLayoutEffectOnFiber @ react-dom.development.js:21437
 commitLayoutEffects @ react-dom.development.js:22912
 commitRootImpl @ react-dom.development.js:26226
 commitRoot @ react-dom.development.js:26077
-performSyncWorkOnRoot @ react-dom.development.js:24925
-flushSyncWorkAcrossRoots_impl @ react-dom.development.js:7758
-flushSyncWorkOnAllRoots @ react-dom.development.js:7718
-flushPassiveEffectsImpl @ react-dom.development.js:26518
-flushPassiveEffects @ react-dom.development.js:26438
-eval @ react-dom.development.js:26172
+commitRootWhenReady @ react-dom.development.js:24749
+finishConcurrentRender @ react-dom.development.js:24714
+performConcurrentWorkOnRoot @ react-dom.development.js:24559
 workLoop @ scheduler.development.js:256
 flushWork @ scheduler.development.js:225
 performWorkUntilDeadline @ scheduler.development.js:534
+igreja-ministerio-farol?placeId=ChIJMxc3c39wGZURn6hZo6QxoZk:1 The resource http://localhost:3000/_next/static/css/app/layout.css?v=1775248175092 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.

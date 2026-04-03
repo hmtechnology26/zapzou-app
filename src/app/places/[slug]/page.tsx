@@ -14,14 +14,27 @@ async function getEnvironmentBySlug(slug: string) {
 
   const decoded = slug.replace(/-/g, ' ');
 
-  const { data } = await supabase
-    .from('environments')
-    .select('id, name, slug, type, image_url, members_count, status, updated_at')
-    .or(`slug.eq.${slug},name.ilike.${decoded}`)
-    .limit(1)
-    .maybeSingle();
+  try {
+    const { data: bySlug } = await supabase
+      .from('environments')
+      .select('id, name, slug, type, image_url, members_count, status, updated_at')
+      .eq('slug', slug)
+      .maybeSingle();
 
-  return data ?? null;
+    if (bySlug) return bySlug;
+
+    const { data: byName } = await supabase
+      .from('environments')
+      .select('id, name, slug, type, image_url, members_count, status, updated_at')
+      .ilike('name', decoded)
+      .limit(1)
+      .maybeSingle();
+
+    return byName ?? null;
+  } catch (error) {
+    console.warn('getEnvironmentBySlug failed:', error);
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -55,6 +68,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const env = await getEnvironmentBySlug(params.slug);
+  const siteUrl = getSiteUrl();
   const title = env?.name || humanizeSlug(params.slug) || 'Ambiente';
   const typeLabel =
     env?.type === 'church'
@@ -65,6 +79,7 @@ export default async function Page({ params }: Props) {
           ? 'Clube'
           : 'Ambiente';
   const memberCount = typeof env?.members_count === 'number' ? env.members_count : null;
+  const canonical = `${siteUrl}/places/${params.slug}`;
 
   const seoContent = (
     <section className="mx-auto max-w-7xl px-4 pt-24 pb-2">

@@ -5,7 +5,7 @@ import { Icon } from './Icon';
 import { StarRating } from './StarRating';
 
 interface ReviewFormProps {
-  onSubmit: (stars: number, comment: string) => Promise<void>;
+  onSubmit: (stars: number, comment: string, isAnonymous: boolean) => Promise<void>;
   onCancel?: () => void;
   isSubmitting?: boolean;
 }
@@ -13,6 +13,7 @@ interface ReviewFormProps {
 export function ReviewForm({ onSubmit, onCancel, isSubmitting = false }: ReviewFormProps) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,9 +26,10 @@ export function ReviewForm({ onSubmit, onCancel, isSubmitting = false }: ReviewF
     }
 
     try {
-      await onSubmit(rating, comment);
+      await onSubmit(rating, comment, isAnonymous);
       setRating(0);
       setComment('');
+      setIsAnonymous(false);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao enviar avaliação. Tente novamente.';
       setError(message);
@@ -65,6 +67,24 @@ export function ReviewForm({ onSubmit, onCancel, isSubmitting = false }: ReviewF
         </p>
       </div>
 
+      <div className="mb-4">
+        <label className="flex items-center gap-3 cursor-pointer bg-surface-container-high rounded-xl p-3 hover:bg-surface-container-low transition-colors">
+          <input
+            type="checkbox"
+            checked={isAnonymous}
+            onChange={(e) => setIsAnonymous(e.target.checked)}
+            className="w-5 h-5 rounded-md border-2 border-outline-variant text-[#30cc36] focus:ring-[#30cc36]/20 focus:ring-offset-0"
+          />
+          <div className="flex items-center gap-2">
+            <Icon icon={isAnonymous ? 'visibility_off' : 'visibility'} size={18} className="text-on-surface-variant" />
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-on-surface">Avaliar anonimamente</span>
+              <span className="text-xs text-on-surface-variant">Seu nome e foto não serão exibidos</span>
+            </div>
+          </div>
+        </label>
+      </div>
+
       {error && (
         <p className="text-error text-sm mb-3">{error}</p>
       )}
@@ -83,7 +103,7 @@ export function ReviewForm({ onSubmit, onCancel, isSubmitting = false }: ReviewF
         <button
           type="submit"
           disabled={isSubmitting || rating === 0}
-          className="flex-1 py-3 rounded-full primary-gradient text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 py-3 rounded-full bg-[#30cc36] text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#259128] transition-colors"
         >
           {isSubmitting ? 'Enviando...' : 'Enviar Avaliação'}
         </button>

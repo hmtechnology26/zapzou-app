@@ -34,26 +34,39 @@ export function ReviewsList({ reviews }: ReviewsListProps) {
       {reviews.map((review) => (
         <div 
           key={review.id} 
-          className="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/10"
+          className={`bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/10 ${review.isAnonymous ? 'bg-amber-50/50 border-amber-200/30' : ''}`}
         >
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
-              {review.user_avatar ? (
-                <img 
-                  src={review.user_avatar} 
-                  alt={review.userName || 'Usuário'} 
-                  className="w-full h-full object-cover"
-                loading="lazy" decoding="async" />
-              ) : (
-                <span className="text-primary font-bold text-sm">
-                  {(review.userName || 'U').charAt(0).toUpperCase()}
-                </span>
-              )}
-            </div>
+            {review.isAnonymous ? (
+              <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center flex-shrink-0 border border-outline-variant/20">
+                <Icon icon="visibility_off" size={18} className="text-on-surface-variant" />
+              </div>
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {review.user_avatar ? (
+                  <img 
+                    src={review.user_avatar} 
+                    alt={review.userName || 'Usuário'} 
+                    className="w-full h-full object-cover"
+                  loading="lazy" decoding="async" />
+                ) : (
+                  <span className="text-primary font-bold text-sm">
+                    {(review.userName || 'U').charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
-                <p className="font-semibold text-on-surface text-sm truncate">
-                  {review.userName || 'Anônimo'}
+                <p className="font-semibold text-on-surface text-sm truncate flex items-center gap-2">
+                  {review.isAnonymous ? (
+                    <>
+                      <Icon icon="visibility_off" size={14} className="text-amber-600" />
+                      Anônimo
+                    </>
+                  ) : (
+                    review.userName || 'Usuário'
+                  )}
                 </p>
                 <span className="text-xs text-on-surface-variant flex-shrink-0">
                   {formatDate(review.created_at)}

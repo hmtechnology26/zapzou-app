@@ -26,6 +26,9 @@ export default function HomePage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterDropdownRef = useRef<HTMLDivElement | null>(null);
 
+  const toSafeLower = (value: unknown) =>
+    typeof value === "string" ? value.toLowerCase() : "";
+
   const activeServices = useMemo(() => {
     return services.filter((s) => s.isActive && s.status === "active");
   }, [services]);
@@ -466,11 +469,13 @@ export default function HomePage() {
               {servicesWithDistance
                 .filter((service) => {
                   const searchLower = search.toLowerCase().trim();
+                  const serviceCategory = toSafeLower(service.category);
+                  const serviceTitle = toSafeLower(service.title);
+                  const serviceDescription = toSafeLower(service.description);
                   return (
-                    service.category.toLowerCase().includes(searchLower) ||
-                    service.title.toLowerCase().includes(searchLower) ||
-                    (service.description &&
-                      service.description.toLowerCase().includes(searchLower))
+                    serviceCategory.includes(searchLower) ||
+                    serviceTitle.includes(searchLower) ||
+                    serviceDescription.includes(searchLower)
                   );
                 })
                 .map((service) => (
@@ -500,7 +505,7 @@ export default function HomePage() {
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
-                            {service.category}
+                            {service.category || "Sem categoria"}
                           </span>
                         </div>
                         <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">
@@ -544,11 +549,13 @@ export default function HomePage() {
                 ))}
               {servicesWithDistance.filter((service) => {
                 const searchLower = search.toLowerCase().trim();
+                const serviceCategory = toSafeLower(service.category);
+                const serviceTitle = toSafeLower(service.title);
+                const serviceDescription = toSafeLower(service.description);
                 return (
-                  service.category.toLowerCase().includes(searchLower) ||
-                  service.title.toLowerCase().includes(searchLower) ||
-                  (service.description &&
-                    service.description.toLowerCase().includes(searchLower))
+                  serviceCategory.includes(searchLower) ||
+                  serviceTitle.includes(searchLower) ||
+                  serviceDescription.includes(searchLower)
                 );
               }).length === 0 && (
                 <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">

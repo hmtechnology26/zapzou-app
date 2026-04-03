@@ -50,6 +50,9 @@ export default function PlacesPage() {
   >("condominium");
   const [forceRefresh, setForceRefresh] = useState(0);
 
+  const toSafeLower = (value: unknown) =>
+    typeof value === "string" ? value.toLowerCase() : "";
+
   useEffect(() => {
     console.log("Places page mounted");
     setMounted(true);
@@ -185,8 +188,7 @@ export default function PlacesPage() {
 
     // Verificar se o ambiente já está cadastrado no banco
     const existingEnvironment = selectedEnvironments.find((env) => {
-      const envSlugFromName = env.name
-        .toLowerCase()
+      const envSlugFromName = toSafeLower(env.name)
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9]+/g, "-")
@@ -379,8 +381,7 @@ export default function PlacesPage() {
                     key={place.id}
                     onClick={() =>
                       handleSelectEnvironment(
-                        place.displayName?.text
-                          ?.toLowerCase()
+                        toSafeLower(place.displayName?.text)
                           .normalize("NFD")
                           .replace(/[\u0300-\u036f]/g, "")
                           .replace(/[^a-z0-9]+/g, "-")

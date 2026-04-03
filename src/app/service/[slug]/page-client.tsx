@@ -107,17 +107,16 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
     }
   };
 
-  const handleSubmitReview = async (stars: number, comment: string) => {
+  const handleSubmitReview = async (stars: number, comment: string, isAnonymous = false) => {
     if (!service?.id || !user) return;
     setIsSubmittingReview(true);
     try {
-      const created = await addReview(service.id, stars, comment);
+      const created = await addReview(service.id, stars, comment, isAnonymous);
       if (created) {
         setReviews((prev) => [created, ...prev.filter((r) => r.id !== created.id)]);
       }
       setShowReviewForm(false);
 
-      // Atualiza em segundo plano (não quebra o fluxo se der timeout/erro)
       void fetchServiceReviews(service.id, { force: true })
         .then(setReviews)
         .catch(() => {});

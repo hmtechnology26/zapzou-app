@@ -12,14 +12,26 @@ async function getServiceBySlug(slug: string) {
   const supabase = createPublicSupabaseClient();
   if (!supabase) return null;
 
-  const { data } = await supabase
-    .from('services')
-    .select('title, slug, description, image_url, environment_id, status, is_active, environments(name, slug)')
-    .or(`slug.eq.${slug},id.eq.${slug}`)
-    .limit(1)
-    .maybeSingle();
+  try {
+    const { data: bySlug } = await supabase
+      .from('services')
+      .select('title, slug, description, image_url, environment_id, status, is_active, environments(name, slug)')
+      .eq('slug', slug)
+      .maybeSingle();
 
-  return data ?? null;
+    if (bySlug) return bySlug;
+
+    const { data: byId } = await supabase
+      .from('services')
+      .select('title, slug, description, image_url, environment_id, status, is_active, environments(name, slug)')
+      .eq('id', slug)
+      .maybeSingle();
+
+    return byId ?? null;
+  } catch (error) {
+    console.warn('getServiceBySlug failed:', error);
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -54,11 +66,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const service = await getServiceBySlug(params.slug);
+  const siteUrl = getSiteUrl();
   const title = service?.title || humanizeSlug(params.slug) || 'Servico';
   const description =
     service?.description ||
     'Confira o servico, veja detalhes importantes e entre em contato com facilidade.';
   const environmentName = service?.environments?.name || '';
+  const canonical = `${siteUrl}/service/${params.slug}`;
 
   const seoContent = (
     <section className="mx-auto max-w-5xl px-4 pt-24 pb-2">

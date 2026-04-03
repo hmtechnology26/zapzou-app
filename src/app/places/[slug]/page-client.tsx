@@ -335,7 +335,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
         </button>
       )}
 
-      <main className="mt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-8 pb-32">
+      <main className="mt-6 px-4 md:px-8 max-w-7xl mx-auto space-y-8 pb-32">
         {(placeSlug === 'igreja-ministerio-farol' || effectiveEnvironment?.name?.toLowerCase().includes('farol')) && (
           <div className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-[#1a4a19] to-[#259128] p-8 shadow-2xl border border-white/5">
              <div className="absolute -top-6 -right-6 opacity-40 rotate-12">

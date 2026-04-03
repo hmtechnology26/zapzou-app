@@ -40,9 +40,9 @@ interface AppContextType {
   fetchFavoritePlaces: () => Promise<void>;
   storeFavoritePlace: (place: PlaceSearchResult) => Promise<void>;
   removeFavoritePlace: (placeId: string) => Promise<void>;
-  rateService: (id: string, stars: number, comment?: string) => Promise<void>;
+  rateService: (id: string, stars: number, comment?: string, isAnonymous?: boolean) => Promise<void>;
   fetchServiceReviews: (serviceId: string, opts?: { force?: boolean }) => Promise<Review[]>;
-  addReview: (serviceId: string, stars: number, comment?: string) => Promise<Review | null>;
+  addReview: (serviceId: string, stars: number, comment?: string, isAnonymous?: boolean) => Promise<Review | null>;
   loading: boolean;
   requestAffiliation: (envId: string) => Promise<void>;
   refreshMembership: () => Promise<void>;
@@ -870,8 +870,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             .from('reviews')
             .select(
               includeAvatarColumn
-                ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at'
-                : 'id, service_id, user_id, user_name, stars, comment, created_at'
+                ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous'
+                : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous'
             )
             .eq('service_id', serviceId)
             .order('created_at', { ascending: false })
@@ -890,7 +890,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ({ data, error } = (await withTimeout(
             supabase
               .from('reviews')
-              .select('id, service_id, user_id, user_name, stars, comment, created_at')
+              .select('id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous')
               .eq('service_id', serviceId)
               .order('created_at', { ascending: false })
               .limit(50),
@@ -917,6 +917,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           stars: r.stars,
           comment: r.comment,
           created_at: r.created_at,
+          isAnonymous: r.is_anonymous,
         }));
         setServiceReviews((prev) => ({ ...prev, [serviceId]: reviews }));
         return reviews;
@@ -935,21 +936,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addReview = async (serviceId: string, stars: number, comment?: string): Promise<Review | null> => {
+  const addReview = async (serviceId: string, stars: number, comment?: string, isAnonymous = false): Promise<Review | null> => {
     if (!user) throw new Error('User must be logged in');
 
     const basePayload = {
       service_id: serviceId,
       user_id: user.id,
-      user_name: user.name,
+      user_name: isAnonymous ? null : user.name,
+      user_avatar: isAnonymous ? null : user.avatar,
       stars,
       comment: comment || '',
+      is_anonymous: isAnonymous,
     };
     const selectColumns = (includeAvatar: boolean) =>
       includeAvatar
-        ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at'
-        : 'id, service_id, user_id, user_name, stars, comment, created_at';
-    const tryInsert = (payload: typeof basePayload & { user_avatar?: string }, includeAvatar: boolean) =>
+        ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous'
+        : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous';
+    const tryInsert = (payload: typeof basePayload, includeAvatar: boolean) =>
       supabase.from('reviews').insert(payload).select(selectColumns(includeAvatar)).single();
 
     let insertResult = await withTimeout(
@@ -987,10 +990,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
           service_id: data.service_id,
           user_id: data.user_id,
           userName: data.user_name,
-          user_avatar: data.user_avatar ?? user.avatar,
+          user_avatar: data.user_avatar,
           stars: data.stars,
           comment: data.comment,
           created_at: data.created_at,
+          isAnonymous: data.is_anonymous,
         }
       : null;
 
@@ -1036,8 +1040,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const rateService = async (id: string, stars: number, comment?: string) => {
-    await addReview(id, stars, comment);
+  const rateService = async (id: string, stars: number, comment?: string, isAnonymous = false) => {
+    await addReview(id, stars, comment, isAnonymous);
   };
 
   return (

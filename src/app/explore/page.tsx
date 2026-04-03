@@ -51,9 +51,13 @@ export default function ExplorePage() {
     setMounted(true);
   }, []);
 
+  const toSafeLower = (value: unknown) =>
+    typeof value === 'string' ? value.toLowerCase() : '';
+
   const filteredEnvironments = allEnvironments.filter(env => {
-    const matchesSearch = env.name.toLowerCase().includes(search.toLowerCase()) || 
-      env.location.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch =
+      toSafeLower(env.name).includes(search.toLowerCase()) ||
+      toSafeLower(env.location).includes(search.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || env.type === selectedCategory;
     return matchesSearch && matchesCategory;
   });

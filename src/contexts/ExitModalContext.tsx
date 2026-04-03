@@ -1,7 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 interface ExitModalContextType {
   showExitModal: boolean;
@@ -19,14 +20,23 @@ export function ExitModalProvider({ children }: { children: ReactNode }) {
   
   const [showExitModal, setShowExitModal] = useState(false);
   const [pendingNav, setPendingNav] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    checkAuth();
+  }, []);
 
   const checkAndShowExitModal = useCallback((targetPath: string): boolean => {
-    // Verifica se está em uma página de lugar (/places/[slug])
+    if (isAuthenticated) return false;
+    
     const isPlacePage = pathname.startsWith("/places/") && pathname.split("/").length === 3;
     
     if (!isPlacePage) return false;
     
-    // Se for para outro lugar com placeId, não mostra modal
     const hrefHasPlaceId = targetPath.includes("placeId=");
     const isSamePlace = targetPath.startsWith("/places/") && hrefHasPlaceId;
     
@@ -35,7 +45,7 @@ export function ExitModalProvider({ children }: { children: ReactNode }) {
     setPendingNav(targetPath);
     setShowExitModal(true);
     return true;
-  }, [pathname]);
+  }, [pathname, isAuthenticated]);
 
   return (
     <ExitModalContext.Provider value={{ showExitModal, pendingNav, setShowExitModal, setPendingNav, checkAndShowExitModal }}>

@@ -42,6 +42,7 @@ export interface Review {
   stars: number;
   comment?: string;
   created_at?: string;
+  isAnonymous?: boolean;
 }
 
 export interface Environment {
