@@ -333,7 +333,7 @@ export default function PlaceDetailPage() {
         {(placeSlug === 'igreja-ministerio-farol' || effectiveEnvironment?.name?.toLowerCase().includes('farol')) && (
           <div className="relative overflow-hidden rounded-[3rem] bg-gradient-to-br from-[#1a4a19] to-[#259128] p-8 shadow-2xl border border-white/5">
              <div className="absolute -top-6 -right-6 opacity-40 rotate-12">
-               <img src="/farol_logo.png" alt="Farol Logo" className="w-52 h-auto" />
+               <img src="/farol_logo.png" alt="Farol Logo" className="w-52 h-auto" loading="lazy" decoding="async" />
              </div>
              <div className="relative z-10 flex flex-col gap-6">
                <div className="flex flex-wrap items-center gap-3">
@@ -461,7 +461,7 @@ export default function PlaceDetailPage() {
                   className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700" 
                   src={service.image} 
                   alt={service.title}
-                />
+                loading="lazy" decoding="async" />
               </div>
               <div className="px-2 pb-2">
                 <div className="flex items-center justify-between mb-3">

@@ -127,7 +127,7 @@ export default function EnvironmentCataloguePage() {
                         src={service.image} 
                         alt={service.title} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
+                      loading="lazy" decoding="async" />
                       <div className="absolute top-3 left-3 flex gap-2">
                           <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
                             service.status === 'active' ? 'bg-[#30CC36] text-white shadow-lg shadow-[#30CC36]/20' : 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'

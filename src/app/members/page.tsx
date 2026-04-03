@@ -17,7 +17,7 @@ export default function MembersPage() {
           {members.map(m => (
             <div key={m.id} className="flex items-center gap-4 p-4 bg-surface-container-lowest rounded-2xl">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                {m.avatar ? <img className="w-full h-full rounded-full object-cover" src={m.avatar} alt={m.name} /> : <span className="font-bold text-primary">{m.initials || m.name[0]}</span>}
+                {m.avatar ? <img className="w-full h-full rounded-full object-cover" src={m.avatar} alt={m.name} loading="lazy" decoding="async" /> : <span className="font-bold text-primary">{m.initials || m.name[0]}</span>}
               </div>
               <div className="flex-1">
                 <h3 className="font-bold text-on-surface">{m.name}</h3>

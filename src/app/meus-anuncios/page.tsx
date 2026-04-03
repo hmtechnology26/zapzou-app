@@ -211,7 +211,7 @@ export default function MyAdsPage() {
                   <article key={env.id} className="bg-surface-container-lowest rounded-[2rem] p-5 border border-outline-variant/10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all">
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 rounded-2xl bg-surface-container overflow-hidden flex-shrink-0 shadow-inner">
-                        {env.image ? <img src={env.image} alt={env.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-on-surface-variant"><Icon icon="domain" size={28} /></div>}
+                        {env.image ? <img src={env.image} alt={env.name} className="w-full h-full object-cover" loading="lazy" decoding="async" /> : <div className="w-full h-full flex items-center justify-center text-on-surface-variant"><Icon icon="domain" size={28} /></div>}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-1.5">

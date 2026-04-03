@@ -529,7 +529,7 @@ function RegisterServiceContent() {
             </div>
             <div className="flex items-center gap-2 bg-surface-container-lowest rounded-full px-3 py-1.5 shadow-sm inline-flex">
               {selectedEnvironment.image ? (
-                <img src={selectedEnvironment.image} alt={selectedEnvironment.name} className="w-5 h-5 rounded-full object-cover" />
+                <img src={selectedEnvironment.image} alt={selectedEnvironment.name} className="w-5 h-5 rounded-full object-cover" loading="lazy" decoding="async" />
               ) : (
                 <div className="w-5 h-5 rounded-full bg-surface-container flex items-center justify-center">
                   <Icon icon="domain" size={12} className="text-on-surface-variant" />
@@ -574,7 +574,7 @@ function RegisterServiceContent() {
               <div className="mt-2 flex flex-wrap items-center gap-3">
                 {images.map((img, index) => (
                   <div key={index} className="relative w-20 h-20 rounded-2xl overflow-hidden">
-                    <img src={img} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                    <img src={img} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     <button 
                       onClick={() => handleRemoveImage(index)}
                       className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white"
@@ -709,7 +709,7 @@ function RegisterServiceContent() {
                     <div key={idx} className="flex items-center gap-3 bg-surface-container-lowest p-3 rounded-xl">
                       <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-high">
                         {item.image ? (
-                          <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
                             <Icon icon="image" size={20} />

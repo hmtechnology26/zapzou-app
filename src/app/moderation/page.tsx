@@ -218,7 +218,7 @@ export default function ModerationPage() {
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden flex-shrink-0 border border-outline-variant/20">
                       {member.avatar ? (
-                        <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
+                        <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                       ) : (
                         <Icon icon="person" size={24} className="text-on-surface-variant" />
                       )}

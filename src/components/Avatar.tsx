@@ -57,6 +57,8 @@ export function Avatar({
           src={normalizedSrc}
           alt={alt || 'Avatar'}
           className={`w-full h-full object-cover ${imgClassName}`}
+          loading="lazy"
+          decoding="async"
           referrerPolicy="no-referrer"
           onError={() => setHasError(true)}
         />

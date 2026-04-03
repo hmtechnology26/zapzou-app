@@ -239,7 +239,7 @@ export default function ServiceDetailPage() {
                           alt={`${service.title} ${idx + 1}`}
                           className="w-full h-full object-cover"
                           src={img}
-                        />
+                        loading="lazy" decoding="async" />
                       </div>
                     ))}
                   </div>
@@ -285,7 +285,7 @@ export default function ServiceDetailPage() {
                   alt={service.title}
                   className="w-full h-full object-cover"
                   src={service.image}
-                />
+                loading="lazy" decoding="async" />
               </div>
             )}
 
@@ -363,7 +363,7 @@ export default function ServiceDetailPage() {
                   <div key={item.id} className="flex items-center gap-4 bg-surface-container-lowest p-3 rounded-2xl shadow-sm border border-outline-variant/10">
                     <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-surface-container-high">
                       {item.image ? (
-                        <img alt={item.name} className="w-full h-full object-cover" src={item.image} />
+                        <img alt={item.name} className="w-full h-full object-cover" src={item.image} loading="lazy" decoding="async" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
                           <Icon icon="restaurant" size={20} />

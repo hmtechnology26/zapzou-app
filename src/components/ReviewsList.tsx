@@ -43,7 +43,7 @@ export function ReviewsList({ reviews }: ReviewsListProps) {
                   src={review.user_avatar} 
                   alt={review.userName || 'Usuário'} 
                   className="w-full h-full object-cover"
-                />
+                loading="lazy" decoding="async" />
               ) : (
                 <span className="text-primary font-bold text-sm">
                   {(review.userName || 'U').charAt(0).toUpperCase()}

@@ -116,6 +116,9 @@ export function TopAppBar({
                 src={theme === 'dark' ? '/conectae_logo_light.png' : '/conectae_logo.png'}
                 alt="Conectae"
                 className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
               />
             </div>
           </div>
@@ -124,7 +127,7 @@ export function TopAppBar({
             <div className="flex items-center gap-2 ml-2">
               <h1 className={`font-semibold text-lg tracking-tight ${textColor} flex items-center gap-2`}>
                 {leftAvatar && (
-                  <img src={leftAvatar} alt="" className="w-7 h-7 rounded-full object-cover border border-outline-variant/20 shadow-sm" />
+                  <img src={leftAvatar} alt="" className="w-7 h-7 rounded-full object-cover border border-outline-variant/20 shadow-sm" loading="lazy" decoding="async" />
                 )}
                 {title}
               </h1>

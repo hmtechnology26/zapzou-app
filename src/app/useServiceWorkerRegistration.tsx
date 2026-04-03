@@ -3,8 +3,7 @@
 import { useEffect } from "react";
 
 const SERVICE_WORKER_PATH = "/sw.js";
-const PWA_CACHE_PREFIX = "zapzou-";
-const PWA_MIGRATION_KEY = "zapzou-pwa-migration-v1";
+const PWA_MIGRATION_KEY = "zapzou-pwa-migration-v2";
 const LOCALHOST_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);
 
 async function clearLegacyServiceWorkersAndCaches() {
@@ -38,11 +37,7 @@ async function clearLegacyServiceWorkersAndCaches() {
 
   try {
     const cacheKeys = await caches.keys();
-    await Promise.all(
-      cacheKeys
-        .filter((key) => !key.startsWith(PWA_CACHE_PREFIX))
-        .map((key) => caches.delete(key)),
-    );
+    await Promise.all(cacheKeys.map((key) => caches.delete(key)));
   } catch (error) {
     console.warn("PWA migration: failed to clear legacy caches.", error);
   }

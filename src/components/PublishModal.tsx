@@ -842,7 +842,7 @@ export function PublishModal() {
                 <div className="flex gap-2 mt-2 overflow-x-auto pb-2">
                   {images.map((img, i) => (
                     <div key={i} className="relative flex-shrink-0">
-                      <img src={img} alt="" className="w-20 h-20 rounded-xl object-cover" />
+                      <img src={img} alt="" className="w-20 h-20 rounded-xl object-cover" loading="lazy" decoding="async" />
                       <button 
                         onClick={() => removeImage(i)}
                         className="absolute -top-2 -right-2 bg-error text-white rounded-full p-1"

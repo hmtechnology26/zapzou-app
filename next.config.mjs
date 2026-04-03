@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  fastRefresh: true,
   experimental: {
     // Work around Windows environments that block child_process spawn during `next build`
     // (Next uses jest-worker; this flips it to worker_threads).

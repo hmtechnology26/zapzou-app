@@ -52,6 +52,13 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const APP_FETCH_CACHE_TTL_MS = 30_000;
+
+type CacheEntry<T> = {
+  data: T;
+  fetchedAt: number;
+};
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,13 +71,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const reviewsHasUserAvatarColumnRef = useRef<boolean | null>(null);
   const [favoritePlaces, setFavoritePlaces] = useState<PlaceSearchResult[]>([]);
   const [membershipVersion, setMembershipVersion] = useState(0);
+  const fetchCacheRef = useRef<{
+    environments: CacheEntry<Environment[]> | null;
+    services: CacheEntry<Service[]> | null;
+    userServices: Map<string, CacheEntry<Service[]>>;
+    members: Map<string, CacheEntry<Member[]>>;
+    favorites: Map<string, CacheEntry<PlaceSearchResult[]>>;
+  }>({
+    environments: null,
+    services: null,
+    userServices: new Map(),
+    members: new Map(),
+    favorites: new Map(),
+  });
   const signalMembershipChange = useCallback(() => {
     setMembershipVersion((prev) => prev + 1);
   }, []);
 
+  const isFresh = <T,>(entry: CacheEntry<T> | null | undefined): entry is CacheEntry<T> => {
+    return Boolean(entry) && Date.now() - entry.fetchedAt < APP_FETCH_CACHE_TTL_MS;
+  };
+
   const fetchFavoritePlaces = useCallback(async () => {
     if (!user?.id) {
       setFavoritePlaces([]);
+      return;
+    }
+
+    const cachedFavorites = fetchCacheRef.current.favorites.get(user.id);
+    if (isFresh(cachedFavorites)) {
+      setFavoritePlaces(cachedFavorites.data);
       return;
     }
 
@@ -90,6 +120,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
             typeof (payload as any).id === 'string'
           );
         setFavoritePlaces(parsed);
+        fetchCacheRef.current.favorites.set(user.id, {
+          data: parsed,
+          fetchedAt: Date.now(),
+        });
       } else if (error) {
         console.warn('fetchFavoritePlaces failed:', error);
       }
@@ -121,7 +155,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       setFavoritePlaces((prev) => {
         const filtered = prev.filter((existing) => existing.id !== place.id);
-        return [place, ...filtered];
+        const nextFavorites = [place, ...filtered];
+        if (user?.id) {
+          fetchCacheRef.current.favorites.set(user.id, {
+            data: nextFavorites,
+            fetchedAt: Date.now(),
+          });
+        }
+        return nextFavorites;
       });
     } catch (err) {
       console.error('storeFavoritePlace failed:', err);
@@ -145,7 +186,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         throw error;
       }
 
-      setFavoritePlaces((prev) => prev.filter((place) => place.id !== placeId));
+      setFavoritePlaces((prev) => {
+        const nextFavorites = prev.filter((place) => place.id !== placeId);
+        if (user?.id) {
+          fetchCacheRef.current.favorites.set(user.id, {
+            data: nextFavorites,
+            fetchedAt: Date.now(),
+          });
+        }
+        return nextFavorites;
+      });
     } catch (err) {
       console.error('removeFavoritePlace failed:', err);
       throw err;
@@ -393,6 +443,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function loadEnvironments() {
+      if (isFresh(fetchCacheRef.current.environments)) {
+        const cachedEnvironments = fetchCacheRef.current.environments.data;
+        setSelectedEnvironments(cachedEnvironments);
+        if (cachedEnvironments.length > 0 && !selectedEnvironment) {
+          setSelectedEnvironment(cachedEnvironments[0]);
+        }
+        return;
+      }
+
       const { data, error } = await supabase
         .from('environments')
         .select('*')
@@ -413,6 +472,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           requiresModeratorApproval: Boolean(e.requires_moderator_approval),
           requiresRadiusValidation: Boolean(e.requires_radius_validation),
         }));
+        fetchCacheRef.current.environments = {
+          data: formatted,
+          fetchedAt: Date.now(),
+        };
         setSelectedEnvironments(formatted);
         if (formatted.length > 0 && !selectedEnvironment) {
           setSelectedEnvironment(formatted[0]);
@@ -433,12 +496,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEnvironment, user?.id]);
-
-  useEffect(() => {
-    if (user?.id) {
-      fetchFavoritePlaces();
-    }
-  }, [user?.id, fetchFavoritePlaces]);
 
   const refreshMembership = async () => {
     if (!user?.id || !selectedEnvironment) return;
@@ -467,6 +524,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const fetchMembers = async () => {
       if (!selectedEnvironment) return;
+      const cachedMembers = fetchCacheRef.current.members.get(selectedEnvironment.id);
+      if (isFresh(cachedMembers)) {
+        setMembers(cachedMembers.data);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('environment_members')
         .select('id, user_id, status, role, user_public_profiles(name, avatar_url)')
@@ -483,10 +546,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
             role: m.role
          }));
          setMembers(mapped);
+         fetchCacheRef.current.members.set(selectedEnvironment.id, {
+           data: mapped,
+           fetchedAt: Date.now(),
+         });
       }
   };
 
   const fetchServices = async () => {
+    if (isFresh(fetchCacheRef.current.services)) {
+      setServices(fetchCacheRef.current.services.data);
+      return;
+    }
+
     const query = supabase
       .from('services')
       .select('*, environments(name, slug, latitude, longitude, type)')
@@ -520,6 +592,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         views: s.views ?? 0,
       }));
       setServices(formatted);
+      fetchCacheRef.current.services = {
+        data: formatted,
+        fetchedAt: Date.now(),
+      };
     }
   };
 
@@ -559,6 +635,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const fetchUserServices = async (userId: string) => {
+    const cachedUserServices = fetchCacheRef.current.userServices.get(userId);
+    if (isFresh(cachedUserServices)) {
+      setUserServices(cachedUserServices.data);
+      return;
+    }
+
     const { data, error } = await supabase
       .from('services')
       .select('*')
@@ -588,6 +670,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         views: s.views ?? 0,
       }));
       setUserServices(formatted);
+      fetchCacheRef.current.userServices.set(userId, {
+        data: formatted,
+        fetchedAt: Date.now(),
+      });
     }
   };
 
@@ -618,6 +704,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     console.log('Service insert result:', { error });
     if (error) throw error;
+    fetchCacheRef.current.services = null;
+    if (user?.id) {
+      fetchCacheRef.current.userServices.delete(user.id);
+    }
     await fetchServices();
   };
 
@@ -645,12 +735,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .eq('id', id);
 
     if (error) throw error;
+    fetchCacheRef.current.services = null;
+    if (user?.id) {
+      fetchCacheRef.current.userServices.delete(user.id);
+    }
     await fetchServices();
   };
 
   const removeService = async (id: string) => {
     const { error } = await supabase.from('services').delete().eq('id', id);
     if (error) throw error;
+    fetchCacheRef.current.services = null;
+    if (user?.id) {
+      fetchCacheRef.current.userServices.delete(user.id);
+    }
     await fetchServices();
   };
 

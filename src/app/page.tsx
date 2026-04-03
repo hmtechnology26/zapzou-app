@@ -397,7 +397,7 @@ export default function HomePage() {
                         className="w-full h-full object-cover"
                         src={service.image}
                         alt={service.title}
-                      />
+                      loading="lazy" decoding="async" />
                     ) : (
                       <div className="w-full h-full bg-primary/5 flex items-center justify-center">
                         <Icon
@@ -485,7 +485,7 @@ export default function HomePage() {
                           className="w-full h-full object-cover"
                           src={service.image}
                           alt={service.title}
-                        />
+                        loading="lazy" decoding="async" />
                       ) : (
                         <div className="w-full h-full bg-primary/5 flex items-center justify-center">
                           <Icon

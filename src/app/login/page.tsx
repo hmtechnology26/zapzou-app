@@ -47,6 +47,9 @@ export default function LoginPage() {
             src={theme === 'dark' ? '/conectae_logo_vert_light.png' : '/conectae_logo_vert.png'}
             alt="Conectae"
             className="h-48"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
           />
           
           {/* <div className="h-1 w-12 bg-primary-container rounded-full"></div> */}

@@ -1,66 +1,11 @@
-// Bump this version whenever you change PWA assets (icons/manifest) so browsers refetch them
-const CACHE_VERSION = "v3";
-const STATIC_CACHE = `zapzou-static-${CACHE_VERSION}`;
-const PAGE_CACHE = `zapzou-pages-${CACHE_VERSION}`;
+// Keep the worker lightweight: we avoid app-shell caching so the web version
+// stays fresh and only provide a network-first offline fallback for pages.
+const CACHE_VERSION = "v4";
 const CACHE_PREFIX = "zapzou-";
-const PRECACHE_PAGE_URLS = ["/"];
-const PRECACHE_ASSET_URLS = [
-  "/manifest.json",
-  "/favicon.ico",
-  "/favicon.png",
-  "/favicon-32x32.png",
-  "/apple-touch-icon.png",
-  "/pwa-192.png",
-  "/pwa-512.png",
-  "/conectae_logo.png",
-  "/conectae_logo_light.png",
-  "/conectae_logo_vert.png",
-  "/conectae_logo_vert_light.png",
-];
-const STATIC_ASSET_EXTENSIONS = [
-  ".css",
-  ".js",
-  ".mjs",
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".svg",
-  ".webp",
-  ".gif",
-  ".ico",
-  ".avif",
-  ".woff",
-  ".woff2",
-  ".ttf",
-  ".otf",
-  ".map",
-];
 const IS_LOCALHOST =
   self.location.hostname === "localhost" ||
   self.location.hostname === "127.0.0.1" ||
   self.location.hostname === "::1";
-
-function isSameOrigin(url) {
-  return url.origin === self.location.origin;
-}
-
-function isStaticAsset(url) {
-  if (url.pathname.startsWith("/_next/static/")) {
-    return true;
-  }
-
-  if (url.pathname.startsWith("/_next/image")) {
-    return true;
-  }
-
-  if (PRECACHE_ASSET_URLS.includes(url.pathname)) {
-    return true;
-  }
-
-  return STATIC_ASSET_EXTENSIONS.some((extension) =>
-    url.pathname.toLowerCase().endsWith(extension),
-  );
-}
 
 function buildOfflineResponse() {
   return new Response(
@@ -134,65 +79,16 @@ function buildOfflineResponse() {
   );
 }
 
-async function cacheFirst(request) {
-  const cached = await caches.match(request);
-
-  if (cached) {
-    return cached;
-  }
-
-  const response = await fetch(request);
-
-  if (response && response.ok) {
-    const cache = await caches.open(STATIC_CACHE);
-    await cache.put(request, response.clone());
-  }
-
-  return response;
-}
-
 async function networkFirstNavigation(request) {
-  const pageCache = await caches.open(PAGE_CACHE);
-
   try {
-    const response = await fetch(request);
-
-    if (response && response.ok) {
-      await pageCache.put(request, response.clone());
-    }
-
-    return response;
+    return await fetch(request);
   } catch {
-    const cachedResponse = await pageCache.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
-    const rootResponse = await pageCache.match("/");
-    if (rootResponse) {
-      return rootResponse;
-    }
-
     return buildOfflineResponse();
   }
 }
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    (async () => {
-      const [pageCache, assetCache] = await Promise.all([
-        caches.open(PAGE_CACHE),
-        caches.open(STATIC_CACHE),
-      ]);
-
-      await Promise.all([
-        pageCache.addAll(PRECACHE_PAGE_URLS),
-        assetCache.addAll(PRECACHE_ASSET_URLS),
-      ]);
-
-      await self.skipWaiting();
-    })(),
-  );
+  event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener("activate", (event) => {
@@ -203,7 +99,6 @@ self.addEventListener("activate", (event) => {
       await Promise.all(
         cacheKeys
           .filter((key) => key.startsWith(CACHE_PREFIX))
-          .filter((key) => key !== STATIC_CACHE && key !== PAGE_CACHE)
           .map((key) => caches.delete(key)),
       );
 
@@ -225,26 +120,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  const url = new URL(request.url);
-
-  if (!isSameOrigin(url)) {
-    return;
-  }
-
   if (request.mode === "navigate") {
     event.respondWith(networkFirstNavigation(request));
-    return;
-  }
-
-  if (url.pathname.startsWith("/api/")) {
-    return;
-  }
-
-  if (isStaticAsset(url)) {
-    if (IS_LOCALHOST && url.pathname.startsWith("/_next/")) {
-      return;
-    }
-
-    event.respondWith(cacheFirst(request));
   }
 });

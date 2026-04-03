@@ -190,7 +190,7 @@ export default function ExplorePage() {
                   className="bg-surface-container-lowest p-4 rounded-2xl flex items-center gap-4 hover:bg-surface-container-low transition-colors cursor-pointer"
                   onClick={() => handleViewServices(env)}
                 >
-                  <img className="w-16 h-16 rounded-full object-cover" src={env.image} alt={env.name} />
+                  <img className="w-16 h-16 rounded-full object-cover" src={env.image} alt={env.name} loading="lazy" decoding="async" />
                   <div className="flex-1">
                     <h3 className="font-bold text-on-surface">{env.name}</h3>
                     <p className="text-on-surface-variant text-sm">{env.location}</p>
@@ -215,7 +215,7 @@ export default function ExplorePage() {
           <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
           <div className="bg-surface-container-lowest rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-outline-variant/10">
             <div className="flex items-center gap-4 mb-4">
-              <img className="w-16 h-16 rounded-full object-cover" src={selectedEnv.image} alt={selectedEnv.name} />
+              <img className="w-16 h-16 rounded-full object-cover" src={selectedEnv.image} alt={selectedEnv.name} loading="lazy" decoding="async" />
               <div>
                 <h3 className="font-bold text-on-surface text-lg">{selectedEnv.name}</h3>
                 <p className="text-on-surface-variant text-sm">{getTypeLabel(selectedEnv.type)}</p>

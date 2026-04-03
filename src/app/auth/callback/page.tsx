@@ -28,10 +28,25 @@ export default function AuthCallback() {
   }, [router, searchParams]);
 
   useEffect(() => {
+    const code = searchParams.get('code');
+
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          console.error('Error exchanging auth code:', error);
+          handleAuthCallback();
+          return;
+        }
+
+        router.replace('/');
+      });
+      return;
+    }
+
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const accessToken = hashParams.get('access_token');
     const refreshToken = hashParams.get('refresh_token');
-    
+
     if (accessToken && refreshToken) {
       supabase.auth.setSession({
         access_token: accessToken,
@@ -41,12 +56,13 @@ export default function AuthCallback() {
           console.error('Error setting session from hash:', error);
           handleAuthCallback();
         } else {
-          router.push('/');
+          router.replace('/');
         }
       });
-    } else {
-      handleAuthCallback();
+      return;
     }
+
+    handleAuthCallback();
   }, [handleAuthCallback, router]);
 
   return (

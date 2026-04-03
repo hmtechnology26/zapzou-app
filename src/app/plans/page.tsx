@@ -201,7 +201,7 @@ export default function PlansPage() {
                   src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" 
                   alt="Alessandra Lima" 
                   className="w-12 h-12 rounded-full object-cover"
-                />
+                loading="lazy" decoding="async" />
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div>
@@ -227,7 +227,7 @@ export default function PlansPage() {
                   src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100" 
                   alt="Juliana Costa" 
                   className="w-12 h-12 rounded-full object-cover"
-                />
+                loading="lazy" decoding="async" />
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div>
@@ -253,7 +253,7 @@ export default function PlansPage() {
                   src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" 
                   alt="Carlos Eduardo" 
                   className="w-12 h-12 rounded-full object-cover"
-                />
+                loading="lazy" decoding="async" />
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div>
@@ -279,7 +279,7 @@ export default function PlansPage() {
                   src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100" 
                   alt="Ana Beatriz" 
                   className="w-12 h-12 rounded-full object-cover"
-                />
+                loading="lazy" decoding="async" />
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div>
@@ -305,7 +305,7 @@ export default function PlansPage() {
                   src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100" 
                   alt="Rafael Souza" 
                   className="w-12 h-12 rounded-full object-cover"
-                />
+                loading="lazy" decoding="async" />
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <div>
