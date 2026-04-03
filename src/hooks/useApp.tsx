@@ -279,6 +279,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0);
   }, []);
 
+  const buildBaseUserFromSession = useCallback((authUser: any, email: string): User => {
+    const authProfile = extractAuthProfile(authUser);
+
+    return {
+      id: authUser.id,
+      name: authProfile.name || 'Usuário',
+      email,
+      avatar: authProfile.avatar || '',
+      role: 'user',
+      plan: 'plus',
+      membershipStatus: null,
+      membershipRole: null,
+      managedEnvironmentIds: [],
+    };
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -287,7 +303,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const { data: { session } } = await supabase.auth.getSession();
         if (isMounted) {
           if (session?.user) {
-            await fetchUserProfile(session.user.id, session.user.email || '', session.user);
+            const baseUser = buildBaseUserFromSession(session.user, session.user.email || '');
+            setUser(baseUser);
+            void fetchUserProfile(session.user.id, session.user.email || '', session.user);
           } else {
             setUser(null);
           }
@@ -304,7 +322,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (isMounted) {
         if (session?.user) {
-          await fetchUserProfile(session.user.id, session.user.email || '', session.user);
+          const baseUser = buildBaseUserFromSession(session.user, session.user.email || '');
+          setUser(baseUser);
+          void fetchUserProfile(session.user.id, session.user.email || '', session.user);
         } else {
           setUser(null);
         }
@@ -315,7 +335,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [buildBaseUserFromSession]);
 
   const fetchUserProfile = async (userId: string, email: string, authUser?: any) => {
     const authProfile = extractAuthProfile(authUser);

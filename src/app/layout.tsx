@@ -3,13 +3,44 @@ import 'react-material-symbols/rounded';
 import type { Metadata } from 'next';
 import { Providers } from './providers';
 import ProtectedLayout from './layout-client';
+import { getSiteUrl } from '@/lib/seo';
+
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
-  title: 'Conectae - Hub de Servicos',
-  description: 'Conecte-se com prestadores de servicos na sua regiao',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'Conectae - Hub de Servicos',
+    template: '%s | Conectae',
+  },
+  description: 'Conecte-se com prestadores de servicos, ambientes e anuncios na sua regiao.',
   icons: {
     icon: '/favicon.png',
     apple: '/apple-touch-icon.png',
+  },
+  keywords: [
+    'servicos locais',
+    'anuncios',
+    'ambientes',
+    'igreja',
+    'condominio',
+    'conectae',
+  ],
+  alternates: {
+    canonical: siteUrl,
+  },
+  openGraph: {
+    type: 'website',
+    url: siteUrl,
+    title: 'Conectae - Hub de Servicos',
+    description: 'Conecte-se com prestadores de servicos, ambientes e anuncios na sua regiao.',
+    siteName: 'Conectae',
+    locale: 'pt_BR',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Conectae - Hub de Servicos',
+    description: 'Conecte-se com prestadores de servicos, ambientes e anuncios na sua regiao.',
   },
   themeColor: '#006d2f',
   viewport: {
