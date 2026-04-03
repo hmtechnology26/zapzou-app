@@ -4,7 +4,6 @@ export function getSiteUrl() {
   const candidate =
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.VERCEL_URL ||
     "https://conectaeapp.com.br";
 
   if (candidate.startsWith("http://") || candidate.startsWith("https://")) {

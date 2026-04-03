@@ -1,6 +1,6 @@
 import './globals.css';
 import 'react-material-symbols/rounded';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Providers } from './providers';
 import ProtectedLayout from './layout-client';
 import { getSiteUrl } from '@/lib/seo';
@@ -42,15 +42,16 @@ export const metadata: Metadata = {
     title: 'Conectae - Hub de Servicos',
     description: 'Conecte-se com prestadores de servicos, ambientes e anuncios na sua regiao.',
   },
-  themeColor: '#006d2f',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
-  },
   manifest: '/manifest.json',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#006d2f',
 };
 
 export const dynamic = 'force-dynamic';

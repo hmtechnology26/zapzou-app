@@ -1,5 +1,5 @@
   ▲ Next.js 14.2.35
-  - Local:        http://localhost:3014
+  - Local:        http://localhost:3017
 
  ✓ Starting...
- ✓ Ready in 775ms
+ ✓ Ready in 1276ms

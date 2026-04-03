@@ -38,10 +38,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const service = await getServiceBySlug(params.slug);
   const siteUrl = getSiteUrl();
   const title = service?.title || humanizeSlug(params.slug) || 'Servico';
+  const environmentSlug = service?.environments?.slug;
   const description =
     service?.description?.slice(0, 160) ||
     `Veja detalhes do servico ${title}, fotos, avaliacao e contato direto na Conectae.`;
-  const canonical = `${siteUrl}/service/${params.slug}`;
+  const canonical = environmentSlug
+    ? `${siteUrl}/places/${environmentSlug}/services/${params.slug}`
+    : `${siteUrl}/service/${params.slug}`;
   const isIndexable = service?.status === 'active' || service?.is_active === true || !service;
 
   return {
@@ -72,7 +75,10 @@ export default async function Page({ params }: Props) {
     service?.description ||
     'Confira o servico, veja detalhes importantes e entre em contato com facilidade.';
   const environmentName = service?.environments?.name || '';
-  const canonical = `${siteUrl}/service/${params.slug}`;
+  const environmentSlug = service?.environments?.slug;
+  const canonical = environmentSlug
+    ? `${siteUrl}/places/${environmentSlug}/services/${params.slug}`
+    : `${siteUrl}/service/${params.slug}`;
 
   const seoContent = (
     <section className="mx-auto max-w-5xl px-4 pt-24 pb-2">
