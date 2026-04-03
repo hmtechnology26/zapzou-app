@@ -23,6 +23,19 @@ export function slugify(text: string): string {
     .replace(/^-|-$/g, "");
 }
 
+export function humanizeSlug(slug: string): string {
+  const normalized = slug
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  return normalized.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 export function createPublicSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
