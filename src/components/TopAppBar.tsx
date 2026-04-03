@@ -145,7 +145,7 @@ export function TopAppBar({
                 <button
                   key={item.path}
                   onClick={() => handleNavClick(item.path)}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-black transition-all flex items-center gap-2 relative group ${
+                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 relative group ${
                     isActive 
                       ? 'text-[#30cc36]' 
                       : 'text-on-surface-variant hover:text-[#30cc36] transition-colors'
