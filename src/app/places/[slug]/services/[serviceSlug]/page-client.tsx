@@ -151,7 +151,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             <Icon icon="arrow_back" size={24} />
           </button>
           <h1 className="text-lg font-semibold tracking-tight text-on-surface">
-            Detalhes do Serviço
+            Detalhes
           </h1>
         </div>
 
@@ -390,8 +390,8 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             </section>
           )}
 
-          <section className="mt-12 px-0 mb-8">
-            <h3 className="mb-4 text-lg font-bold text-on-surface tracking-tight">Por que pedir no Conectae?</h3>
+          {/* <section className="mt-12 px-0 mb-8">
+            <h3 className="mb-4 text-lg font-bold text-on-surface tracking-tight">Por que pedir no Conect<span className="text-primary">ae</span>?</h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-1 bg-secondary-container/30 p-4 rounded-3xl flex flex-col gap-3">
                 <Icon icon="verified_user" weight={400} size={32} className="text-secondary" />
@@ -411,7 +411,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                 </div>
               </div>
             </div>
-          </section>
+          </section> */}
         </div>
       </main>
 
