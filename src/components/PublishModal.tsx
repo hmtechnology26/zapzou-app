@@ -18,6 +18,7 @@ import {
   countCountableEnvironmentMemberships,
   getPlanLimits,
   isPlanAtServiceLimit,
+  type PublicationMode,
 } from '@/lib/plan-rules';
 import { searchPlaces, type PlaceSearchResult } from '@/lib/maps';
 import type { Environment } from '@/types';
@@ -29,12 +30,13 @@ export function PublishModal() {
   const { isOpen, close } = usePublishModal();
   const { user, services, addService, selectedEnvironments, setSelectedEnvironments, setSelectedEnvironment, signalMembershipChange } = useApp();
   
-  const [step, setStep] = useState<'search' | 'radius' | 'moderator' | 'form'>('search');
+  const [step, setStep] = useState<'search' | 'mode' | 'radius' | 'moderator' | 'form'>('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
   const [selectedPlaceDistanceKm, setSelectedPlaceDistanceKm] = useState<number | null>(null);
   const [selectedPlaceDecision, setSelectedPlaceDecision] = useState<ReturnType<typeof resolveEnvironmentAccessDecision> | null>(null);
   const [selectedEnvironmentRecord, setSelectedEnvironmentRecord] = useState<Environment | null>(null);
+  const [publicationMode, setPublicationMode] = useState<PublicationMode | null>(null);
   
   const [form, setForm] = useState({
     serviceName: '',
@@ -77,6 +79,7 @@ export function PublishModal() {
       setSelectedEnvironmentRecord(null);
       setSelectedPlaceDistanceKm(null);
       setActiveEnvId(null);
+      setPublicationMode(null);
       setErrorMsg('');
       setUploading(false);
     },
@@ -171,7 +174,11 @@ export function PublishModal() {
   }, [userLocation]);
 
   const syncEnvironmentMembership = useCallback(
-    async (envId: string, status: 'active' | 'pending') => {
+    async (
+      envId: string,
+      status: 'active' | 'pending',
+      options?: { role?: 'member' | 'moderator' | 'resident' | 'service_provider' | null },
+    ) => {
       if (!user) {
         throw new Error('Usuário não autenticado');
       }
@@ -183,7 +190,7 @@ export function PublishModal() {
             environment_id: envId,
             user_id: user.id,
             status,
-            role: 'member',
+            role: options?.role ?? 'member',
           },
           { onConflict: 'environment_id,user_id' },
         );
@@ -197,22 +204,27 @@ export function PublishModal() {
     [user, signalMembershipChange],
   );
 
-  const getEnvironmentMembershipStatus = useCallback(async (envId: string) => {
+  const getEnvironmentMembership = useCallback(async (envId: string) => {
     if (!user?.id) return null;
 
     const { data, error } = await supabase
       .from('environment_members')
-      .select('status')
+      .select('status, role')
       .eq('user_id', user.id)
       .eq('environment_id', envId)
       .maybeSingle();
 
     if (error) {
-      console.warn('getEnvironmentMembershipStatus failed:', error);
+      console.warn('getEnvironmentMembership failed:', error);
       return null;
     }
 
-    return data?.status ?? null;
+    return data
+      ? {
+          status: data.status ?? null,
+          role: data.role ?? null,
+        }
+      : null;
   }, [user?.id]);
 
   const getTypeLabel = (type: string) => {
@@ -238,6 +250,7 @@ export function PublishModal() {
     setErrorMsg('');
     setSelectedPlaceDistanceKm(null);
     setSelectedPlaceDecision(null);
+    setPublicationMode(null);
 
     try {
       const inferredType = inferEnvironmentTypeFromPlace(place.primaryType);
@@ -310,7 +323,7 @@ export function PublishModal() {
           envRecord.requires_radius_validation ?? inferredFlags.requiresRadiusValidation,
       });
 
-      const membershipStatusPromise = getEnvironmentMembershipStatus(envRecord.id);
+      const membershipInfoPromise = getEnvironmentMembership(envRecord.id);
       const { data: userMembershipRows, error: userMembershipsError } = await supabase
         .from('environment_members')
         .select('environment_id, status')
@@ -351,6 +364,15 @@ export function PublishModal() {
         requiresRadiusValidation: decision.requiresRadiusValidation,
       };
 
+      const membershipInfo = await membershipInfoPromise;
+      const storedPublicationMode =
+        membershipInfo?.role === 'service_provider' || membershipInfo?.role === 'resident'
+          ? membershipInfo.role
+          : membershipInfo?.role === 'member'
+            ? 'resident'
+            : null;
+      const effectivePublicationMode = publicationMode ?? storedPublicationMode;
+
       setSelectedPlaceDecision(decision);
       setSelectedEnvironmentRecord(normalizedEnvironment);
       setSelectedEnvironments((prev) => {
@@ -358,13 +380,25 @@ export function PublishModal() {
         return [normalizedEnvironment, ...filtered];
       });
 
+      if (user.plan === 'plus') {
+        await syncEnvironmentMembership(normalizedEnvironment.id, 'active', {
+          role:
+            (membershipInfo?.role === 'service_provider' || membershipInfo?.role === 'resident'
+              ? membershipInfo.role
+              : null),
+        });
+        setSelectedEnvironment(normalizedEnvironment);
+        showEnvironmentAddedAlert(normalizedEnvironment.name);
+        return;
+      }
+
       if (decision.mode === 'moderator') {
         setActiveEnvId(null);
         setStep('moderator');
         setUploading(false);
 
-        void membershipStatusPromise.then((membershipStatus) => {
-          if (membershipStatus === 'active') {
+        void membershipInfoPromise.then((nextMembershipInfo) => {
+          if (nextMembershipInfo?.status === 'active') {
             setSelectedPlaceDecision({
               ...decision,
               mode: 'open',
@@ -376,16 +410,7 @@ export function PublishModal() {
         return;
       }
 
-      const membershipStatus = await membershipStatusPromise;
-      const effectiveDecision =
-        membershipStatus === 'active'
-          ? {
-              ...decision,
-              mode: 'open' as const,
-            }
-          : decision;
-
-      if (effectiveDecision.mode === 'radius') {
+      if (decision.mode === 'radius') {
         const distance = userLocation && place.location
           ? calculateDistanceKm(
               userLocation.lat,
@@ -479,7 +504,9 @@ export function PublishModal() {
         return;
       }
 
-      await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active');
+      await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', {
+        role: publicationMode ?? 'member',
+      });
       setSelectedEnvironment(selectedEnvironmentRecord);
       showEnvironmentAddedAlert(selectedEnvironmentRecord.name);
     } catch (error: any) {
@@ -702,6 +729,7 @@ export function PublishModal() {
                     setSelectedEnvironmentRecord(null);
                     setSelectedPlaceDistanceKm(null);
                     setSelectedPlaceDecision(null);
+                    setPublicationMode(null);
                     setErrorMsg('');
                   }}
                   className="p-1 -ml-1"
@@ -889,6 +917,84 @@ export function PublishModal() {
                       <Icon icon="add_photo_alternate" size={24} className="text-on-surface-variant" />
                     </label>
                   )}
+                </div>
+              </div>
+            </div>
+          ) : step === 'mode' ? (
+            <div className="flex-1 overflow-y-auto p-6 -mt-4">
+              <div className="flex h-full flex-col items-center justify-center text-center">
+                <div className="flex flex-row items-center gap-2">
+                  <Icon icon="badge" size={36} className="text-primary mt-10" />
+                  <h4 className="text-2xl mt-10 font-black tracking-tight text-on-surface">
+                    Como você atua neste ambiente?
+                  </h4>
+                </div>
+                <p className="mt-3 max-w-sm text-sm leading-6 text-on-surface-variant">
+                  Se você reside aqui, vamos validar os 500m. Se apenas presta serviço, a publicação segue livre.
+                </p>
+                {errorMsg && (
+                  <div className="mt-4 rounded-2xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
+                    {errorMsg}
+                  </div>
+                )}
+                <div className="mt-8 grid w-full max-w-sm gap-3">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!selectedEnvironmentRecord) return;
+                      setPublicationMode('resident');
+                      const distance = userLocation &&
+                        typeof selectedEnvironmentRecord.latitude === 'number' &&
+                        typeof selectedEnvironmentRecord.longitude === 'number'
+                        ? calculateDistanceKm(
+                            userLocation.lat,
+                            userLocation.lng,
+                            selectedEnvironmentRecord.latitude,
+                            selectedEnvironmentRecord.longitude,
+                          )
+                        : null;
+                      setSelectedPlaceDistanceKm(distance);
+                      if (isWithinAutoApprovalRadius(distance)) {
+                        setUploading(true);
+                        try {
+                          await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', { role: 'resident' });
+                          setSelectedEnvironment(selectedEnvironmentRecord);
+                          showEnvironmentAddedAlert(selectedEnvironmentRecord.name);
+                        } catch (err: any) {
+                          setErrorMsg(err?.message || 'Não foi possível validar sua localização.');
+                        } finally {
+                          setUploading(false);
+                        }
+                        return;
+                      }
+                      setStep('radius');
+                    }}
+                    className="rounded-2xl border border-outline-variant/10 bg-surface-container-low p-4 text-left transition-all hover:bg-surface-container"
+                  >
+                    <p className="font-bold text-on-surface">Resido / Moro / Residência</p>
+                    <p className="text-xs text-on-surface-variant mt-1">Aplica a validação de 500m para publicar.</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!selectedEnvironmentRecord) return;
+                      setPublicationMode('service_provider');
+                      setUploading(true);
+                      try {
+                        await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', { role: 'service_provider' });
+                        setSelectedEnvironment(selectedEnvironmentRecord);
+                        showEnvironmentAddedAlert(selectedEnvironmentRecord.name);
+                      } catch (err: any) {
+                        setErrorMsg(err?.message || 'Não foi possível concluir a publicação.');
+                      } finally {
+                        setUploading(false);
+                      }
+                    }}
+                    className="rounded-2xl border border-outline-variant/10 bg-surface-container-low p-4 text-left transition-all hover:bg-surface-container"
+                  >
+                    <p className="font-bold text-on-surface">Presto Serviço</p>
+                    <p className="text-xs text-on-surface-variant mt-1">Publica livremente neste ambiente, sem o raio de 500m.</p>
+                  </button>
                 </div>
               </div>
             </div>

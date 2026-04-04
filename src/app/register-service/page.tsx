@@ -747,8 +747,8 @@ function RegisterServiceContent() {
               <div className="mt-4 rounded-2xl border border-outline-variant/10 bg-surface-container-lowest p-4">
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">Como você atua aqui?</p>
-                    <p className="text-[11px] text-on-surface-variant mt-1">Escolha antes de publicar. Resido/Moro/Residência aplica o raio de 500m; Presto Serviço libera a publicação.</p>
+                    <p className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">Como você atua neste ambiente?</p>
+                    <p className="text-[11px] text-on-surface-variant mt-1">Escolha antes de publicar.</p>
                   </div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -761,8 +761,8 @@ function RegisterServiceContent() {
                         : 'border-outline-variant/10 bg-surface-container-low hover:bg-surface-container'
                     }`}
                   >
-                    <p className="font-bold text-on-surface">Resido / Moro / Residência</p>
-                    <p className="text-xs text-on-surface-variant mt-1">Usa a regra dos 500m para validar sua localização.</p>
+                    <p className="font-bold text-on-surface">Resido aqui</p>
+                    {/* <p className="text-xs text-on-surface-variant mt-1">Usa a regra dos 500m para validar sua localização.</p> */}
                   </button>
                   <button
                     type="button"
@@ -774,7 +774,7 @@ function RegisterServiceContent() {
                     }`}
                   >
                     <p className="font-bold text-on-surface">Presto Serviço</p>
-                    <p className="text-xs text-on-surface-variant mt-1">Publica livremente neste ambiente, sem o raio de 500m.</p>
+                    {/* <p className="text-xs text-on-surface-variant mt-1">Publica livremente neste ambiente, sem o raio de 500m.</p> */}
                   </button>
                 </div>
               </div>

@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import type { Service, Environment, Member, Review } from '../types';
 import type { PlaceSearchResult } from '@/lib/maps';
 import { supabase } from '../lib/supabase';
-import { countCountableEnvironmentMemberships, getPlanLimits, isPlanAtEnvironmentLimit, type EnvironmentMembershipRole } from '@/lib/plan-rules';
+import { countCountableEnvironmentMemberships, getPlanLimits, type EnvironmentMembershipRole } from '@/lib/plan-rules';
 
 export interface User {
   id: string;
