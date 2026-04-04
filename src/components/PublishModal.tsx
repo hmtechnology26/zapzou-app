@@ -23,6 +23,13 @@ import {
 import { searchPlaces, type PlaceSearchResult } from '@/lib/maps';
 import type { Environment } from '@/types';
 
+const PLACE_CATEGORIES = [
+  { id: 'condominium', label: 'Condomínios', icon: 'domain' },
+  { id: 'church', label: 'Igrejas', icon: 'church' },
+] as const;
+
+type PlaceCategory = (typeof PLACE_CATEGORIES)[number]['id'];
+
 const serviceCategories = ['Alimentação', 'Limpeza', 'Manutenção', 'Pet Sitting', 'Beleza', 'Tecnologia', 'Outros'];
 
 export function PublishModal() {
@@ -32,6 +39,7 @@ export function PublishModal() {
   
   const [step, setStep] = useState<'search' | 'mode' | 'radius' | 'moderator' | 'form'>('search');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<PlaceCategory>('condominium');
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
   const [selectedPlaceDistanceKm, setSelectedPlaceDistanceKm] = useState<number | null>(null);
   const [selectedPlaceDecision, setSelectedPlaceDecision] = useState<ReturnType<typeof resolveEnvironmentAccessDecision> | null>(null);
@@ -135,7 +143,9 @@ export function PublishModal() {
       setSearchLoading(true);
       setHasSearched(true);
       try {
-        const results = await searchPlaces(searchQuery);
+        const results = await searchPlaces(searchQuery, {
+          categoryType: selectedCategory,
+        });
         setSearchResults(results);
       } catch (error) {
         console.error('Search error:', error);
@@ -146,7 +156,7 @@ export function PublishModal() {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
+  }, [searchQuery, selectedCategory]);
 
   const ensureCurrentLocation = useCallback(async () => {
     if (userLocation) {
@@ -524,6 +534,7 @@ export function PublishModal() {
       setSearchQuery('');
       setSearchResults([]);
       setHasSearched(false);
+      setSelectedCategory('condominium');
       setSelectedPlace(null);
       setActiveEnvId(null);
       setSelectedEnvironmentRecord(null);
@@ -764,7 +775,11 @@ export function PublishModal() {
                 <Icon icon="search" size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" />
                 <input
                   type="text"
-                  placeholder="Buscar condomínio, igreja, prédio..."
+                  placeholder={
+                    selectedCategory === 'church'
+                      ? 'Nome da igreja, templo ou capela...'
+                      : 'Nome do condomínio ou residencial...'
+                  }
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-surface-container-highest rounded-full py-3 pl-11 pr-4 text-sm focus:ring-2 focus:ring-primary/20"
@@ -774,6 +789,31 @@ export function PublishModal() {
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent"></div>
                   </div>
                 )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {PLACE_CATEGORIES.map((category) => {
+                  const isSelected = selectedCategory === category.id;
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => setSelectedCategory(category.id)}
+                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-bold text-sm transition-all border ${
+                        isSelected
+                          ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                          : 'bg-surface-container-lowest text-on-surface-variant border-outline-variant/10 hover:border-primary/30 hover:text-primary'
+                      }`}
+                    >
+                      <Icon
+                        icon={category.icon}
+                        size={18}
+                        className={isSelected ? 'text-white' : 'text-primary'}
+                      />
+                      <span>{category.label}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {uploading && (
@@ -1090,3 +1130,4 @@ export function PublishModal() {
     </div>
   );
 }
+

@@ -737,7 +737,7 @@ function RegisterServiceContent() {
                   className={environmentAvailability.status === 'pending' ? 'text-amber-600 mt-0.5' : 'text-[#30CC36] mt-0.5'} 
                 />
                 <div className="flex-1">
-                   <p className="text-xs font-bold">{environmentAvailability.label}</p>
+                   <p className="text-xs font-bold mt-1">{environmentAvailability.label}</p>
                    <p className="text-[11px] leading-tight mt-0.5">{environmentAvailability.reason}</p>
                 </div>
               </div>
@@ -761,7 +761,7 @@ function RegisterServiceContent() {
                         : 'border-outline-variant/10 bg-surface-container-low hover:bg-surface-container'
                     }`}
                   >
-                    <p className="font-bold text-on-surface">Resido aqui</p>
+                    <p className="font-bold text-on-surface">Morador</p>
                     {/* <p className="text-xs text-on-surface-variant mt-1">Usa a regra dos 500m para validar sua localização.</p> */}
                   </button>
                   <button
@@ -773,7 +773,7 @@ function RegisterServiceContent() {
                         : 'border-outline-variant/10 bg-surface-container-low hover:bg-surface-container'
                     }`}
                   >
-                    <p className="font-bold text-on-surface">Presto Serviço</p>
+                    <p className="font-bold text-on-surface">Prestador de Serviço</p>
                     {/* <p className="text-xs text-on-surface-variant mt-1">Publica livremente neste ambiente, sem o raio de 500m.</p> */}
                   </button>
                 </div>

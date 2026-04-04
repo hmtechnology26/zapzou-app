@@ -184,8 +184,8 @@ export function getEnvironmentAvailabilityState(
     if (!publicationRole) {
       return {
         status: 'pending',
-        label: 'Escolha o modo',
-        reason: 'Selecione se você reside neste ambiente ou apenas presta serviço nele.',
+        label: 'Aguardando validação',
+        reason: '',
       };
     }
 
@@ -193,7 +193,7 @@ export function getEnvironmentAvailabilityState(
       return {
         status: 'active',
         label: 'Ativo',
-        reason: 'Você pode publicar livremente neste ambiente.',
+        reason: '',
       };
     }
 
@@ -201,7 +201,7 @@ export function getEnvironmentAvailabilityState(
       return {
         status: 'pending',
         label: 'Aguardando validação',
-        reason: 'Ative a sua localização para validar o raio de 500m.',
+        reason: '',
       };
     }
 

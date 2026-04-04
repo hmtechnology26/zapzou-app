@@ -9,10 +9,14 @@ import { useApp } from '@/hooks/useApp';
 import { useState, useEffect } from 'react';
 import { type PlaceSearchResult } from '@/lib/maps';
 import {
+  AUTO_APPROVAL_RADIUS_KM,
+  calculateDistanceKm,
   inferEnvironmentTypeFromPlace,
   inferEnvironmentValidationFlagsFromPlace,
+  isWithinAutoApprovalRadius,
 } from '@/lib/environment-rules';
 import { supabase } from '@/lib/supabase';
+import { type PublicationMode } from '@/lib/plan-rules';
 
 interface PlaceDetailPageProps {
   seoContent?: ReactNode;
@@ -31,6 +35,9 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   const [memberCount, setMemberCount] = useState<number | null>(null);
   const [loadingEnvironment, setLoadingEnvironment] = useState(true);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [publicationMode, setPublicationMode] = useState<PublicationMode | null>(null);
+  const [publishingModeLoading, setPublishingModeLoading] = useState(false);
 
   const generateSlug = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -193,6 +200,72 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
 
     fetchMemberCount();
   }, [effectiveEnvironment?.id]);
+
+  const ensureCurrentLocation = async (): Promise<{ latitude: number; longitude: number }> => {
+    if (userLocation) return userLocation;
+
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+      throw new Error('Geolocalização indisponível neste dispositivo.');
+    }
+
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const nextLocation = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          };
+          setUserLocation(nextLocation);
+          resolve(nextLocation);
+        },
+        (error) => reject(new Error(error.message || 'Falha ao obter sua localização.')),
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+      );
+    });
+  };
+
+  const handlePlusRequest = async (mode: PublicationMode) => {
+    if (!user || !effectiveEnvironment?.id) return;
+
+    setPublishingModeLoading(true);
+    try {
+      setPublicationMode(mode);
+
+      if (mode === 'resident') {
+        const location = await ensureCurrentLocation();
+
+        if (
+          typeof effectiveEnvironment.latitude !== 'number' ||
+          typeof effectiveEnvironment.longitude !== 'number'
+        ) {
+          throw new Error('Este ambiente não possui coordenadas para validação.');
+        }
+
+        const distance = calculateDistanceKm(
+          location.latitude,
+          location.longitude,
+          effectiveEnvironment.latitude,
+          effectiveEnvironment.longitude,
+        );
+
+        if (!isWithinAutoApprovalRadius(distance)) {
+          throw new Error(`Você precisa estar dentro de ${AUTO_APPROVAL_RADIUS_KM * 1000}m para publicar como residente neste ambiente.`);
+        }
+      }
+
+      await requestAffiliation(effectiveEnvironment.id, {
+        role: mode,
+        status: 'active',
+      });
+
+      setMembership({ status: 'active' });
+    } catch (error: any) {
+      console.error('Error handling Plus request:', error);
+      alert(error?.message || 'Não foi possível concluir sua solicitação.');
+    } finally {
+      setPublishingModeLoading(false);
+    }
+  };
 
   const categories = [
     { id: 'all', label: 'Tudo', icon: 'apps' },
@@ -432,14 +505,37 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
              </div>
              <div>
                 <h3 className="text-xl font-black text-on-surface tracking-tight">Vincule-se a este ambiente</h3>
-                <p className="text-sm text-on-surface-variant font-medium mt-1">Para publicar serviços aqui, você precisa solicitar acesso à liderança.</p>
+                <p className="text-sm text-on-surface-variant font-medium mt-1">
+                  {user.plan === 'plus'
+                    ? 'No Plus, escolha como você atua aqui antes de publicar.'
+                    : 'Para publicar serviços aqui, você precisa solicitar acesso à liderança.'}
+                </p>
              </div>
-             <button 
-               onClick={() => router.push(`/meus-anuncios`)}
-               className="px-10 py-4.5 rounded-full primary-gradient text-white text-sm font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105"
-             >
-               Solicitar Acesso
-             </button>
+             {user.plan === 'plus' ? (
+               <div className="grid w-full gap-3 sm:grid-cols-2">
+                 <button
+                   onClick={() => handlePlusRequest('resident')}
+                   disabled={publishingModeLoading}
+                   className="px-6 py-4 rounded-full bg-surface-container-high text-on-surface text-sm font-black shadow-sm active:scale-95 transition-all hover:bg-surface-container-highest disabled:opacity-50"
+                 >
+                   Resido / Moro
+                 </button>
+                 <button
+                   onClick={() => handlePlusRequest('service_provider')}
+                   disabled={publishingModeLoading}
+                   className="px-6 py-4 rounded-full primary-gradient text-white text-sm font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105 disabled:opacity-50"
+                 >
+                   Presto Serviço
+                 </button>
+               </div>
+             ) : (
+               <button 
+                 onClick={() => router.push(`/meus-anuncios`)}
+                 className="px-10 py-4.5 rounded-full primary-gradient text-white text-sm font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105"
+               >
+                 Solicitar Acesso
+               </button>
+             )}
           </div>
         )}
 

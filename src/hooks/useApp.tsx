@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import type { Service, Environment, Member, Review } from '../types';
 import type { PlaceSearchResult } from '@/lib/maps';
 import { supabase } from '../lib/supabase';
-import { countCountableEnvironmentMemberships, getPlanLimits, type EnvironmentMembershipRole } from '@/lib/plan-rules';
+import { countCountableEnvironmentMemberships, getPlanLimits, isPlanAtEnvironmentLimit, type EnvironmentMembershipRole } from '@/lib/plan-rules';
 
 export interface User {
   id: string;
@@ -683,12 +683,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       const { error } = await supabase
         .from('environment_members')
-        .insert([{
+        .upsert([{
            environment_id: envId,
            user_id: user.id,
            role: options?.role ?? 'member',
            status: options?.status ?? 'pending',
-        }]);
+        }], { onConflict: 'environment_id,user_id' });
       if (error) throw error;
       await refreshMembership();
       signalMembershipChange();
