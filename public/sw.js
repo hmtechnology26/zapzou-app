@@ -64,8 +64,8 @@ function buildOfflineResponse() {
 </head>
 <body>
   <main>
-    <div class="badge">ZapZou offline</div>
-    <h1>Sem conexao agora</h1>
+    <div class="badge">Conectae offline</div>
+    <h1>Sem conexão agora</h1>
     <p>Abra o app novamente quando a internet voltar para ver os ambientes e servicos mais recentes.</p>
   </main>
 </body>

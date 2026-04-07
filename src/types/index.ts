@@ -11,6 +11,8 @@ export interface Service {
   price?: string;
   provider: string;
   provider_id?: string;
+  publisherType?: 'resident' | 'service_provider' | null;
+  authorRole?: 'member' | 'moderator' | 'resident' | 'service_provider' | null;
   frequency?: string;
   isActive?: boolean;
   WhatsApp?: string;

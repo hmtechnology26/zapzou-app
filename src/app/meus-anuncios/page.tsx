@@ -1,53 +1,58 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Icon } from '@/components/Icon';
-import { useApp } from '@/hooks/useApp';
-import { TopAppBar } from '@/components/TopAppBar';
-import { usePublishModal } from '@/contexts/PublishModalContext';
-import { supabase } from '@/lib/supabase';
-import type { Environment } from '@/types';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Icon } from "@/components/Icon";
+import { useApp } from "@/hooks/useApp";
+import { TopAppBar } from "@/components/TopAppBar";
+import { usePublishModal } from "@/contexts/PublishModalContext";
+import { supabase } from "@/lib/supabase";
+import { isForcedPendingApprovalEnvironment } from "@/lib/environment-rules";
+import type { Environment } from "@/types";
 
-const TYPE_LABELS: Record<Environment['type'], string> = {
-  residential: 'Residencial',
-  church: 'Igreja',
-  club: 'Clube',
-  association: 'Associação',
+const TYPE_LABELS: Record<Environment["type"], string> = {
+  residential: "Residencial",
+  church: "Igreja",
+  club: "Clube",
+  association: "Associação",
 };
 
 type AffiliationRecord = {
   id: string;
   environmentId: string;
-  role: 'member' | 'moderator' | 'resident' | 'service_provider' | null;
-  status: 'active' | 'pending' | 'banned';
+  role: "member" | "moderator" | "resident" | "service_provider" | null;
+  status: "active" | "pending" | "banned";
   createdAt?: string;
 };
 
-const getStatusRank = (status?: AffiliationRecord['status']) => {
+const getStatusRank = (status?: AffiliationRecord["status"]) => {
   switch (status) {
-    case 'active': return 0;
-    case 'pending': return 1;
-    case 'banned': return 2;
-    default: return 3;
+    case "active":
+      return 0;
+    case "pending":
+      return 1;
+    case "banned":
+      return 2;
+    default:
+      return 3;
   }
 };
 
 const normalizeSlug = (value: string) =>
   value
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 
 const normalizeEnvironmentRecord = (env: any): Environment => ({
   id: env.id,
   name: env.name,
-  slug: env.slug || normalizeSlug(env.name ?? env.id ?? ''),
+  slug: env.slug || normalizeSlug(env.name ?? env.id ?? ""),
   type: env.type,
   members: Number(env.members_count ?? 0),
-  image: env.image_url || '',
+  image: env.image_url || "",
   latitude: env.latitude,
   longitude: env.longitude,
   requiresModeratorApproval: Boolean(env.requires_moderator_approval),
@@ -56,14 +61,29 @@ const normalizeEnvironmentRecord = (env: any): Environment => ({
 
 export default function MyAdsPage() {
   const router = useRouter();
-  const { user, membershipVersion, selectedEnvironments } = useApp();
+  const {
+    user,
+    membershipVersion,
+    selectedEnvironments,
+    setSelectedEnvironments,
+    selectedEnvironment,
+    setSelectedEnvironment,
+    signalMembershipChange,
+  } = useApp();
   const { open } = usePublishModal();
-  const [mounted, setMounted] = useState(false);
-  const [affiliations, setAffiliations] = useState<Record<string, AffiliationRecord>>({});
+  const [affiliations, setAffiliations] = useState<
+    Record<string, AffiliationRecord>
+  >({});
   const [affiliationLoading, setAffiliationLoading] = useState(false);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
   const [myContexts, setMyContexts] = useState<Environment[]>([]);
   const [loadingContexts, setLoadingContexts] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [environmentToDelete, setEnvironmentToDelete] =
+    useState<Environment | null>(null);
+  const [togglingRoleId, setTogglingRoleId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -81,20 +101,27 @@ export default function MyAdsPage() {
     if (!user?.id) return;
     setLoadingContexts(true);
     setAffiliationLoading(true);
+    try {
+      const { data: membersData, error: membersError } = await supabase
+        .from("environment_members")
+        .select("id, status, role, environment_id")
+        .eq("user_id", user.id)
+        .in("status", ["active", "pending"]);
 
-    const { data: membersData, error: membersError } = await supabase
-      .from('environment_members')
-      .select('id, status, role, environment_id')
-      .eq('user_id', user.id);
+      if (membersError) {
+        console.error("fetchUserContexts failed:", membersError);
+        return;
+      }
 
-    if (membersData && !membersError) {
       const affiliationsPayload: Record<string, AffiliationRecord> = {};
       const contextsPayload: Environment[] = [];
       const missingEnvIds = new Set<string>();
       const seenEnvIds = new Set<string>();
-      const envCache: Record<string, Environment> = { ...selectedEnvironmentMap };
+      const envCache: Record<string, Environment> = {
+        ...selectedEnvironmentMap,
+      };
 
-      membersData.forEach((record: any) => {
+      (membersData ?? []).forEach((record: any) => {
         const envId = record.environment_id;
         if (!envId) return;
 
@@ -105,7 +132,13 @@ export default function MyAdsPage() {
           status: record.status,
         };
 
-        if (record.role === 'member' || record.role === 'moderator' || record.role === 'resident' || record.role === 'service_provider') {
+        const shouldShowContext =
+          isForcedPendingApprovalEnvironment(envId) ||
+          record.status === "pending" ||
+          record.role === "resident" ||
+          record.role === "service_provider";
+
+        if (shouldShowContext) {
           const cachedEnv = envCache[envId];
           if (cachedEnv) {
             if (!seenEnvIds.has(envId)) {
@@ -120,9 +153,9 @@ export default function MyAdsPage() {
 
       if (missingEnvIds.size > 0) {
         const { data: missingEnvRecords } = await supabase
-          .from('environments')
-          .select('*')
-          .in('id', Array.from(missingEnvIds));
+          .from("environments")
+          .select("*")
+          .in("id", Array.from(missingEnvIds));
 
         missingEnvRecords?.forEach((env) => {
           const normalizedEnv = normalizeEnvironmentRecord(env);
@@ -135,16 +168,20 @@ export default function MyAdsPage() {
       }
 
       setAffiliations(affiliationsPayload);
-      setMyContexts(contextsPayload.sort((a, b) => {
-        const rankA = getStatusRank(affiliationsPayload[a.id]?.status);
-        const rankB = getStatusRank(affiliationsPayload[b.id]?.status);
-        if (rankA !== rankB) return rankA - rankB;
-        return a.name.localeCompare(b.name);
-      }));
+      setMyContexts(
+        contextsPayload.sort((a, b) => {
+          const rankA = getStatusRank(affiliationsPayload[a.id]?.status);
+          const rankB = getStatusRank(affiliationsPayload[b.id]?.status);
+          if (rankA !== rankB) return rankA - rankB;
+          return a.name.localeCompare(b.name);
+        }),
+      );
+    } catch (err) {
+      console.error("fetchUserContexts exception:", err);
+    } finally {
+      setLoadingContexts(false);
+      setAffiliationLoading(false);
     }
-
-    setLoadingContexts(false);
-    setAffiliationLoading(false);
   }, [user?.id, selectedEnvironmentMap]);
 
   useEffect(() => {
@@ -152,6 +189,104 @@ export default function MyAdsPage() {
       fetchUserContexts();
     }
   }, [user?.id, fetchUserContexts, membershipVersion]);
+
+  const handleDeleteClick = (env: Environment) => {
+    setEnvironmentToDelete(env);
+    setDeleteModalOpen(true);
+  };
+
+  const handleToggleRole = async (envId: string, currentRole: string | null) => {
+    if (!user?.id) return;
+    
+    const newRole = currentRole === 'resident' ? 'service_provider' : 'resident';
+    
+    if (newRole === 'resident') {
+      const residentEnvId = Object.entries(affiliations).find(
+        ([id, aff]) => id !== envId && aff.role === 'resident'
+      )?.[0];
+      
+      if (residentEnvId) {
+        const residentEnvName = myContexts.find(e => e.id === residentEnvId)?.name;
+        setStatusNotice(`Você já é morador de "${residentEnvName}". Altere para prestador primeiro.`);
+        setTimeout(() => setStatusNotice(null), 4000);
+        return;
+      }
+    }
+    
+    setTogglingRoleId(envId);
+
+    try {
+      const newRole = currentRole === 'resident' ? 'service_provider' : 'resident';
+      
+      const { error } = await supabase
+        .from('environment_members')
+        .update({ role: newRole })
+        .eq('environment_id', envId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error toggling role:', error);
+        setStatusNotice('Erro ao alterar função');
+      } else {
+        setAffiliations(prev => ({
+          ...prev,
+          [envId]: { ...prev[envId], role: newRole as any }
+        }));
+        setStatusNotice(newRole === 'resident' ? 'Agora você é morador neste ambiente' : 'Agora você é prestador neste ambiente');
+      }
+    } catch (err) {
+      console.error('Error toggling role:', err);
+    } finally {
+      setTogglingRoleId(null);
+      setTimeout(() => setStatusNotice(null), 3000);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!environmentToDelete || !user?.id) return;
+
+    setDeletingId(environmentToDelete.id);
+
+    const { error } = await supabase
+      .from("environment_members")
+      .delete()
+      .eq("environment_id", environmentToDelete.id)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Error leaving environment:", error);
+      setStatusNotice("Não foi possível sair deste ambiente.");
+      setDeletingId(null);
+      setTimeout(() => setStatusNotice(null), 4000);
+      return;
+    }
+
+    const envIdToDelete = environmentToDelete.id;
+
+    setMyContexts((prev) => prev.filter((env) => env.id !== envIdToDelete));
+    setAffiliations((prev) => {
+      const next = { ...prev };
+      delete next[envIdToDelete];
+      return next;
+    });
+    const nextSelectedEnvironments = selectedEnvironments.filter(
+      (env) => env.id !== envIdToDelete,
+    );
+    setSelectedEnvironments(nextSelectedEnvironments);
+    if (selectedEnvironment?.id === envIdToDelete) {
+      const nextEnvironment = nextSelectedEnvironments[0] ?? null;
+      setSelectedEnvironment(nextEnvironment);
+    }
+
+    setStatusNotice("Ambiente removido com sucesso");
+    setTimeout(() => setStatusNotice(null), 3000);
+    
+    signalMembershipChange();
+    
+    setDeletingId(null);
+    setDeleteModalOpen(false);
+    setEnvironmentToDelete(null);
+  };
 
   if (!mounted) return null;
 
@@ -161,22 +296,30 @@ export default function MyAdsPage() {
 
       <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-12 pb-32">
         <section className="bg-primary/5 border border-primary/10 rounded-[3rem] p-10 shadow-sm text-center relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-            <div className="relative z-10">
-              <div className="w-16 h-16 bg-[#30cc36]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-[#30cc36]/20 group-hover:scale-110 transition-transform duration-500">
-                 <Icon icon="add_location_alt" size={32} className="text-[#30cc36]" weight={700} />
-              </div>
-              <h2 className="text-3xl font-black text-on-surface tracking-tighter">Expandir seu Negócio</h2>
-              <p className="text-base text-on-surface-variant max-w-md mx-auto mt-3 font-medium leading-relaxed">
-                Leve seus serviços para novos condomínios e comunidades. Solicite vínculo agora mesmo.
-              </p>
-              <button 
-                onClick={open}
-                className="mt-8 uppercase py-2 primary-gradient text-white text-sm rounded-full px-10 py-4.5 font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105"
-              >
-                Procurar Ambiente
-              </button>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          <div className="relative z-10">
+            <div className="w-16 h-16 bg-[#30cc36]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-[#30cc36]/20 group-hover:scale-110 transition-transform duration-500">
+              <Icon
+                icon="add_location_alt"
+                size={32}
+                className="text-[#30cc36]"
+                weight={700}
+              />
             </div>
+            <h2 className="text-3xl font-black text-on-surface tracking-tighter">
+              Expandir seu Negócio
+            </h2>
+            <p className="text-base text-on-surface-variant max-w-md mx-auto mt-3 font-medium leading-relaxed">
+              Leve seus serviços para novos condomínios e comunidades. Solicite
+              vínculo agora mesmo.
+            </p>
+            <button
+              onClick={open}
+              className="mt-8 uppercase py-2 primary-gradient text-white text-sm rounded-full px-10 py-4.5 font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105"
+            >
+              Procurar Ambiente
+            </button>
+          </div>
         </section>
 
         <section className="space-y-6">
@@ -189,77 +332,193 @@ export default function MyAdsPage() {
             </span>
           </div>
 
-          {(loadingContexts || affiliationLoading) ? (
+          {loadingContexts || affiliationLoading ? (
             <div className="py-24 flex justify-center flex-col items-center gap-4">
-               <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#30cc36] border-t-transparent"></div>
-               <p className="text-xs font-black uppercase tracking-widest text-primary/40">Carregando seus locais...</p>
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#30cc36] border-t-transparent"></div>
+              <p className="text-xs font-black uppercase tracking-widest text-primary/40">
+                Carregando seus locais...
+              </p>
             </div>
           ) : myContexts.length === 0 ? (
             <div className="rounded-[3rem] border-2 border-dashed border-outline-variant/10 py-24 text-center bg-surface-container-low/20">
-               <Icon icon="explore" size={56} className="mx-auto mb-6 opacity-10 text-primary" />
-               <h4 className="text-xl font-black text-on-surface/40">Nenhum vínculo ativo</h4>
-               <p className="text-sm text-on-surface-variant/60 font-medium max-w-xs mx-auto mt-2">Você ainda não solicitou entrada em nenhum ambiente para anunciar.</p>
+              <Icon
+                icon="explore"
+                size={56}
+                className="mx-auto mb-6 opacity-10 text-primary"
+              />
+              <h4 className="text-xl font-black text-on-surface/40">
+                Nenhum vínculo ativo
+              </h4>
+              <p className="text-sm text-on-surface-variant/60 font-medium max-w-xs mx-auto mt-2">
+                Você ainda não solicitou entrada em nenhum ambiente para
+                anunciar.
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {myContexts.map((env) => {
                 const membership = affiliations[env.id];
-                const isActive = membership?.status === 'active';
-                const isPending = membership?.status === 'pending';
+                const isActive = membership?.status === "active";
+                const isPending = membership?.status === "pending";
 
                 return (
-                  <article key={env.id} className="bg-surface-container-lowest rounded-[2rem] p-5 border border-outline-variant/10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-2xl bg-surface-container overflow-hidden flex-shrink-0 shadow-inner">
-                        {env.image ? <img src={env.image} alt={env.name} className="w-full h-full object-cover" loading="lazy" decoding="async" /> : <div className="w-full h-full flex items-center justify-center text-on-surface-variant"><Icon icon="domain" size={28} /></div>}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                          <h4 className="font-bold text-on-surface truncate">{env.name}</h4>
-                          <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border ${
-                            isActive ? 'bg-[#30CC36]/10 text-[#30CC36] border-[#30CC36]/20' : isPending ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-error/10 text-error border-error/20'
-                          }`}>
-                            {isActive ? 'Ativo' : isPending ? 'Análise' : 'Bloqueado'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                           <span className="text-[10px] text-primary font-bold uppercase tracking-wider flex items-center gap-1">
-                              <Icon icon="category" size={12} />
-                              {TYPE_LABELS[env.type]}
-                           </span>
-                           {env.members > 0 && (
-                             <span className="text-[10px] text-on-surface-variant/60 font-bold flex items-center gap-1">
-                                <Icon icon="groups" size={14} />
-                                {env.members}
-                             </span>
-                           )}
-                        </div>
-                      </div>
-                    </div>
+                  <article
+  key={env.id}
+  className="bg-surface-container-lowest rounded-[2rem] p-5 pr-16 border border-outline-variant/10 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 transition-all relative overflow-hidden"
+>
+  <button
+    onClick={() => handleDeleteClick(env)}
+    disabled={deletingId === env.id}
+    className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-error/10 hover:text-error transition-colors disabled:opacity-50"
+  >
+    {deletingId === env.id ? (
+      <div className="w-4 h-4 border-2 border-error/30 border-t-error rounded-full animate-spin" />
+    ) : (
+      <Icon icon="close" size={16} />
+    )}
+  </button>
 
-                    <div className="flex shrink-0">
-                      {isActive && (
-                        <button 
-                          onClick={() => router.push(`/meus-anuncios/${env.id}`)}
-                          className="w-full md:w-auto min-w-[180px] md:min-w-[220px] max-w-[250px] py-3.5 md:px-8 rounded-2xl bg-[#30cc36] text-white font-black uppercase text-[10px] md:text-sm shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2 hover:brightness-110 whitespace-nowrap"
-                        >
-                          <Icon icon="store" size={18} />
-                          Gerenciar Catálogo
-                        </button>
-                      )}
-                      {!isActive && isPending && (
-                        <div className="w-full md:w-auto py-3.5 px-6 rounded-2xl bg-amber-500/10 text-amber-700 border border-amber-500/20 text-[10px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2">
-                           <Icon icon="hourglass_empty" size={16} />
-                           Aguardando Aprovação
-                        </div>
-                      )}
-                    </div>
-                  </article>
+  <div className="flex items-center gap-4 flex-1 min-w-0">
+    <div className="w-16 h-16 rounded-2xl bg-surface-container overflow-hidden flex-shrink-0 shadow-inner">
+      {env.image ? (
+        <img
+          src={env.image}
+          alt={env.name}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
+          <Icon icon="domain" size={28} />
+        </div>
+      )}
+    </div>
+
+    <div className="flex-1 min-w-0">
+      <div className="flex flex-wrap items-center gap-2 mb-1.5">
+        <h4 className="font-bold text-on-surface truncate">{env.name}</h4>
+                <span
+                  className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border ${
+                    isActive
+                      ? 'bg-[#30CC36]/10 text-[#30CC36] border-[#30CC36]/20'
+                      : isPending
+              ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+              : 'bg-error/10 text-error border-error/20'
+          }`}
+        >
+          {isActive ? 'ATIVO' : isPending ? 'PENDENTE' : 'BLOQUEADO'}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="text-[10px] text-primary font-bold uppercase tracking-wider flex items-center gap-1">
+          <Icon icon="category" size={12} />
+          {TYPE_LABELS[env.type]}
+        </span>
+
+        {env.members > 0 && (
+          <span className="text-[10px] text-on-surface-variant/60 font-bold flex items-center gap-1">
+            <Icon icon="groups" size={14} />
+            {env.members}
+          </span>
+        )}
+      </div>
+    </div>
+  </div>
+
+  <div className="w-full lg:w-auto lg:flex-shrink-0 space-y-3">
+    {isActive && membership?.role && (
+      <button
+        onClick={() => handleToggleRole(env.id, membership?.role)}
+        disabled={togglingRoleId === env.id}
+        className={`w-full lg:w-[220px] h-10 rounded-2xl font-black uppercase text-[9px] flex items-center justify-center gap-2 transition-all ${
+          membership?.role === 'resident'
+            ? 'bg-orange-500/10 text-orange-600 border border-orange-500/20 hover:bg-orange-500/20'
+            : 'bg-blue-600/10 text-blue-700 border border-blue-600/20 hover:bg-blue-600/20'
+        }`}
+      >
+        {togglingRoleId === env.id ? (
+          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        ) : membership?.role === 'resident' ? (
+          <>
+            <Icon icon="home" size={14} />
+            Morador
+          </>
+        ) : (
+          <>
+            <Icon icon="work" size={14} />
+            Prestador
+          </>
+        )}
+      </button>
+    )}
+
+    {isActive && (
+      <button
+        onClick={() => router.push(`/meus-anuncios/${env.id}`)}
+        className="w-full lg:w-[220px] h-12 rounded-2xl bg-[#30cc36] text-white font-black uppercase text-[10px] md:text-sm shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2 hover:brightness-110 whitespace-nowrap"
+      >
+        <Icon icon="store" size={18} />
+        Gerenciar Anúncios
+      </button>
+    )}
+
+    {!isActive && isPending && (
+      <div className="w-full lg:w-[220px] h-12 rounded-2xl bg-amber-500/10 text-amber-700 border border-amber-500/20 text-[10px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2">
+        <Icon icon="hourglass_empty" size={16} />
+        Aguardando Aprovação
+      </div>
+    )}
+  </div>
+</article>
                 );
               })}
             </div>
           )}
         </section>
+
+        {deleteModalOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-surface-container-lowest rounded-[2rem] p-6 max-w-sm w-full shadow-2xl border border-outline-variant/10">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Icon icon="warning" size={32} className="text-error" />
+                </div>
+                <h3 className="text-xl font-black text-on-surface mb-2">
+                  Sair do Ambiente?
+                </h3>
+                <p className="text-sm text-on-surface-variant mb-6">
+                  Ao confirmar, todos os seus anúncios neste ambiente serão
+                  excluídos permanentemente.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setDeleteModalOpen(false)}
+                    className="flex-1 py-3 rounded-2xl border border-outline-variant/20 text-on-surface font-black text-sm"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleDeleteConfirm}
+                    className="flex-1 py-3 rounded-2xl bg-error text-white font-black text-sm"
+                  >
+                    Confirmar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {statusNotice && (
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-surface-container-lowest px-6 py-3 rounded-full shadow-2xl border border-outline-variant/10 flex items-center gap-2 animate-fade-in z-50">
+            <Icon icon="check_circle" size={18} className="text-[#30cc36]" />
+            <span className="text-sm font-bold text-on-surface">
+              {statusNotice}
+            </span>
+          </div>
+        )}
       </main>
     </div>
   );

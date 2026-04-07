@@ -22,6 +22,13 @@ export interface EnvironmentAvailabilityState {
 
 const DEFAULT_RADIUS_TYPES = new Set<Environment['type']>(['residential', 'club', 'association']);
 const DEFAULT_MODERATOR_TYPES = new Set<Environment['type']>(['church']);
+export const FORCED_PENDING_APPROVAL_ENVIRONMENT_IDS = new Set<string>([
+  'fb6f5a5c-4126-451d-ad55-97f2ac33980b',
+]);
+
+export function isForcedPendingApprovalEnvironment(environmentId?: string | null) {
+  return Boolean(environmentId && FORCED_PENDING_APPROVAL_ENVIRONMENT_IDS.has(environmentId));
+}
 
 const PLACE_TYPE_TO_ENVIRONMENT_TYPE: Record<string, Environment['type']> = {
   church: 'church',
@@ -83,16 +90,30 @@ function normalizePublicationRole(role: EnvironmentMembershipRole): PublicationM
 
 export function resolveEnvironmentAccessDecision(
   environment?: Partial<
-    Pick<Environment, 'type' | 'requiresModeratorApproval' | 'requiresRadiusValidation'>
+    Pick<Environment, 'id' | 'type' | 'requiresModeratorApproval' | 'requiresRadiusValidation'>
   >,
   options?: {
     userPlan?: UserPlan;
     membershipRole?: EnvironmentMembershipRole;
+    membershipStatus?: 'active' | 'pending' | 'banned' | null;
     publicationMode?: PublicationMode | null;
   },
 ): EnvironmentAccessDecision {
   const inferredType = environment?.type ?? 'residential';
   const inferredFlags = inferEnvironmentValidationFlagsFromType(inferredType);
+  const forceModeratorApproval = isForcedPendingApprovalEnvironment(environment?.id);
+  const isUnlockedSpecialEnvironment =
+    forceModeratorApproval &&
+    options?.membershipStatus === 'active' &&
+    (options?.membershipRole === 'resident' || options?.membershipRole === 'service_provider');
+
+  if (forceModeratorApproval && !isUnlockedSpecialEnvironment) {
+    return {
+      mode: 'moderator',
+      requiresModeratorApproval: true,
+      requiresRadiusValidation: false,
+    };
+  }
 
   const requiresModeratorApproval =
     environment?.requiresModeratorApproval ?? inferredFlags.requiresModeratorApproval;
@@ -266,4 +287,3 @@ export function getEnvironmentAvailabilityState(
     reason: 'Este ambiente tem acesso livre para publicar.',
   };
 }
-

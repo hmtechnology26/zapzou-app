@@ -413,10 +413,20 @@ export default function HomePage() {
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
                     <div>
-                      <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center justify-between mb-1.5 gap-2">
                         <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">
                           {service.category}
                         </span>
+                        {service.publisherType === 'resident' && (
+                          <span className="text-[9px] font-bold text-white bg-orange-500 px-2 py-0.5 rounded-full">
+                            Morador
+                          </span>
+                        )}
+                        {service.publisherType === 'service_provider' && (
+                          <span className="text-[9px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full">
+                            Prestador
+                          </span>
+                        )}
                       </div>
                       <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#30cc36] transition-colors">
                         {service.title}
@@ -503,10 +513,20 @@ export default function HomePage() {
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
                       <div>
-                        <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center justify-between mb-1.5 gap-2">
                           <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
                             {service.category || "Sem categoria"}
                           </span>
+                        {service.publisherType === 'resident' && (
+                          <span className="text-[9px] font-bold text-white bg-orange-500 px-2 py-0.5 rounded-full">
+                            Morador
+                          </span>
+                        )}
+                        {service.publisherType === 'service_provider' && (
+                          <span className="text-[9px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full">
+                            Prestador
+                          </span>
+                        )}
                         </div>
                         <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">
                           {service.title}

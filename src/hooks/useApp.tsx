@@ -5,6 +5,7 @@ import type { Service, Environment, Member, Review } from '../types';
 import type { PlaceSearchResult } from '@/lib/maps';
 import { supabase } from '../lib/supabase';
 import { countCountableEnvironmentMemberships, getPlanLimits, isPlanAtEnvironmentLimit, type EnvironmentMembershipRole } from '@/lib/plan-rules';
+import { isForcedPendingApprovalEnvironment } from '@/lib/environment-rules';
 
 export interface User {
   id: string;
@@ -470,6 +471,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function loadEnvironments() {
+      if (!user?.id) {
+        setSelectedEnvironments([]);
+        fetchCacheRef.current.environments = null;
+        return;
+      }
+
       if (isFresh(fetchCacheRef.current.environments)) {
         const cachedEnvironments = fetchCacheRef.current.environments.data;
         setSelectedEnvironments(cachedEnvironments);
@@ -479,9 +486,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      const { data: membersData } = await supabase
+        .from('environment_members')
+        .select('environment_id, role, status')
+        .eq('user_id', user.id);
+
+      const eligibleMemberships = (membersData || []).filter((membership: any) => {
+        const envId = membership?.environment_id;
+        if (typeof envId !== 'string' || !envId) return false;
+        if (membership?.status === 'banned') return false;
+        if (isForcedPendingApprovalEnvironment(envId)) return true;
+        return membership?.status === 'active' && (
+          membership?.role === 'resident' || membership?.role === 'service_provider'
+        );
+      });
+
+      if (eligibleMemberships.length === 0) {
+        setSelectedEnvironments([]);
+        return;
+      }
+
+      const envIds = eligibleMemberships.map((m: any) => m.environment_id);
+
       const { data, error } = await supabase
         .from('environments')
         .select('*')
+        .in('id', envIds)
         .order('name');
       
       if (data && !error) {
@@ -511,7 +541,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     loadEnvironments();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user?.id, membershipVersion]);
 
   useEffect(() => {
     if (selectedEnvironment) {
@@ -592,6 +622,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .order('created_at', { ascending: false });
       
     const { data, error } = await query;
+    
     if (data && !error) {
       const formatted = data.map((s: any) => ({
         id: s.id,
@@ -603,6 +634,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         images: s.images_urls || [],
         provider: s.provider || 'Prestador',
         provider_id: s.provider_id,
+        publisherType: s.publisher_type as 'resident' | 'service_provider' | null,
         status: s.status as any,
         isActive: s.is_active,
         environmentId: s.environment_id,
@@ -760,6 +792,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         environment_id: service.environmentId,
         provider_id: user.id,
         provider: user.name || 'Prestador',
+        publisher_type: service.publisherType || 'service_provider',
       }]);
 
     console.log('Service insert result:', { error });
