@@ -12,6 +12,7 @@ import {
   inferEnvironmentTypeFromPlace,
   inferEnvironmentValidationFlagsFromPlace,
   isWithinAutoApprovalRadius,
+  isForcedPendingApprovalEnvironment,
   resolveEnvironmentAccessDecision,
 } from '@/lib/environment-rules';
 import {
@@ -45,6 +46,10 @@ export function PublishModal() {
   const [selectedPlaceDecision, setSelectedPlaceDecision] = useState<ReturnType<typeof resolveEnvironmentAccessDecision> | null>(null);
   const [selectedEnvironmentRecord, setSelectedEnvironmentRecord] = useState<Environment | null>(null);
   const [publicationMode, setPublicationMode] = useState<PublicationMode | null>(null);
+  const [residentEnvironmentId, setResidentEnvironmentId] = useState<string | null>(null);
+  const [residentEnvironmentName, setResidentEnvironmentName] = useState<string | null>(null);
+  const [showResidentAlert, setShowResidentAlert] = useState(false);
+  const [residentAlertEnvName, setResidentAlertEnvName] = useState('');
   
   const [form, setForm] = useState({
     serviceName: '',
@@ -65,6 +70,11 @@ export function PublishModal() {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [alertAction, setAlertAction] = useState<{ label: string; onClick: () => void } | null>(null);
+  const proceedToPublicationMode = useCallback(() => {
+    setStep('mode');
+    setUploading(false);
+    setErrorMsg('');
+  }, []);
   const showEnvironmentAddedAlert = useCallback(
     (envName: string, opts?: { pending?: boolean }) => {
       const title = opts?.pending ? 'Solicitação enviada' : 'Ambiente vinculado';
@@ -102,7 +112,25 @@ export function PublishModal() {
   const [activeEnvId, setActiveEnvId] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchResidentEnvironment = async () => {
+      if (!user?.id) return;
+      const { data } = await supabase
+        .from('environment_members')
+        .select('environment_id, environments(name)')
+        .eq('user_id', user.id)
+        .eq('role', 'resident')
+        .eq('status', 'active')
+        .limit(1)
+        .single();
+      if (data?.environment_id) {
+        setResidentEnvironmentId(data.environment_id);
+        const envName = Array.isArray(data.environments) ? data.environments[0]?.name : null;
+        setResidentEnvironmentName(envName);
+      }
+    };
+
     if (isOpen) {
+      fetchResidentEnvironment();
       if (!user) {
         close();
         router.push('/login');
@@ -325,14 +353,6 @@ export function PublishModal() {
         }
       }
 
-      const decision = resolveEnvironmentAccessDecision({
-        type: (envRecord.type as Environment['type']) || inferredType,
-        requiresModeratorApproval:
-          envRecord.requires_moderator_approval ?? inferredFlags.requiresModeratorApproval,
-        requiresRadiusValidation:
-          envRecord.requires_radius_validation ?? inferredFlags.requiresRadiusValidation,
-      });
-
       const membershipInfoPromise = getEnvironmentMembership(envRecord.id);
       const { data: userMembershipRows, error: userMembershipsError } = await supabase
         .from('environment_members')
@@ -351,6 +371,20 @@ export function PublishModal() {
         : false;
       const currentEnvironmentCount = countCountableEnvironmentMemberships(userMembershipRows as any);
       const environmentLimit = getPlanLimits(user.plan).environments;
+
+      const membershipInfo = await membershipInfoPromise;
+      const decision = resolveEnvironmentAccessDecision({
+        id: envRecord.id,
+        type: (envRecord.type as Environment['type']) || inferredType,
+        requiresModeratorApproval:
+          envRecord.requires_moderator_approval ?? inferredFlags.requiresModeratorApproval,
+        requiresRadiusValidation:
+          envRecord.requires_radius_validation ?? inferredFlags.requiresRadiusValidation,
+      }, {
+        membershipStatus: membershipInfo?.status ?? null,
+        membershipRole: membershipInfo?.role ?? null,
+        publicationMode,
+      });
 
       if (!alreadyLinked && typeof environmentLimit === 'number' && currentEnvironmentCount >= environmentLimit) {
         throw new Error(
@@ -374,7 +408,6 @@ export function PublishModal() {
         requiresRadiusValidation: decision.requiresRadiusValidation,
       };
 
-      const membershipInfo = await membershipInfoPromise;
       const storedPublicationMode =
         membershipInfo?.role === 'service_provider' || membershipInfo?.role === 'resident'
           ? membershipInfo.role
@@ -382,6 +415,9 @@ export function PublishModal() {
             ? 'resident'
             : null;
       const effectivePublicationMode = publicationMode ?? storedPublicationMode;
+      const hasUnlockedPublicationRole =
+        membershipInfo?.status === 'active' &&
+        (membershipInfo?.role === 'service_provider' || membershipInfo?.role === 'resident');
 
       setSelectedPlaceDecision(decision);
       setSelectedEnvironmentRecord(normalizedEnvironment);
@@ -389,6 +425,16 @@ export function PublishModal() {
         const filtered = prev.filter((env) => env.id !== normalizedEnvironment.id);
         return [normalizedEnvironment, ...filtered];
       });
+
+      if (isForcedPendingApprovalEnvironment(normalizedEnvironment.id) && !hasUnlockedPublicationRole) {
+        await syncEnvironmentMembership(normalizedEnvironment.id, 'pending', {
+          role: 'member',
+        });
+        setSelectedEnvironment(normalizedEnvironment);
+        setActiveEnvId(null);
+        showEnvironmentAddedAlert(normalizedEnvironment.name, { pending: true });
+        return;
+      }
 
       if (user.plan === 'plus') {
         await syncEnvironmentMembership(normalizedEnvironment.id, 'active', {
@@ -398,7 +444,8 @@ export function PublishModal() {
               : null),
         });
         setSelectedEnvironment(normalizedEnvironment);
-        showEnvironmentAddedAlert(normalizedEnvironment.name);
+        setActiveEnvId(normalizedEnvironment.id);
+        proceedToPublicationMode();
         return;
       }
 
@@ -435,7 +482,8 @@ export function PublishModal() {
         if (isWithinAutoApprovalRadius(distance)) {
           await syncEnvironmentMembership(normalizedEnvironment.id, 'active');
           setSelectedEnvironment(normalizedEnvironment);
-          showEnvironmentAddedAlert(normalizedEnvironment.name);
+          setActiveEnvId(normalizedEnvironment.id);
+          proceedToPublicationMode();
           return;
         }
 
@@ -449,7 +497,8 @@ export function PublishModal() {
 
       await syncEnvironmentMembership(normalizedEnvironment.id, 'active');
       setSelectedEnvironment(normalizedEnvironment);
-      showEnvironmentAddedAlert(normalizedEnvironment.name);
+      setActiveEnvId(normalizedEnvironment.id);
+      proceedToPublicationMode();
     } catch (err: any) {
       console.error('Error selecting place:', err);
       setErrorMsg(err.message || 'Erro ao selecionar local. Tente novamente.');
@@ -518,7 +567,8 @@ export function PublishModal() {
         role: publicationMode ?? 'member',
       });
       setSelectedEnvironment(selectedEnvironmentRecord);
-      showEnvironmentAddedAlert(selectedEnvironmentRecord.name);
+      setActiveEnvId(selectedEnvironmentRecord.id);
+      proceedToPublicationMode();
     } catch (error: any) {
       console.error('Error validating radius:', error);
       setErrorMsg(error?.message || 'Não foi possível validar sua localização.');
@@ -695,6 +745,7 @@ export function PublishModal() {
         instagram: form.instagram,
         status: 'active',
         environmentId: activeEnvId,
+        publisherType: publicationMode || 'service_provider',
         menu: menuItems.map((item, idx) => ({ ...item, id: `menu-${Date.now()}-${idx}` })),
       };
 
@@ -982,6 +1033,13 @@ export function PublishModal() {
                     type="button"
                     onClick={async () => {
                       if (!selectedEnvironmentRecord) return;
+                      
+                      if (residentEnvironmentId && residentEnvironmentId !== selectedEnvironmentRecord.id) {
+                        setResidentAlertEnvName(selectedEnvironmentRecord.name);
+                        setShowResidentAlert(true);
+                        return;
+                      }
+                      
                       setPublicationMode('resident');
                       const distance = userLocation &&
                         typeof selectedEnvironmentRecord.latitude === 'number' &&
@@ -999,7 +1057,9 @@ export function PublishModal() {
                         try {
                           await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', { role: 'resident' });
                           setSelectedEnvironment(selectedEnvironmentRecord);
-                          showEnvironmentAddedAlert(selectedEnvironmentRecord.name);
+                          setActiveEnvId(selectedEnvironmentRecord.id);
+                          setResidentEnvironmentId(selectedEnvironmentRecord.id);
+                          setStep('form');
                         } catch (err: any) {
                           setErrorMsg(err?.message || 'Não foi possível validar sua localização.');
                         } finally {
@@ -1011,7 +1071,7 @@ export function PublishModal() {
                     }}
                     className="rounded-2xl border border-outline-variant/10 bg-surface-container-low p-4 text-left transition-all hover:bg-surface-container"
                   >
-                    <p className="font-bold text-on-surface">Resido / Moro / Residência</p>
+                    <p className="font-bold text-on-surface">Morador</p>
                     <p className="text-xs text-on-surface-variant mt-1">Aplica a validação de 500m para publicar.</p>
                   </button>
                   <button
@@ -1023,7 +1083,8 @@ export function PublishModal() {
                       try {
                         await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', { role: 'service_provider' });
                         setSelectedEnvironment(selectedEnvironmentRecord);
-                        showEnvironmentAddedAlert(selectedEnvironmentRecord.name);
+                        setActiveEnvId(selectedEnvironmentRecord.id);
+                        setStep('form');
                       } catch (err: any) {
                         setErrorMsg(err?.message || 'Não foi possível concluir a publicação.');
                       } finally {
@@ -1032,9 +1093,10 @@ export function PublishModal() {
                     }}
                     className="rounded-2xl border border-outline-variant/10 bg-surface-container-low p-4 text-left transition-all hover:bg-surface-container"
                   >
-                    <p className="font-bold text-on-surface">Presto Serviço</p>
+                    <p className="font-bold text-on-surface">Prestador de Serviço</p>
                     <p className="text-xs text-on-surface-variant mt-1">Publica livremente neste ambiente, sem o raio de 500m.</p>
                   </button>
+                  
                 </div>
               </div>
             </div>
@@ -1127,7 +1189,32 @@ export function PublishModal() {
           </div>
         </div>
       )}
+
+      {showResidentAlert && (
+        <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-surface-container-lowest rounded-2xl w-full max-w-sm p-6 text-center border border-outline-variant/10">
+            <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon icon="warning" size={32} className="text-orange-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-on-surface mb-2">Apenas um ambiente como morador</h3>
+            <p className="text-on-surface-variant text-sm mb-6">
+              Você já é morador de "{residentEnvironmentName}". Para ser morador em "{residentAlertEnvName}", primeiro altere seu outro ambiente para Prestador.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowResidentAlert(false)} className="flex-1 py-3 rounded-full border border-outline-variant font-bold text-on-surface">
+                Cancelar
+              </button>
+              <button onClick={() => {
+                setShowResidentAlert(false);
+                setPublicationMode('service_provider');
+                setStep('form');
+              }} className="flex-1 py-3 rounded-full primary-gradient text-white font-bold">
+                Sou Prestador
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-

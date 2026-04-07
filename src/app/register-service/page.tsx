@@ -10,6 +10,7 @@ import {
   calculateDistanceKm,
   getEnvironmentAvailabilityState,
   isWithinAutoApprovalRadius,
+  isForcedPendingApprovalEnvironment,
 } from '@/lib/environment-rules';
 import {
   countCountableEnvironmentMemberships,
@@ -456,6 +457,14 @@ function RegisterServiceContent() {
         publicationMode: normalizedPublicationMode,
       });
 
+      const isForcedApprovalEnvironment = isForcedPendingApprovalEnvironment(selectedEnvironment?.id);
+      const canChoosePublicationMode =
+        effectiveMembershipRole === 'resident' || effectiveMembershipRole === 'service_provider';
+
+      if (isForcedApprovalEnvironment && !canChoosePublicationMode) {
+        throw new Error('Aguarde a aprovação do moderador e escolha Morador ou Prestador em Meus Serviços antes de publicar.');
+      }
+
       if (user?.plan !== 'plus' && !existingService && isPlanAtServiceLimit(user.plan, services.filter((service) => service.provider_id === user.id).length)) {
         throw new Error(
           user.plan === 'free'
@@ -528,29 +537,31 @@ function RegisterServiceContent() {
           );
         }
 
-        const { error: membershipUpsertError } = await supabase
-          .from('environment_members')
-          .upsert(
-            {
-              environment_id: selectedEnvironment.id,
-              user_id: user.id,
-              status: 'active',
-              role: publicationMode,
-            },
-            { onConflict: 'environment_id,user_id' },
-          );
+        if (!isForcedApprovalEnvironment) {
+          const { error: membershipUpsertError } = await supabase
+            .from('environment_members')
+            .upsert(
+              {
+                environment_id: selectedEnvironment.id,
+                user_id: user.id,
+                status: 'active',
+                role: publicationMode,
+              },
+              { onConflict: 'environment_id,user_id' },
+            );
 
-        if (membershipUpsertError) {
-          throw membershipUpsertError;
+          if (membershipUpsertError) {
+            throw membershipUpsertError;
+          }
+
+          effectiveMembershipStatus = 'active';
+          effectiveMembershipRole = publicationMode;
+          nextPublicationStatus = existingService?.status || 'active';
+          nextIsActive = existingService ? Boolean(existingService.isActive) : true;
+          setSpecificMembershipStatus('active');
+          setSpecificMembershipRole(publicationMode);
+          setPublicationMode(publicationMode);
         }
-
-        effectiveMembershipStatus = 'active';
-        effectiveMembershipRole = publicationMode;
-        nextPublicationStatus = existingService?.status || 'active';
-        nextIsActive = existingService ? Boolean(existingService.isActive) : true;
-        setSpecificMembershipStatus('active');
-        setSpecificMembershipRole(publicationMode);
-        setPublicationMode(publicationMode);
       }
 
       const serviceData = {
@@ -748,35 +759,48 @@ function RegisterServiceContent() {
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">Como você atua neste ambiente?</p>
-                    <p className="text-[11px] text-on-surface-variant mt-1">Escolha antes de publicar.</p>
+                    <p className="text-[11px] text-on-surface-variant mt-1">
+                      {isForcedPendingApprovalEnvironment(selectedEnvironment?.id) && canChoosePublicationMode
+                        ? 'A escolha já foi liberada após a aprovação.'
+                        : 'Escolha antes de publicar.'}
+                    </p>
                   </div>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    onClick={() => setPublicationMode('resident')}
-                    className={`rounded-2xl border p-4 text-left transition-all ${
-                      publicationMode === 'resident'
-                        ? 'border-primary bg-primary/10 shadow-sm'
-                        : 'border-outline-variant/10 bg-surface-container-low hover:bg-surface-container'
-                    }`}
-                  >
-                    <p className="font-bold text-on-surface">Morador</p>
-                    {/* <p className="text-xs text-on-surface-variant mt-1">Usa a regra dos 500m para validar sua localização.</p> */}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPublicationMode('service_provider')}
-                    className={`rounded-2xl border p-4 text-left transition-all ${
-                      publicationMode === 'service_provider'
-                        ? 'border-primary bg-primary/10 shadow-sm'
-                        : 'border-outline-variant/10 bg-surface-container-low hover:bg-surface-container'
-                    }`}
-                  >
-                    <p className="font-bold text-on-surface">Prestador de Serviço</p>
-                    {/* <p className="text-xs text-on-surface-variant mt-1">Publica livremente neste ambiente, sem o raio de 500m.</p> */}
-                  </button>
-                </div>
+                {isForcedPendingApprovalEnvironment(selectedEnvironment?.id) && !canChoosePublicationMode ? (
+                  <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-amber-800">
+                    <p className="text-sm font-bold">Aguardando aprovação do moderador</p>
+                    <p className="text-xs mt-1">
+                      Depois que o moderador liberar este ambiente, a escolha entre Morador e Prestador ficará disponível.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => setPublicationMode('resident')}
+                      className={`rounded-2xl border p-4 text-left transition-all ${
+                        publicationMode === 'resident'
+                          ? 'border-primary bg-primary/10 shadow-sm'
+                          : 'border-outline-variant/10 bg-surface-container-low hover:bg-surface-container'
+                      }`}
+                    >
+                      <p className="font-bold text-on-surface">Morador</p>
+                      {/* <p className="text-xs text-on-surface-variant mt-1">Usa a regra dos 500m para validar sua localização.</p> */}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPublicationMode('service_provider')}
+                      className={`rounded-2xl border p-4 text-left transition-all ${
+                        publicationMode === 'service_provider'
+                          ? 'border-primary bg-primary/10 shadow-sm'
+                          : 'border-outline-variant/10 bg-surface-container-low hover:bg-surface-container'
+                      }`}
+                    >
+                      <p className="font-bold text-on-surface">Prestador de Serviço</p>
+                      {/* <p className="text-xs text-on-surface-variant mt-1">Publica livremente neste ambiente, sem o raio de 500m.</p> */}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
