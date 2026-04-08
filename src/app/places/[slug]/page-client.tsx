@@ -14,6 +14,7 @@ import {
   inferEnvironmentTypeFromPlace,
   inferEnvironmentValidationFlagsFromPlace,
   isWithinAutoApprovalRadius,
+  isForcedPendingApprovalEnvironment,
 } from '@/lib/environment-rules';
 import { supabase } from '@/lib/supabase';
 import { type PublicationMode } from '@/lib/plan-rules';
@@ -30,7 +31,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [placeFromSearch, setPlaceFromSearch] = useState<PlaceSearchResult | null>(null);
-  const [membership, setMembership] = useState<{ status: 'active' | 'pending' | 'banned' } | null>(null);
+  const [membership, setMembership] = useState<{ status: 'active' | 'pending' | 'banned'; role?: 'member' | 'moderator' | 'resident' | 'service_provider' | null } | null>(null);
   const [membershipLoading, setMembershipLoading] = useState(false);
   const [memberCount, setMemberCount] = useState<number | null>(null);
   const [loadingEnvironment, setLoadingEnvironment] = useState(true);
@@ -151,7 +152,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
       try {
         const { data, error } = await supabase
           .from('environment_members')
-          .select('status')
+          .select('status, role')
           .eq('environment_id', effectiveEnvironment.id)
           .eq('user_id', user.id)
           .single();
@@ -230,6 +231,19 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     setPublishingModeLoading(true);
     try {
       setPublicationMode(mode);
+
+      const hasUnlockedPublicationRole =
+        membership?.status === 'active' &&
+        (membership?.role === 'resident' || membership?.role === 'service_provider');
+
+      if (isForcedPendingApprovalEnvironment(effectiveEnvironment.id) && !hasUnlockedPublicationRole) {
+        await requestAffiliation(effectiveEnvironment.id, {
+          role: 'member',
+          status: 'pending',
+        });
+        setMembership({ status: 'pending' });
+        return;
+      }
 
       if (mode === 'resident') {
         const location = await ensureCurrentLocation();
@@ -518,7 +532,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                    disabled={publishingModeLoading}
                    className="px-6 py-4 rounded-full bg-surface-container-high text-on-surface text-sm font-black shadow-sm active:scale-95 transition-all hover:bg-surface-container-highest disabled:opacity-50"
                  >
-                   Resido / Moro
+                   Morador 
                  </button>
                  <button
                    onClick={() => handlePlusRequest('service_provider')}
