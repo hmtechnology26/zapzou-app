@@ -5,7 +5,11 @@ import { useRouter, useParams } from 'next/navigation';
 import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
-import { useState, useEffect } from 'react';
+import { StarRating } from '@/components/StarRating';
+import { ReviewsList } from '@/components/ReviewsList';
+import { ReviewForm } from '@/components/ReviewForm';
+import { useState, useEffect, useRef } from 'react';
+import type { Review } from '@/types';
 
 interface ServiceDetailPageProps {
   seoContent?: ReactNode;
@@ -21,6 +25,9 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
     selectedEnvironments = [],
     toggleServiceStatus,
     removeService,
+    incrementServiceViews,
+    fetchServiceReviews,
+    addReview,
   } = useApp() || {};
 
   const [mounted, setMounted] = useState(false);
@@ -31,10 +38,13 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [service, setService] = useState<any>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const lastViewIncrementedServiceIdRef = useRef<string | null>(null);
   const minSwipeDistance = 50;
-
-  const placeSlug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
   const serviceSlug = Array.isArray(params?.serviceSlug) ? params.serviceSlug[0] : params?.serviceSlug;
+  const serviceId = service?.id;
 
   const generateSlug = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -53,6 +63,26 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, [services, serviceSlug, mounted]);
+
+  useEffect(() => {
+    if (!serviceId) return;
+    if (lastViewIncrementedServiceIdRef.current === serviceId) return;
+    lastViewIncrementedServiceIdRef.current = serviceId;
+    void incrementServiceViews(serviceId);
+  }, [serviceId, incrementServiceViews]);
+
+  useEffect(() => {
+    if (serviceId) {
+      void fetchServiceReviews(serviceId).then(setReviews).catch(() => setReviews([]));
+    }
+  }, [serviceId, fetchServiceReviews]);
+
+  useEffect(() => {
+    if (!serviceId) return;
+    const count = reviews.length;
+    const avg = count > 0 ? reviews.reduce((acc, r) => acc + (r.stars || 0), 0) / count : 0;
+    setService((prev: any) => (prev ? { ...prev, rating: avg, reviews_count: count } : prev));
+  }, [reviews, serviceId]);
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
@@ -88,7 +118,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
     return (
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
         <Icon icon="error_outline" size={48} className="text-outline" />
-        <p className="text-on-surface-variant">Serviço não encontrado</p>
+        <p className="text-on-surface-variant">ServiÃƒÆ’Ã‚Â§o nÃƒÆ’Ã‚Â£o encontrado</p>
         <button onClick={() => router.back()} className="text-primary font-bold">
           Voltar
         </button>
@@ -109,7 +139,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
   };
 
   const WhatsAppMessage = encodeURIComponent(
-    `Olá! Vim pelo Conectae e tenho interesse no serviço:\n\n${service.title}.\nGostaria de mais informações!`
+    `OlÃƒÆ’Ã‚Â¡! Vim pelo Conectae e tenho interesse no serviÃƒÆ’Ã‚Â§o:\n\n${service.title}.\nGostaria de mais informaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes!`
   );
 
   const handleWhatsApp = () => {
@@ -121,7 +151,31 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
     );
   };
 
+  const handleSubmitReview = async (stars: number, comment: string, isAnonymous = false) => {
+    if (!service?.id || !user) return;
+    setIsSubmittingReview(true);
+    try {
+      const created = await addReview(service.id, stars, comment, isAnonymous);
+      if (created) {
+        setReviews((prev) => [created, ...prev.filter((r) => r.id !== created.id)]);
+      }
+      setShowReviewForm(false);
+
+      void fetchServiceReviews(service.id, { force: true })
+        .then(setReviews)
+        .catch(() => {});
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
   const isOwner = user && service.provider === user.name;
+  const hasUserReviewed = user && reviews.some((r) => r.user_id === user.id);
+  const reviewsCount = reviews.length;
+  const averageRating =
+    reviewsCount > 0
+      ? reviews.reduce((acc, r) => acc + (r.stars || 0), 0) / reviewsCount
+      : 0;
 
   const handleToggleStatus = () => {
     toggleServiceStatus(service.id);
@@ -312,11 +366,10 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             </div>
             <div className="flex items-center gap-2 text-on-surface-variant font-medium text-sm">
               <div className="flex items-center text-primary">
-                <Icon icon="star" weight={700} size={16} className="text-sm mr-1" style={{ fontVariationSettings: "'FILL' 1" }} />
-                <span>{service.rating || 'Novo'}</span>
+                <StarRating rating={averageRating} size={18} />
+                <span className="font-bold text-on-surface ml-1">{averageRating > 0 ? averageRating.toFixed(1) : 'Novo'}</span>
               </div>
-              <span>•</span>
-              <span>{service.reviews_count || 0} avaliações</span>
+              <span>{reviewsCount} avaliações</span>
               <span>•</span>
               <span className="bg-surface-container-high px-2 py-0.5 rounded-md font-bold">{environment?.name || 'Ambiente'}</span>
             </div>
@@ -363,7 +416,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
           {menuItems.length > 0 && (
             <section className="mt-10">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-on-surface tracking-tight">Cardápio / Serviços</h3>
+                <h3 className="text-lg font-bold text-on-surface tracking-tight">CardÃƒÆ’Ã‚Â¡pio / ServiÃƒÆ’Ã‚Â§os</h3>
               </div>
               <div className="space-y-3">
                 {menuItems.map((item: any) => (
@@ -390,13 +443,65 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             </section>
           )}
 
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <StarRating rating={averageRating} size={18} />
+                <h3 className="font-bold text-on-surface">Avaliações</h3>
+              </div>
+              <span className="text-sm text-on-surface-variant">{reviewsCount} avaliações</span>
+            </div>
+
+            <section className="bg-surface-container-lowest rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    <StarRating rating={averageRating} size={22} />
+                    <span className="font-bold text-on-surface ml-1">{averageRating > 0 ? averageRating.toFixed(1) : 'Novo'}</span>
+                  </div>
+                  <span className="text-on-surface-variant text-sm">{reviewsCount} avaliações</span>
+                </div>
+              </div>
+
+              {user && !hasUserReviewed && !isOwner && (
+                <button
+                  onClick={() => setShowReviewForm(true)}
+                  className="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                >
+                  <Icon icon="star" size={18} />
+                  Avaliar Serviço
+                </button>
+              )}
+
+              {hasUserReviewed && (
+                <div className="text-center py-2 text-primary text-sm font-medium">
+                  Você já avaliou este serviço
+                </div>
+              )}
+
+              {showReviewForm && (
+                <div className="mt-3 pt-3 border-t border-outline-variant/10">
+                  <ReviewForm
+                    onSubmit={handleSubmitReview}
+                    onCancel={() => setShowReviewForm(false)}
+                    isSubmitting={isSubmittingReview}
+                  />
+                </div>
+              )}
+            </section>
+
+            <div className="mt-4">
+              <ReviewsList reviews={reviews} />
+            </div>
+          </section>
+
           {/* <section className="mt-12 px-0 mb-8">
             <h3 className="mb-4 text-lg font-bold text-on-surface tracking-tight">Por que pedir no Conect<span className="text-primary">ae</span>?</h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-1 bg-secondary-container/30 p-4 rounded-3xl flex flex-col gap-3">
                 <Icon icon="verified_user" weight={400} size={32} className="text-secondary" />
                 <div>
-                  <p className="font-bold text-secondary text-sm">Segurança</p>
+                  <p className="font-bold text-secondary text-sm">SeguranÃƒÆ’Ã‚Â§a</p>
                   <p className="text-xs text-on-secondary-container/80">Pagamento direto e seguro no delivery.</p>
                 </div>
               </div>
@@ -421,9 +526,9 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             <div className="flex items-center justify-center w-14 h-14 rounded-full bg-error/10 mx-auto mb-4">
               <Icon icon="warning" size={32} className="text-error" />
             </div>
-            <h3 className="text-lg font-bold text-on-surface text-center mb-2">Excluir Serviço?</h3>
+            <h3 className="text-lg font-bold text-on-surface text-center mb-2">Excluir ServiÃƒÆ’Ã‚Â§o?</h3>
             <p className="text-sm text-on-surface-variant text-center mb-6">
-              Esta ação não pode ser desfeita. O serviço será removido permanentemente.
+              Esta aÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o nÃƒÆ’Ã‚Â£o pode ser desfeita. O serviÃƒÆ’Ã‚Â§o serÃƒÆ’Ã‚Â¡ removido permanentemente.
             </p>
             <div className="flex gap-3">
               <button

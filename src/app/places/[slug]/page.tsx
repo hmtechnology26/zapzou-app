@@ -92,7 +92,7 @@ export default async function Page({ params }: Props) {
           {title}
         </h1>
         <p className="mt-3 max-w-3xl text-sm md:text-base leading-relaxed text-on-surface-variant">
-          Veja anuncios, prestadores e servicos vinculados a este ambiente.
+          Veja anúncios, prestadores e servicos vinculados a este ambiente.
         </p>
       </div>
     </section>

@@ -6,7 +6,7 @@ import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/Avatar';
 import { TopAppBar } from '@/components/TopAppBar';
 import { useApp } from '@/hooks/useApp';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { type PlaceSearchResult } from '@/lib/maps';
 import {
   AUTO_APPROVAL_RADIUS_KM,
@@ -43,6 +43,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   const generateSlug = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   const placeSlug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
+  const isFarolPlace = placeSlug === 'igreja-ministerio-farol';
   const placeId = searchParams?.get('placeId');
 
   const environmentsWithSlug = selectedEnvironments.map(env => ({
@@ -55,12 +56,12 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   // Se encontrou o ambiente no banco, remover o placeId da URL
   useEffect(() => {
     if (environment && placeId) {
-      // Remover o placeId da URL quando o ambiente está cadastrado
+      // Remover o placeId da URL quando o ambiente estÃƒÂ¡ cadastrado
       router.replace(`/places/${placeSlug}`, { scroll: false });
     }
   }, [environment, placeId, placeSlug]);
 
-  // Se não encontrou no estado local, buscar diretamente do banco
+  // Se nÃƒÂ£o encontrou no estado local, buscar diretamente do banco
   useEffect(() => {
     if (!environment && placeSlug && !placeFromSearch && loadingEnvironment) {
       const fetchEnvironmentFromDb = async () => {
@@ -91,7 +92,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
               return [...prev, envWithSlug];
             });
           } else {
-            // Ambiente não encontrado no banco - mostrar modal de boas-vindas
+            // Ambiente nÃƒÂ£o encontrado no banco - mostrar modal de boas-vindas
             setShowWelcomeModal(true);
           }
         } catch (err) {
@@ -206,7 +207,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     if (userLocation) return userLocation;
 
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
-      throw new Error('Geolocalização indisponível neste dispositivo.');
+      throw new Error('GeolocalizaÃƒÂ§ÃƒÂ£o indisponÃƒÂ­vel neste dispositivo.');
     }
 
     return new Promise((resolve, reject) => {
@@ -219,7 +220,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           setUserLocation(nextLocation);
           resolve(nextLocation);
         },
-        (error) => reject(new Error(error.message || 'Falha ao obter sua localização.')),
+        (error) => reject(new Error(error.message || 'Falha ao obter sua localizaÃƒÂ§ÃƒÂ£o.')),
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
       );
     });
@@ -252,7 +253,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           typeof effectiveEnvironment.latitude !== 'number' ||
           typeof effectiveEnvironment.longitude !== 'number'
         ) {
-          throw new Error('Este ambiente não possui coordenadas para validação.');
+          throw new Error('Este ambiente nÃƒÂ£o possui coordenadas para validaÃƒÂ§ÃƒÂ£o.');
         }
 
         const distance = calculateDistanceKm(
@@ -263,7 +264,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
         );
 
         if (!isWithinAutoApprovalRadius(distance)) {
-          throw new Error(`Você precisa estar dentro de ${AUTO_APPROVAL_RADIUS_KM * 1000}m para publicar como residente neste ambiente.`);
+          throw new Error(`VocÃƒÂª precisa estar dentro de ${AUTO_APPROVAL_RADIUS_KM * 1000}m para publicar como residente neste ambiente.`);
         }
       }
 
@@ -275,7 +276,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
       setMembership({ status: 'active' });
     } catch (error: any) {
       console.error('Error handling Plus request:', error);
-      alert(error?.message || 'Não foi possível concluir sua solicitação.');
+      alert(error?.message || 'NÃƒÂ£o foi possÃƒÂ­vel concluir sua solicitaÃƒÂ§ÃƒÂ£o.');
     } finally {
       setPublishingModeLoading(false);
     }
@@ -284,6 +285,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   const categories = [
     { id: 'all', label: 'Tudo', icon: 'apps' },
     { id: 'Tecnologia', label: 'Tecnologia', icon: 'terminal' },
+    { id: 'Manutenção', label: "Manutenção", icon: 'engineering'},
     { id: 'Limpeza', label: 'Limpeza', icon: 'cleaning_services' },
     { id: "Alimentação", label: "Alimentação", icon: "restaurant" },
     { id: 'Construção', label: 'Construção', icon: 'construction' },
@@ -298,16 +300,55 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     slug: s.slug || generateSlug(s.title)
   }));
 
-  const filteredServices = servicesWithSlug.filter(s => {
-    const isActive = s.isActive && s.status === 'active';
-    const serviceEnvSlug = s.environmentSlug || (s.environmentId ? environmentsWithSlug.find(e => e.id === s.environmentId)?.slug : undefined);
-    const matchesEnv = serviceEnvSlug === placeSlug || s.environmentId === effectiveEnvironment?.id;
-    const matchesSearch = !search ||
-      s.title.toLowerCase().includes(search.toLowerCase()) ||
-      s.description.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || s.category === selectedCategory;
-    return matchesEnv && matchesSearch && isActive && matchesCategory;
-  });
+  const servicesWithDistance = useMemo(() => {
+    return servicesWithSlug
+      .filter((service) => {
+        const isActive = service.isActive && service.status === 'active';
+        const serviceEnvSlug =
+          service.environmentSlug ||
+          (service.environmentId
+            ? environmentsWithSlug.find((env) => env.id === service.environmentId)?.slug
+            : undefined);
+        const matchesEnv =
+          serviceEnvSlug === placeSlug || service.environmentId === effectiveEnvironment?.id;
+        const searchLower = search.toLowerCase().trim();
+        const matchesSearch =
+          !searchLower ||
+          service.title.toLowerCase().includes(searchLower) ||
+          service.description.toLowerCase().includes(searchLower) ||
+          (service.category || '').toLowerCase().includes(searchLower);
+        const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
+        return matchesEnv && matchesSearch && isActive && matchesCategory;
+      })
+      .map((service) => {
+        if (
+          userLocation &&
+          typeof service.environmentLatitude === 'number' &&
+          typeof service.environmentLongitude === 'number'
+        ) {
+          return {
+            ...service,
+            distance: calculateDistanceKm(
+              userLocation.latitude,
+              userLocation.longitude,
+              service.environmentLatitude,
+              service.environmentLongitude,
+            ),
+          };
+        }
+
+        return { ...service, distance: Infinity };
+      })
+      .sort((a, b) => a.distance - b.distance);
+  }, [
+    effectiveEnvironment?.id,
+    environmentsWithSlug,
+    placeSlug,
+    search,
+    selectedCategory,
+    servicesWithSlug,
+    userLocation,
+  ]);
 
   const mode = searchParams.get('mode');
 
@@ -323,14 +364,14 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     );
   }
 
-  // Se não encontrou ambiente e não está mostrando modal, mostra erro
+  // Se nÃƒÂ£o encontrou ambiente e nÃƒÂ£o estÃƒÂ¡ mostrando modal, mostra erro
   if (!effectiveEnvironment && !showWelcomeModal) {
     return (
       <div className="min-h-screen pb-24 md:pb-8 bg-background">
         <TopAppBar {...topBarProps} />
         <main className="mt-20 px-4 md:px-8 max-w-4xl mx-auto flex items-center justify-center flex-col gap-4 pb-32">
           <Icon icon="error_outline" size={48} className="text-outline" />
-          <p className="text-on-surface-variant">Ambiente não encontrado</p>
+          <p className="text-on-surface-variant">Ambiente nÃƒÂ£o encontrado</p>
           <button onClick={() => router.back()} className="text-primary font-bold">
             Voltar
           </button>
@@ -339,7 +380,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     );
   }
 
-  // Se não encontrou ambiente mas tem o modal, mostrar modal inline
+  // Se nÃƒÂ£o encontrou ambiente mas tem o modal, mostrar modal inline
   if (!effectiveEnvironment && showWelcomeModal && placeSlug) {
     const envName = placeSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     const isChurch = placeFromSearch?.primaryType === 'church' || 
@@ -370,10 +411,10 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                 {envName.toUpperCase()}!
               </h2>
               <p className="text-on-surface-variant text-center mt-4">
-                Você é o primeiro a descobrir este ambiente!
+                VocÃƒÂª ÃƒÂ© o primeiro a descobrir este ambiente!
               </p>
               <p className="text-on-surface-variant text-center mt-4">
-                Seja o primeiro a fazer parte e publicar seus serviços aqui.
+                Seja o primeiro a fazer parte e publicar seus serviÃƒÂ§os aqui.
               </p>
               <div className="p-4 bg-surface-container-lowest rounded-2xl">
                 <p className="text-xs font-black text-primary uppercase tracking-widest mb-2"></p>
@@ -413,7 +454,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
       {seoContent}
 
       {/* Floating Action Button for mobile */}
-      {user && membership?.status === 'active' && (
+      {user && membership?.status === 'active' && !isFarolPlace && (
         <button 
           onClick={() => router.push(`/register-service?envId=${effectiveEnvironment!.id}`)}
           className="md:hidden fixed bottom-24 right-6 z-50 w-14 h-14 rounded-full primary-gradient text-white shadow-2xl flex items-center justify-center hover:scale-110 active:scale-90 transition-all"
@@ -471,16 +512,16 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
            </div>
         )}
 
-        {effectiveEnvironment && (
+        {/* {effectiveEnvironment && (
           <div className="text-center">
             <p className="text-xs font-black uppercase tracking-widest text-primary/60">
-              Você está vendo os serviços de
+              VocÃƒÂª estÃƒÂ¡ vendo os serviÃƒÂ§os de
             </p>
             <h2 className="text-xl font-black text-on-surface mt-1">
               {effectiveEnvironment.name}
             </h2>
           </div>
-        )}
+        )} */}
 
         <div className="relative">
             <div className="flex items-center bg-surface-container-highest rounded-[2.5rem] px-8 py-6 gap-6 focus-within:bg-surface-container-lowest focus-within:ring-8 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group">
@@ -521,7 +562,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                 <h3 className="text-xl font-black text-on-surface tracking-tight">Vincule-se a este ambiente</h3>
                 <p className="text-sm text-on-surface-variant font-medium mt-1">
                   {user.plan === 'plus'
-                    ? 'No Plus, escolha como você atua aqui antes de publicar.'
+                    ? 'No Plus, escolha como vocÃƒÂª atua aqui antes de publicar.'
                     : 'Para publicar serviços aqui, você precisa solicitar acesso à liderança.'}
                 </p>
              </div>
@@ -539,7 +580,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                    disabled={publishingModeLoading}
                    className="px-6 py-4 rounded-full primary-gradient text-white text-sm font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105 disabled:opacity-50"
                  >
-                   Presto Serviço
+                   Presto ServiÃƒÂ§o
                  </button>
                </div>
              ) : (
@@ -559,54 +600,72 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                 <Icon icon="hourglass_empty" size={32} className="text-amber-600" weight={700} />
              </div>
              <div>
-                <h3 className="text-xl font-black text-amber-900 tracking-tight">Acesso em análise</h3>
-                <p className="text-sm text-amber-800 font-medium mt-1">Sua solicitação de vínculo com {effectiveEnvironment!.name} está aguardando aprovação.</p>
+                <h3 className="text-xl font-black text-amber-900 tracking-tight">Acesso em anÃƒÂ¡lise</h3>
+                <p className="text-sm text-amber-800 font-medium mt-1">Sua solicitaÃƒÂ§ÃƒÂ£o de vÃƒÂ­nculo com {effectiveEnvironment!.name} estÃƒÂ¡ aguardando aprovaÃƒÂ§ÃƒÂ£o.</p>
              </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredServices.map((service) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {servicesWithDistance.map((service) => (
             <div 
               key={service.id}
               onClick={() => router.push(`/places/${placeSlug}/services/${service.slug}`)}
-              className="group/card bg-surface-container-lowest p-4 rounded-[2.5rem] flex flex-col gap-5 cursor-pointer hover:shadow-2xl hover:shadow-primary/5 border border-outline-variant/10 transition-all duration-500 active:scale-[0.98] relative overflow-hidden"
+              className="bg-surface-container-lowest p-4 rounded-[2rem] flex gap-4 items-center cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
             >
-              <div className="w-full h-48 rounded-[2rem] overflow-hidden shadow-inner bg-surface-container relative">
+              <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
                 <img 
-                  className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700" 
+                  className="w-full h-full object-cover" 
                   src={service.image} 
                   alt={service.title}
                 loading="lazy" decoding="async" />
               </div>
-              <div className="px-2 pb-2">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2.5 py-1 rounded-full">{service.category}</span>
-                </div>
-                <h3 className="font-black text-on-surface text-lg leading-tight group-hover/card:text-primary transition-colors mb-2">{service.title}</h3>
-                <p className="text-on-surface-variant text-xs line-clamp-2 font-medium leading-relaxed opacity-70">{service.description}</p>
+              <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
+                <div>
+                  <div className="flex items-center justify-between mb-1.5 gap-2">
+                    <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">{service.category || 'Sem categoria'}</span>
+                  </div>
+                  <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#30cc36] transition-colors">{service.title}</h4>
+                  <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">{service.description}</p>
                 
-                <div className="mt-5 pt-5 border-t border-outline-variant/5 flex items-center justify-between">
-                   <span className="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-tighter">Ver detalhes e contato</span>
-                   <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-primary group-hover/card:text-white transition-all transform group-hover/card:translate-x-1">
-                      <Icon icon="arrow_forward" size={20} weight={700} />
-                   </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    {(userLocation || service.environmentName) && (
+                      <div className="flex items-center gap-2">
+                        {userLocation && service.distance !== Infinity && (
+                          <div className="flex items-center gap-1 text-primary">
+                            <Icon icon="location_on" size={12} weight={700} />
+                            <span className="text-[10px] text-[#30cc36] font-bold">
+                              {service.distance < 1
+                                ? `${Math.round(service.distance * 1000)}m`
+                                : `${service.distance.toFixed(1)}km`}
+                            </span>
+                          </div>
+                        )}
+                        {service.environmentName && (
+                          <span className="text-[10px] text-on-surface-variant font-medium">
+                            {service.environmentName}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#30cc36] group-hover/card:text-white transition-all duration-300">
+                      <Icon icon="arrow_forward" size={14} weight={700} />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
           
-          {filteredServices.length === 0 && (
-            <div className="col-span-full text-center py-24 bg-surface-container-low/20 rounded-[3rem] border-2 border-dashed border-outline-variant/10">
-              <Icon icon="search_off" weight={700} size={56} className="mb-4 text-primary/10 mx-auto" />
-              <p className="text-lg font-black text-on-surface/40">Busca sem resultados</p>
-              <p className="text-sm text-on-surface-variant/60 font-medium">Nenhum serviço encontrado com esses filtros neste ambiente.</p>
+          {servicesWithDistance.length === 0 && (
+            <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
+              <p className="text-sm font-bold text-on-surface/40">Nenhum serviço encontrado neste ambiente</p>
             </div>
           )}
         </div>
       </main>
 
-      {/* Modal de boas-vindas para ambiente não cadastrado */}
+      {/* Modal de boas-vindas para ambiente nÃƒÂ£o cadastrado */}
         {showWelcomeModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-surface-container-lowest rounded-3xl p-8 w-full max-w-md space-y-6 animate-in zoom-in-95 duration-200">
@@ -618,7 +677,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                 SEJA BEM VINDO AO {placeFromSearch?.displayName?.text?.toUpperCase() || placeSlug?.toUpperCase() || 'AMBIENTE'}!
               </h2>
               <p className="text-on-surface-variant text-center mt-4">
-                Você é o primeiro a descobrir este ambiente! Seja o primeiro a fazer parte e publicar seus serviços aqui.
+                VocÃƒÂª ÃƒÂ© o primeiro a descobrir este ambiente! Seja o primeiro a fazer parte e publicar seus serviÃƒÂ§os aqui.
               </p>
               <div className="mt-6 p-4 bg-surface-container-lowest rounded-2xl">
                 <p className="text-xs font-black text-primary uppercase tracking-widest mb-2">Como funciona?</p>
@@ -629,7 +688,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                   </li>
                   <li className="flex items-start gap-2">
                     <Icon icon="admin_panel_settings" size={16} className="text-primary mt-0.5" />
-                    <span>Peça autorização para um moderador</span>
+                    <span>PeÃƒÂ§a autorizaÃƒÂ§ÃƒÂ£o para um moderador</span>
                   </li>
                 </ul>
               </div>
@@ -641,7 +700,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                       return;
                     }
                     try {
-                      // Criar solicitação de novo ambiente
+                      // Criar solicitaÃƒÂ§ÃƒÂ£o de novo ambiente
                       const envName = placeFromSearch?.displayName?.text || placeSlug || 'Novo Ambiente';
                       const { error } = await supabase
                         .from('environment_requests')
@@ -653,7 +712,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                         }]);
                       if (error) throw error;
                       setShowWelcomeModal(false);
-                      alert('Solicitação enviada! Em breve este ambiente será aprovado.');
+                      alert('SolicitaÃƒÂ§ÃƒÂ£o enviada! Em breve este ambiente serÃƒÂ¡ aprovado.');
                     } catch (err) {
                       console.error('Error requesting environment:', err);
                       alert('Erro ao solicitar. Tente novamente.');

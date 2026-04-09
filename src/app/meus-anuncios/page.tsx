@@ -83,6 +83,9 @@ export default function MyAdsPage() {
   const [environmentToDelete, setEnvironmentToDelete] =
     useState<Environment | null>(null);
   const [togglingRoleId, setTogglingRoleId] = useState<string | null>(null);
+  const [togglingRoleTarget, setTogglingRoleTarget] = useState<
+    Record<string, "resident" | "service_provider" | null>
+  >({});
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -195,49 +198,68 @@ export default function MyAdsPage() {
     setDeleteModalOpen(true);
   };
 
-  const handleToggleRole = async (envId: string, currentRole: string | null) => {
+  const handleToggleRole = async (
+    envId: string,
+    nextRole: "resident" | "service_provider",
+  ) => {
     if (!user?.id) return;
-    
-    const newRole = currentRole === 'resident' ? 'service_provider' : 'resident';
-    
-    if (newRole === 'resident') {
+
+    const currentRole = affiliations[envId]?.role ?? null;
+    if (currentRole === nextRole) return;
+
+    if (nextRole === "resident") {
       const residentEnvId = Object.entries(affiliations).find(
-        ([id, aff]) => id !== envId && aff.role === 'resident'
+        ([id, aff]) => id !== envId && aff.role === "resident",
       )?.[0];
-      
+
       if (residentEnvId) {
-        const residentEnvName = myContexts.find(e => e.id === residentEnvId)?.name;
-        setStatusNotice(`Você já é morador de "${residentEnvName}". Altere para prestador primeiro.`);
+        const residentEnvName = myContexts.find(
+          (e) => e.id === residentEnvId,
+        )?.name;
+        setStatusNotice(
+          `Você já é morador de "${residentEnvName}". Altere para prestador primeiro.`,
+        );
         setTimeout(() => setStatusNotice(null), 4000);
         return;
       }
     }
-    
+
     setTogglingRoleId(envId);
+    setTogglingRoleTarget((prev) => ({
+      ...prev,
+      [envId]: nextRole,
+    }));
 
     try {
-      const newRole = currentRole === 'resident' ? 'service_provider' : 'resident';
-      
       const { error } = await supabase
-        .from('environment_members')
-        .update({ role: newRole })
-        .eq('environment_id', envId)
-        .eq('user_id', user.id);
+        .from("environment_members")
+        .update({ role: nextRole })
+        .eq("environment_id", envId)
+        .eq("user_id", user.id);
 
       if (error) {
-        console.error('Error toggling role:', error);
-        setStatusNotice('Erro ao alterar função');
+        console.error("Error toggling role:", error);
+        setStatusNotice("Erro ao alterar função");
       } else {
-        setAffiliations(prev => ({
+        setAffiliations((prev) => ({
           ...prev,
-          [envId]: { ...prev[envId], role: newRole as any }
+          [envId]: { ...prev[envId], role: nextRole as any },
         }));
-        setStatusNotice(newRole === 'resident' ? 'Agora você é morador neste ambiente' : 'Agora você é prestador neste ambiente');
+        setStatusNotice(
+          nextRole === "resident"
+            ? "Agora você é morador neste ambiente"
+            : "Agora você é prestador neste ambiente",
+        );
+        signalMembershipChange();
       }
     } catch (err) {
-      console.error('Error toggling role:', err);
+      console.error("Error toggling role:", err);
     } finally {
       setTogglingRoleId(null);
+      setTogglingRoleTarget((prev) => ({
+        ...prev,
+        [envId]: null,
+      }));
       setTimeout(() => setStatusNotice(null), 3000);
     }
   };
@@ -427,37 +449,76 @@ export default function MyAdsPage() {
     </div>
   </div>
 
-  <div className="w-full lg:w-auto lg:flex-shrink-0 space-y-3">
+  <div className="w-full lg:w-auto lg:flex-shrink-0 flex flex-col items-stretch gap-3">
     {isActive && membership?.role && (
-      <button
-        onClick={() => handleToggleRole(env.id, membership?.role)}
-        disabled={togglingRoleId === env.id}
-        className={`w-full lg:w-[220px] h-10 rounded-2xl font-black uppercase text-[9px] flex items-center justify-center gap-2 transition-all ${
-          membership?.role === 'resident'
-            ? 'bg-orange-500/10 text-orange-600 border border-orange-500/20 hover:bg-orange-500/20'
-            : 'bg-blue-600/10 text-blue-700 border border-blue-600/20 hover:bg-blue-600/20'
-        }`}
-      >
-        {togglingRoleId === env.id ? (
-          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-        ) : membership?.role === 'resident' ? (
-          <>
-            <Icon icon="home" size={14} />
+      <div className="w-full lg:w-[260px] rounded-[1.6rem] border border-outline-variant/30 dark:border-[#30cc36]/28 bg-surface-container-low p-1 shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_24px_rgba(48,204,54,0.08)]">
+        <div className="flex items-center justify-between px-3 pt-2 pb-1">
+          <span className="text-[9px] font-black uppercase tracking-[0.28em] text-on-surface-variant/60">
+            Tipo de acesso
+          </span>
+          <span className="text-[9px] font-black uppercase tracking-[0.18em] text-primary">
+            {membership?.role === "resident" ? "Morador" : "Prestador"}
+          </span>
+        </div>
+
+        <div className="relative grid grid-cols-2 rounded-full bg-surface-container-high/70 p-1 overflow-hidden border border-outline-variant/15 dark:border-[#30cc36]/15">
+          <div
+            className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-lg shadow-primary/25 transition-transform duration-300 ease-out ${
+              membership?.role === "service_provider"
+                ? "translate-x-full"
+                : "translate-x-0"
+            }`}
+          />
+
+          <button
+            type="button"
+            onClick={() => handleToggleRole(env.id, "resident")}
+            disabled={togglingRoleId === env.id}
+            aria-pressed={membership?.role === "resident"}
+            className={`relative z-10 h-11 rounded-full font-black uppercase text-[9px] flex items-center justify-center gap-2 transition-colors ${
+              togglingRoleTarget[env.id] === "resident"
+                ? "text-white"
+                : membership?.role === "resident"
+                  ? "text-white"
+                  : "text-on-surface-variant/80 hover:text-on-surface"
+            }`}
+          >
+            {togglingRoleTarget[env.id] === "resident" ? (
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Icon icon="home" size={14} />
+            )}
             Morador
-          </>
-        ) : (
-          <>
-            <Icon icon="work" size={14} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleToggleRole(env.id, "service_provider")}
+            disabled={togglingRoleId === env.id}
+            aria-pressed={membership?.role === "service_provider"}
+            className={`relative z-10 h-11 rounded-full font-black uppercase text-[9px] flex items-center justify-center gap-2 transition-colors ${
+              togglingRoleTarget[env.id] === "service_provider"
+                ? "text-white"
+                : membership?.role === "service_provider"
+                  ? "text-white"
+                  : "text-on-surface-variant/80 hover:text-on-surface"
+            }`}
+          >
+            {togglingRoleTarget[env.id] === "service_provider" ? (
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Icon icon="work" size={14} />
+            )}
             Prestador
-          </>
-        )}
-      </button>
+          </button>
+        </div>
+      </div>
     )}
 
     {isActive && (
       <button
         onClick={() => router.push(`/meus-anuncios/${env.id}`)}
-        className="w-full lg:w-[220px] h-12 rounded-2xl bg-[#30cc36] text-white font-black uppercase text-[10px] md:text-sm shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2 hover:brightness-110 whitespace-nowrap"
+        className="w-full lg:w-[260px] h-12 rounded-2xl bg-surface-container-high/80 text-on-surface border border-outline-variant/35 shadow-[0_8px_20px_rgba(15,23,42,0.05)] transition-all duration-300 ease-out font-black uppercase text-[10px] md:text-sm active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap hover:bg-surface-container-high hover:border-primary/25 hover:text-primary dark:bg-[#223626] dark:text-[#e8f8ea] dark:border-[#30cc36]/28 dark:shadow-[0_8px_20px_rgba(48,204,54,0.08)] dark:hover:bg-[#2b4a2f] dark:hover:border-[#30cc36]/45 dark:hover:text-white"
       >
         <Icon icon="store" size={18} />
         Gerenciar Anúncios
@@ -523,3 +584,5 @@ export default function MyAdsPage() {
     </div>
   );
 }
+
+
