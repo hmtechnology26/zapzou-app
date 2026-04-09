@@ -4,7 +4,7 @@ export default function Head() {
       <title>Suporte e contato</title>
       <meta
         name="description"
-        content="Fale com o time da Conectae para suporte, duvidas e atendimento."
+        content="Fale com o time da ConectaE para suporte, duvidas e atendimento."
       />
     </>
   );

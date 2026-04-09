@@ -10,7 +10,7 @@ export default function ContactPage() {
   const { user } = useApp();
 
   const handleWhatsApp = () => {
-    const message = encodeURIComponent(`Olá! Sou o ${user?.name || 'Usuário'} e preciso de suporte com a plataforma Conectae.`);
+    const message = encodeURIComponent(`Olá! Sou o ${user?.name || 'Usuário'} e preciso de suporte com a plataforma ConectaE.`);
     window.open(`https://wa.me/5551983117180?text=${message}`, '_blank');
   };
 

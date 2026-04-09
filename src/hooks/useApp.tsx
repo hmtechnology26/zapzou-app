@@ -544,9 +544,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [user?.id, membershipVersion]);
 
   useEffect(() => {
+    void fetchServices();
     if (selectedEnvironment) {
       refreshMembership();
-      fetchServices();
       if (user) {
         fetchMembers();
       }

@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useApp } from "@/hooks/useApp";
 import { BottomNav } from "@/components/BottomNav";
-import { Icon } from "@/components/Icon";
 import { useServiceWorkerRegistration } from "@/app/useServiceWorkerRegistration";
 
 function ProtectedLayoutSkeleton() {
@@ -19,7 +18,7 @@ function ProtectedLayoutSkeleton() {
       <header className="fixed inset-x-0 top-0 z-40 h-16 bg-surface-container-lowest/60 backdrop-blur-xl border-b border-outline-variant/20 flex items-center px-4">
         <div className="h-6 w-32 rounded-full bg-surface-container-lowest/60" />
         <div className="ml-auto flex items-center gap-2">
-        <div className="h-10 w-10 rounded-full bg-surface-container-lowest/60" />
+          <div className="h-10 w-10 rounded-full bg-surface-container-lowest/60" />
           <div className="h-10 w-16 rounded-full bg-surface-container-lowest/60" />
         </div>
       </header>
@@ -41,88 +40,17 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useApp();
   const router = useRouter();
   const pathname = usePathname() ?? "";
-  const searchParams = useSearchParams();
   const [hasMounted, setHasMounted] = useState(false);
-  const [locationPermission, setLocationPermission] = useState<
-    "granted" | "denied" | "prompt" | "unknown"
-  >("unknown");
-  const [hasSeenLocationPrompt, setHasSeenLocationPrompt] = useState(false);
 
-  const LOCATION_PROMPT_STORAGE_KEY = "zapzou-location-permission-prompted";
-
-  const publicExact = [
-    "/",
-    "/login",
-    "/search",
-    "/places",
-    "/contact",
-    "/favorites",
-  ];
-
+  const publicExact = ["/", "/login", "/search", "/places", "/contact", "/favorites"];
   const publicPrefixes = ["/service/", "/places/", "/auth/"];
 
   const isPublicPage =
     publicExact.includes(pathname) ||
     publicPrefixes.some((prefix) => pathname.startsWith(prefix));
 
-  const locationExemptPages = [
-    "/login",
-    "/places",
-    "/favorites",
-    "/register-service",
-    "/edit-profile",
-    "/meus-anuncios",
-    "/profile",
-    "/terms",
-    "/privacy",
-    "/plans",
-    "/plans/plus",
-    "/plans/pro",
-    "/bulletins",
-    "/notifications",
-    "/select-environments",
-    "/admin",
-    "/contact",
-  ];
-
   useEffect(() => {
     setHasMounted(true);
-  }, []);
-
-  useEffect(() => {
-    try {
-      const storedPrompt = window.localStorage.getItem(
-        LOCATION_PROMPT_STORAGE_KEY,
-      );
-      setHasSeenLocationPrompt(storedPrompt === "true");
-    } catch {
-      setHasSeenLocationPrompt(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const checkLocationPermission = async () => {
-      if (!navigator.permissions) {
-        setLocationPermission("unknown");
-        return;
-      }
-
-      try {
-        const permissionStatus = await navigator.permissions.query({
-          name: "geolocation" as PermissionName,
-        });
-        setLocationPermission(permissionStatus.state);
-
-        permissionStatus.onchange = () => {
-          setLocationPermission(permissionStatus.state);
-        };
-      } catch (err) {
-        console.error("Error checking location permission:", err);
-        setLocationPermission("unknown");
-      }
-    };
-
-    checkLocationPermission();
   }, []);
 
   useEffect(() => {
@@ -146,93 +74,12 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
     return <ProtectedLayoutSkeleton />;
   }
 
-  const isLocationExemptPath = locationExemptPages.some(
-    (page) => pathname === page || pathname.startsWith(`${page}/`),
-  );
-
-  const shouldShowLocationModal =
-    locationPermission !== "granted" &&
-    !hasSeenLocationPrompt &&
-    !isLocationExemptPath;
-
   const showBottomNav = hasMounted && pathname ? true : false;
 
   return (
     <div className="min-h-screen">
       {children}
       {showBottomNav && <BottomNav />}
-      {shouldShowLocationModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-surface-container-lowest rounded-2xl p-8 w-full max-w-md mx-4 space-y-6">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <svg
-                  className="w-8 h-8 text-primary"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-xl font-bold text-on-surface">
-                Permissão de localização necessária
-              </h2>
-              <p className="text-on-surface-variant text-center">
-                Para mostrar serviços próximos a você, precisamos acessar sua
-                localização. Por favor, conceda permissão para continuar.
-              </p>
-              <button
-                onClick={() => {
-                  if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                      () => {
-                        setLocationPermission("granted");
-                        try {
-                          window.localStorage.setItem(LOCATION_PROMPT_STORAGE_KEY, "true");
-                        } catch {}
-                        setHasSeenLocationPrompt(true);
-                      },
-                      () => {
-                        setLocationPermission("denied");
-                        try {
-                          window.localStorage.setItem(LOCATION_PROMPT_STORAGE_KEY, "true");
-                        } catch {}
-                        setHasSeenLocationPrompt(true);
-                      },
-                    );
-                  } else {
-                    setHasSeenLocationPrompt(true);
-                  }
-                }}
-                className="w-full bg-primary text-white font-bold py-3 px-6 mt-6 rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                  <span>Conceder permissão de localização</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

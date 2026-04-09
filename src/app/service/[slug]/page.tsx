@@ -41,27 +41,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const environmentSlug = service?.environments?.slug;
   const description =
     service?.description?.slice(0, 160) ||
-    `Veja detalhes do servico ${title}, fotos, avaliacao e contato direto na Conectae.`;
+    `Veja detalhes do servico ${title}, fotos, avaliacao e contato direto na ConectaE.`;
   const canonical = environmentSlug
     ? `${siteUrl}/places/${environmentSlug}/services/${params.slug}`
     : `${siteUrl}/service/${params.slug}`;
   const isIndexable = service?.status === 'active' || service?.is_active === true || !service;
 
   return {
-    title: `${title} | Conectae`,
+    title: `${title} | ConectaE`,
     description,
     alternates: { canonical },
     robots: isIndexable ? { index: true, follow: true } : { index: false, follow: false },
     openGraph: {
       type: 'article',
       url: canonical,
-      title: `${title} | Conectae`,
+      title: `${title} | ConectaE`,
       description,
-      siteName: 'Conectae',
+      siteName: 'ConectaE',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | Conectae`,
+      title: `${title} | ConectaE`,
       description,
     },
   };
@@ -105,7 +105,7 @@ export default async function Page({ params }: Props) {
     url: canonical,
     provider: {
       '@type': 'Organization',
-      name: 'Conectae',
+      name: 'ConectaE',
       url: siteUrl,
     },
   };

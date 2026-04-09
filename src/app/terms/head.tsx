@@ -4,7 +4,7 @@ export default function Head() {
       <title>Termos de uso</title>
       <meta
         name="description"
-        content="Leia os termos de uso da plataforma Conectae."
+        content="Leia os termos de uso da plataforma ConectaE."
       />
     </>
   );
