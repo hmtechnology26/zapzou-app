@@ -312,35 +312,72 @@ export default function MyAdsPage() {
 
   if (!mounted) return null;
 
+  const activeContextsCount = myContexts.filter(
+    (env) => affiliations[env.id]?.status === "active",
+  ).length;
+  const pendingContextsCount = myContexts.filter(
+    (env) => affiliations[env.id]?.status === "pending",
+  ).length;
+
   return (
     <div className="relative min-h-screen bg-background overflow-x-hidden pb-24">
       <TopAppBar />
 
       <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-12 pb-32">
-        <section className="bg-primary/5 border border-primary/10 rounded-[3rem] p-10 shadow-sm text-center relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-          <div className="relative z-10">
-            <div className="w-16 h-16 bg-[#30cc36]/10 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-[#30cc36]/20 group-hover:scale-110 transition-transform duration-500">
-              <Icon
-                icon="add_location_alt"
-                size={36}
-                className="text-[#30cc36]"
-                weight={700}
-              />
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-primary/10 bg-gradient-to-br from-surface-container-lowest via-surface-container-lowest to-[#30cc36]/[0.08] p-6 shadow-sm md:p-8">
+          <div className="pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 left-24 h-32 w-32 rounded-full bg-primary/5 blur-3xl" />
+
+          <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-primary">
+                Painel de anúncios
+              </span>
+              <h2 className="mt-4 text-3xl font-black tracking-tight text-on-surface md:text-5xl">
+                Meus anúncios
+              </h2>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-on-surface-variant md:text-base">
+                Gerencie seus ambientes vinculados, altere seu tipo de acesso e
+                abra a central de anúncios de cada local sem perder o contexto.
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                <span className="inline-flex items-center rounded-full border border-outline-variant/10 bg-background/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant shadow-sm">
+                  {myContexts.length} ambientes
+                </span>
+                <span className="inline-flex items-center rounded-full border border-outline-variant/10 bg-background/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant shadow-sm">
+                  {activeContextsCount} ativos
+                </span>
+                {pendingContextsCount > 0 && (
+                  <span className="inline-flex items-center rounded-full border border-outline-variant/10 bg-background/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant shadow-sm">
+                    {pendingContextsCount} pendentes
+                  </span>
+                )}
+              </div>
             </div>
-            {/* <h2 className="text-2xl font-black text-on-surface tracking-tighter">
-              Procure seu Ambiente
-            </h2> */}
-            {/* <p className="text-base  text-on-surface-variant max-w-md mx-auto mt-3 font-small leading-relaxed">
-              Leve seus serviços para novos condomínios e comunidades. Solicite
-              vínculo agora mesmo.
-            </p> */}
-            <button
-              onClick={open}
-              className="mt-2 uppercase py-3 primary-gradient text-white text-sm rounded-full px-20 py-5 font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105"
-            >
-              Procurar Ambiente
-            </button>
+
+            <div className="w-full md:max-w-sm">
+              <div className="flex items-center gap-3 rounded-[1.5rem] border border-outline-variant/10 bg-background/70 px-4 py-4 shadow-sm">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Icon icon="add_location_alt" size={28} weight={700} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-black text-on-surface">
+                    Procurar um novo ambiente
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">
+                    Solicite vínculo quando quiser anunciar em outro local.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={open}
+                className="mt-3 w-full rounded-full px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-primary/25 transition-transform hover:scale-[1.02] active:scale-95 primary-gradient"
+              >
+                Procurar Ambiente
+              </button>
+            </div>
           </div>
         </section>
 
@@ -395,12 +432,12 @@ export default function MyAdsPage() {
                 return (
                   <article
                     key={env.id}
-                    className="relative flex flex-col justify-between gap-5 overflow-hidden rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest p-5 pr-5 shadow-sm transition-all lg:flex-row lg:items-center lg:pr-16"
+                    className="relative flex flex-col justify-between gap-5 overflow-hidden rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest p-5 shadow-sm transition-all lg:flex-row lg:items-center lg:pr-16"
                   >
   <button
     onClick={() => handleDeleteClick(env)}
     disabled={deletingId === env.id}
-    className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-error/10 hover:text-error transition-colors disabled:opacity-50"
+    className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-error/10 hover:text-error transition-colors disabled:opacity-50"
   >
     {deletingId === env.id ? (
       <div className="w-4 h-4 border-2 border-error/30 border-t-error rounded-full animate-spin" />
@@ -409,7 +446,7 @@ export default function MyAdsPage() {
     )}
   </button>
 
-  <div className="flex items-center gap-4 flex-1 min-w-0">
+  <div className="flex items-center gap-4 flex-1 min-w-0 pr-10 lg:pr-0">
     <div className="w-16 h-16 rounded-2xl bg-surface-container overflow-hidden flex-shrink-0 shadow-inner">
       {env.image ? (
         <img
@@ -427,7 +464,7 @@ export default function MyAdsPage() {
     </div>
 
     <div className="flex-1 min-w-0">
-      <div className="flex flex-wrap items-center gap-2 mb-1.5">
+      <div className="flex flex-wrap items-center gap-2 mb-1.5 pr-1">
         <h4 className="font-bold text-on-surface truncate">{env.name}</h4>
                 <span
                   className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border ${
@@ -458,9 +495,9 @@ export default function MyAdsPage() {
     </div>
   </div>
 
-  <div className="w-full lg:w-auto lg:flex-shrink-0 flex flex-col items-stretch gap-3">
+  <div className="-mx-5 grid w-[calc(100%+2.5rem)] gap-3 min-w-0 px-5 lg:mx-0 lg:w-auto lg:flex-shrink-0 lg:px-0">
     {isActive && membership?.role && (
-      <div className="w-full lg:w-[260px] rounded-[1.6rem] border border-outline-variant/30 dark:border-[#30cc36]/28 bg-surface-container-low p-1 shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_24px_rgba(48,204,54,0.08)]">
+      <div className="w-full min-w-0 lg:w-[260px] rounded-[1.6rem] border border-outline-variant/30 dark:border-[#30cc36]/28 bg-surface-container-low p-1 shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_24px_rgba(48,204,54,0.08)]">
         <div className="flex items-center justify-between px-3 pt-2 pb-1">
           <span className="text-[9px] font-black uppercase tracking-[0.28em] text-on-surface-variant/60">
             Tipo de acesso
@@ -470,7 +507,7 @@ export default function MyAdsPage() {
           </span>
         </div>
 
-        <div className="relative grid grid-cols-2 rounded-full bg-surface-container-high/70 p-1 overflow-hidden border border-outline-variant/15 dark:border-[#30cc36]/15">
+        <div className="relative grid w-full grid-cols-2 rounded-full bg-surface-container-high/70 p-1 overflow-hidden border border-outline-variant/15 dark:border-[#30cc36]/15">
           <div
             className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-lg shadow-primary/25 transition-transform duration-300 ease-out ${
               isServiceProviderRole
@@ -484,7 +521,7 @@ export default function MyAdsPage() {
             onClick={() => handleToggleRole(env.id, "resident")}
             disabled={togglingRoleId === env.id}
             aria-pressed={isResidentRole}
-            className={`relative z-10 h-11 rounded-full font-black uppercase text-[9px] flex items-center justify-center gap-2 transition-colors ${
+            className={`relative z-10 h-11 w-full rounded-full font-black uppercase text-[9px] flex items-center justify-center gap-2 transition-colors ${
               togglingRoleTarget[env.id] === "resident"
                 ? "text-white"
                 : isResidentRole
@@ -505,7 +542,7 @@ export default function MyAdsPage() {
             onClick={() => handleToggleRole(env.id, "service_provider")}
             disabled={togglingRoleId === env.id}
             aria-pressed={isServiceProviderRole}
-            className={`relative z-10 h-11 rounded-full font-black uppercase text-[9px] flex items-center justify-center gap-2 transition-colors ${
+            className={`relative z-10 h-11 w-full rounded-full font-black uppercase text-[9px] flex items-center justify-center gap-2 transition-colors ${
               togglingRoleTarget[env.id] === "service_provider"
                 ? "text-white"
                 : isServiceProviderRole
