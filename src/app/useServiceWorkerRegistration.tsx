@@ -37,7 +37,11 @@ async function clearLegacyServiceWorkersAndCaches() {
 
   try {
     const cacheKeys = await caches.keys();
-    await Promise.all(cacheKeys.map((key) => caches.delete(key)));
+    await Promise.all(
+      cacheKeys
+        .filter((key) => key.startsWith("zapzou-"))
+        .map((key) => caches.delete(key)),
+    );
   } catch (error) {
     console.warn("PWA migration: failed to clear legacy caches.", error);
   }
@@ -55,6 +59,9 @@ export function useServiceWorkerRegistration() {
 
     let cancelled = false;
     let shouldReload = false;
+    let idleHandle: number | null = null;
+    let timeoutHandle: number | null = null;
+    let loadListener: (() => void) | null = null;
 
     const handleControllerChange = () => {
       if (!shouldReload || cancelled) {
@@ -135,12 +142,42 @@ export function useServiceWorkerRegistration() {
       }
     };
 
+    const startRegistration = () => {
+      if (cancelled) return;
+
+      if ("requestIdleCallback" in window) {
+        idleHandle = window.requestIdleCallback(() => {
+          void register();
+        }, { timeout: 4000 });
+        return;
+      }
+
+      timeoutHandle = window.setTimeout(() => {
+        void register();
+      }, 1200);
+    };
+
     navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
-    void register();
+
+    if (document.readyState === "complete") {
+      startRegistration();
+    } else {
+      loadListener = () => startRegistration();
+      window.addEventListener("load", loadListener, { once: true });
+    }
 
     return () => {
       cancelled = true;
       navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
+      if (loadListener) {
+        window.removeEventListener("load", loadListener);
+      }
+      if (idleHandle !== null && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleHandle);
+      }
+      if (timeoutHandle !== null) {
+        window.clearTimeout(timeoutHandle);
+      }
     };
   }, []);
 }

@@ -394,9 +394,9 @@ export default function MyAdsPage() {
 
                 return (
                   <article
-  key={env.id}
-  className="bg-surface-container-lowest rounded-[2rem] p-5 pr-16 border border-outline-variant/10 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 transition-all relative overflow-hidden"
->
+                    key={env.id}
+                    className="relative flex flex-col justify-between gap-5 overflow-hidden rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest p-5 pr-5 shadow-sm transition-all lg:flex-row lg:items-center lg:pr-16"
+                  >
   <button
     onClick={() => handleDeleteClick(env)}
     disabled={deletingId === env.id}

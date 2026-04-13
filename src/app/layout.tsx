@@ -1,11 +1,16 @@
 import './globals.css';
 import 'react-material-symbols/rounded';
 import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
 import { Providers } from './providers';
 import ProtectedLayout from './layout-client';
 import { getSiteUrl } from '@/lib/seo';
 
 const siteUrl = getSiteUrl();
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -63,12 +68,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
-      </head>
-      <body>
+      <body className={inter.className}>
         <Providers>
           <ProtectedLayout>{children}</ProtectedLayout>
         </Providers>

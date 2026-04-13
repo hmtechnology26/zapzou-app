@@ -1,6 +1,6 @@
-// Keep the worker lightweight: we avoid app-shell caching so the web version
-// stays fresh and only provide a network-first offline fallback for pages.
-const CACHE_VERSION = "v4";
+// Keep the worker lightweight: cache only static assets and use network-first
+// for navigations so the app stays fresh without heavy shell caches.
+const STATIC_CACHE = "zapzou-static-v5";
 const CACHE_PREFIX = "zapzou-";
 const IS_LOCALHOST =
   self.location.hostname === "localhost" ||
@@ -87,6 +87,41 @@ async function networkFirstNavigation(request) {
   }
 }
 
+async function cacheFirstAsset(request) {
+  const cache = await caches.open(STATIC_CACHE);
+  const cached = await cache.match(request);
+  if (cached) {
+    return cached;
+  }
+
+  const response = await fetch(request);
+  if (response && response.ok) {
+    void cache.put(request, response.clone());
+  }
+  return response;
+}
+
+function isStaticAssetRequest(request) {
+  const url = new URL(request.url);
+
+  if (url.origin !== self.location.origin) {
+    return false;
+  }
+
+  return (
+    request.destination === "script" ||
+    request.destination === "style" ||
+    request.destination === "font" ||
+    request.destination === "image" ||
+    request.destination === "manifest" ||
+    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/_next/image") ||
+    url.pathname.startsWith("/pwa-") ||
+    url.pathname.startsWith("/apple-touch-icon") ||
+    url.pathname.startsWith("/favicon")
+  );
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
 });
@@ -122,5 +157,10 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith(networkFirstNavigation(request));
+    return;
+  }
+
+  if (isStaticAssetRequest(request)) {
+    event.respondWith(cacheFirstAsset(request));
   }
 });
