@@ -563,7 +563,7 @@ export default function HomePage() {
           </section>
         )}
 
-        {!selectedEnvironment && (
+        {/* {!selectedEnvironment && (
           <section className="bg-primary/5 p-6 rounded-3xl text-center space-y-3 border border-primary/10">
             <div className="w-16 h-16 rounded-full bg-primary-container mx-auto flex items-center justify-center">
               <Icon icon="touch_app" size={32} className="text-primary" />
@@ -580,7 +580,7 @@ export default function HomePage() {
               Ver ambientes
             </button>
           </section>
-        )}
+        )} */}
       </main>
     </div>
   );
