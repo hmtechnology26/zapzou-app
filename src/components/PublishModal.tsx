@@ -21,6 +21,7 @@ import {
   isPlanAtServiceLimit,
   type PublicationMode,
 } from '@/lib/plan-rules';
+import { SERVICE_CATEGORIES } from '@/lib/service-categories';
 import { searchPlaces, type PlaceSearchResult } from '@/lib/maps';
 import type { Environment } from '@/types';
 
@@ -31,7 +32,7 @@ const PLACE_CATEGORIES = [
 
 type PlaceCategory = (typeof PLACE_CATEGORIES)[number]['id'];
 
-const serviceCategories = ['Alimentação', 'Limpeza', 'Manutenção', 'Pet Sitting', 'Beleza', 'Tecnologia', 'Outros'];
+const serviceCategories = SERVICE_CATEGORIES.map((category) => category.label);
 
 export function PublishModal() {
   const router = useRouter();
@@ -291,8 +292,9 @@ export function PublishModal() {
     setPublicationMode(null);
 
     try {
-      const inferredType = inferEnvironmentTypeFromPlace(place.primaryType);
-      const inferredFlags = inferEnvironmentValidationFlagsFromPlace(place.primaryType);
+      const searchContextText = `${place.displayName?.text || ''} ${searchQuery}`;
+      const inferredType = inferEnvironmentTypeFromPlace(place.primaryType, searchContextText);
+      const inferredFlags = inferEnvironmentValidationFlagsFromPlace(place.primaryType, searchContextText);
 
       const { data: existingEnv, error: fetchError } = await supabase
         .from('environments')
@@ -375,6 +377,7 @@ export function PublishModal() {
       const membershipInfo = await membershipInfoPromise;
       const decision = resolveEnvironmentAccessDecision({
         id: envRecord.id,
+        name: envRecord.name || place.displayName?.text || '',
         type: (envRecord.type as Environment['type']) || inferredType,
         requiresModeratorApproval:
           envRecord.requires_moderator_approval ?? inferredFlags.requiresModeratorApproval,
@@ -398,7 +401,10 @@ export function PublishModal() {
         id: envRecord.id,
         slug: envRecord.slug || place.displayName?.text?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || place.id,
         name: envRecord.name || place.displayName?.text || '',
-        type: (envRecord.type as Environment['type']) || inferredType,
+        type:
+          inferredType === 'church' || envRecord.type === 'church'
+            ? 'church'
+            : ((envRecord.type as Environment['type']) || inferredType),
         members: 1,
         image: '',
         latitude: envRecord.latitude ?? place.location?.latitude,
@@ -436,6 +442,16 @@ export function PublishModal() {
         return;
       }
 
+      if (decision.mode === 'moderator') {
+        await syncEnvironmentMembership(normalizedEnvironment.id, 'pending', {
+          role: 'member',
+        });
+        setSelectedEnvironment(normalizedEnvironment);
+        setActiveEnvId(null);
+        setStep('moderator');
+        return;
+      }
+
       if (user.plan === 'plus') {
         await syncEnvironmentMembership(normalizedEnvironment.id, 'active', {
           role:
@@ -446,24 +462,6 @@ export function PublishModal() {
         setSelectedEnvironment(normalizedEnvironment);
         setActiveEnvId(normalizedEnvironment.id);
         proceedToPublicationMode();
-        return;
-      }
-
-      if (decision.mode === 'moderator') {
-        setActiveEnvId(null);
-        setStep('moderator');
-        setUploading(false);
-
-        void membershipInfoPromise.then((nextMembershipInfo) => {
-          if (nextMembershipInfo?.status === 'active') {
-            setSelectedPlaceDecision({
-              ...decision,
-              mode: 'open',
-            });
-            setActiveEnvId(normalizedEnvironment.id);
-            setSelectedEnvironment(normalizedEnvironment);
-          }
-        });
         return;
       }
 
@@ -1021,7 +1019,9 @@ export function PublishModal() {
                   </h4>
                 </div>
                 <p className="mt-3 max-w-sm text-sm leading-6 text-on-surface-variant">
-                  Se você reside aqui, vamos validar os 500m. Se apenas presta serviço, a publicação segue livre.
+                  {selectedPlaceDecision?.mode === 'open'
+                    ? 'Você já foi aprovado neste ambiente e pode publicar livremente.'
+                    : 'Se você reside aqui, vamos validar os 500m. Se apenas presta serviço, a publicação segue livre.'}
                 </p>
                 {errorMsg && (
                   <div className="mt-4 rounded-2xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
@@ -1041,6 +1041,23 @@ export function PublishModal() {
                       }
                       
                       setPublicationMode('resident');
+
+                      if (selectedPlaceDecision?.mode === 'open') {
+                        setUploading(true);
+                        try {
+                          await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', { role: 'resident' });
+                          setSelectedEnvironment(selectedEnvironmentRecord);
+                          setActiveEnvId(selectedEnvironmentRecord.id);
+                          setResidentEnvironmentId(selectedEnvironmentRecord.id);
+                          setStep('form');
+                        } catch (err: any) {
+                          setErrorMsg(err?.message || 'Não foi possível validar sua localização.');
+                        } finally {
+                          setUploading(false);
+                        }
+                        return;
+                      }
+
                       const distance = userLocation &&
                         typeof selectedEnvironmentRecord.latitude === 'number' &&
                         typeof selectedEnvironmentRecord.longitude === 'number'

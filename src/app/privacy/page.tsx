@@ -2,57 +2,109 @@
 
 import Link from 'next/link';
 
+const sections = [
+  {
+    title: '1. Dados coletados',
+    body: 'Coletamos apenas os dados necessários para o funcionamento da plataforma e para a publicação/visualização de serviços.',
+    items: [
+      'Dados de autenticação via Google, por meio do Supabase Auth.',
+      'Dados de perfil, como nome e avatar, além das informações inseridas na publicação de serviços.',
+      'Localização, quando necessária, para validar regras de publicação por ambiente.',
+    ],
+  },
+  {
+    title: '2. Finalidades',
+    body: 'Usamos os dados para autenticar usuários, manter a conta ativa, exibir serviços e aplicar regras de segurança.',
+    items: [
+      'Permitir o login e o uso contínuo da conta.',
+      'Exibir e organizar serviços por comunidade e ambiente.',
+      'Prevenir fraudes, duplicidade de contato e uso indevido da plataforma.',
+    ],
+  },
+  {
+    title: '3. Compartilhamento',
+    body: 'O contato com prestadores pode ocorrer por links de WhatsApp e Instagram informados pelo próprio usuário.',
+    items: ['Não vendemos dados pessoais.', 'Não compartilhamos informações além do necessário para o funcionamento do app.'],
+  },
+  {
+    title: '4. Armazenamento',
+    body: 'Os dados ficam armazenados no Supabase, incluindo banco de dados e autenticação.',
+    items: [
+      'Quando aplicável, imagens e arquivos podem ser armazenados em um serviço de storage configurado.',
+      'Mantemos os registros pelo tempo necessário para operar a plataforma e atender obrigações legais.',
+    ],
+  },
+  {
+    title: '5. Seus direitos',
+    body: 'Você pode solicitar atualização ou remoção de dados conforme aplicável, além de pedir suporte sobre o uso da conta.',
+    items: ['Consulte também os Termos de Uso para entender as regras da plataforma.'],
+  },
+];
+
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-background px-6 py-10">
-      <div className="mx-auto w-full max-w-3xl">
-        <h1 className="text-3xl font-extrabold text-on-surface">Política de Privacidade</h1>
-        <p className="mt-2 text-sm text-on-surface-variant">Última atualização: 26/03/2026</p>
+    <main className="min-h-screen bg-background pb-20 pt-20 text-on-surface">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 md:px-8">
+        <section className="rounded-[2.5rem] border border-outline-variant/10 bg-gradient-to-br from-surface-container-lowest via-surface-container-lowest to-[#30cc36]/[0.06] p-6 shadow-sm md:p-8">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-primary">
+                Política de privacidade
+              </span>
+              <span className="text-xs font-medium text-on-surface-variant">
+                Última atualização: 26/03/2026
+              </span>
+            </div>
 
-        <section className="mt-8 space-y-4 text-on-surface">
-          <p>
-            Esta Política explica, de forma resumida, como tratamos dados pessoais no Conectae. Ao usar o aplicativo,
-            você concorda com este tratamento conforme descrito aqui.
+            <div className="max-w-3xl">
+              <h1 className="text-3xl font-black tracking-tight text-on-surface md:text-5xl">
+                Política de Privacidade
+              </h1>
+              <p className="mt-3 text-sm leading-relaxed text-on-surface-variant md:text-base">
+                Esta política explica como tratamos os dados pessoais no ConectaE e quais informações podem ser
+                coletadas durante o uso da plataforma.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest p-5 shadow-sm md:p-6">
+          <p className="text-sm leading-relaxed text-on-surface-variant md:text-base">
+            Ao usar o aplicativo, você concorda com este tratamento de dados conforme descrito nesta página.
           </p>
+        </section>
 
-          <h2 className="mt-6 text-xl font-bold">1. Dados coletados</h2>
-          <ul className="list-disc pl-6 text-on-surface">
-            <li>Dados de autenticação via Google (por meio do Supabase Auth).</li>
-            <li>Dados de perfil (ex.: nome e avatar) e informações fornecidas ao publicar serviços.</li>
-            <li>
-              Localização (quando necessária) para validar regras de publicação por ambiente (ex.: raio de 500m).
-            </li>
-          </ul>
+        <div className="grid gap-4">
+          {sections.map((section) => (
+            <section
+              key={section.title}
+              className="rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest p-5 shadow-sm md:p-6"
+            >
+              <h2 className="text-lg font-black tracking-tight text-on-surface md:text-xl">
+                {section.title}
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-on-surface-variant md:text-base">
+                {section.body}
+              </p>
+              <ul className="mt-4 space-y-2 text-sm leading-relaxed text-on-surface-variant md:text-base">
+                {section.items.map((item) => (
+                  <li key={item} className="flex gap-3">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
 
-          <h2 className="mt-6 text-xl font-bold">2. Finalidades</h2>
-          <ul className="list-disc pl-6 text-on-surface">
-            <li>Autenticar usuários e manter a conta ativa.</li>
-            <li>Permitir publicação e visualização de serviços por comunidade/ambiente.</li>
-            <li>Aplicar regras de segurança e prevenção de fraude (ex.: duplicidade de contato).</li>
-          </ul>
-
-          <h2 className="mt-6 text-xl font-bold">3. Compartilhamento</h2>
-          <p>
-            O contato com prestadores pode ocorrer via links para WhatsApp/Instagram informados pelo próprio prestador.
-            Fora isso, não vendemos dados pessoais.
-          </p>
-
-          <h2 className="mt-6 text-xl font-bold">4. Armazenamento</h2>
-          <p>
-            Os dados são armazenados no Supabase (PostgreSQL/Auth) e, quando aplicável, arquivos/imagens podem ser
-            armazenados em um serviço de storage configurado.
-          </p>
-
-          <h2 className="mt-6 text-xl font-bold">5. Seus direitos</h2>
-          <p>
-            Você pode solicitar remoção/atualização de dados conforme aplicável. Para detalhes, consulte os termos e o
-            suporte do projeto.
-          </p>
-
-          <h2 className="mt-6 text-xl font-bold">6. Termos</h2>
-          <p>
+        <section className="rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest p-5 shadow-sm md:p-6">
+          <h2 className="text-lg font-black tracking-tight text-on-surface md:text-xl">
+            6. Termos relacionados
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-on-surface-variant md:text-base">
             Consulte também os{' '}
-            <Link className="text-primary font-semibold hover:underline" href="/terms">
+            <Link className="font-semibold text-primary hover:underline" href="/terms">
               Termos de Uso
             </Link>
             .
@@ -62,4 +114,3 @@ export default function PrivacyPage() {
     </main>
   );
 }
-

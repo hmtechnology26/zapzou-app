@@ -1,14 +1,22 @@
 'use client';
 
+import { useState } from 'react';
 import { Icon } from './Icon';
 import { StarRating } from './StarRating';
 import type { Review } from '@/types';
 
 interface ReviewsListProps {
   reviews: Review[];
+  canReply?: boolean;
+  onReply?: (reviewId: string, reply: string) => Promise<void>;
 }
 
-export function ReviewsList({ reviews }: ReviewsListProps) {
+export function ReviewsList({ reviews, canReply = false, onReply }: ReviewsListProps) {
+  const [replyingReviewId, setReplyingReviewId] = useState<string | null>(null);
+  const [replyDraft, setReplyDraft] = useState('');
+  const [replyError, setReplyError] = useState('');
+  const [replySubmittingId, setReplySubmittingId] = useState<string | null>(null);
+
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
@@ -17,6 +25,39 @@ export function ReviewsList({ reviews }: ReviewsListProps) {
       month: 'short',
       year: 'numeric'
     });
+  };
+
+  const openReplyForm = (review: Review) => {
+    setReplyingReviewId(review.id);
+    setReplyDraft(review.owner_reply || '');
+    setReplyError('');
+  };
+
+  const closeReplyForm = () => {
+    setReplyingReviewId(null);
+    setReplyDraft('');
+    setReplyError('');
+  };
+
+  const submitReply = async (reviewId: string) => {
+    if (!onReply) return;
+
+    const normalizedReply = replyDraft.trim();
+    if (!normalizedReply) {
+      setReplyError('Escreva uma resposta antes de salvar.');
+      return;
+    }
+
+    setReplyError('');
+    setReplySubmittingId(reviewId);
+    try {
+      await onReply(reviewId, normalizedReply);
+      closeReplyForm();
+    } catch (err) {
+      setReplyError(err instanceof Error ? err.message : 'Não foi possível salvar a resposta.');
+    } finally {
+      setReplySubmittingId(null);
+    }
   };
 
   if (reviews.length === 0) {
@@ -79,6 +120,68 @@ export function ReviewsList({ reviews }: ReviewsListProps) {
                 <p className="text-on-surface-variant text-sm mt-2 leading-relaxed">
                   {review.comment}
                 </p>
+              )}
+
+              {review.owner_reply && (
+                <div className="mt-3 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 shadow-sm">
+                  <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-primary px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-sm">
+                    <Icon icon="reply" size={13} />
+                    Resposta do proprietário
+                  </div>
+                  <p className="text-sm leading-relaxed text-on-surface">
+                    {review.owner_reply}
+                  </p>
+                  {review.owner_reply_at && (
+                    <p className="mt-2 text-[11px] font-medium text-on-surface-variant/70">
+                      {formatDate(review.owner_reply_at)}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {canReply && onReply && (
+                <div className="mt-3">
+                  {replyingReviewId === review.id ? (
+                    <div className="rounded-xl border border-outline-variant/10 bg-surface-container-high p-3">
+                      <textarea
+                        value={replyDraft}
+                        onChange={(e) => setReplyDraft(e.target.value)}
+                        placeholder="Escreva sua resposta ao comentário..."
+                        className="w-full min-h-[96px] resize-none rounded-lg bg-surface-container-lowest p-3 text-sm text-on-surface outline-none border border-outline-variant/10 focus:border-primary/30"
+                        maxLength={500}
+                      />
+                      {replyError && (
+                        <p className="mt-2 text-xs text-error">{replyError}</p>
+                      )}
+                      <div className="mt-3 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={closeReplyForm}
+                          className="rounded-full border border-outline-variant px-4 py-2 text-xs font-bold text-on-surface-variant"
+                          disabled={replySubmittingId === review.id}
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void submitReply(review.id)}
+                          className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-white disabled:opacity-60"
+                          disabled={replySubmittingId === review.id}
+                        >
+                          {replySubmittingId === review.id ? 'Salvando...' : 'Salvar resposta'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => openReplyForm(review)}
+                      className="text-xs font-bold text-primary hover:opacity-80"
+                    >
+                      {review.owner_reply ? 'Editar resposta' : 'Responder'}
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>

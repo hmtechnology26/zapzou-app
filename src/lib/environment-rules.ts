@@ -26,6 +26,51 @@ export const FORCED_PENDING_APPROVAL_ENVIRONMENT_IDS = new Set<string>([
   'fb6f5a5c-4126-451d-ad55-97f2ac33980b',
 ]);
 
+const CHURCH_NAME_HINTS = [
+  'igreja',
+  'igrejas',
+  'templo',
+  'templos',
+  'capela',
+  'capelas',
+  'paroquia',
+  'paroquias',
+  'paroquia',
+  'paroquias',
+  'catedral',
+  'catedrais',
+  'santuario',
+  'santuarios',
+  'assembleia',
+  'evangelica',
+  'evangelicas',
+  'catolica',
+  'catolicas',
+  'ministerio',
+  'ministerios',
+  'diocese',
+];
+
+function normalizeText(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function isChurchLikeText(value?: string | null) {
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  const normalized = normalizeText(value);
+  return CHURCH_NAME_HINTS.some((hint) => normalized.includes(hint));
+}
+
+export function isChurchLikeEnvironmentName(value?: string | null) {
+  return isChurchLikeText(value);
+}
+
 export function isForcedPendingApprovalEnvironment(environmentId?: string | null) {
   return Boolean(environmentId && FORCED_PENDING_APPROVAL_ENVIRONMENT_IDS.has(environmentId));
 }
@@ -61,7 +106,11 @@ export function calculateDistanceKm(
   return earthRadiusKm * c;
 }
 
-export function inferEnvironmentTypeFromPlace(primaryType: string): Environment['type'] {
+export function inferEnvironmentTypeFromPlace(primaryType: string, displayName?: string): Environment['type'] {
+  if (isChurchLikeText(displayName)) {
+    return 'church';
+  }
+
   return PLACE_TYPE_TO_ENVIRONMENT_TYPE[primaryType] ?? 'residential';
 }
 
@@ -72,8 +121,8 @@ export function inferEnvironmentValidationFlagsFromType(type: Environment['type'
   };
 }
 
-export function inferEnvironmentValidationFlagsFromPlace(primaryType: string) {
-  return inferEnvironmentValidationFlagsFromType(inferEnvironmentTypeFromPlace(primaryType));
+export function inferEnvironmentValidationFlagsFromPlace(primaryType: string, displayName?: string) {
+  return inferEnvironmentValidationFlagsFromType(inferEnvironmentTypeFromPlace(primaryType, displayName));
 }
 
 function normalizePublicationRole(role: EnvironmentMembershipRole): PublicationMode | null {
@@ -90,7 +139,7 @@ function normalizePublicationRole(role: EnvironmentMembershipRole): PublicationM
 
 export function resolveEnvironmentAccessDecision(
   environment?: Partial<
-    Pick<Environment, 'id' | 'type' | 'requiresModeratorApproval' | 'requiresRadiusValidation'>
+    Pick<Environment, 'id' | 'name' | 'type' | 'requiresModeratorApproval' | 'requiresRadiusValidation'>
   >,
   options?: {
     userPlan?: UserPlan;
@@ -102,12 +151,25 @@ export function resolveEnvironmentAccessDecision(
   const inferredType = environment?.type ?? 'residential';
   const inferredFlags = inferEnvironmentValidationFlagsFromType(inferredType);
   const forceModeratorApproval = isForcedPendingApprovalEnvironment(environment?.id);
+  const churchLikeEnvironment = environment?.type === 'church' || isChurchLikeText(environment?.name);
+  const churchLikeEnvironmentUnlocked = churchLikeEnvironment && options?.membershipStatus === 'active';
   const isUnlockedSpecialEnvironment =
     forceModeratorApproval &&
     options?.membershipStatus === 'active' &&
     (options?.membershipRole === 'resident' || options?.membershipRole === 'service_provider');
 
-  if (forceModeratorApproval && !isUnlockedSpecialEnvironment) {
+  if (options?.membershipStatus === 'active') {
+    return {
+      mode: 'open',
+      requiresModeratorApproval: false,
+      requiresRadiusValidation: false,
+    };
+  }
+
+  if (
+    (forceModeratorApproval && !isUnlockedSpecialEnvironment) ||
+    (churchLikeEnvironment && !churchLikeEnvironmentUnlocked)
+  ) {
     return {
       mode: 'moderator',
       requiresModeratorApproval: true,
@@ -116,7 +178,9 @@ export function resolveEnvironmentAccessDecision(
   }
 
   const requiresModeratorApproval =
-    environment?.requiresModeratorApproval ?? inferredFlags.requiresModeratorApproval;
+    churchLikeEnvironmentUnlocked
+      ? false
+      : environment?.requiresModeratorApproval ?? inferredFlags.requiresModeratorApproval;
   const requiresRadiusValidation =
     environment?.requiresRadiusValidation ?? inferredFlags.requiresRadiusValidation;
 
@@ -177,7 +241,7 @@ export function isWithinAutoApprovalRadius(distanceKm: number | null | undefined
 
 export function getEnvironmentAvailabilityState(
   environment?: Partial<
-    Pick<Environment, 'type' | 'requiresModeratorApproval' | 'requiresRadiusValidation'>
+    Pick<Environment, 'name' | 'type' | 'requiresModeratorApproval' | 'requiresRadiusValidation'>
   >,
   options?: {
     distanceKm?: number | null;
@@ -198,6 +262,14 @@ export function getEnvironmentAvailabilityState(
       status: 'pending',
       label: 'Bloqueado',
       reason: 'Seu acesso foi bloqueado pela liderança deste ambiente.',
+    };
+  }
+
+  if (options?.membershipStatus === 'active') {
+    return {
+      status: 'active',
+      label: 'Ativo',
+      reason: 'Você já foi aprovado neste ambiente e pode publicar normalmente.',
     };
   }
 
@@ -238,14 +310,6 @@ export function getEnvironmentAvailabilityState(
       status: 'pending',
       label: 'Fora do raio',
       reason: `Você precisa estar dentro de ${AUTO_APPROVAL_RADIUS_KM * 1000}m para liberar este ambiente.`,
-    };
-  }
-
-  if (options?.membershipStatus === 'active') {
-    return {
-      status: 'active',
-      label: 'Ativo',
-      reason: 'Você já foi aprovado neste ambiente e pode publicar normalmente.',
     };
   }
 

@@ -13,10 +13,13 @@ import {
   calculateDistanceKm,
   inferEnvironmentTypeFromPlace,
   inferEnvironmentValidationFlagsFromPlace,
+  isChurchLikeEnvironmentName,
   isWithinAutoApprovalRadius,
   isForcedPendingApprovalEnvironment,
 } from '@/lib/environment-rules';
 import { supabase } from '@/lib/supabase';
+import { hasCnpj } from '@/lib/cnpj';
+import { SearchField } from '@/components/SearchField';
 import { type PublicationMode } from '@/lib/plan-rules';
 
 interface PlaceDetailPageProps {
@@ -110,13 +113,29 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     id: placeFromSearch.id,
     slug: generateSlug(placeFromSearch.displayName?.text || ''),
     name: placeFromSearch.displayName?.text || '',
-    type: inferEnvironmentTypeFromPlace(placeFromSearch.primaryType),
+    type: inferEnvironmentTypeFromPlace(
+      placeFromSearch.primaryType,
+      placeFromSearch.displayName?.text,
+    ),
     members: 0,
     image: '',
     latitude: placeFromSearch.location?.latitude,
     longitude: placeFromSearch.location?.longitude,
-    ...inferEnvironmentValidationFlagsFromPlace(placeFromSearch.primaryType),
+    ...inferEnvironmentValidationFlagsFromPlace(
+      placeFromSearch.primaryType,
+      placeFromSearch.displayName?.text,
+    ),
   } : null);
+
+  const requiresModeratorGate = Boolean(
+    effectiveEnvironment &&
+      (
+        effectiveEnvironment.type === 'church' ||
+        isChurchLikeEnvironmentName(effectiveEnvironment.name) ||
+        effectiveEnvironment.requiresModeratorApproval
+      ) &&
+      membership?.status !== 'active',
+  );
 
   const topBarProps = {
     showBack: true,
@@ -246,8 +265,8 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
         return;
       }
 
-      if (mode === 'resident') {
-        const location = await ensureCurrentLocation();
+       if (mode === 'resident' && membership?.status !== 'active') {
+         const location = await ensureCurrentLocation();
 
         if (
           typeof effectiveEnvironment.latitude !== 'number' ||
@@ -350,8 +369,6 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     userLocation,
   ]);
 
-  const mode = searchParams.get('mode');
-
   // Mostrar loading enquanto busca ambiente
   if (loadingEnvironment || !placeSlug) {
     return (
@@ -383,16 +400,6 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   // Se nÃƒÂ£o encontrou ambiente mas tem o modal, mostrar modal inline
   if (!effectiveEnvironment && showWelcomeModal && placeSlug) {
     const envName = placeSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    const isChurch = placeFromSearch?.primaryType === 'church' || 
-                     placeFromSearch?.primaryType === 'place_of_worship' || 
-                     placeFromSearch?.primaryType === 'cathedral' || 
-                     placeFromSearch?.primaryType === 'chapel' || 
-                     placeFromSearch?.primaryType === 'temple' ||
-                     envName.toLowerCase().includes('igreja') ||
-                     envName.toLowerCase().includes('templo') ||
-                     envName.toLowerCase().includes('capela') ||
-                     envName.toLowerCase().includes('catedral');
-    
     return (
       <div className="min-h-screen pb-24 md:pb-8 bg-background">
         <TopAppBar {...topBarProps} />
@@ -523,18 +530,11 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           </div>
         )} */}
 
-        <div className="relative">
-            <div className="flex items-center bg-surface-container-highest rounded-[2.5rem] px-8 py-6 gap-6 focus-within:bg-surface-container-lowest focus-within:ring-8 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group">
-            <Icon icon="search" size={28} className="text-[#30cc36] group-focus-within:scale-110 transition-transform" weight={700} />
-            <input 
-              className="bg-transparent border-none focus:ring-0 w-full text-on-surface placeholder:text-on-surface-variant/70 font-black text-lg"
-              placeholder="Buscar serviços..."
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
+        <SearchField
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar serviços..."
+        />
 
         <div className="flex overflow-x-auto pb-4 -mx-4 px-4 gap-3 no-scrollbar scroll-smooth">
           {categories.map((cat) => (
@@ -553,7 +553,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           ))}
         </div>
 
-        {user && membership === null && !membershipLoading && mode === 'join' && (
+        {requiresModeratorGate && !membershipLoading && (
           <div className="bg-primary/5 border border-primary/10 rounded-[3rem] p-10 flex flex-col items-center text-center gap-4 max-w-2xl mx-auto md:ml-0">
              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/10">
                 <Icon icon="person_add" size={32} className="text-primary" weight={700} />
@@ -566,7 +566,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                     : 'Para publicar serviços aqui, você precisa solicitar acesso à liderança.'}
                 </p>
              </div>
-             {user.plan === 'plus' ? (
+             {user ? (
                <div className="grid w-full gap-3 sm:grid-cols-2">
                  <button
                    onClick={() => handlePlusRequest('resident')}
@@ -585,10 +585,10 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                </div>
              ) : (
                <button 
-                 onClick={() => router.push(`/meus-anuncios`)}
+                 onClick={() => router.push('/login')}
                  className="px-10 py-4.5 rounded-full primary-gradient text-white text-sm font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105"
                >
-                 Solicitar Acesso
+                 Fazer login para solicitar
                </button>
              )}
           </div>
@@ -606,6 +606,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           </div>
         )}
 
+        {!requiresModeratorGate && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {servicesWithDistance.map((service) => (
             <div 
@@ -624,6 +625,15 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                 <div>
                   <div className="flex items-center justify-between mb-1.5 gap-2">
                     <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">{service.category || 'Sem categoria'}</span>
+                    <span
+                      className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                        hasCnpj(service.cnpj)
+                          ? 'text-emerald-700 bg-emerald-500/10'
+                          : 'text-slate-600 bg-slate-500/10'
+                      }`}
+                    >
+                      {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
+                    </span>
                   </div>
                   <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#30cc36] transition-colors">{service.title}</h4>
                   <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">{service.description}</p>
@@ -663,6 +673,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
             </div>
           )}
         </div>
+        )}
       </main>
 
       {/* Modal de boas-vindas para ambiente nÃƒÂ£o cadastrado */}

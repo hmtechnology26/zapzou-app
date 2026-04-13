@@ -1,10 +1,10 @@
 export default function Head() {
   return (
     <>
-      <title>Ambientes perto de voce</title>
+      <title>Ambientes com servicos publicados | Conectae</title>
       <meta
         name="description"
-        content="Veja ambientes, comunidades e servicos proximos na Conectae."
+        content="Veja os ambientes que ja possuem servicos publicados e navegue por cada lista de servicos na Conectae."
       />
     </>
   );

@@ -10,6 +10,7 @@ import { ReviewsList } from '@/components/ReviewsList';
 import { ReviewForm } from '@/components/ReviewForm';
 import { useState, useEffect, useRef } from 'react';
 import type { Review } from '@/types';
+import { hasCnpj } from '@/lib/cnpj';
 
 interface ServiceDetailPageProps {
   seoContent?: ReactNode;
@@ -28,6 +29,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
     incrementServiceViews,
     fetchServiceReviews,
     addReview,
+    replyToReview,
   } = useApp() || {};
 
   const [mounted, setMounted] = useState(false);
@@ -118,7 +120,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
     return (
       <div className="min-h-screen flex items-center justify-center flex-col gap-4">
         <Icon icon="error_outline" size={48} className="text-outline" />
-        <p className="text-on-surface-variant">ServiÃƒÆ’Ã‚Â§o nÃƒÆ’Ã‚Â£o encontrado</p>
+        <p className="text-on-surface-variant">Serviço não encontrado</p>
         <button onClick={() => router.back()} className="text-primary font-bold">
           Voltar
         </button>
@@ -127,8 +129,12 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
   }
 
   const menuItems = Array.isArray(service.menu) ? service.menu : [];
-  const serviceImages = service.images || [];
-  const allImages = serviceImages.length > 0 ? serviceImages : [service.image];
+  const serviceImages = Array.isArray(service.images) ? service.images : [];
+  const allImages = serviceImages.length > 0
+    ? serviceImages
+    : typeof service.image === 'string' && service.image
+      ? [service.image]
+      : [];
 
   const environment = selectedEnvironments.find(
     (e: any) => e.id === service.environmentId
@@ -169,7 +175,15 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
     }
   };
 
-  const isOwner = user && service.provider === user.name;
+  const handleSubmitReply = async (reviewId: string, reply: string) => {
+    if (!service?.id || !user || !isOwner) return;
+    const updated = await replyToReview(reviewId, reply);
+    if (updated) {
+      setReviews((prev) => prev.map((review) => (review.id === updated.id ? updated : review)));
+    }
+  };
+
+  const isOwner = user && (service.provider_id === user.id || service.provider === user.name);
   const hasUserReviewed = user && reviews.some((r) => r.user_id === user.id);
   const reviewsCount = reviews.length;
   const averageRating =
@@ -286,7 +300,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
               >
-                <div className="overflow-hidden rounded-2xl h-72">
+                <div className="aspect-square w-full overflow-hidden rounded-2xl max-h-[32rem] mx-auto">
                   <div
                     className="flex transition-transform duration-300 ease-in-out"
                     style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
@@ -294,7 +308,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                     {allImages.map((img: string, idx: number) => (
                       <div
                         key={idx}
-                        className="w-full flex-shrink-0 h-72"
+                        className="w-full flex-shrink-0 h-full"
                       >
                         <img
                           alt={`${service.title} ${idx + 1}`}
@@ -341,7 +355,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                 </div>
               </div>
             ) : (
-              <div className="h-72 rounded-2xl overflow-hidden">
+              <div className="aspect-square w-full rounded-2xl overflow-hidden max-h-[32rem] mx-auto">
                 <img
                   alt={service.title}
                   className="w-full h-full object-cover"
@@ -363,6 +377,17 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
               {service.verified && (
                 <Icon icon="verified" weight={400} size={24} className="text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }} />
               )}
+            </div>
+            <div className="mb-2">
+              <span
+                className={`inline-flex text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                  hasCnpj(service.cnpj)
+                    ? 'text-emerald-700 bg-emerald-500/10'
+                    : 'text-slate-600 bg-slate-500/10'
+                }`}
+              >
+                {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
+              </span>
             </div>
             <div className="flex items-center gap-2 text-on-surface-variant font-medium text-sm">
               <div className="flex items-center text-primary">
@@ -435,7 +460,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                       <p className="text-xs text-on-surface-variant">{item.description}</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-primary font-extrabold">{item.price}</span>
+                      <span className="text-primary font-extrabold">{item.price || 'Sem valor'}</span>
                     </div>
                   </div>
                 ))}
@@ -444,25 +469,8 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
           )}
 
           <section>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <StarRating rating={averageRating} size={18} />
-                <h3 className="font-bold text-on-surface">Avaliações</h3>
-              </div>
-              <span className="text-sm text-on-surface-variant">{reviewsCount} avaliações</span>
-            </div>
-
+            <h3 className="font-bold text-on-surface mb-3">Avaliações</h3>
             <section className="bg-surface-container-lowest rounded-2xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1">
-                    <StarRating rating={averageRating} size={22} />
-                    <span className="font-bold text-on-surface ml-1">{averageRating > 0 ? averageRating.toFixed(1) : 'Novo'}</span>
-                  </div>
-                  <span className="text-on-surface-variant text-sm">{reviewsCount} avaliações</span>
-                </div>
-              </div>
-
               {user && !hasUserReviewed && !isOwner && (
                 <button
                   onClick={() => setShowReviewForm(true)}
@@ -491,7 +499,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             </section>
 
             <div className="mt-4">
-              <ReviewsList reviews={reviews} />
+              <ReviewsList reviews={reviews} canReply={Boolean(isOwner)} onReply={handleSubmitReply} />
             </div>
           </section>
 

@@ -122,7 +122,7 @@ export default function EnvironmentCataloguePage() {
 
                 return (
                   <article key={service.id} className="bg-surface-container-lowest rounded-3xl border border-outline-variant/10 shadow-sm overflow-hidden flex flex-col group">
-                    <div className="relative aspect-video w-full overflow-hidden">
+                    <div className="relative aspect-square w-full overflow-hidden">
                       <img 
                         src={service.image} 
                         alt={service.title} 

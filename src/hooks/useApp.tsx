@@ -28,6 +28,7 @@ interface AppContextType {
   setSelectedEnvironment: (env: Environment | null) => void;
   updateEnvironment: (id: string, updates: Partial<Environment>) => void;
   services: Service[];
+  servicesLoading: boolean;
   userServices: Service[];
   fetchUserServices: (userId: string) => Promise<void>;
   toggleServiceStatus: (id: string) => Promise<void>;
@@ -45,6 +46,7 @@ interface AppContextType {
   rateService: (id: string, stars: number, comment?: string, isAnonymous?: boolean) => Promise<void>;
   fetchServiceReviews: (serviceId: string, opts?: { force?: boolean }) => Promise<Review[]>;
   addReview: (serviceId: string, stars: number, comment?: string, isAnonymous?: boolean) => Promise<Review | null>;
+  replyToReview: (reviewId: string, reply: string) => Promise<Review | null>;
   loading: boolean;
   requestAffiliation: (
     envId: string,
@@ -62,6 +64,19 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const APP_FETCH_CACHE_TTL_MS = 30_000;
 
+const normalizeArrayValue = <T,>(value: unknown): T[] => {
+  if (Array.isArray(value)) return value as T[];
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? (parsed as T[]) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
 type CacheEntry<T> = {
   data: T;
   fetchedAt: number;
@@ -73,10 +88,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [selectedEnvironments, setSelectedEnvironments] = useState<Environment[]>([]);
   const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
   const [services, setServices] = useState<Service[]>([]);
+  const [servicesLoading, setServicesLoading] = useState(true);
   const [userServices, setUserServices] = useState<Service[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [serviceReviews, setServiceReviews] = useState<Record<string, Review[]>>({});
   const reviewsHasUserAvatarColumnRef = useRef<boolean | null>(null);
+  const reviewsHasOwnerReplyColumnRef = useRef<boolean | null>(null);
   const [favoritePlaces, setFavoritePlaces] = useState<PlaceSearchResult[]>([]);
   const [membershipVersion, setMembershipVersion] = useState(0);
   const fetchCacheRef = useRef<{
@@ -611,50 +628,60 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const fetchServices = async () => {
+    setServicesLoading(true);
+
     if (isFresh(fetchCacheRef.current.services)) {
       setServices(fetchCacheRef.current.services.data);
+      setServicesLoading(false);
       return;
     }
 
-    const query = supabase
-      .from('services')
-      .select('*, environments(name, slug, latitude, longitude, type)')
-      .order('created_at', { ascending: false });
+    try {
+      const query = supabase
+        .from('services')
+        .select('*, environments(name, slug, latitude, longitude, type, image_url)')
+        .order('created_at', { ascending: false });
+        
+      const { data, error } = await query;
       
-    const { data, error } = await query;
-    
-    if (data && !error) {
-      const formatted = data.map((s: any) => ({
-        id: s.id,
-        slug: s.slug || generateSlug(s.title),
-        title: s.title,
-        description: s.description,
-        category: s.category,
-        image: s.image_url || '',
-        images: s.images_urls || [],
-        provider: s.provider || 'Prestador',
-        provider_id: s.provider_id,
-        publisherType: s.publisher_type as 'resident' | 'service_provider' | null,
-        status: s.status as any,
-        isActive: s.is_active,
-        environmentId: s.environment_id,
-        environmentName: s.environments?.name || '',
-        environmentType: s.environments?.type || '',
-        environmentLatitude: s.environments?.latitude,
-        environmentLongitude: s.environments?.longitude,
-        WhatsApp: s.whatsapp,
-        instagram: s.instagram,
-        frequency: s.frequency,
-        menu: s.menu || [],
-        rating: s.rating ?? 0,
-        reviews_count: s.reviews_count ?? 0,
-        views: s.views ?? 0,
-      }));
-      setServices(formatted);
-      fetchCacheRef.current.services = {
-        data: formatted,
-        fetchedAt: Date.now(),
-      };
+      if (data && !error) {
+        const formatted = data.map((s: any) => ({
+          id: s.id,
+          slug: s.slug || generateSlug(s.title),
+          title: s.title,
+          description: s.description,
+          category: s.category,
+          image: s.image_url || '',
+          images: normalizeArrayValue<string>(s.images_urls),
+          provider: s.provider || 'Prestador',
+          provider_id: s.provider_id,
+          publisherType: s.publisher_type as 'resident' | 'service_provider' | null,
+          status: s.status as any,
+          isActive: s.is_active,
+          environmentId: s.environment_id,
+          environmentName: s.environments?.name || '',
+          environmentSlug: s.environments?.slug || '',
+          environmentType: s.environments?.type || '',
+          environmentLatitude: s.environments?.latitude,
+          environmentLongitude: s.environments?.longitude,
+          environmentImage: s.environments?.image_url || '',
+          WhatsApp: s.whatsapp,
+          instagram: s.instagram,
+          cnpj: s.cnpj || '',
+          frequency: s.frequency,
+          menu: normalizeArrayValue<any>(s.menu),
+          rating: s.rating ?? 0,
+          reviews_count: s.reviews_count ?? 0,
+          views: s.views ?? 0,
+        }));
+        setServices(formatted);
+        fetchCacheRef.current.services = {
+          data: formatted,
+          fetchedAt: Date.now(),
+        };
+      }
+    } finally {
+      setServicesLoading(false);
     }
   };
 
@@ -735,7 +762,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const { data, error } = await supabase
       .from('services')
-      .select('*')
+      .select('*, environments(name, slug, latitude, longitude, type, image_url)')
       .eq('provider_id', userId)
       .order('created_at', { ascending: false });
     
@@ -747,16 +774,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
         description: s.description,
         category: s.category,
         image: s.image_url || '',
-        images: s.images_urls || [],
+        images: normalizeArrayValue<string>(s.images_urls),
         provider: s.provider || 'Prestador',
         provider_id: s.provider_id,
         status: s.status as any,
         isActive: s.is_active,
         environmentId: s.environment_id,
+        environmentName: s.environments?.name || '',
+        environmentSlug: s.environments?.slug || '',
+        environmentType: s.environments?.type || '',
+        environmentLatitude: s.environments?.latitude,
+        environmentLongitude: s.environments?.longitude,
+        environmentImage: s.environments?.image_url || '',
         WhatsApp: s.whatsapp,
         instagram: s.instagram,
+        cnpj: s.cnpj || '',
         frequency: s.frequency,
-        menu: s.menu || [],
+        menu: normalizeArrayValue<any>(s.menu),
         rating: s.rating ?? 0,
         reviews_count: s.reviews_count ?? 0,
         views: s.views ?? 0,
@@ -786,6 +820,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         tags: service.tags ?? [],
         whatsapp: service.WhatsApp,
         instagram: service.instagram,
+        cnpj: service.cnpj || null,
         frequency: service.frequency,
         status: service.status || 'active',
         is_active: true,
@@ -817,6 +852,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (updatedFields.price !== undefined) payload.price = updatedFields.price;
     if (updatedFields.WhatsApp !== undefined) payload.whatsapp = updatedFields.WhatsApp;
     if (updatedFields.instagram !== undefined) payload.instagram = updatedFields.instagram;
+    if (updatedFields.cnpj !== undefined) payload.cnpj = updatedFields.cnpj || null;
     if (updatedFields.frequency !== undefined) payload.frequency = updatedFields.frequency;
     if (updatedFields.status !== undefined) payload.status = updatedFields.status;
     if (updatedFields.isActive !== undefined) payload.is_active = updatedFields.isActive;
@@ -846,19 +882,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const incrementServiceViews = async (id: string) => {
+    const updateLocalViews = (newViews: number) => {
+      setServices((prev) => prev.map((s) => (s.id === id ? { ...s, views: newViews } : s)));
+      setUserServices((prev) => prev.map((s) => (s.id === id ? { ...s, views: newViews } : s)));
+    };
+
+    const { data: rpcViews, error: rpcError } = await supabase.rpc('increment_service_views', {
+      p_service_id: id,
+    });
+
+    if (!rpcError) {
+      const newViews = typeof rpcViews === 'number' ? rpcViews : Number(rpcViews);
+      if (rpcViews !== null && rpcViews !== undefined && Number.isFinite(newViews)) {
+        updateLocalViews(newViews);
+        return;
+      }
+    }
+
     const { data, error } = await supabase
       .from('services')
       .select('views')
       .eq('id', id)
       .single();
-    
+
     if (!error && data) {
       const newViews = (data.views || 0) + 1;
       await supabase
         .from('services')
         .update({ views: newViews })
         .eq('id', id);
-      setServices(prev => prev.map(s => s.id === id ? { ...s, views: newViews } : s));
+      updateLocalViews(newViews);
     }
   };
 
@@ -935,6 +988,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
 
       const includeAvatarColumn = reviewsHasUserAvatarColumnRef.current !== false;
+      const includeOwnerReplyColumns = reviewsHasOwnerReplyColumnRef.current !== false;
       let data: any;
       let error: any;
       try {
@@ -943,8 +997,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
             .from('reviews')
             .select(
               includeAvatarColumn
-                ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved'
-                : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved'
+                ? includeOwnerReplyColumns
+                  ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved, owner_reply, owner_reply_at, owner_reply_by'
+                  : 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved'
+                : includeOwnerReplyColumns
+                  ? 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved, owner_reply, owner_reply_at, owner_reply_by'
+                  : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved'
             )
             .eq('service_id', serviceId)
             .or('is_anonymous.is.null,is_anonymous.eq.false,approved.eq.true')
@@ -964,7 +1022,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ({ data, error } = (await withTimeout(
             supabase
               .from('reviews')
-              .select('id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved')
+              .select(
+                reviewsHasOwnerReplyColumnRef.current === false
+                  ? 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved'
+                  : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved, owner_reply, owner_reply_at, owner_reply_by'
+              )
               .eq('service_id', serviceId)
               .or('is_anonymous.is.null,is_anonymous.eq.false,approved.eq.true')
               .order('created_at', { ascending: false })
@@ -978,8 +1040,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      if (error && isMissingColumnError(error, 'owner_reply')) {
+        reviewsHasOwnerReplyColumnRef.current = false;
+        try {
+          ({ data, error } = (await withTimeout(
+            supabase
+              .from('reviews')
+              .select(
+                includeAvatarColumn
+                  ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved'
+                  : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved'
+              )
+              .eq('service_id', serviceId)
+              .or('is_anonymous.is.null,is_anonymous.eq.false,approved.eq.true')
+              .order('created_at', { ascending: false })
+              .limit(50),
+            25000,
+            'Tempo esgotado ao carregar avaliaÃ§Ãµes'
+          )) as any);
+        } catch (err) {
+          console.warn('fetchServiceReviews failed (exception/timeout):', err);
+          return serviceReviews[serviceId] || [];
+        }
+      }
+
       if (!error && includeAvatarColumn) {
         reviewsHasUserAvatarColumnRef.current = true;
+      }
+      if (!error && includeOwnerReplyColumns) {
+        reviewsHasOwnerReplyColumnRef.current = true;
       }
 
       if (!error && Array.isArray(data)) {
@@ -994,6 +1083,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           created_at: r.created_at,
           isAnonymous: r.is_anonymous,
           approved: r.approved,
+          owner_reply: r.owner_reply,
+          owner_reply_at: r.owner_reply_at,
+          owner_reply_by: r.owner_reply_by,
         }));
         setServiceReviews((prev) => ({ ...prev, [serviceId]: reviews }));
         return reviews;
@@ -1027,8 +1119,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
     const selectColumns = (includeAvatar: boolean) =>
       includeAvatar
-        ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved'
-        : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved';
+        ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved, owner_reply, owner_reply_at, owner_reply_by'
+        : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved, owner_reply, owner_reply_at, owner_reply_by';
     const tryInsert = (payload: typeof basePayload, includeAvatar: boolean) =>
       supabase.from('reviews').insert(payload).select(selectColumns(includeAvatar)).single();
 
@@ -1052,8 +1144,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ({ data, error } = insertResult as { data: any; error: any });
     }
 
+    if (error && isMissingColumnError(error, 'owner_reply')) {
+      reviewsHasOwnerReplyColumnRef.current = false;
+      const selectWithoutReply = (includeAvatar: boolean) =>
+        includeAvatar
+          ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved'
+          : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved';
+      const tryInsertWithoutReply = (payload: typeof basePayload, includeAvatar: boolean) =>
+        supabase.from('reviews').insert(payload).select(selectWithoutReply(includeAvatar)).single();
+
+      insertResult = await withTimeout(
+        tryInsertWithoutReply(
+          reviewsHasUserAvatarColumnRef.current === false ? basePayload : { ...basePayload, user_avatar: user.avatar },
+          reviewsHasUserAvatarColumnRef.current !== false
+        ),
+        15000,
+        'Tempo esgotado ao enviar avaliaÃ§Ã£o'
+      );
+      ({ data, error } = insertResult as { data: any; error: any });
+    }
+
     if (!error && reviewsHasUserAvatarColumnRef.current !== false) {
       reviewsHasUserAvatarColumnRef.current = true;
+    }
+    if (!error && reviewsHasOwnerReplyColumnRef.current !== false) {
+      reviewsHasOwnerReplyColumnRef.current = true;
     }
 
     if (error) {
@@ -1073,6 +1188,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           created_at: data.created_at,
           isAnonymous: data.is_anonymous,
           approved: data.approved,
+          owner_reply: data.owner_reply,
+          owner_reply_at: data.owner_reply_at,
+          owner_reply_by: data.owner_reply_by,
         }
       : null;
 
@@ -1095,6 +1213,60 @@ export function AppProvider({ children }: { children: ReactNode }) {
     void withTimeout(updateServiceRating(serviceId), 8000).catch(() => {});
 
     return createdReview;
+  };
+
+  const replyToReview = async (reviewId: string, reply: string): Promise<Review | null> => {
+    if (!user) throw new Error('User must be logged in');
+
+    const normalizedReply = reply.trim();
+    if (!normalizedReply) {
+      throw new Error('A resposta não pode ficar vazia.');
+    }
+
+    const { data, error } = (await withTimeout(
+      supabase.rpc('reply_to_review', {
+        p_review_id: reviewId,
+        p_reply: normalizedReply,
+      }),
+      15000,
+      'Tempo esgotado ao salvar resposta'
+    )) as { data: any; error: any };
+
+    if (error) {
+      console.warn('replyToReview failed:', error);
+      throw toUserFriendlyReviewError(error);
+    }
+
+    const updatedReview: Review | null = data
+      ? {
+          id: data.id,
+          service_id: data.service_id,
+          user_id: data.user_id,
+          userName: data.user_name,
+          user_avatar: data.user_avatar,
+          stars: data.stars,
+          comment: data.comment,
+          created_at: data.created_at,
+          isAnonymous: data.is_anonymous,
+          approved: data.approved,
+          owner_reply: data.owner_reply,
+          owner_reply_at: data.owner_reply_at,
+          owner_reply_by: data.owner_reply_by,
+        }
+      : null;
+
+    if (updatedReview?.service_id) {
+      setServiceReviews((prev) => {
+        const serviceId = updatedReview.service_id as string;
+        const current = Array.isArray(prev[serviceId]) ? prev[serviceId] : [];
+        const nextForService = current.map((review) =>
+          review.id === updatedReview.id ? updatedReview : review
+        );
+        return { ...prev, [serviceId]: nextForService };
+      });
+    }
+
+    return updatedReview;
   };
 
   const updateServiceRating = async (serviceId: string) => {
@@ -1132,6 +1304,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setSelectedEnvironment,
       updateEnvironment,
       services,
+      servicesLoading,
       userServices,
       fetchUserServices,
       toggleServiceStatus,
@@ -1149,6 +1322,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       rateService,
       fetchServiceReviews,
       addReview,
+      replyToReview,
       loading,
       requestAffiliation,
       refreshMembership,

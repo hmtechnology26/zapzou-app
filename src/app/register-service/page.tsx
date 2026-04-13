@@ -12,14 +12,16 @@ import {
   isWithinAutoApprovalRadius,
   isForcedPendingApprovalEnvironment,
 } from '@/lib/environment-rules';
+import { SERVICE_CATEGORIES } from '@/lib/service-categories';
 import {
   countCountableEnvironmentMemberships,
   getPlanLimits,
   isPlanAtServiceLimit,
   type PublicationMode,
 } from '@/lib/plan-rules';
+import { formatCnpj, normalizeCnpj } from '@/lib/cnpj';
 
-const categories = ['Alimentação', 'Limpeza', 'Manutenção', 'Pet Sitting', 'Beleza', 'Tecnologia', 'Outros'];
+const categories = SERVICE_CATEGORIES.map((category) => category.label);
 
 function RegisterServiceContent() {
   const router = useRouter();
@@ -50,6 +52,7 @@ function RegisterServiceContent() {
     title: '',
     description: '',
     category: categories[0],
+    cnpj: '',
     WhatsApp: '',
     instagram: '',
   });
@@ -76,6 +79,7 @@ function RegisterServiceContent() {
         title: existingService.title || '',
         description: existingService.description || '',
         category: existingService.category || categories[0],
+        cnpj: existingService.cnpj || '',
         WhatsApp: existingService.WhatsApp || '',
         instagram: existingService.instagram || '',
       });
@@ -500,7 +504,7 @@ function RegisterServiceContent() {
           throw new Error('Escolha se você reside neste ambiente ou apenas presta serviço nele.');
         }
 
-        if (publicationRole === 'resident') {
+        if (publicationRole === 'resident' && effectiveMembershipStatus !== 'active') {
           const currentLocation = await ensureCurrentLocation();
 
           if (
@@ -566,6 +570,7 @@ function RegisterServiceContent() {
 
       const serviceData = {
         ...form,
+        cnpj: form.cnpj || '',
         image: finalImage,
         images: finalImages,
         WhatsApp: form.WhatsApp ? `55${form.WhatsApp}` : '',
@@ -604,10 +609,15 @@ function RegisterServiceContent() {
   };
 
   const handleAddMenuItem = () => {
-    if (menuItemForm.name && menuItemForm.price) {
-      const newItem = { ...menuItemForm, id: menuItemForm.id || `menu-${Date.now()}` };
-      const newIndex = menuItems.length;
-      
+    if (menuItemForm.name.trim()) {
+      const newItem = {
+        ...menuItemForm,
+        name: menuItemForm.name.trim(),
+        description: menuItemForm.description.trim(),
+        price: menuItemForm.price.trim(),
+        image: menuItemForm.image || '',
+        id: menuItemForm.id || `menu-${Date.now()}`,
+      };
       if (editingMenuItemIndex !== null) {
         const updatedItems = [...menuItems];
         updatedItems[editingMenuItemIndex] = newItem;
@@ -615,13 +625,6 @@ function RegisterServiceContent() {
         setEditingMenuItemIndex(null);
       } else {
         setMenuItems([...menuItems, newItem]);
-        
-        if (menuItemForm.image && menuItemForm.image.startsWith('blob:')) {
-          const newFiles = new Map(menuItemFiles);
-          const formFile = new File([menuItemForm.image], 'preview', { type: 'image/webp' });
-          newFiles.set(newIndex, formFile);
-          setMenuItemFiles(newFiles);
-        }
       }
       setMenuItemForm({ name: '', description: '', price: '', image: '' });
       setShowMenuItemModal(false);
@@ -630,6 +633,14 @@ function RegisterServiceContent() {
 
   const handleRemoveMenuItem = (index: number) => {
     setMenuItems(menuItems.filter((_, i) => i !== index));
+    setMenuItemFiles((prev) => {
+      const next = new Map<number, File>();
+      prev.forEach((file, key) => {
+        if (key === index) return;
+        next.set(key > index ? key - 1 : key, file);
+      });
+      return next;
+    });
   };
 
   const handleEditMenuItem = (index: number) => {
@@ -653,10 +664,13 @@ function RegisterServiceContent() {
     try {
       setErrorMsg('');
       const previewUrl = URL.createObjectURL(file);
+      if (menuItemForm.image?.startsWith('blob:')) {
+        URL.revokeObjectURL(menuItemForm.image);
+      }
       setMenuItemForm({ ...menuItemForm, image: previewUrl });
       
       const newFiles = new Map(menuItemFiles);
-      newFiles.set(menuItems.length, file);
+      newFiles.set(editingMenuItemIndex ?? menuItems.length, file);
       setMenuItemFiles(newFiles);
     } catch (err: any) {
       setErrorMsg(err?.message || 'Erro ao selecionar imagem.');
@@ -674,12 +688,30 @@ function RegisterServiceContent() {
     }
   };
 
+  const closeMenuItemModal = () => {
+    const targetIndex = editingMenuItemIndex ?? menuItems.length;
+    const nextFiles = new Map(menuItemFiles);
+    nextFiles.delete(targetIndex);
+    setMenuItemFiles(nextFiles);
+    if (menuItemForm.image?.startsWith('blob:')) {
+      URL.revokeObjectURL(menuItemForm.image);
+    }
+    setMenuItemForm({ name: '', description: '', price: '', image: '' });
+    setEditingMenuItemIndex(null);
+    setShowMenuItemModal(false);
+  };
+
   const environmentAvailability = getEnvironmentAvailabilityState(selectedEnvironment ?? undefined, {
     membershipStatus: specificMembershipStatus,
     membershipRole: specificMembershipRole,
     userPlan: user?.plan,
     publicationMode,
   });
+  const isForcedApprovalEnvironment = isForcedPendingApprovalEnvironment(selectedEnvironment?.id);
+  const canChoosePublicationMode =
+    !isForcedApprovalEnvironment ||
+    (specificMembershipStatus === 'active' &&
+      (specificMembershipRole === 'resident' || specificMembershipRole === 'service_provider'));
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-background">
@@ -722,7 +754,7 @@ function RegisterServiceContent() {
           <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <Icon icon="location_on" size={20} className="text-primary" weight={700} />
-              <span className="font-semibold text-on-surface text-sm">Ambiente alvo:</span>
+              <span className="font-semibold text-on-surface text-sm">Ambiente</span>
             </div>
             <div className="flex items-center gap-2 bg-surface-container-lowest rounded-full px-3 py-1.5 shadow-sm inline-flex">
               {selectedEnvironment.image ? (
@@ -736,7 +768,7 @@ function RegisterServiceContent() {
             </div>
             
             {/* Aviso de disponibilidade */}
-            {environmentAvailability && (
+            {/* {environmentAvailability && (
               <div className={`mt-4 p-3 rounded-xl border flex items-start gap-2 ${
                 environmentAvailability.status === 'pending' 
                   ? 'bg-amber-500/10 border-amber-500/20 text-amber-700' 
@@ -752,21 +784,21 @@ function RegisterServiceContent() {
                    <p className="text-[11px] leading-tight mt-0.5">{environmentAvailability.reason}</p>
                 </div>
               </div>
-            )}
+            )} */}
 
-            {user?.plan === 'plus' && (
+            {selectedEnvironment?.id === '__never__' && (
               <div className="mt-4 rounded-2xl border border-outline-variant/10 bg-surface-container-lowest p-4">
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">Como você atua neste ambiente?</p>
                     <p className="text-[11px] text-on-surface-variant mt-1">
-                      {isForcedPendingApprovalEnvironment(selectedEnvironment?.id) && canChoosePublicationMode
+                      {isForcedApprovalEnvironment && canChoosePublicationMode
                         ? 'A escolha já foi liberada após a aprovação.'
                         : 'Escolha antes de publicar.'}
                     </p>
                   </div>
                 </div>
-                {isForcedPendingApprovalEnvironment(selectedEnvironment?.id) && !canChoosePublicationMode ? (
+                {isForcedApprovalEnvironment && !canChoosePublicationMode ? (
                   <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-amber-800">
                     <p className="text-sm font-bold">Aguardando aprovação do moderador</p>
                     <p className="text-xs mt-1">
@@ -857,12 +889,29 @@ function RegisterServiceContent() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-on-surface">Nome do Serviço</label>
+              <label className="text-sm font-medium text-on-surface">Nome do Serviço/Empresa</label>
               <input 
                 className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60" 
-                placeholder="Ex: Limpeza Residencial" 
+                placeholder="Ex: Limpeza Residencial ou Clean Limpezas" 
                 value={form.title} 
                 onChange={e => setForm({...form, title: e.target.value})} 
+              />
+            </div>
+
+            <div>
+              <label className='text-sm font-medium text-on-surface'>CNPJ</label>
+              <input
+                className="w-full bg-surface-container border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60"
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                maxLength={18}
+                placeholder="00.000.000/0001-00"
+                value={form.cnpj}
+                onChange={(e) => {
+                  const digits = normalizeCnpj(e.target.value);
+                  setForm({ ...form, cnpj: formatCnpj(digits) });
+                }}
               />
             </div>
 
@@ -965,7 +1014,7 @@ function RegisterServiceContent() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-on-surface text-sm truncate">{item.name}</p>
-                        <p className="text-xs text-on-surface-variant truncate">{item.price}</p>
+                     <p className="text-xs text-on-surface-variant truncate">{item.price || 'Sem valor'}</p>
                       </div>
                       <button onClick={() => handleEditMenuItem(idx)} className="p-2 text-primary">
                         <Icon icon="edit" size={18} />
@@ -1001,7 +1050,7 @@ function RegisterServiceContent() {
                 <h3 className="text-lg font-bold text-on-surface">
                   {editingMenuItemIndex !== null ? 'Editar Opção' : 'Nova Opção'}
                 </h3>
-                <button onClick={() => setShowMenuItemModal(false)} className="p-2">
+                <button onClick={closeMenuItemModal} className="p-2">
                   <Icon icon="close" size={24} />
                 </button>
               </div>
@@ -1017,7 +1066,7 @@ function RegisterServiceContent() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-on-surface">Preço *</label>
+                  <label className="text-sm font-medium text-on-surface">Preço (opcional)</label>
                   <input 
                     className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface" 
                     placeholder="Ex: R$ 25"
@@ -1026,9 +1075,64 @@ function RegisterServiceContent() {
                   />
                 </div>
 
+                <div>
+                  <label className="text-sm font-medium text-on-surface">Imagem da opção</label>
+                  <div className="mt-2 rounded-xl border border-dashed border-outline-variant/20 bg-surface-container-lowest p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-surface-container-high flex items-center justify-center flex-shrink-0">
+                        {menuItemForm.image ? (
+                          <img
+                            src={menuItemForm.image}
+                            alt={menuItemForm.name || 'Prévia da opção'}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : (
+                          <Icon icon="image" size={24} className="text-on-surface-variant/40" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-on-surface">1 imagem por opção</p>
+                        <p className="text-xs text-on-surface-variant">A imagem é opcional e substitui a anterior ao selecionar outra.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <label className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold cursor-pointer active:scale-95 transition-transform">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleMenuItemImageUpload}
+                        />
+                        {menuItemForm.image ? 'Trocar imagem' : 'Adicionar imagem'}
+                      </label>
+                      {menuItemForm.image && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const targetIndex = editingMenuItemIndex ?? menuItems.length;
+                            const nextFiles = new Map(menuItemFiles);
+                            nextFiles.delete(targetIndex);
+                            setMenuItemFiles(nextFiles);
+                            if (menuItemForm.image?.startsWith('blob:')) {
+                              URL.revokeObjectURL(menuItemForm.image);
+                            }
+                            setMenuItemForm({ ...menuItemForm, image: '' });
+                          }}
+                          className="px-4 py-2 rounded-xl border border-outline-variant/20 text-on-surface text-xs font-bold"
+                        >
+                          Remover imagem
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 <button 
                   onClick={handleAddMenuItem}
-                  disabled={!menuItemForm.name || !menuItemForm.price}
+                  disabled={!menuItemForm.name.trim()}
                   className="w-full primary-gradient text-white font-bold py-3 rounded-xl disabled:opacity-50"
                 >
                   {editingMenuItemIndex !== null ? 'Salvar' : 'Adicionar'}

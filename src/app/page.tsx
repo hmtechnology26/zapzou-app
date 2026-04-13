@@ -7,6 +7,9 @@ import { useApp } from "@/hooks/useApp";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { MapComponent } from "@/components/GoogleMap";
 import { TopAppBar } from "@/components/TopAppBar";
+import { hasCnpj } from "@/lib/cnpj";
+import { SERVICE_CATEGORIES } from "@/lib/service-categories";
+import { SearchField } from "@/components/SearchField";
 
 export default function HomePage() {
   const router = useRouter();
@@ -191,15 +194,10 @@ export default function HomePage() {
         .replace(/^-|-$/g, ""),
   }));
 
-  const getCategoryIcon = (type: string) => {
-    const icons: Record<string, string> = {
-      residential: "apartment",
-      church: "church",
-      club: "clubs",
-      association: "groups",
-    };
-    return icons[type] || "location_on";
-  };
+  const categories = [
+    { id: "all", label: "Tudo", icon: "apps" },
+    ...SERVICE_CATEGORIES,
+  ];
 
   return (
     <div className={`min-h-screen ${user ? "pb-32" : "pb-10"} bg-background`}>
@@ -251,21 +249,12 @@ export default function HomePage() {
         <section className="space-y-6">
           <div className="flex items-center gap-2">
             {/* INPUT */}
-            <div className="flex-1 flex items-center bg-surface-container-highest rounded-[2.5rem] px-4 py-3 gap-2 focus-within:bg-surface-container-lowest focus-within:ring-4 focus-within:ring-primary/5 transition-all shadow-md border border-outline-variant/10 group min-w-0">
-              <Icon
-                icon="search"
-                size={18}
-                className="text-[#30cc36] group-focus-within:scale-110 transition-transform shrink-0"
-                weight={500}
+            <div className="flex-1 min-w-0">
+              <SearchField
+                value={search}
+                onChange={setSearch}
+                placeholder="Encontre um serviço..."
               />
-
-              <input
-  className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 flex-1 min-w-0 text-on-surface placeholder:text-on-surface-variant/70 font-medium text-sm"
-  placeholder="Encontre um serviço..."
-  type="text"
-  value={search}
-  onChange={(e) => setSearch(e.target.value)}
-/>
             </div>
 
             {/* DROPDOWN CUSTOMIZADO */}
@@ -335,17 +324,7 @@ export default function HomePage() {
           </div>
 
           <div className="flex overflow-x-auto pb-4 -mx-4 px-4 gap-3 no-scrollbar scroll-smooth">
-            {[
-              { id: "all", label: "Tudo", icon: "apps" },
-              { id: "Tecnologia", label: "Tecnologia", icon: "terminal" },
-              { id: "Limpeza", label: "Limpeza", icon: "cleaning_services" },
-              { id: "Alimentação", label: "Alimentação", icon: "restaurant" },
-              { id: "Construção", label: "Construção", icon: "construction" },
-              { id: "Saúde", label: "Saúde", icon: "medical_services" },
-              { id: "Beleza", label: "Beleza", icon: "content_cut" },
-              { id: "Eventos", label: "Eventos", icon: "event" },
-              { id: "Pet Sitting", label: "Pet Sitting", icon: "pets" },
-            ].map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() =>
@@ -417,16 +396,15 @@ export default function HomePage() {
                         <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">
                           {service.category}
                         </span>
-                        {service.publisherType === 'resident' && (
-                          <span className="text-[9px] font-bold text-white bg-orange-500 px-2 py-0.5 rounded-full">
-                            Morador
-                          </span>
-                        )}
-                        {service.publisherType === 'service_provider' && (
-                          <span className="text-[9px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full">
-                            Prestador
-                          </span>
-                        )}
+                        <span
+                          className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                            hasCnpj(service.cnpj)
+                              ? 'text-emerald-700 bg-emerald-500/10'
+                              : 'text-slate-600 bg-slate-500/10'
+                          }`}
+                        >
+                          {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
+                        </span>
                       </div>
                       <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#30cc36] transition-colors">
                         {service.title}
@@ -517,16 +495,15 @@ export default function HomePage() {
                           <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
                             {service.category || "Sem categoria"}
                           </span>
-                        {service.publisherType === 'resident' && (
-                          <span className="text-[9px] font-bold text-white bg-orange-500 px-2 py-0.5 rounded-full">
-                            Morador
-                          </span>
-                        )}
-                        {service.publisherType === 'service_provider' && (
-                          <span className="text-[9px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full">
-                            Prestador
-                          </span>
-                        )}
+                        <span
+                          className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                            hasCnpj(service.cnpj)
+                              ? 'text-emerald-700 bg-emerald-500/10'
+                              : 'text-slate-600 bg-slate-500/10'
+                          }`}
+                        >
+                          {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
+                        </span>
                         </div>
                         <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">
                           {service.title}

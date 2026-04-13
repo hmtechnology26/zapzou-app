@@ -10,6 +10,7 @@ import { ReviewsList } from '@/components/ReviewsList';
 import { ReviewForm } from '@/components/ReviewForm';
 import { useState, useEffect, useRef } from 'react';
 import type { Review } from '@/types';
+import { hasCnpj } from '@/lib/cnpj';
 
 interface ServiceDetailPageProps {
   seoContent?: ReactNode;
@@ -28,6 +29,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
     incrementServiceViews,
     fetchServiceReviews,
     addReview,
+    replyToReview,
   } = useApp() || {};
 
   const [mounted, setMounted] = useState(false);
@@ -146,8 +148,12 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
   }
 
   const menuItems = Array.isArray(service.menu) ? service.menu : [];
-  const serviceImages = service.images || [];
-  const allImages = serviceImages.length > 0 ? serviceImages : [service.image];
+  const serviceImages = Array.isArray(service.images) ? service.images : [];
+  const allImages = serviceImages.length > 0
+    ? serviceImages
+    : typeof service.image === 'string' && service.image
+      ? [service.image]
+      : [];
 
   const environment = selectedEnvironments.find(
     (e: any) => e.id === service.environmentId
@@ -173,6 +179,14 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
   const hasUserReviewed = user && reviews.some(r => r.user_id === user.id);
   const reviewsCount = reviews.length;
   const averageRating = reviewsCount > 0 ? reviews.reduce((acc, r) => acc + (r.stars || 0), 0) / reviewsCount : 0;
+
+  const handleSubmitReply = async (reviewId: string, reply: string) => {
+    if (!service?.id || !user || !isOwner) return;
+    const updated = await replyToReview(reviewId, reply);
+    if (updated) {
+      setReviews((prev) => prev.map((review) => (review.id === updated.id ? updated : review)));
+    }
+  };
 
   const handleToggleStatus = () => {
     toggleServiceStatus(service.id);
@@ -318,7 +332,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
               >
-                <div className="overflow-hidden h-64 md:h-80">
+                <div className="aspect-square w-full overflow-hidden max-h-[32rem] mx-auto">
                   <div
                     className="flex transition-transform duration-300 ease-in-out h-full"
                     style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
@@ -326,7 +340,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                     {allImages.map((img: string, idx: number) => (
                       <div
                         key={idx}
-                        className="w-full flex-shrink-0 h-64 md:h-80"
+                        className="w-full flex-shrink-0 h-full"
                       >
                         <img
                           alt={`${service.title} ${idx + 1}`}
@@ -365,7 +379,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                 </div>
               </div>
             ) : (
-              <div className="h-64 md:h-80 overflow-hidden">
+              <div className="aspect-square w-full overflow-hidden max-h-[32rem] mx-auto">
                 <img alt={service.title} className="w-full h-full object-cover" src={service.image} loading="lazy" decoding="async" />
               </div>
             )}
@@ -386,6 +400,17 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                     {service.verified && (
                       <Icon icon="verified" weight={400} size={22} className="text-primary" style={{ fontVariationSettings: "'FILL' 1" }} />
                     )}
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                        hasCnpj(service.cnpj)
+                          ? 'text-emerald-700 bg-emerald-500/10'
+                          : 'text-slate-600 bg-slate-500/10'
+                      }`}
+                    >
+                      {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
+                    </span>
                   </div>
                   <p className="text-xs text-on-surface-variant">{environment?.name || 'Ambiente'}</p>
                 </div>
@@ -475,7 +500,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
 
             {menuItems.length > 0 && (
               <section>
-                <h3 className="font-bold text-on-surface mb-3">Cardápio / Serviços</h3>
+                <h3 className="font-bold text-on-surface mb-3">Outros Serviços</h3>
                 <div className="space-y-2">
                   {menuItems.map((item: any) => (
                     <div key={item.id} className="flex items-center gap-3 bg-surface-container-lowest p-3 rounded-2xl border border-outline-variant/10">
@@ -493,7 +518,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                         <p className="text-xs text-on-surface-variant truncate">{item.description}</p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <span className="text-primary font-extrabold text-sm">{item.price}</span>
+                        <span className="text-primary font-extrabold text-sm">{item.price || 'Sem valor'}</span>
                       </div>
                     </div>
                   ))}
@@ -502,11 +527,8 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             )}
 
             <section>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-bold text-on-surface">Avaliações</h3>
-                <span className="text-sm text-on-surface-variant">{reviews.length} avaliações</span>
-              </div>
-              <ReviewsList reviews={reviews} />
+              <h3 className="font-bold text-on-surface mb-3">Avaliações</h3>
+              <ReviewsList reviews={reviews} canReply={Boolean(isOwner)} onReply={handleSubmitReply} />
             </section>
 
             <section className="pb-8">

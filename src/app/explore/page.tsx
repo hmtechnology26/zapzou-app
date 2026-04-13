@@ -3,9 +3,9 @@
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/Avatar';
-import { TopAppBar } from '@/components/TopAppBar';
 import { useApp } from '@/hooks/useApp';
 import { useState, useEffect } from 'react';
+import { SearchField } from '@/components/SearchField';
 
 const allEnvironments = [
   { id: '1', name: 'Paróquia Santo Antônio', location: 'Bairro Jardins, São Paulo', type: 'church', image: 'https://images.unsplash.com/photo-1519491050282-cf00c82424b4?w=200' },
@@ -153,15 +153,11 @@ export default function ExplorePage() {
       </header>
 
       <main className="pt-20 px-4 md:px-8 max-w-3xl mx-auto space-y-6">
-        <div className="relative">
-          <Icon icon="search" weight={400} size={24} className="absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant" />
-          <input 
-            className="w-full bg-surface-container-highest border-none rounded-full py-4 pl-14 pr-6 text-on-surface placeholder:text-on-surface-variant/60" 
-            placeholder="Buscar ambientes..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <SearchField
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar ambientes..."
+        />
         
         <div className="flex gap-2 overflow-x-auto no-scrollbar">
           {categories.map((cat) => (

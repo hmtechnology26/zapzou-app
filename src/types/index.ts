@@ -17,6 +17,7 @@ export interface Service {
   isActive?: boolean;
   WhatsApp?: string;
   instagram?: string;
+  cnpj?: string;
   status: 'active' | 'pending' | 'rejected';
   environmentId?: string;
   environmentSlug?: string;
@@ -24,6 +25,7 @@ export interface Service {
   environmentType?: string;
   environmentLatitude?: number;
   environmentLongitude?: number;
+  environmentImage?: string;
   environments?: { id: string; slug: string }[];
   reviewList?: Review[];
   verified?: boolean;
@@ -46,6 +48,9 @@ export interface Review {
   created_at?: string;
   isAnonymous?: boolean;
   approved?: boolean;
+  owner_reply?: string;
+  owner_reply_at?: string;
+  owner_reply_by?: string;
 }
 
 export interface Environment {

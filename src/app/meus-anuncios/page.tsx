@@ -320,24 +320,24 @@ export default function MyAdsPage() {
         <section className="bg-primary/5 border border-primary/10 rounded-[3rem] p-10 shadow-sm text-center relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
           <div className="relative z-10">
-            <div className="w-16 h-16 bg-[#30cc36]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-[#30cc36]/20 group-hover:scale-110 transition-transform duration-500">
+            <div className="w-16 h-16 bg-[#30cc36]/10 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-[#30cc36]/20 group-hover:scale-110 transition-transform duration-500">
               <Icon
                 icon="add_location_alt"
-                size={32}
+                size={36}
                 className="text-[#30cc36]"
                 weight={700}
               />
             </div>
-            <h2 className="text-3xl font-black text-on-surface tracking-tighter">
-              Expandir seu Negócio
-            </h2>
-            <p className="text-base text-on-surface-variant max-w-md mx-auto mt-3 font-medium leading-relaxed">
+            {/* <h2 className="text-2xl font-black text-on-surface tracking-tighter">
+              Procure seu Ambiente
+            </h2> */}
+            {/* <p className="text-base  text-on-surface-variant max-w-md mx-auto mt-3 font-small leading-relaxed">
               Leve seus serviços para novos condomínios e comunidades. Solicite
               vínculo agora mesmo.
-            </p>
+            </p> */}
             <button
               onClick={open}
-              className="mt-8 uppercase py-2 primary-gradient text-white text-sm rounded-full px-10 py-4.5 font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105"
+              className="mt-2 uppercase py-3 primary-gradient text-white text-sm rounded-full px-20 py-5 font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105"
             >
               Procurar Ambiente
             </button>
@@ -382,6 +382,15 @@ export default function MyAdsPage() {
                 const membership = affiliations[env.id];
                 const isActive = membership?.status === "active";
                 const isPending = membership?.status === "pending";
+                const needsModeratorApproval =
+                  env.type === "church" || env.requiresModeratorApproval;
+                const pendingLabel = needsModeratorApproval
+                  ? "AGUARDANDO MODERADOR"
+                  : "PENDENTE";
+                const displayedRole =
+                  togglingRoleTarget[env.id] ?? membership?.role ?? null;
+                const isResidentRole = displayedRole === "resident";
+                const isServiceProviderRole = displayedRole === "service_provider";
 
                 return (
                   <article
@@ -425,11 +434,11 @@ export default function MyAdsPage() {
                     isActive
                       ? 'bg-[#30CC36]/10 text-[#30CC36] border-[#30CC36]/20'
                       : isPending
-              ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+              ? 'bg-amber-500/10 text-amber-700 border-amber-500/20'
               : 'bg-error/10 text-error border-error/20'
           }`}
         >
-          {isActive ? 'ATIVO' : isPending ? 'PENDENTE' : 'BLOQUEADO'}
+          {isActive ? 'ATIVO' : isPending ? pendingLabel : 'BLOQUEADO'}
         </span>
       </div>
 
@@ -457,14 +466,14 @@ export default function MyAdsPage() {
             Tipo de acesso
           </span>
           <span className="text-[9px] font-black uppercase tracking-[0.18em] text-primary">
-            {membership?.role === "resident" ? "Morador" : "Prestador"}
+            {isResidentRole ? "Morador" : "Prestador"}
           </span>
         </div>
 
         <div className="relative grid grid-cols-2 rounded-full bg-surface-container-high/70 p-1 overflow-hidden border border-outline-variant/15 dark:border-[#30cc36]/15">
           <div
             className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-lg shadow-primary/25 transition-transform duration-300 ease-out ${
-              membership?.role === "service_provider"
+              isServiceProviderRole
                 ? "translate-x-full"
                 : "translate-x-0"
             }`}
@@ -474,11 +483,11 @@ export default function MyAdsPage() {
             type="button"
             onClick={() => handleToggleRole(env.id, "resident")}
             disabled={togglingRoleId === env.id}
-            aria-pressed={membership?.role === "resident"}
+            aria-pressed={isResidentRole}
             className={`relative z-10 h-11 rounded-full font-black uppercase text-[9px] flex items-center justify-center gap-2 transition-colors ${
               togglingRoleTarget[env.id] === "resident"
                 ? "text-white"
-                : membership?.role === "resident"
+                : isResidentRole
                   ? "text-white"
                   : "text-on-surface-variant/80 hover:text-on-surface"
             }`}
@@ -495,11 +504,11 @@ export default function MyAdsPage() {
             type="button"
             onClick={() => handleToggleRole(env.id, "service_provider")}
             disabled={togglingRoleId === env.id}
-            aria-pressed={membership?.role === "service_provider"}
+            aria-pressed={isServiceProviderRole}
             className={`relative z-10 h-11 rounded-full font-black uppercase text-[9px] flex items-center justify-center gap-2 transition-colors ${
               togglingRoleTarget[env.id] === "service_provider"
                 ? "text-white"
-                : membership?.role === "service_provider"
+                : isServiceProviderRole
                   ? "text-white"
                   : "text-on-surface-variant/80 hover:text-on-surface"
             }`}
@@ -527,8 +536,8 @@ export default function MyAdsPage() {
 
     {!isActive && isPending && (
       <div className="w-full lg:w-[220px] h-12 rounded-2xl bg-amber-500/10 text-amber-700 border border-amber-500/20 text-[10px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2">
-        <Icon icon="hourglass_empty" size={16} />
-        Aguardando Aprovação
+        <Icon icon={needsModeratorApproval ? "admin_panel_settings" : "hourglass_empty"} size={16} />
+        {needsModeratorApproval ? "Aguardando Moderador" : "Aguardando Aprovação"}
       </div>
     )}
   </div>
