@@ -40,7 +40,8 @@ function RegisterServiceContent() {
     setSelectedEnvironments
   } = useApp();
   const [specificMembershipStatus, setSpecificMembershipStatus] = useState<'active' | 'pending' | 'banned' | null>(null);
-  const [specificMembershipRole, setSpecificMembershipRole] = useState<'member' | 'moderator' | 'resident' | 'service_provider' | null>(null);
+  const [specificMembershipRole, setSpecificMembershipRole] = useState<'member' | 'moderator' | null>(null);
+  const [specificMembershipAccessType, setSpecificMembershipAccessType] = useState<PublicationMode | null>(null);
   const [publicationMode, setPublicationMode] = useState<PublicationMode | null>(null);
   const [loadingMembership, setLoadingMembership] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'uploading' | 'locating' | 'saving'>('idle');
@@ -165,6 +166,7 @@ function RegisterServiceContent() {
     if (!mounted || !user || !selectedEnvironment?.id) {
        setSpecificMembershipStatus(null);
        setSpecificMembershipRole(null);
+       setSpecificMembershipAccessType(null);
        setPublicationMode(null);
        return;
     }
@@ -173,32 +175,25 @@ function RegisterServiceContent() {
       setLoadingMembership(true);
       const { data, error } = await supabase
         .from('environment_members')
-        .select('status, role')
+        .select('status, role, access_type')
         .eq('user_id', user.id)
         .eq('environment_id', selectedEnvironment.id)
         .maybeSingle();
 
       if (data && !error) {
         setSpecificMembershipStatus(data.status);
-        const normalizedRole =
-          data.role === 'service_provider' || data.role === 'resident'
-            ? data.role
-            : data.role === 'moderator'
-              ? 'moderator'
-              : data.role === 'member'
-                ? 'member'
-                : null;
+        const normalizedRole = data.role === 'moderator' ? 'moderator' : 'member';
+        const normalizedAccessType =
+          data.access_type === 'service_provider' || data.access_type === 'resident'
+            ? data.access_type
+            : null;
         setSpecificMembershipRole(normalizedRole);
-        setPublicationMode(
-          normalizedRole === 'service_provider' || normalizedRole === 'resident'
-            ? normalizedRole
-            : normalizedRole === 'member'
-              ? 'resident'
-              : null,
-        );
+        setSpecificMembershipAccessType(normalizedAccessType);
+        setPublicationMode(normalizedAccessType);
       } else {
         setSpecificMembershipStatus(null);
         setSpecificMembershipRole(null);
+        setSpecificMembershipAccessType(null);
         setPublicationMode(null);
       }
       setLoadingMembership(false);
@@ -415,12 +410,13 @@ function RegisterServiceContent() {
 
       let effectiveMembershipStatus = user?.membershipStatus ?? null;
       let effectiveMembershipRole = user?.membershipRole ?? null;
+      let effectiveMembershipAccessType = user?.membershipAccessType ?? null;
       let currentEnvironmentMemberships: Array<{ environment_id?: string; status?: string }> = [];
 
       if (selectedEnvironment?.id && user?.id) {
         const { data: membershipsData, error: membershipsError } = await supabase
           .from('environment_members')
-          .select('environment_id, status, role')
+          .select('environment_id, status, role, access_type')
           .eq('user_id', user.id);
 
         if (membershipsError) {
@@ -434,36 +430,37 @@ function RegisterServiceContent() {
 
         const currentMembership = currentEnvironmentMemberships.find(
           (membership) => membership.environment_id === selectedEnvironment.id,
-        ) as (typeof currentEnvironmentMemberships[number] & { role?: string }) | undefined;
+        ) as (typeof currentEnvironmentMemberships[number] & { role?: string; access_type?: string | null }) | undefined;
 
         if (currentMembership?.status) {
           effectiveMembershipStatus = currentMembership.status as any;
         }
 
         if (currentMembership?.role) {
-          effectiveMembershipRole = currentMembership.role as any;
+          effectiveMembershipRole = currentMembership.role === 'moderator' ? 'moderator' : 'member';
+        }
+
+        if (currentMembership?.access_type === 'resident' || currentMembership?.access_type === 'service_provider') {
+          effectiveMembershipAccessType = currentMembership.access_type as any;
         }
       }
 
       setSubmitStatus('saving');
       const normalizedPublicationMode =
         publicationMode ||
-        (effectiveMembershipRole === 'service_provider' || effectiveMembershipRole === 'resident'
-          ? effectiveMembershipRole
-          : effectiveMembershipRole === 'member'
-            ? 'resident'
-            : null);
+        effectiveMembershipAccessType;
 
       const environmentAvailability = getEnvironmentAvailabilityState(selectedEnvironment ?? undefined, {
         membershipStatus: effectiveMembershipStatus,
         membershipRole: effectiveMembershipRole as any,
+        membershipAccessType: effectiveMembershipAccessType,
         userPlan: user?.plan,
         publicationMode: normalizedPublicationMode,
       });
 
       const isForcedApprovalEnvironment = isForcedPendingApprovalEnvironment(selectedEnvironment?.id);
       const canChoosePublicationMode =
-        effectiveMembershipRole === 'resident' || effectiveMembershipRole === 'service_provider';
+        effectiveMembershipAccessType === 'resident' || effectiveMembershipAccessType === 'service_provider';
 
       if (isForcedApprovalEnvironment && !canChoosePublicationMode) {
         throw new Error('Aguarde a aprovação do moderador e escolha Morador ou Prestador em Meus Serviços antes de publicar.');
@@ -549,7 +546,8 @@ function RegisterServiceContent() {
                 environment_id: selectedEnvironment.id,
                 user_id: user.id,
                 status: 'active',
-                role: publicationMode,
+                role: effectiveMembershipRole === 'moderator' ? 'moderator' : 'member',
+                access_type: publicationMode,
               },
               { onConflict: 'environment_id,user_id' },
             );
@@ -559,11 +557,12 @@ function RegisterServiceContent() {
           }
 
           effectiveMembershipStatus = 'active';
-          effectiveMembershipRole = publicationMode;
+          effectiveMembershipAccessType = publicationMode;
           nextPublicationStatus = existingService?.status || 'active';
           nextIsActive = existingService ? Boolean(existingService.isActive) : true;
           setSpecificMembershipStatus('active');
-          setSpecificMembershipRole(publicationMode);
+          setSpecificMembershipRole(effectiveMembershipRole === 'moderator' ? 'moderator' : 'member');
+          setSpecificMembershipAccessType(publicationMode);
           setPublicationMode(publicationMode);
         }
       }
@@ -704,6 +703,7 @@ function RegisterServiceContent() {
   const environmentAvailability = getEnvironmentAvailabilityState(selectedEnvironment ?? undefined, {
     membershipStatus: specificMembershipStatus,
     membershipRole: specificMembershipRole,
+    membershipAccessType: specificMembershipAccessType,
     userPlan: user?.plan,
     publicationMode,
   });
@@ -711,7 +711,7 @@ function RegisterServiceContent() {
   const canChoosePublicationMode =
     !isForcedApprovalEnvironment ||
     (specificMembershipStatus === 'active' &&
-      (specificMembershipRole === 'resident' || specificMembershipRole === 'service_provider'));
+      (specificMembershipAccessType === 'resident' || specificMembershipAccessType === 'service_provider'));
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-background">

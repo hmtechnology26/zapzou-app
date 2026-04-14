@@ -2,7 +2,9 @@ export type UserPlan = 'free' | 'pro' | 'plus' | null | undefined;
 
 export type PublicationMode = 'resident' | 'service_provider';
 
-export type EnvironmentMembershipRole = 'member' | 'moderator' | PublicationMode | null;
+export type EnvironmentMembershipRole = 'member' | 'moderator' | null;
+
+export type EnvironmentMembershipAccessType = PublicationMode | null;
 
 export interface PlanLimits {
   services: number | null;
@@ -52,4 +54,3 @@ export function countCountableEnvironmentMemberships(
 export function isPlusPublicationMode(value: unknown): value is PublicationMode {
   return value === 'resident' || value === 'service_provider';
 }
-

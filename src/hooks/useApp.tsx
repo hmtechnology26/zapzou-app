@@ -4,7 +4,13 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import type { Service, Environment, Member, Review } from '../types';
 import type { PlaceSearchResult } from '@/lib/maps';
 import { supabase } from '../lib/supabase';
-import { countCountableEnvironmentMemberships, getPlanLimits, isPlanAtEnvironmentLimit, type EnvironmentMembershipRole } from '@/lib/plan-rules';
+import {
+  countCountableEnvironmentMemberships,
+  getPlanLimits,
+  isPlanAtEnvironmentLimit,
+  type EnvironmentMembershipAccessType,
+  type EnvironmentMembershipRole,
+} from '@/lib/plan-rules';
 import { isForcedPendingApprovalEnvironment } from '@/lib/environment-rules';
 
 export interface User {
@@ -16,6 +22,7 @@ export interface User {
   plan?: 'free' | 'pro' | 'plus';
   membershipStatus?: 'active' | 'pending' | 'banned' | null;
   membershipRole?: EnvironmentMembershipRole;
+  membershipAccessType?: EnvironmentMembershipAccessType;
   managedEnvironmentIds?: string[];
 }
 
@@ -51,7 +58,8 @@ interface AppContextType {
   requestAffiliation: (
     envId: string,
     options?: {
-      role?: EnvironmentMembershipRole;
+      role?: EnvironmentMembershipRole | null;
+      accessType?: EnvironmentMembershipAccessType;
       status?: 'active' | 'pending' | 'banned';
     },
   ) => Promise<void>;
@@ -126,7 +134,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isFresh = <T,>(entry: CacheEntry<T> | null | undefined): entry is CacheEntry<T> => {
-    return Boolean(entry) && Date.now() - entry.fetchedAt < APP_FETCH_CACHE_TTL_MS;
+    if (!entry) return false;
+    return Date.now() - entry.fetchedAt < APP_FETCH_CACHE_TTL_MS;
   };
 
   const fetchFavoritePlaces = useCallback(async () => {
@@ -433,6 +442,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             plan: nextPlan,
             membershipStatus: prev?.membershipStatus || null,
             membershipRole: prev?.membershipRole || null,
+            membershipAccessType: prev?.membershipAccessType || null,
             managedEnvironmentIds,
           };
         });
@@ -450,6 +460,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             role: prev?.role || 'user',
             membershipStatus: prev?.membershipStatus || null,
             membershipRole: prev?.membershipRole || null,
+            membershipAccessType: prev?.membershipAccessType || null,
             managedEnvironmentIds,
           }));
           return;
@@ -478,6 +489,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           plan: 'plus',
           membershipStatus: null,
           membershipRole: null,
+          membershipAccessType: null,
           managedEnvironmentIds,
         });
       }
@@ -493,6 +505,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
          plan: 'plus',
          membershipStatus: null,
          membershipRole: null,
+         membershipAccessType: null,
          managedEnvironmentIds,
        });
     }
@@ -517,16 +530,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       const { data: membersData } = await supabase
         .from('environment_members')
-        .select('environment_id, role, status')
+        .select('environment_id, role, access_type, status')
         .eq('user_id', user.id);
 
       const eligibleMemberships = (membersData || []).filter((membership: any) => {
         const envId = membership?.environment_id;
         if (typeof envId !== 'string' || !envId) return false;
-        if (membership?.status === 'banned') return false;
-        if (isForcedPendingApprovalEnvironment(envId)) return true;
-        return membership?.status === 'active' && (
-          membership?.role === 'resident' || membership?.role === 'service_provider'
+        return (
+          membership?.status === 'pending' ||
+          membership?.role === 'moderator' ||
+          membership?.access_type === 'resident' ||
+          membership?.access_type === 'service_provider' ||
+          isForcedPendingApprovalEnvironment(envId)
         );
       });
 
@@ -536,6 +551,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
 
       const envIds = eligibleMemberships.map((m: any) => m.environment_id);
+      const membershipByEnvironmentId = new Map(
+        eligibleMemberships.map((membership: any) => [
+          membership.environment_id,
+          membership,
+        ]),
+      );
 
       const { data, error } = await supabase
         .from('environments')
@@ -556,6 +577,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           latitude: e.latitude,
           longitude: e.longitude,
           address: e.address || '',
+          membershipRole: membershipByEnvironmentId.get(e.id)?.role ?? null,
+          membershipAccessType: membershipByEnvironmentId.get(e.id)?.access_type ?? null,
           requiresModeratorApproval: Boolean(e.requires_moderator_approval),
           requiresRadiusValidation: Boolean(e.requires_radius_validation),
         }));
@@ -589,7 +612,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     const { data, error } = await supabase
       .from('environment_members')
-      .select('status, role')
+      .select('status, role, access_type')
       .eq('user_id', user.id)
       .eq('environment_id', selectedEnvironment.id)
       .maybeSingle();
@@ -598,13 +621,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
        setUser(prev => prev ? { 
          ...prev, 
          membershipStatus: data?.status || null,
-         membershipRole: data?.role || null 
+         membershipRole: data?.role || null,
+         membershipAccessType: data?.access_type || null,
        } : null);
     } else {
        setUser(prev => prev ? { 
          ...prev, 
          membershipStatus: null,
-         membershipRole: null 
+         membershipRole: null,
+         membershipAccessType: null,
        } : null);
     }
   };
@@ -619,7 +644,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       const { data, error } = await supabase
         .from('environment_members')
-        .select('id, user_id, status, role, user_public_profiles(name, avatar_url)')
+        .select('id, user_id, status, role, access_type, user_public_profiles(name, avatar_url)')
         .eq('environment_id', selectedEnvironment.id);
         
       if (data && !error) {
@@ -630,7 +655,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             email: '', 
             avatar: normalizeAvatarUrl(m.user_public_profiles?.avatar_url || ''),
             isPending: m.status === 'pending',
-            role: m.role
+            role: m.role,
+            accessType: m.access_type ?? null,
          }));
          setMembers(mapped);
          fetchCacheRef.current.members.set(selectedEnvironment.id, {
@@ -736,7 +762,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const requestAffiliation = async (
     envId: string,
     options?: {
-      role?: EnvironmentMembershipRole;
+      role?: EnvironmentMembershipRole | null;
+      accessType?: EnvironmentMembershipAccessType;
       status?: 'active' | 'pending' | 'banned';
     },
   ) => {
@@ -744,7 +771,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       const { data: existingMemberships, error: membershipsError } = await supabase
         .from('environment_members')
-        .select('environment_id, status')
+        .select('environment_id, status, role, access_type')
         .eq('user_id', user.id);
 
       if (membershipsError) {
@@ -766,12 +793,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
         );
       }
 
+      const existingMembership = Array.isArray(existingMemberships)
+        ? existingMemberships.find((membership: any) => membership?.environment_id === envId && membership?.status !== 'banned')
+        : null;
+      const requestedAccessType = options?.accessType ?? null;
+      const preservedAccessType =
+        requestedAccessType ?? (existingMembership?.access_type as EnvironmentMembershipAccessType | null);
+      const nextRole = existingMembership?.role === 'moderator' || options?.role === 'moderator'
+        ? 'moderator'
+        : 'member';
+
       const { error } = await supabase
         .from('environment_members')
         .upsert([{
            environment_id: envId,
            user_id: user.id,
-           role: options?.role ?? 'member',
+           role: nextRole,
+           access_type: preservedAccessType,
            status: options?.status ?? 'pending',
         }], { onConflict: 'environment_id,user_id' });
       if (error) throw error;

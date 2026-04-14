@@ -11,6 +11,24 @@ import { hasCnpj } from "@/lib/cnpj";
 import { SERVICE_CATEGORIES } from "@/lib/service-categories";
 import { SearchField } from "@/components/SearchField";
 
+function getAccessTypeBadge(accessType?: 'resident' | 'service_provider' | null) {
+  if (accessType === 'resident') {
+    return {
+      label: 'MORADOR',
+      className: 'bg-orange-500/10 text-orange-700 border-orange-500/20',
+    };
+  }
+
+  if (accessType === 'service_provider') {
+    return {
+      label: 'PRESTADOR',
+      className: 'bg-sky-500/10 text-sky-700 border-sky-500/20',
+    };
+  }
+
+  return null;
+}
+
 export default function HomePage() {
   const router = useRouter();
   const { user, selectedEnvironment, selectedEnvironments, services } =
@@ -62,6 +80,16 @@ export default function HomePage() {
       a.name.localeCompare(b.name),
     );
   }, [activeServices]);
+
+  const membershipByEnvironmentId = useMemo(() => {
+    const map = new Map<string, 'resident' | 'service_provider'>();
+    selectedEnvironments.forEach((env) => {
+      if (env.membershipAccessType === 'resident' || env.membershipAccessType === 'service_provider') {
+        map.set(env.id, env.membershipAccessType);
+      }
+    });
+    return map;
+  }, [selectedEnvironments]);
 
   const selectedEnvironmentName = useMemo(() => {
     if (selectedEnvironmentId === "all") return "Filtro";
@@ -428,9 +456,22 @@ export default function HomePage() {
                             </div>
                           )}
                           {service.environmentName && (
-                            <span className="text-[10px] text-on-surface-variant font-medium">
-                              {service.environmentName}
-                            </span>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-[10px] text-on-surface-variant font-medium">
+                                {service.environmentName}
+                              </span>
+                              {(() => {
+                                const accessBadge = getAccessTypeBadge(
+                                  membershipByEnvironmentId.get(service.environmentId ?? '') ?? null,
+                                );
+
+                                return accessBadge ? (
+                                  <span className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] ${accessBadge.className}`}>
+                                    {accessBadge.label}
+                                  </span>
+                                ) : null;
+                              })()}
+                            </div>
                           )}
                         </div>
                       )}
@@ -531,9 +572,22 @@ export default function HomePage() {
                               </div>
                             )}
                             {service.environmentName && (
-                              <span className="text-[10px] text-on-surface-variant font-medium">
-                                {service.environmentName}
-                              </span>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-[10px] text-on-surface-variant font-medium">
+                                  {service.environmentName}
+                                </span>
+                                {(() => {
+                                  const accessBadge = getAccessTypeBadge(
+                                    membershipByEnvironmentId.get(service.environmentId ?? '') ?? null,
+                                  );
+
+                                  return accessBadge ? (
+                                    <span className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] ${accessBadge.className}`}>
+                                      {accessBadge.label}
+                                    </span>
+                                  ) : null;
+                                })()}
+                              </div>
                             )}
                           </div>
                         )}

@@ -34,7 +34,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [placeFromSearch, setPlaceFromSearch] = useState<PlaceSearchResult | null>(null);
-  const [membership, setMembership] = useState<{ status: 'active' | 'pending' | 'banned'; role?: 'member' | 'moderator' | 'resident' | 'service_provider' | null } | null>(null);
+  const [membership, setMembership] = useState<{ status: 'active' | 'pending' | 'banned'; role?: 'member' | 'moderator' | null; accessType?: PublicationMode | null } | null>(null);
   const [membershipLoading, setMembershipLoading] = useState(false);
   const [memberCount, setMemberCount] = useState<number | null>(null);
   const [loadingEnvironment, setLoadingEnvironment] = useState(true);
@@ -77,6 +77,24 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
             .maybeSingle();
           
           if (data && !error) {
+            let membershipAccessType: PublicationMode | null = null;
+            let membershipRole: 'member' | 'moderator' | null = null;
+
+            if (user?.id) {
+              const { data: membershipData } = await supabase
+                .from('environment_members')
+                .select('role, access_type')
+                .eq('environment_id', data.id)
+                .eq('user_id', user.id)
+                .maybeSingle();
+
+              membershipRole = membershipData?.role === 'moderator' ? 'moderator' : 'member';
+              membershipAccessType =
+                membershipData?.access_type === 'resident' || membershipData?.access_type === 'service_provider'
+                  ? membershipData.access_type
+                  : null;
+            }
+
             const envWithSlug = {
               id: data.id,
               name: data.name,
@@ -88,6 +106,8 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
               latitude: data.latitude,
               longitude: data.longitude,
               address: data.address || '',
+              membershipRole,
+              membershipAccessType,
               requiresModeratorApproval: Boolean(data.requires_moderator_approval),
               requiresRadiusValidation: Boolean(data.requires_radius_validation),
             };
@@ -174,7 +194,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
       try {
         const { data, error } = await supabase
           .from('environment_members')
-          .select('status, role')
+          .select('status, role, access_type')
           .eq('environment_id', effectiveEnvironment.id)
           .eq('user_id', user.id)
           .single();
@@ -256,14 +276,15 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
 
       const hasUnlockedPublicationRole =
         membership?.status === 'active' &&
-        (membership?.role === 'resident' || membership?.role === 'service_provider');
+        (membership?.accessType === 'resident' || membership?.accessType === 'service_provider');
 
       if (isForcedPendingApprovalEnvironment(effectiveEnvironment.id) && !hasUnlockedPublicationRole) {
         await requestAffiliation(effectiveEnvironment.id, {
           role: 'member',
+          accessType: null,
           status: 'pending',
         });
-        setMembership({ status: 'pending' });
+        setMembership({ status: 'pending', accessType: null });
         return;
       }
 
@@ -290,11 +311,12 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
       }
 
       await requestAffiliation(effectiveEnvironment.id, {
-        role: mode,
+        role: 'member',
+        accessType: mode,
         status: 'active',
       });
 
-      setMembership({ status: 'active' });
+      setMembership({ status: 'active', accessType: mode });
     } catch (error: any) {
       console.error('Error handling Plus request:', error);
       alert(error?.message || 'NÃƒÂ£o foi possÃƒÂ­vel concluir sua solicitaÃƒÂ§ÃƒÂ£o.');
@@ -579,7 +601,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
              <div>
                 <h3 className="text-xl font-black text-on-surface tracking-tight">Vincule-se a este ambiente</h3>
                 <p className="text-sm text-on-surface-variant font-medium mt-1">
-                  {user.plan === 'plus'
+                  {user?.plan === 'plus'
                     ? 'No Plus, escolha como vocÃƒÂª atua aqui antes de publicar.'
                     : 'Para publicar serviços aqui, você precisa solicitar acesso à liderança.'}
                 </p>

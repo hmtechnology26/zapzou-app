@@ -1,5 +1,10 @@
 import type { Environment } from '@/types';
-import type { EnvironmentMembershipRole, PublicationMode, UserPlan } from './plan-rules';
+import type {
+  EnvironmentMembershipAccessType,
+  EnvironmentMembershipRole,
+  PublicationMode,
+  UserPlan,
+} from './plan-rules';
 
 export const AUTO_APPROVAL_RADIUS_KM = 0.5;
 
@@ -125,13 +130,9 @@ export function inferEnvironmentValidationFlagsFromPlace(primaryType: string, di
   return inferEnvironmentValidationFlagsFromType(inferEnvironmentTypeFromPlace(primaryType, displayName));
 }
 
-function normalizePublicationRole(role: EnvironmentMembershipRole): PublicationMode | null {
+function normalizePublicationRole(role: EnvironmentMembershipAccessType): PublicationMode | null {
   if (role === 'service_provider' || role === 'resident') {
     return role;
-  }
-
-  if (role === 'member') {
-    return 'resident';
   }
 
   return null;
@@ -144,6 +145,7 @@ export function resolveEnvironmentAccessDecision(
   options?: {
     userPlan?: UserPlan;
     membershipRole?: EnvironmentMembershipRole;
+    membershipAccessType?: EnvironmentMembershipAccessType;
     membershipStatus?: 'active' | 'pending' | 'banned' | null;
     publicationMode?: PublicationMode | null;
   },
@@ -156,7 +158,7 @@ export function resolveEnvironmentAccessDecision(
   const isUnlockedSpecialEnvironment =
     forceModeratorApproval &&
     options?.membershipStatus === 'active' &&
-    (options?.membershipRole === 'resident' || options?.membershipRole === 'service_provider');
+    (options?.membershipAccessType === 'resident' || options?.membershipAccessType === 'service_provider');
 
   if (options?.membershipStatus === 'active') {
     return {
@@ -185,7 +187,7 @@ export function resolveEnvironmentAccessDecision(
     environment?.requiresRadiusValidation ?? inferredFlags.requiresRadiusValidation;
 
   const effectivePublicationMode =
-    options?.publicationMode ?? normalizePublicationRole(options?.membershipRole ?? null);
+    options?.publicationMode ?? normalizePublicationRole(options?.membershipAccessType ?? null);
 
   if (options?.userPlan === 'plus') {
     if (effectivePublicationMode === 'service_provider') {
@@ -248,13 +250,14 @@ export function getEnvironmentAvailabilityState(
     hasLocation?: boolean;
     membershipStatus?: 'active' | 'pending' | 'banned' | null;
     membershipRole?: EnvironmentMembershipRole;
+    membershipAccessType?: EnvironmentMembershipAccessType;
     userPlan?: UserPlan;
     publicationMode?: PublicationMode | null;
   },
 ): EnvironmentAvailabilityState {
   const decision = resolveEnvironmentAccessDecision(environment, options);
   const publicationRole = normalizePublicationRole(
-    options?.publicationMode ?? options?.membershipRole ?? null,
+    options?.publicationMode ?? options?.membershipAccessType ?? null,
   );
 
   if (options?.membershipStatus === 'banned') {

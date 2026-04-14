@@ -66,6 +66,8 @@ export interface Environment {
   latitude?: number;
   longitude?: number;
   address?: string;
+  membershipRole?: 'member' | 'moderator' | null;
+  membershipAccessType?: 'resident' | 'service_provider' | null;
   requiresModeratorApproval?: boolean;
   requiresRadiusValidation?: boolean;
 }
@@ -78,7 +80,8 @@ export interface Member {
   avatar?: string;
   initials?: string;
   isPending?: boolean;
-  role?: 'member' | 'moderator' | 'resident' | 'service_provider' | null;
+  role?: 'member' | 'moderator' | null;
+  accessType?: 'resident' | 'service_provider' | null;
 }
 
 export interface MenuItem {

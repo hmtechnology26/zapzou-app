@@ -120,7 +120,7 @@ export function PublishModal() {
         .from('environment_members')
         .select('environment_id, environments(name)')
         .eq('user_id', userId)
-        .eq('role', 'resident')
+        .eq('access_type', 'resident')
         .eq('status', 'active')
         .limit(1)
         .single();
@@ -218,12 +218,24 @@ export function PublishModal() {
     async (
       envId: string,
       status: 'active' | 'pending',
-      options?: { role?: 'member' | 'moderator' | 'resident' | 'service_provider' | null },
+      options?: { role?: 'member' | 'moderator' | null; accessType?: PublicationMode | null },
     ) => {
       const userId = user?.id;
       if (!userId) {
         throw new Error('Usuário não autenticado');
       }
+
+      const { data: existingMembership } = await supabase
+        .from('environment_members')
+        .select('role, access_type')
+        .eq('environment_id', envId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      const nextRole = existingMembership?.role === 'moderator' || options?.role === 'moderator'
+        ? 'moderator'
+        : 'member';
+      const nextAccessType = options?.accessType ?? (existingMembership?.access_type ?? null);
 
       const { error } = await supabase
         .from('environment_members')
@@ -232,7 +244,8 @@ export function PublishModal() {
             environment_id: envId,
             user_id: userId,
             status,
-            role: options?.role ?? 'member',
+            role: nextRole,
+            access_type: nextAccessType,
           },
           { onConflict: 'environment_id,user_id' },
         );
@@ -252,7 +265,7 @@ export function PublishModal() {
 
     const { data, error } = await supabase
       .from('environment_members')
-      .select('status, role')
+      .select('status, role, access_type')
       .eq('user_id', userId)
       .eq('environment_id', envId)
       .maybeSingle();
@@ -266,6 +279,7 @@ export function PublishModal() {
       ? {
           status: data.status ?? null,
           role: data.role ?? null,
+          accessType: data.access_type ?? null,
         }
       : null;
   }, [user?.id]);
@@ -410,6 +424,7 @@ export function PublishModal() {
       }, {
         membershipStatus: membershipInfo?.status ?? null,
         membershipRole: membershipInfo?.role ?? null,
+        membershipAccessType: membershipInfo?.accessType ?? null,
         publicationMode,
       });
 
@@ -438,16 +453,11 @@ export function PublishModal() {
         requiresRadiusValidation: decision.requiresRadiusValidation,
       };
 
-      const storedPublicationMode =
-        membershipInfo?.role === 'service_provider' || membershipInfo?.role === 'resident'
-          ? membershipInfo.role
-          : membershipInfo?.role === 'member'
-            ? 'resident'
-            : null;
+      const storedPublicationMode = membershipInfo?.accessType ?? null;
       const effectivePublicationMode = publicationMode ?? storedPublicationMode;
       const hasUnlockedPublicationRole =
         membershipInfo?.status === 'active' &&
-        (membershipInfo?.role === 'service_provider' || membershipInfo?.role === 'resident');
+        (membershipInfo?.accessType === 'service_provider' || membershipInfo?.accessType === 'resident');
 
       setSelectedPlaceDecision(decision);
       setSelectedEnvironmentRecord(normalizedEnvironment);
@@ -461,6 +471,7 @@ export function PublishModal() {
         setModeratorApprovalVariant(approvalVariant);
         await syncEnvironmentMembership(normalizedEnvironment.id, 'pending', {
           role: 'member',
+          accessType: null,
         });
         setSelectedEnvironment(normalizedEnvironment);
         setActiveEnvId(null);
@@ -471,6 +482,7 @@ export function PublishModal() {
       if (isForcedPendingApprovalEnvironment(normalizedEnvironment.id) && !hasUnlockedPublicationRole) {
         await syncEnvironmentMembership(normalizedEnvironment.id, 'pending', {
           role: 'member',
+          accessType: null,
         });
         setSelectedEnvironment(normalizedEnvironment);
         setActiveEnvId(null);
@@ -480,10 +492,8 @@ export function PublishModal() {
 
       if (userPlan === 'plus') {
         await syncEnvironmentMembership(normalizedEnvironment.id, 'active', {
-          role:
-            (membershipInfo?.role === 'service_provider' || membershipInfo?.role === 'resident'
-              ? membershipInfo.role
-              : null),
+          role: membershipInfo?.role === 'moderator' ? 'moderator' : 'member',
+          accessType: effectivePublicationMode,
         });
         setSelectedEnvironment(normalizedEnvironment);
         setActiveEnvId(normalizedEnvironment.id);
@@ -599,7 +609,8 @@ export function PublishModal() {
       }
 
       await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', {
-        role: publicationMode ?? 'member',
+        role: 'member',
+        accessType: publicationMode,
       });
       setSelectedEnvironment(selectedEnvironmentRecord);
       setActiveEnvId(selectedEnvironmentRecord.id);
@@ -1089,7 +1100,7 @@ export function PublishModal() {
                       if (selectedPlaceDecision?.mode === 'open') {
                         setUploading(true);
                         try {
-                          await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', { role: 'resident' });
+                          await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', { role: 'member', accessType: 'resident' });
                           setSelectedEnvironment(selectedEnvironmentRecord);
                           setActiveEnvId(selectedEnvironmentRecord.id);
                           setResidentEnvironmentId(selectedEnvironmentRecord.id);
@@ -1116,7 +1127,7 @@ export function PublishModal() {
                       if (isWithinAutoApprovalRadius(distance)) {
                         setUploading(true);
                         try {
-                          await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', { role: 'resident' });
+                          await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', { role: 'member', accessType: 'resident' });
                           setSelectedEnvironment(selectedEnvironmentRecord);
                           setActiveEnvId(selectedEnvironmentRecord.id);
                           setResidentEnvironmentId(selectedEnvironmentRecord.id);
@@ -1142,7 +1153,7 @@ export function PublishModal() {
                       setPublicationMode('service_provider');
                       setUploading(true);
                       try {
-                        await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', { role: 'service_provider' });
+                        await syncEnvironmentMembership(selectedEnvironmentRecord.id, 'active', { role: 'member', accessType: 'service_provider' });
                         setSelectedEnvironment(selectedEnvironmentRecord);
                         setActiveEnvId(selectedEnvironmentRecord.id);
                         setStep('form');

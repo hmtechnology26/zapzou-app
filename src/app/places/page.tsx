@@ -65,9 +65,27 @@ function getEnvironmentIcon(type: string, name: string) {
   return isChurchLike ? "church" : "location_city";
 }
 
+function getAccessTypeBadge(accessType?: 'resident' | 'service_provider' | null) {
+  if (accessType === 'resident') {
+    return {
+      label: 'MORADOR',
+      className: 'bg-orange-500/10 text-orange-700 border-orange-500/20',
+    };
+  }
+
+  if (accessType === 'service_provider') {
+    return {
+      label: 'PRESTADOR',
+      className: 'bg-sky-500/10 text-sky-700 border-sky-500/20',
+    };
+  }
+
+  return null;
+}
+
 export default function PlacesPage() {
   const router = useRouter();
-  const { services, servicesLoading } = useApp();
+  const { services, servicesLoading, selectedEnvironments } = useApp();
   const [environmentSearch, setEnvironmentSearch] = useState("");
 
   const activeServices = useMemo(
@@ -110,6 +128,16 @@ export default function PlacesPage() {
 
     return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, [activeServices]);
+
+  const membershipByEnvironmentId = useMemo(() => {
+    const map = new Map<string, 'resident' | 'service_provider'>();
+    selectedEnvironments.forEach((env) => {
+      if (env.membershipAccessType === 'resident' || env.membershipAccessType === 'service_provider') {
+        map.set(env.id, env.membershipAccessType);
+      }
+    });
+    return map;
+  }, [selectedEnvironments]);
 
   const filteredEnvironments = useMemo(() => {
     const search = environmentSearch.trim().toLowerCase();
@@ -205,51 +233,64 @@ export default function PlacesPage() {
 
         {filteredEnvironments.length > 0 ? (
           <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {filteredEnvironments.map((environment) => (
-              <button
-                key={environment.id}
-                type="button"
-                onClick={() => openEnvironment(environment.slug)}
-                className="group rounded-[1.75rem] border border-outline-variant/10 bg-surface-container-lowest p-5 text-left shadow-sm transition-all duration-300 hover:border-[#30cc36]/20 hover:shadow-md"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-outline-variant/10 bg-surface-container-high text-[#30cc36] transition-colors group-hover:bg-[#30cc36]/8">
+            {filteredEnvironments.map((environment) => {
+              const accessBadge = getAccessTypeBadge(
+                membershipByEnvironmentId.get(environment.id) ?? null,
+              );
+
+              return (
+                <button
+                  key={environment.id}
+                  type="button"
+                  onClick={() => openEnvironment(environment.slug)}
+                  className="group rounded-[1.75rem] border border-outline-variant/10 bg-surface-container-lowest p-5 text-left shadow-sm transition-all duration-300 hover:border-[#30cc36]/20 hover:shadow-md"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-outline-variant/10 bg-surface-container-high text-[#30cc36] transition-colors group-hover:bg-[#30cc36]/8">
+                      <Icon
+                        icon={getEnvironmentIcon(environment.type, environment.name)}
+                        size={26}
+                        className="text-[#30cc36]"
+                        weight={700}
+                      />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/55">
+                          {getTypeLabel(environment.type)}
+                        </p>
+                        {accessBadge && (
+                          <span className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] ${accessBadge.className}`}>
+                            {accessBadge.label}
+                          </span>
+                        )}
+                      </div>
+                      <h2 className="mt-1 line-clamp-2 text-[1.15rem] font-black tracking-tight text-on-surface">
+                        {environment.name}
+                      </h2>
+                      {environment.address && (
+                        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-on-surface-variant">
+                          {environment.address}
+                        </p>
+                      )}
+                      <p className="mt-2 text-sm font-medium text-on-surface-variant">
+                        {environment.serviceCount} serviço
+                        {environment.serviceCount === 1 ? "" : "s"} publicado
+                        {environment.serviceCount === 1 ? "" : "s"}
+                      </p>
+                    </div>
+
                     <Icon
-                      icon={getEnvironmentIcon(environment.type, environment.name)}
-                      size={26}
-                      className="text-[#30cc36]"
+                      icon="chevron_right"
+                      size={20}
                       weight={700}
+                      className="mt-1 text-on-surface-variant/60 transition-colors group-hover:text-on-surface"
                     />
                   </div>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/55">
-                      {getTypeLabel(environment.type)}
-                    </p>
-                    <h2 className="mt-1 line-clamp-2 text-[1.15rem] font-black tracking-tight text-on-surface">
-                      {environment.name}
-                    </h2>
-                    {environment.address && (
-                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-on-surface-variant">
-                        {environment.address}
-                      </p>
-                    )}
-                    <p className="mt-2 text-sm font-medium text-on-surface-variant">
-                      {environment.serviceCount} serviço
-                      {environment.serviceCount === 1 ? "" : "s"} publicado
-                      {environment.serviceCount === 1 ? "" : "s"}
-                    </p>
-                  </div>
-
-                  <Icon
-                    icon="chevron_right"
-                    size={20}
-                    weight={700}
-                    className="mt-1 text-on-surface-variant/60 transition-colors group-hover:text-on-surface"
-                  />
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         ) : null}
 

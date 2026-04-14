@@ -8,6 +8,7 @@ import { TopAppBar } from "@/components/TopAppBar";
 import { usePublishModal } from "@/contexts/PublishModalContext";
 import { supabase } from "@/lib/supabase";
 import { isForcedPendingApprovalEnvironment } from "@/lib/environment-rules";
+import type { PublicationMode } from "@/lib/plan-rules";
 import type { Environment } from "@/types";
 
 const TYPE_LABELS: Record<Environment["type"], string> = {
@@ -20,7 +21,8 @@ const TYPE_LABELS: Record<Environment["type"], string> = {
 type AffiliationRecord = {
   id: string;
   environmentId: string;
-  role: "member" | "moderator" | "resident" | "service_provider" | null;
+  role: "member" | "moderator" | null;
+  accessType: PublicationMode | null;
   status: "active" | "pending" | "banned";
   createdAt?: string;
 };
@@ -84,7 +86,7 @@ export default function MyAdsPage() {
     useState<Environment | null>(null);
   const [togglingRoleId, setTogglingRoleId] = useState<string | null>(null);
   const [togglingRoleTarget, setTogglingRoleTarget] = useState<
-    Record<string, "resident" | "service_provider" | null>
+    Record<string, PublicationMode | null>
   >({});
   const [mounted, setMounted] = useState(false);
 
@@ -107,7 +109,7 @@ export default function MyAdsPage() {
     try {
       const { data: membersData, error: membersError } = await supabase
         .from("environment_members")
-        .select("id, status, role, environment_id")
+        .select("id, status, role, access_type, environment_id")
         .eq("user_id", user.id)
         .in("status", ["active", "pending"]);
 
@@ -132,14 +134,16 @@ export default function MyAdsPage() {
           id: record.id,
           environmentId: envId,
           role: record.role,
+          accessType: record.access_type ?? null,
           status: record.status,
         };
 
         const shouldShowContext =
-          isForcedPendingApprovalEnvironment(envId) ||
           record.status === "pending" ||
-          record.role === "resident" ||
-          record.role === "service_provider";
+          record.role === "moderator" ||
+          record.access_type === "resident" ||
+          record.access_type === "service_provider" ||
+          isForcedPendingApprovalEnvironment(envId);
 
         if (shouldShowContext) {
           const cachedEnv = envCache[envId];
@@ -200,16 +204,16 @@ export default function MyAdsPage() {
 
   const handleToggleRole = async (
     envId: string,
-    nextRole: "resident" | "service_provider",
+    nextAccessType: PublicationMode,
   ) => {
     if (!user?.id) return;
 
-    const currentRole = affiliations[envId]?.role ?? null;
-    if (currentRole === nextRole) return;
+    const currentAccessType = affiliations[envId]?.accessType ?? null;
+    if (currentAccessType === nextAccessType) return;
 
-    if (nextRole === "resident") {
+    if (nextAccessType === "resident") {
       const residentEnvId = Object.entries(affiliations).find(
-        ([id, aff]) => id !== envId && aff.role === "resident",
+        ([id, aff]) => id !== envId && aff.accessType === "resident",
       )?.[0];
 
       if (residentEnvId) {
@@ -225,17 +229,25 @@ export default function MyAdsPage() {
     }
 
     setTogglingRoleId(envId);
-    setTogglingRoleTarget((prev) => ({
-      ...prev,
-      [envId]: nextRole,
-    }));
+      setTogglingRoleTarget((prev) => ({
+        ...prev,
+        [envId]: nextAccessType,
+      }));
 
     try {
+      const currentMembership = affiliations[envId];
       const { error } = await supabase
         .from("environment_members")
-        .update({ role: nextRole })
-        .eq("environment_id", envId)
-        .eq("user_id", user.id);
+        .upsert(
+          {
+            environment_id: envId,
+            user_id: user.id,
+            role: currentMembership?.role === "moderator" ? "moderator" : "member",
+            access_type: nextAccessType,
+            status: currentMembership?.status ?? "active",
+          },
+          { onConflict: "environment_id,user_id" },
+        );
 
       if (error) {
         console.error("Error toggling role:", error);
@@ -243,10 +255,10 @@ export default function MyAdsPage() {
       } else {
         setAffiliations((prev) => ({
           ...prev,
-          [envId]: { ...prev[envId], role: nextRole as any },
+          [envId]: { ...prev[envId], accessType: nextAccessType },
         }));
         setStatusNotice(
-          nextRole === "resident"
+          nextAccessType === "resident"
             ? "Agora você é morador neste ambiente"
             : "Agora você é prestador neste ambiente",
         );
@@ -425,7 +437,7 @@ export default function MyAdsPage() {
                   ? "AGUARDANDO APROVAÇÃO"
                   : "PENDENTE";
                 const displayedRole =
-                  togglingRoleTarget[env.id] ?? membership?.role ?? null;
+                  togglingRoleTarget[env.id] ?? membership?.accessType ?? null;
                 const isResidentRole = displayedRole === "resident";
                 const isServiceProviderRole = displayedRole === "service_provider";
 
@@ -503,7 +515,11 @@ export default function MyAdsPage() {
             Tipo de acesso
           </span>
           <span className="text-[9px] font-black uppercase tracking-[0.18em] text-primary">
-            {isResidentRole ? "Morador" : "Prestador"}
+            {displayedRole === "resident"
+              ? "Morador"
+              : displayedRole === "service_provider"
+                ? "Prestador"
+                : "Sem acesso"}
           </span>
         </div>
 
