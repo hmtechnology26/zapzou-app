@@ -183,7 +183,7 @@ services (1) ──────< (N) reviews
 
 ### Status de Serviço
 ```sql
-'pending'   -- Aguardando moderação
+'pending'   -- Aguardando aprovação
 'active'   -- Ativo/publicado
 'rejected' -- Rejeitado
 ```

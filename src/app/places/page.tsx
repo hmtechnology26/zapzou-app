@@ -13,6 +13,7 @@ type EnvironmentCard = {
   slug: string;
   name: string;
   type: string;
+  address: string;
   serviceCount: number;
 };
 
@@ -89,6 +90,7 @@ export default function PlacesPage() {
           slug,
           name: label,
           type: service.environmentType?.trim() || "environment",
+          address: service.environmentAddress?.trim() || "",
           serviceCount: 1,
         });
         return;
@@ -100,6 +102,9 @@ export default function PlacesPage() {
       }
       if (current.type === "environment" && service.environmentType?.trim()) {
         current.type = service.environmentType.trim();
+      }
+      if (!current.address && service.environmentAddress?.trim()) {
+        current.address = service.environmentAddress.trim();
       }
     });
 
@@ -224,6 +229,11 @@ export default function PlacesPage() {
                     <h2 className="mt-1 line-clamp-2 text-[1.15rem] font-black tracking-tight text-on-surface">
                       {environment.name}
                     </h2>
+                    {environment.address && (
+                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-on-surface-variant">
+                        {environment.address}
+                      </p>
+                    )}
                     <p className="mt-2 text-sm font-medium text-on-surface-variant">
                       {environment.serviceCount} serviço
                       {environment.serviceCount === 1 ? "" : "s"} publicado

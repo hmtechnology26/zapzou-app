@@ -400,6 +400,7 @@ export interface PlaceSearchResult {
   id: string;
   displayName: { text: string; languageCode: string };
   formattedAddress: string;
+  address?: string;
   primaryType: string;
   googleMapsUri: string;
   location: { latitude: number; longitude: number };
@@ -484,6 +485,10 @@ export async function searchPlaces(
         id: place.id,
         displayName: place.displayName,
         formattedAddress: place.formattedAddress,
+        address:
+          place.formattedAddress ||
+          [neighborhood, city].filter(Boolean).join(', ') ||
+          '',
         primaryType: primaryType || place.primaryType,
         googleMapsUri: place.googleMapsUri,
         location: place.location,

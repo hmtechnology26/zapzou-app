@@ -422,7 +422,7 @@ export default function MyAdsPage() {
                 const needsModeratorApproval =
                   env.type === "church" || env.requiresModeratorApproval;
                 const pendingLabel = needsModeratorApproval
-                  ? "AGUARDANDO MODERADOR"
+                  ? "AGUARDANDO APROVAÇÃO"
                   : "PENDENTE";
                 const displayedRole =
                   togglingRoleTarget[env.id] ?? membership?.role ?? null;
@@ -574,7 +574,7 @@ export default function MyAdsPage() {
     {!isActive && isPending && (
       <div className="w-full lg:w-[220px] h-12 rounded-2xl bg-amber-500/10 text-amber-700 border border-amber-500/20 text-[10px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2">
         <Icon icon={needsModeratorApproval ? "admin_panel_settings" : "hourglass_empty"} size={16} />
-        {needsModeratorApproval ? "Aguardando Moderador" : "Aguardando Aprovação"}
+        {needsModeratorApproval ? "Aguardando Aprovação" : "Aguardando Aprovação"}
       </div>
     )}
   </div>

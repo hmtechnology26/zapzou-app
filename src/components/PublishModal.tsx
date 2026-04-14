@@ -31,6 +31,7 @@ const PLACE_CATEGORIES = [
 ] as const;
 
 type PlaceCategory = (typeof PLACE_CATEGORIES)[number]['id'];
+type ModeratorApprovalVariant = 'standard' | 'no-moderator';
 
 const serviceCategories = SERVICE_CATEGORIES.map((category) => category.label);
 
@@ -51,6 +52,7 @@ export function PublishModal() {
   const [residentEnvironmentName, setResidentEnvironmentName] = useState<string | null>(null);
   const [showResidentAlert, setShowResidentAlert] = useState(false);
   const [residentAlertEnvName, setResidentAlertEnvName] = useState('');
+  const [moderatorApprovalVariant, setModeratorApprovalVariant] = useState<ModeratorApprovalVariant>('standard');
   
   const [form, setForm] = useState({
     serviceName: '',
@@ -113,12 +115,11 @@ export function PublishModal() {
   const [activeEnvId, setActiveEnvId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchResidentEnvironment = async () => {
-      if (!user?.id) return;
+    const fetchResidentEnvironment = async (userId: string) => {
       const { data } = await supabase
         .from('environment_members')
         .select('environment_id, environments(name)')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .eq('role', 'resident')
         .eq('status', 'active')
         .limit(1)
@@ -131,18 +132,19 @@ export function PublishModal() {
     };
 
     if (isOpen) {
-      fetchResidentEnvironment();
       if (!user) {
         close();
         router.push('/login');
         return;
       }
+      void fetchResidentEnvironment(user.id);
+      const userPlan = user.plan ?? 'free';
       const userServicesCount = services.filter(s => s.provider_id === user.id).length;
-      if (isPlanAtServiceLimit(user.plan, userServicesCount)) {
+      if (isPlanAtServiceLimit(userPlan, userServicesCount)) {
         close();
-        setAlertTitle(user.plan === 'free' ? 'Limite do Plano Grátis' : 'Limite do Plano Pró');
+        setAlertTitle(userPlan === 'free' ? 'Limite do Plano Grátis' : 'Limite do Plano Pró');
         setAlertMessage(
-          user.plan === 'free'
+          userPlan === 'free'
             ? 'Você já atingiu o limite de 2 serviços do Plano Grátis. Para continuar publicando, contrate o Plano Pró ou Plus.'
             : 'Você já atingiu o limite de 5 serviços do Plano Pró. Para continuar publicando, faça upgrade para o Plano Plus.',
         );
@@ -218,7 +220,8 @@ export function PublishModal() {
       status: 'active' | 'pending',
       options?: { role?: 'member' | 'moderator' | 'resident' | 'service_provider' | null },
     ) => {
-      if (!user) {
+      const userId = user?.id;
+      if (!userId) {
         throw new Error('Usuário não autenticado');
       }
 
@@ -227,7 +230,7 @@ export function PublishModal() {
         .upsert(
           {
             environment_id: envId,
-            user_id: user.id,
+            user_id: userId,
             status,
             role: options?.role ?? 'member',
           },
@@ -240,16 +243,17 @@ export function PublishModal() {
 
       signalMembershipChange();
     },
-    [user, signalMembershipChange],
+    [user?.id, signalMembershipChange],
   );
 
   const getEnvironmentMembership = useCallback(async (envId: string) => {
-    if (!user?.id) return null;
+    const userId = user?.id;
+    if (!userId) return null;
 
     const { data, error } = await supabase
       .from('environment_members')
       .select('status, role')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('environment_id', envId)
       .maybeSingle();
 
@@ -265,6 +269,19 @@ export function PublishModal() {
         }
       : null;
   }, [user?.id]);
+
+  const getModeratorApprovalVariant = useCallback(async (envId: string) => {
+    const { data, error } = await supabase.rpc('has_active_environment_moderator', {
+      p_environment_id: envId,
+    });
+
+    if (error) {
+      console.warn('getModeratorApprovalVariant failed:', error);
+      return 'standard' as ModeratorApprovalVariant;
+    }
+
+    return data ? 'standard' : 'no-moderator';
+  }, []);
 
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
@@ -283,7 +300,14 @@ export function PublishModal() {
     return labels[type] || type;
   };
 
-  const handleSelectPlace = async (place: PlaceSearchResult) => {
+  const handleSelectPlace = useCallback(async (place: PlaceSearchResult) => {
+    if (!user?.id) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    const userId = user.id;
+    const userPlan = user.plan ?? 'free';
+
     setSelectedPlace(place);
     setUploading(true);
     setErrorMsg('');
@@ -359,7 +383,7 @@ export function PublishModal() {
       const { data: userMembershipRows, error: userMembershipsError } = await supabase
         .from('environment_members')
         .select('environment_id, status')
-        .eq('user_id', user.id);
+        .eq('user_id', userId);
 
       if (userMembershipsError) {
         throw userMembershipsError;
@@ -372,7 +396,7 @@ export function PublishModal() {
           )
         : false;
       const currentEnvironmentCount = countCountableEnvironmentMemberships(userMembershipRows as any);
-      const environmentLimit = getPlanLimits(user.plan).environments;
+      const environmentLimit = getPlanLimits(userPlan).environments;
 
       const membershipInfo = await membershipInfoPromise;
       const decision = resolveEnvironmentAccessDecision({
@@ -391,7 +415,7 @@ export function PublishModal() {
 
       if (!alreadyLinked && typeof environmentLimit === 'number' && currentEnvironmentCount >= environmentLimit) {
         throw new Error(
-          user.plan === 'free'
+          userPlan === 'free'
             ? 'Seu plano permite apenas 1 ambiente. Atualize para o Plano Pró ou Plus para adicionar mais.'
             : 'Seu plano já atingiu o limite de 2 ambientes. Atualize para o Plano Plus para continuar.',
         );
@@ -432,6 +456,18 @@ export function PublishModal() {
         return [normalizedEnvironment, ...filtered];
       });
 
+      if (decision.mode === 'moderator') {
+        const approvalVariant = await getModeratorApprovalVariant(normalizedEnvironment.id);
+        setModeratorApprovalVariant(approvalVariant);
+        await syncEnvironmentMembership(normalizedEnvironment.id, 'pending', {
+          role: 'member',
+        });
+        setSelectedEnvironment(normalizedEnvironment);
+        setActiveEnvId(null);
+        setStep('moderator');
+        return;
+      }
+
       if (isForcedPendingApprovalEnvironment(normalizedEnvironment.id) && !hasUnlockedPublicationRole) {
         await syncEnvironmentMembership(normalizedEnvironment.id, 'pending', {
           role: 'member',
@@ -442,17 +478,7 @@ export function PublishModal() {
         return;
       }
 
-      if (decision.mode === 'moderator') {
-        await syncEnvironmentMembership(normalizedEnvironment.id, 'pending', {
-          role: 'member',
-        });
-        setSelectedEnvironment(normalizedEnvironment);
-        setActiveEnvId(null);
-        setStep('moderator');
-        return;
-      }
-
-      if (user.plan === 'plus') {
+      if (userPlan === 'plus') {
         await syncEnvironmentMembership(normalizedEnvironment.id, 'active', {
           role:
             (membershipInfo?.role === 'service_provider' || membershipInfo?.role === 'resident'
@@ -503,7 +529,18 @@ export function PublishModal() {
     } finally {
       setUploading(false);
     }
-  };
+  }, [
+    getModeratorApprovalVariant,
+    getEnvironmentMembership,
+    publicationMode,
+    proceedToPublicationMode,
+    searchQuery,
+    syncEnvironmentMembership,
+    showEnvironmentAddedAlert,
+    user?.id,
+    user?.plan,
+    userLocation,
+  ]);
 
   const handleRequestModeratorApproval = async () => {
     if (!selectedEnvironmentRecord) {
@@ -593,6 +630,7 @@ export function PublishModal() {
       setImageFiles([]);
       setMenuItems([]);
       setErrorMsg('');
+      setModeratorApprovalVariant('standard');
     }
   }, [isOpen]);
 
@@ -790,6 +828,7 @@ export function PublishModal() {
                     setSelectedPlaceDistanceKm(null);
                     setSelectedPlaceDecision(null);
                     setPublicationMode(null);
+                    setModeratorApprovalVariant('standard');
                     setErrorMsg('');
                   }}
                   className="p-1 -ml-1"
@@ -901,6 +940,11 @@ export function PublishModal() {
                             <span className="text-primary font-medium"> • {distance.toFixed(1)}km</span>
                           )}
                         </p>
+                        {(place.address || place.formattedAddress || place.neighborhood || place.city) && (
+                          <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-on-surface-variant/80">
+                            {place.address || place.formattedAddress || [place.neighborhood, place.city].filter(Boolean).join(', ')}
+                          </p>
+                        )}
                       </div>
                       <Icon icon="add_circle" size={24} className="text-primary" />
                     </div>
@@ -1118,18 +1162,24 @@ export function PublishModal() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto p-6 -mt-12">
-              <div className="flex h-full flex-col items-center justify-center text-center">
-                <div className="flex flex-row items-center gap-2">
+        <div className="flex-1 overflow-y-auto p-6 -mt-12">
+          <div className="flex h-full flex-col items-center justify-center text-center">
+            <div className="flex flex-row items-center gap-2">
                     <Icon icon={step === 'radius' ? 'location_on' : 'admin_panel_settings'} size={36} className="text-primary mt-10" />
                     <h4 className="text-2xl mt-10 font-black tracking-tight text-on-surface">
-                  {step === 'radius' ? 'Validação de Raio' : 'Aprovação Necessária'}
+                  {step === 'radius'
+                    ? 'Validação de Raio'
+                    : moderatorApprovalVariant === 'no-moderator'
+                      ? 'Solicitação registrada'
+                      : 'Aprovação Necessária'}
                 </h4>
                 </div>
                 <p className="mt-3 max-w-sm text-sm leading-6 text-on-surface-variant">
                   {step === 'radius'
                     ? 'Estamos verificando sua proximidade com o local selecionado. Você precisa estar dentro de 500m para publicar neste ambiente.'
-                    : 'Este ambiente exige aprovação do moderador antes que a opção de publicar seja liberada.'}
+                    : moderatorApprovalVariant === 'no-moderator'
+                      ? 'Sua solicitação neste ambiente já foi registrada. Peça a algum líder para entrar em contato através do suporte para requisitar a moderação deste ambiente.'
+                      : 'Este ambiente exige aprovação do moderador antes que a opção de publicar seja liberada.'}
                 </p>
                 {selectedPlaceDecision && (
                   <p className="mt-3 text-xs font-bold uppercase tracking-[0.25em] text-primary/70">
@@ -1151,7 +1201,13 @@ export function PublishModal() {
                   </div>
                 )}
                 <button
-                  onClick={step === 'radius' ? handleValidateRadius : handleRequestModeratorApproval}
+                  onClick={
+                    step === 'radius'
+                      ? handleValidateRadius
+                      : moderatorApprovalVariant === 'no-moderator'
+                        ? close
+                        : handleRequestModeratorApproval
+                  }
                   disabled={uploading}
                   className="mt-8 w-full max-w-sm rounded-full bg-primary px-5 py-4 font-bold text-white shadow-lg shadow-primary/20 transition active:scale-[0.98] disabled:opacity-60"
                 >
@@ -1159,7 +1215,9 @@ export function PublishModal() {
                     ? 'Processando...'
                     : step === 'radius'
                       ? 'Requisitar Validação'
-                      : 'Requisitar Aprovação'}
+                      : moderatorApprovalVariant === 'no-moderator'
+                        ? 'Fechar'
+                        : 'Requisitar Aprovação'}
                 </button>
                 
               </div>

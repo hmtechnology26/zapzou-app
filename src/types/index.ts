@@ -25,6 +25,7 @@ export interface Service {
   environmentType?: string;
   environmentLatitude?: number;
   environmentLongitude?: number;
+  environmentAddress?: string;
   environmentImage?: string;
   environments?: { id: string; slug: string }[];
   reviewList?: Review[];
@@ -64,6 +65,7 @@ export interface Environment {
   status?: string;
   latitude?: number;
   longitude?: number;
+  address?: string;
   requiresModeratorApproval?: boolean;
   requiresRadiusValidation?: boolean;
 }

@@ -77,6 +77,18 @@ const normalizeArrayValue = <T,>(value: unknown): T[] => {
   return [];
 };
 
+const normalizeRelatedRecord = <T,>(value: unknown): T | null => {
+  if (Array.isArray(value)) {
+    return (value[0] as T) ?? null;
+  }
+
+  if (value && typeof value === 'object') {
+    return value as T;
+  }
+
+  return null;
+};
+
 type CacheEntry<T> = {
   data: T;
   fetchedAt: number;
@@ -543,6 +555,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           status: e.status,
           latitude: e.latitude,
           longitude: e.longitude,
+          address: e.address || '',
           requiresModeratorApproval: Boolean(e.requires_moderator_approval),
           requiresRadiusValidation: Boolean(e.requires_radius_validation),
         }));
@@ -639,41 +652,54 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const query = supabase
         .from('services')
-        .select('*, environments(name, slug, latitude, longitude, type, image_url)')
+        .select('*, environments(name, slug, latitude, longitude, address, type, image_url)')
         .order('created_at', { ascending: false });
         
       const { data, error } = await query;
       
       if (data && !error) {
-        const formatted = data.map((s: any) => ({
-          id: s.id,
-          slug: s.slug || generateSlug(s.title),
-          title: s.title,
-          description: s.description,
-          category: s.category,
-          image: s.image_url || '',
-          images: normalizeArrayValue<string>(s.images_urls),
-          provider: s.provider || 'Prestador',
-          provider_id: s.provider_id,
-          publisherType: s.publisher_type as 'resident' | 'service_provider' | null,
-          status: s.status as any,
-          isActive: s.is_active,
-          environmentId: s.environment_id,
-          environmentName: s.environments?.name || '',
-          environmentSlug: s.environments?.slug || '',
-          environmentType: s.environments?.type || '',
-          environmentLatitude: s.environments?.latitude,
-          environmentLongitude: s.environments?.longitude,
-          environmentImage: s.environments?.image_url || '',
-          WhatsApp: s.whatsapp,
-          instagram: s.instagram,
-          cnpj: s.cnpj || '',
-          frequency: s.frequency,
-          menu: normalizeArrayValue<any>(s.menu),
-          rating: s.rating ?? 0,
-          reviews_count: s.reviews_count ?? 0,
-          views: s.views ?? 0,
-        }));
+        const formatted = data.map((s: any) => {
+          const environment = normalizeRelatedRecord<{
+            name?: string;
+            slug?: string;
+            latitude?: number;
+            longitude?: number;
+            address?: string;
+            type?: string;
+            image_url?: string;
+          }>(s.environments);
+
+          return {
+            environmentName: environment?.name || '',
+            environmentSlug: environment?.slug || '',
+            environmentType: environment?.type || '',
+            environmentLatitude: environment?.latitude,
+            environmentLongitude: environment?.longitude,
+            environmentAddress: environment?.address || '',
+            environmentImage: environment?.image_url || '',
+            id: s.id,
+            slug: s.slug || generateSlug(s.title),
+            title: s.title,
+            description: s.description,
+            category: s.category,
+            image: s.image_url || '',
+            images: normalizeArrayValue<string>(s.images_urls),
+            provider: s.provider || 'Prestador',
+            provider_id: s.provider_id,
+            publisherType: s.publisher_type as 'resident' | 'service_provider' | null,
+            status: s.status as any,
+            isActive: s.is_active,
+            environmentId: s.environment_id,
+            WhatsApp: s.whatsapp,
+            instagram: s.instagram,
+            cnpj: s.cnpj || '',
+            frequency: s.frequency,
+            menu: normalizeArrayValue<any>(s.menu),
+            rating: s.rating ?? 0,
+            reviews_count: s.reviews_count ?? 0,
+            views: s.views ?? 0,
+          };
+        });
         setServices(formatted);
         fetchCacheRef.current.services = {
           data: formatted,
@@ -762,39 +788,52 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const { data, error } = await supabase
       .from('services')
-      .select('*, environments(name, slug, latitude, longitude, type, image_url)')
+      .select('*, environments(name, slug, latitude, longitude, address, type, image_url)')
       .eq('provider_id', userId)
       .order('created_at', { ascending: false });
     
     if (data && !error) {
-      const formatted = data.map((s: any) => ({
-        id: s.id,
-        slug: s.slug || generateSlug(s.title),
-        title: s.title,
-        description: s.description,
-        category: s.category,
-        image: s.image_url || '',
-        images: normalizeArrayValue<string>(s.images_urls),
-        provider: s.provider || 'Prestador',
-        provider_id: s.provider_id,
-        status: s.status as any,
-        isActive: s.is_active,
-        environmentId: s.environment_id,
-        environmentName: s.environments?.name || '',
-        environmentSlug: s.environments?.slug || '',
-        environmentType: s.environments?.type || '',
-        environmentLatitude: s.environments?.latitude,
-        environmentLongitude: s.environments?.longitude,
-        environmentImage: s.environments?.image_url || '',
-        WhatsApp: s.whatsapp,
-        instagram: s.instagram,
-        cnpj: s.cnpj || '',
-        frequency: s.frequency,
-        menu: normalizeArrayValue<any>(s.menu),
-        rating: s.rating ?? 0,
-        reviews_count: s.reviews_count ?? 0,
-        views: s.views ?? 0,
-      }));
+      const formatted = data.map((s: any) => {
+        const environment = normalizeRelatedRecord<{
+          name?: string;
+          slug?: string;
+          latitude?: number;
+          longitude?: number;
+          address?: string;
+          type?: string;
+          image_url?: string;
+        }>(s.environments);
+
+        return {
+          environmentName: environment?.name || '',
+          environmentSlug: environment?.slug || '',
+          environmentType: environment?.type || '',
+          environmentLatitude: environment?.latitude,
+          environmentLongitude: environment?.longitude,
+          environmentAddress: environment?.address || '',
+          environmentImage: environment?.image_url || '',
+          id: s.id,
+          slug: s.slug || generateSlug(s.title),
+          title: s.title,
+          description: s.description,
+          category: s.category,
+          image: s.image_url || '',
+          images: normalizeArrayValue<string>(s.images_urls),
+          provider: s.provider || 'Prestador',
+          provider_id: s.provider_id,
+          status: s.status as any,
+          isActive: s.is_active,
+          environmentId: s.environment_id,
+          WhatsApp: s.whatsapp,
+          instagram: s.instagram,
+          cnpj: s.cnpj || '',
+          frequency: s.frequency,
+          menu: normalizeArrayValue<any>(s.menu),
+          rating: s.rating ?? 0,
+          reviews_count: s.reviews_count ?? 0,
+          views: s.views ?? 0,
+        };
+      });
       setUserServices(formatted);
       fetchCacheRef.current.userServices.set(userId, {
         data: formatted,

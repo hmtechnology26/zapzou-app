@@ -87,6 +87,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
               status: data.status,
               latitude: data.latitude,
               longitude: data.longitude,
+              address: data.address || '',
               requiresModeratorApproval: Boolean(data.requires_moderator_approval),
               requiresRadiusValidation: Boolean(data.requires_radius_validation),
             };
@@ -121,6 +122,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     image: '',
     latitude: placeFromSearch.location?.latitude,
     longitude: placeFromSearch.location?.longitude,
+    address: placeFromSearch.formattedAddress || '',
     ...inferEnvironmentValidationFlagsFromPlace(
       placeFromSearch.primaryType,
       placeFromSearch.displayName?.text,
@@ -535,6 +537,22 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           onChange={setSearch}
           placeholder="Buscar serviços..."
         />
+
+        {effectiveEnvironment?.address && (
+          <div className="flex items-start gap-3 rounded-2xl border border-outline-variant/10 bg-surface-container-lowest px-4 py-3">
+            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Icon icon="location_on" size={16} weight={700} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/60">
+                Endereço do ambiente
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-on-surface-variant">
+                {effectiveEnvironment.address}
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="flex overflow-x-auto pb-4 -mx-4 px-4 gap-3 no-scrollbar scroll-smooth">
           {categories.map((cat) => (
