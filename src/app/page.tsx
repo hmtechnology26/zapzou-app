@@ -316,14 +316,14 @@ export default function HomePage() {
       <TopAppBar />
 
       <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-8 pb-32">
-        <section className="mb-10 mt-6 text-center md:text-left">
+        {/* <section className="mb-1 mt-1 text-left md:text-left">
           <h2 className="text-3xl font-black text-on-surface tracking-tighter">
-            Perto de você
+            Anúncios
           </h2>
           <p className="text-on-surface-variant text-base mt-1 font-medium">
-            Serviços confiáveis de ambientes próximos
+            Serviços confiáveis perto de você.
           </p>
-        </section>
+        </section> */}
 
         {/* sessão do mapa */}
 
@@ -467,17 +467,7 @@ export default function HomePage() {
 
         {!search ? (
           <section className="space-y-4">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-xl font-black text-on-surface tracking-tight">
-                Serviços próximos
-              </h3>
-              <button
-                onClick={() => router.push("/places")}
-                className="text-xs font-bold text-primary uppercase tracking-wider hover:opacity-70"
-              >
-                Ver Ambientes →
-              </button>
-            </div>
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {paginatedServices.map((service) => (
                 <div

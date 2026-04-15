@@ -42,11 +42,11 @@ export default function LoginPage() {
     <div className="flex flex-col min-h-screen items-center justify-center p-6 bg-background">
       <main className="w-full max-w-md flex flex-col items-center">
         {/* Logo */}
-        <div className="mt-16 mb-8 flex flex-col items-center">
+        <div className="mt-8 mb-8 flex flex-col items-center">
           <img
             src={theme === 'dark' ? '/conectae_logo_vert_light.png' : '/conectae_logo_vert.png'}
             alt="Conectae"
-            className="h-48"
+            className="h-36"
             loading="eager"
             fetchPriority="high"
             decoding="async"
@@ -58,7 +58,7 @@ export default function LoginPage() {
         {/* Card */}
         <div className="w-full bg-surface-container-lowest rounded-3xl p-8 flex flex-col items-center shadow-sm">
           <div className="text-center mb-10">
-            <h2 className="text-on-surface font-semibold text-2xl mb-3">Seja Bem-Vindo(a)</h2>
+            <h2 className="text-on-surface font-semibold text-2xl -mt-2 mb-3">Seja Bem-Vindo(a)</h2>
             <p className="text-on-surface-variant text-base leading-relaxed">
               Faça login para acessar os serviços da sua comunidade
             </p>

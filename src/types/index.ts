@@ -17,6 +17,7 @@ export interface Service {
   isActive?: boolean;
   WhatsApp?: string;
   instagram?: string;
+  website?: string;
   cnpj?: string;
   status: 'active' | 'pending' | 'rejected';
   environmentId?: string;

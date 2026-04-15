@@ -162,44 +162,8 @@ export default function PlacesPage() {
       <TopAppBar />
 
       <main className="mx-auto max-w-7xl px-4 pt-24 md:px-8">
-        <section className="rounded-[2.5rem] border border-outline-variant/10 bg-gradient-to-br from-surface-container-lowest via-surface-container-lowest to-[#30cc36]/[0.06] p-6 shadow-sm md:p-8">
-          <div className="grid gap-6 md:grid-cols-[1.35fr_0.65fr] md:items-end">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.28em] text-primary/70">
-                Ambientes com serviços publicados
-              </p>
-              <h1 className="mt-6 text-2xl text-center md:text-start font-black uppercase tracking-tight text-on-surface md:text-5xl">
-                Escolha um ambiente
-              </h1>
-              {/* <p className="mt-4 max-w-2xl text-sm leading-relaxed text-on-surface-variant md:text-base">
-                Esta lista mostra apenas os ambientes que já têm serviços ativos
-                publicados. Ao abrir um card, você vai para a página do ambiente
-                com os serviços dele.
-              </p> */}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-3xl border border-outline-variant/10 bg-surface-container-lowest/80 p-4">
-                <p className="text-[10px] text-center font-black uppercase tracking-[0.2em] text-on-surface-variant/70">
-                  Ambientes
-                </p>
-                <p className="mt-2 text-center text-3xl font-black tracking-tight text-on-surface">
-                  {totalEnvironments}
-                </p>
-              </div>
-              <div className="rounded-3xl border border-outline-variant/10 bg-surface-container-lowest/80 p-4">
-                <p className="text-[10px] text-center font-black uppercase tracking-[0.2em] text-on-surface-variant/70">
-                  Serviços
-                </p>
-                <p className="mt-2 text-3xl text-center font-black tracking-tight text-on-surface">
-                  {totalServices}
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-8">
+        
+        <section className="">
           <SearchField
             value={environmentSearch}
             onChange={setEnvironmentSearch}

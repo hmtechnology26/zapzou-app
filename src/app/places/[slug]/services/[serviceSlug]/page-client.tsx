@@ -11,6 +11,7 @@ import { ReviewForm } from '@/components/ReviewForm';
 import { useState, useEffect, useRef } from 'react';
 import type { Review } from '@/types';
 import { hasCnpj } from '@/lib/cnpj';
+import { normalizeWebsiteUrl } from '@/lib/website';
 
 interface ServiceDetailPageProps {
   seoContent?: ReactNode;
@@ -156,6 +157,9 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
       '_blank'
     );
   };
+
+  const websiteHref = normalizeWebsiteUrl(service.website);
+  const actionGridClass = websiteHref ? 'mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3' : 'mt-8 grid grid-cols-2 gap-3';
 
   const handleSubmitReview = async (stars: number, comment: string, isAnonymous = false) => {
     if (!service?.id || !user) return;
@@ -417,10 +421,10 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             </div>
           </section>
 
-          <section className="mt-8 flex gap-3">
+          <section className={actionGridClass}>
               <button 
                 onClick={handleWhatsApp}
-                className="flex-1 h-12 bg-gradient-to-br from-primary to-primary-container rounded-full flex items-center justify-center gap-2 text-on-primary font-bold active:scale-95 transition-transform shadow-md"
+                className="col-span-1 h-12 w-full min-w-0 bg-gradient-to-br from-primary to-primary-container rounded-full flex items-center justify-center gap-2 text-on-primary font-bold active:scale-95 transition-transform shadow-md"
               >
                 <img
                   src="/whatsapp_logo.png"
@@ -429,12 +433,23 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                 />
                 Contatar
               </button>
+              {websiteHref && (
+                <a 
+                  href={websiteHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="col-span-2 sm:col-span-1 h-12 w-full min-w-0 rounded-full gap-2 bg-surface-container-lowest text-on-surface font-bold flex items-center justify-center active:scale-95 transition-transform shadow-sm border border-outline-variant/10"
+                >
+                  <Icon icon="language" size={18} />
+                  Site
+                </a>
+              )}
               {service.instagram && (
                 <a 
                   href={service.instagram.startsWith('http') ? service.instagram : `https://instagram.com/${service.instagram.replace('@', '')}`}
                 target="_blank"
                   rel="noreferrer"
-                  className="flex-1 h-12 rounded-full gap-2 bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] text-white font-bold flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-pink-500/20"
+                  className="col-span-1 h-12 w-full min-w-0 rounded-full gap-2 bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] text-white font-bold flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-pink-500/20"
                 >
                   <img
                     src="/instagram_logo.png"

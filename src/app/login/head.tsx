@@ -5,7 +5,7 @@ export default function Head() {
       <meta name="robots" content="noindex,nofollow" />
       <meta
         name="description"
-        content="Entre na Conectae para anunciar, favoritar e gerenciar seus servicos."
+        content="Entre no ConectaE para anunciar, favoritar e gerenciar seus servicos."
       />
     </>
   );

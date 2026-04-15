@@ -11,6 +11,7 @@ import { ReviewForm } from '@/components/ReviewForm';
 import { useState, useEffect, useRef } from 'react';
 import type { Review } from '@/types';
 import { hasCnpj } from '@/lib/cnpj';
+import { normalizeWebsiteUrl } from '@/lib/website';
 
 interface ServiceDetailPageProps {
   seoContent?: ReactNode;
@@ -174,6 +175,9 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
       '_blank'
     );
   };
+
+  const websiteHref = normalizeWebsiteUrl(service.website);
+  const actionGridClass = websiteHref ? 'grid grid-cols-2 gap-3 sm:grid-cols-3' : 'grid grid-cols-2 gap-3';
 
   const isOwner = user && service.provider_id === user.id;
   const hasUserReviewed = user && reviews.some(r => r.user_id === user.id);
@@ -417,48 +421,6 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
               </div>
             </section>
 
-            <section className="bg-surface-container-lowest rounded-2xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1">
-                    <StarRating rating={averageRating} size={22} />
-                    <span className="font-bold text-on-surface ml-1">{averageRating.toFixed(1)}</span>
-                  </div>
-                  <span className="text-on-surface-variant text-sm">({service.reviews_count || 0} avaliações)</span>
-                </div>
-                <div className="flex items-center gap-1 text-on-surface-variant text-xs">
-                  <Icon icon="visibility" size={14} />
-                  <span>{service.views || 0}</span>
-                </div>
-              </div>
-
-              {user && !hasUserReviewed && !isOwner && (
-                <button
-                  onClick={() => setShowReviewForm(true)}
-                  className="w-full py-3 rounded-xl bg-primary text-white font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
-                >
-                  <Icon icon="star" size={18} />
-                  Avaliar Serviço
-                </button>
-              )}
-
-              {hasUserReviewed && (
-                <div className="text-center py-2 text-primary text-sm font-medium">
-                  Você já avaliou este serviço
-                </div>
-              )}
-
-              {showReviewForm && (
-                <div className="mt-3 pt-3 border-t border-outline-variant/10">
-                  <ReviewForm
-                    onSubmit={handleSubmitReview}
-                    onCancel={() => setShowReviewForm(false)}
-                    isSubmitting={isSubmittingReview}
-                  />
-                </div>
-              )}
-            </section>
-
             <section>
               <h3 className="font-bold text-on-surface mb-3">Sobre</h3>
               <div className="bg-surface-container-lowest p-4 rounded-2xl">
@@ -477,10 +439,10 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
               </div>
             </section>
 
-            <section className="flex gap-3">
+            <section className={actionGridClass}>
               <button 
                 onClick={handleWhatsApp}
-                className="flex-1 h-12 bg-gradient-to-br from-primary to-primary-container rounded-full flex items-center justify-center gap-2 text-on-primary font-bold active:scale-95 transition-transform shadow-md"
+                className="col-span-1 h-12 w-full min-w-0 bg-gradient-to-br from-primary to-primary-container rounded-full flex items-center justify-center gap-2 text-on-primary font-bold active:scale-95 transition-transform shadow-md"
               >
                 <img
                   src="/whatsapp_logo.png"
@@ -489,12 +451,23 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                 />
                 Contatar
               </button>
+              {websiteHref && (
+                <a
+                  href={websiteHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="col-span-2 sm:col-span-1 h-12 w-full min-w-0 rounded-full gap-2 bg-surface-container-lowest text-on-surface font-bold flex items-center justify-center active:scale-95 transition-transform shadow-sm border border-outline-variant/10"
+                >
+                  <Icon icon="language" size={18} />
+                  Site
+                </a>
+              )}
               {service.instagram && (
                 <a 
                   href={service.instagram.startsWith('http') ? service.instagram : `https://instagram.com/${service.instagram.replace('@', '')}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex-1 h-12 rounded-full gap-2 bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] text-white font-bold flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-pink-500/20"
+                  className="col-span-1 h-12 w-full min-w-0 rounded-full gap-2 bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] text-white font-bold flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-pink-500/20"
                 >
                   <img
                     src="/instagram_logo.png"
@@ -504,6 +477,57 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                   Instagram
                 </a>
               )}
+            </section>
+
+            <section className="bg-surface-container-lowest rounded-3xl p-5 shadow-sm border border-outline-variant/10">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-black text-on-surface tracking-tight">Avaliações</h3>
+                  <p className="mt-1 text-xs text-on-surface-variant">
+                    Nota média, comentários e resposta do proprietário em um só lugar.
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 text-on-surface-variant text-xs flex-shrink-0">
+                  <Icon icon="visibility" size={14} />
+                  <span>{service.views || 0}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+                <StarRating rating={averageRating} size={22} />
+                <span className="font-bold text-on-surface text-base">{averageRating.toFixed(1)}</span>
+                <span className="text-on-surface-variant text-sm">({service.reviews_count || 0} avaliações)</span>
+              </div>
+
+              {user && !hasUserReviewed && !isOwner && (
+                <button
+                  onClick={() => setShowReviewForm(true)}
+                  className="mt-4 w-full py-3 rounded-2xl bg-primary text-white font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                >
+                  <Icon icon="star" size={18} />
+                  Avaliar Serviço
+                </button>
+              )}
+
+              {hasUserReviewed && (
+                <div className="mt-4 rounded-2xl bg-primary/5 px-4 py-3 text-center text-primary text-sm font-medium">
+                  Você já avaliou este serviço
+                </div>
+              )}
+
+              {showReviewForm && (
+                <div className="mt-4 pt-4 border-t border-outline-variant/10">
+                  <ReviewForm
+                    onSubmit={handleSubmitReview}
+                    onCancel={() => setShowReviewForm(false)}
+                    isSubmitting={isSubmittingReview}
+                  />
+                </div>
+              )}
+
+              <div className="mt-5 pt-5 border-t border-outline-variant/10">
+                <ReviewsList reviews={reviews} canReply={Boolean(isOwner)} onReply={handleSubmitReply} />
+              </div>
             </section>
 
             {menuItems.length > 0 && (
@@ -533,11 +557,6 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                 </div>
               </section>
             )}
-
-            <section>
-              <h3 className="font-bold text-on-surface mb-3">Avaliações</h3>
-              <ReviewsList reviews={reviews} canReply={Boolean(isOwner)} onReply={handleSubmitReply} />
-            </section>
 
             <section className="pb-8">
               <div className="bg-secondary-container/30 p-5 rounded-3xl relative overflow-hidden">

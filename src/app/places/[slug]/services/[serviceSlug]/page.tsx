@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import ServiceDetailClient from './page-client';
 import { createPublicSupabaseClient, getSiteUrl, humanizeSlug } from '@/lib/seo';
+import { normalizeWebsiteUrl } from '@/lib/website';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,15 +16,15 @@ async function getServiceContext(placeSlug: string, serviceSlug: string) {
   try {
     const { data: bySlug } = await supabase
       .from('services')
-      .select('title, slug, description, image_url, environment_id, status, is_active, environments(name, slug)')
+      .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments(name, slug)')
       .eq('slug', serviceSlug)
       .maybeSingle();
 
     const service = bySlug
       ? bySlug
       : await supabase
-          .from('services')
-          .select('title, slug, description, image_url, environment_id, status, is_active, environments(name, slug)')
+        .from('services')
+          .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments(name, slug)')
           .eq('id', serviceSlug)
           .maybeSingle()
           .then(({ data }) => data ?? null);
@@ -81,9 +82,10 @@ export default async function Page({ params }: Props) {
     ctx?.description ||
     'Veja os detalhes do servico dentro do ambiente e entre em contato com facilidade.';
   const canonical = `${siteUrl}/places/${params.slug}/services/${params.serviceSlug}`;
+  const websiteHref = normalizeWebsiteUrl(ctx?.website_url);
 
   const seoContent = (
-    <section className="mx-auto max-w-5xl px-4 pt-24 pb-2">
+    <section className="sr-only" aria-hidden="true">
       <div className="rounded-3xl border border-outline-variant/10 bg-surface-container-lowest p-6 md:p-8 shadow-sm">
         <p className="text-[10px] font-black uppercase tracking-[0.22em] text-primary/70">
           {placeTitle}
@@ -94,6 +96,16 @@ export default async function Page({ params }: Props) {
         <p className="mt-3 max-w-3xl text-sm md:text-base leading-relaxed text-on-surface-variant">
           {description}
         </p>
+        {websiteHref && (
+          <a
+            href={websiteHref}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-4 inline-flex items-center rounded-full border border-outline-variant/10 bg-surface-container-low px-4 py-2 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container"
+          >
+            Visitar site
+          </a>
+        )}
       </div>
     </section>
   );

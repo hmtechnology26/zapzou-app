@@ -718,6 +718,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             environmentId: s.environment_id,
             WhatsApp: s.whatsapp,
             instagram: s.instagram,
+            website: s.website_url,
             cnpj: s.cnpj || '',
             frequency: s.frequency,
             menu: normalizeArrayValue<any>(s.menu),
@@ -897,6 +898,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         tags: service.tags ?? [],
         whatsapp: service.WhatsApp,
         instagram: service.instagram,
+        website_url: service.website || null,
         cnpj: service.cnpj || null,
         frequency: service.frequency,
         status: service.status || 'active',
@@ -929,6 +931,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (updatedFields.price !== undefined) payload.price = updatedFields.price;
     if (updatedFields.WhatsApp !== undefined) payload.whatsapp = updatedFields.WhatsApp;
     if (updatedFields.instagram !== undefined) payload.instagram = updatedFields.instagram;
+    if (updatedFields.website !== undefined) payload.website_url = updatedFields.website || null;
     if (updatedFields.cnpj !== undefined) payload.cnpj = updatedFields.cnpj || null;
     if (updatedFields.frequency !== undefined) payload.frequency = updatedFields.frequency;
     if (updatedFields.status !== undefined) payload.status = updatedFields.status;

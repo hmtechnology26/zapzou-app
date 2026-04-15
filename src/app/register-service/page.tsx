@@ -13,6 +13,7 @@ import {
   isForcedPendingApprovalEnvironment,
 } from '@/lib/environment-rules';
 import { SERVICE_CATEGORIES } from '@/lib/service-categories';
+import { normalizeWebsiteUrl } from '@/lib/website';
 import {
   countCountableEnvironmentMemberships,
   getPlanLimits,
@@ -56,6 +57,7 @@ function RegisterServiceContent() {
     cnpj: '',
     WhatsApp: '',
     instagram: '',
+    website: '',
   });
   const [images, setImages] = useState<string[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -83,6 +85,7 @@ function RegisterServiceContent() {
         cnpj: existingService.cnpj || '',
         WhatsApp: existingService.WhatsApp || '',
         instagram: existingService.instagram || '',
+        website: existingService.website || '',
       });
       setImages(existingService.images || []);
       setIsActive(existingService.isActive ?? true);
@@ -573,6 +576,7 @@ function RegisterServiceContent() {
         image: finalImage,
         images: finalImages,
         WhatsApp: form.WhatsApp ? `55${form.WhatsApp}` : '',
+        website: normalizeWebsiteUrl(form.website),
         isActive: nextIsActive,
         status: nextPublicationStatus,
         environmentId: selectedEnvironment?.id || '',
@@ -938,7 +942,7 @@ function RegisterServiceContent() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-on-surface">WhatsApp</label>
+              <label className="text-sm font-medium text-on-surface">WhatsApp (obrigatório)</label>
               <input 
                 className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60" 
                 placeholder="51999999999" 
@@ -961,6 +965,16 @@ function RegisterServiceContent() {
                   let value = e.target.value.trim();
                   setForm({...form, instagram: value});
                 }}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-on-surface">Site da Empresa (opcional)</label>
+              <input 
+                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60" 
+                placeholder="https://seusite.com ou seusite.com" 
+                value={form.website || ''}
+                onChange={e => setForm({...form, website: e.target.value.trim()})}
               />
             </div>
 
