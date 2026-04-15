@@ -11,6 +11,8 @@ import { hasCnpj } from "@/lib/cnpj";
 import { SERVICE_CATEGORIES } from "@/lib/service-categories";
 import { SearchField } from "@/components/SearchField";
 
+const PAGE_SIZE = 10;
+
 function getAccessTypeBadge(accessType?: 'resident' | 'service_provider' | null) {
   if (accessType === 'resident') {
     return {
@@ -29,6 +31,49 @@ function getAccessTypeBadge(accessType?: 'resident' | 'service_provider' | null)
   return null;
 }
 
+function PaginationControls({
+  currentPage,
+  totalPages,
+  totalItems,
+  onPrevious,
+  onNext,
+}: {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  onPrevious: () => void;
+  onNext: () => void;
+}) {
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+      <p className="text-sm font-medium text-on-surface-variant">
+        Pagina {currentPage} de {totalPages} • {totalItems} servicos
+      </p>
+
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onPrevious}
+          disabled={currentPage <= 1}
+          className="px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container-lowest text-sm font-bold text-on-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-highest"
+        >
+          Anterior
+        </button>
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={currentPage >= totalPages}
+          className="px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container-lowest text-sm font-bold text-on-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-highest"
+        >
+          Proximo
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
   const { user, selectedEnvironment, selectedEnvironments, services } =
@@ -37,6 +82,7 @@ export default function HomePage() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedEnvironmentId, setSelectedEnvironmentId] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const [mounted, setMounted] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [userLocation, setUserLocation] = useState<{
@@ -147,9 +193,47 @@ export default function HomePage() {
       .sort((a, b) => a.distance - b.distance);
   }, [activeServices, userLocation, selectedCategory, selectedEnvironmentId]);
 
+  const filteredServices = useMemo(() => {
+    const searchLower = search.toLowerCase().trim();
+
+    if (!searchLower) {
+      return servicesWithDistance;
+    }
+
+    return servicesWithDistance.filter((service) => {
+      const serviceCategory = toSafeLower(service.category);
+      const serviceTitle = toSafeLower(service.title);
+      const serviceDescription = toSafeLower(service.description);
+
+      return (
+        serviceCategory.includes(searchLower) ||
+        serviceTitle.includes(searchLower) ||
+        serviceDescription.includes(searchLower)
+      );
+    });
+  }, [search, servicesWithDistance]);
+
+  const displayedServices = filteredServices;
+  const totalPages = Math.max(1, Math.ceil(displayedServices.length / PAGE_SIZE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedServices = displayedServices.slice(
+    (safeCurrentPage - 1) * PAGE_SIZE,
+    safeCurrentPage * PAGE_SIZE,
+  );
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedCategory, selectedEnvironmentId]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -395,7 +479,7 @@ export default function HomePage() {
               </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {servicesWithDistance.slice(0, 6).map((service) => (
+              {paginatedServices.map((service) => (
                 <div
                   key={service.id}
                   onClick={() => router.push(`/service/${service.slug}`)}
@@ -482,12 +566,23 @@ export default function HomePage() {
                   </div>
                 </div>
               ))}
-              {servicesWithDistance.length === 0 && (
+              {displayedServices.length === 0 && (
                 <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
                   Nenhum serviço encontrado próximo a você
                 </div>
               )}
             </div>
+            <PaginationControls
+              currentPage={safeCurrentPage}
+              totalPages={totalPages}
+              totalItems={displayedServices.length}
+              onPrevious={() =>
+                setCurrentPage((prev) => Math.max(1, prev - 1))
+              }
+              onNext={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
+            />
           </section>
         ) : (
           <section className="space-y-4">
@@ -495,19 +590,7 @@ export default function HomePage() {
               Resultados da busca
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {servicesWithDistance
-                .filter((service) => {
-                  const searchLower = search.toLowerCase().trim();
-                  const serviceCategory = toSafeLower(service.category);
-                  const serviceTitle = toSafeLower(service.title);
-                  const serviceDescription = toSafeLower(service.description);
-                  return (
-                    serviceCategory.includes(searchLower) ||
-                    serviceTitle.includes(searchLower) ||
-                    serviceDescription.includes(searchLower)
-                  );
-                })
-                .map((service) => (
+              {paginatedServices.map((service) => (
                   <div
                     key={service.id}
                     onClick={() => router.push(`/service/${service.slug}`)}
@@ -614,6 +697,17 @@ export default function HomePage() {
                 </div>
               )}
             </div>
+            <PaginationControls
+              currentPage={safeCurrentPage}
+              totalPages={totalPages}
+              totalItems={displayedServices.length}
+              onPrevious={() =>
+                setCurrentPage((prev) => Math.max(1, prev - 1))
+              }
+              onNext={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
+            />
           </section>
         )}
 

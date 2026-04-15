@@ -1,16 +1,11 @@
 import './globals.css';
 import 'react-material-symbols/rounded';
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import { Providers } from './providers';
 import ProtectedLayout from './layout-client';
 import { getSiteUrl } from '@/lib/seo';
 
 const siteUrl = getSiteUrl();
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -68,7 +63,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className="antialiased">
         <Providers>
           <ProtectedLayout>{children}</ProtectedLayout>
         </Providers>

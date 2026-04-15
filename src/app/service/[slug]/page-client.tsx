@@ -482,8 +482,12 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                 onClick={handleWhatsApp}
                 className="flex-1 h-12 bg-gradient-to-br from-primary to-primary-container rounded-full flex items-center justify-center gap-2 text-on-primary font-bold active:scale-95 transition-transform shadow-md"
               >
-                <Icon icon="chat" weight={400} size={20} />
-                Contratar
+                <img
+                  src="/whatsapp_logo.png"
+                  alt="WhatsApp"
+                  className="w-5 h-5 object-contain"
+                />
+                Contatar
               </button>
               {service.instagram && (
                 <a 
@@ -492,7 +496,11 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                   rel="noreferrer"
                   className="flex-1 h-12 rounded-full gap-2 bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] text-white font-bold flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-pink-500/20"
                 >
-                  <Icon icon="photo_camera" weight={400} size={20} />
+                  <img
+                    src="/instagram_logo.png"
+                    alt="Instagram"
+                    className="w-5 h-5 object-contain"
+                  />
                   Instagram
                 </a>
               )}

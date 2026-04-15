@@ -418,24 +418,32 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
           </section>
 
           <section className="mt-8 flex gap-3">
-            <button 
-              onClick={handleWhatsApp}
-              className="flex-1 h-12 bg-gradient-to-br from-primary to-primary-container rounded-full flex items-center justify-center gap-2 text-on-primary font-bold active:scale-95 transition-transform shadow-md"
-            >
-              <Icon icon="chat" weight={400} size={24} />
-              Contratar
-            </button>
-            {service.instagram && (
-              <a 
-                href={service.instagram.startsWith('http') ? service.instagram : `https://instagram.com/${service.instagram.replace('@', '')}`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex-1 h-12 rounded-full gap-2 bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] text-white font-bold flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-pink-500/20"
+              <button 
+                onClick={handleWhatsApp}
+                className="flex-1 h-12 bg-gradient-to-br from-primary to-primary-container rounded-full flex items-center justify-center gap-2 text-on-primary font-bold active:scale-95 transition-transform shadow-md"
               >
-                <Icon icon="photo_camera" weight={400} size={24} />
-                Instagram
-              </a>
-            )}
+                <img
+                  src="/whatsapp_logo.png"
+                  alt="WhatsApp"
+                  className="w-6 h-6 object-contain"
+                />
+                Contatar
+              </button>
+              {service.instagram && (
+                <a 
+                  href={service.instagram.startsWith('http') ? service.instagram : `https://instagram.com/${service.instagram.replace('@', '')}`}
+                target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 h-12 rounded-full gap-2 bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] text-white font-bold flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-pink-500/20"
+                >
+                  <img
+                    src="/instagram_logo.png"
+                    alt="Instagram"
+                    className="w-6 h-6 object-contain"
+                  />
+                  Instagram
+                </a>
+              )}
           </section>
 
           {menuItems.length > 0 && (
