@@ -129,7 +129,6 @@ export default function ModerationPage() {
       .from('reviews')
       .select('id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved')
       .in('service_id', serviceIds)
-      .or('is_anonymous.is.null,is_anonymous.eq.false,approved.eq.true')
       .order('created_at', { ascending: false })
       .limit(100);
 
@@ -631,29 +630,27 @@ export default function ModerationPage() {
     setActionLoading(null);
   };
 
-  const handleApproveAnonymousReview = async (reviewId: string) => {
-    if (!window.confirm('Aprovar esta avaliação anónima? Ela será exibida no serviço.')) return;
+  const handleApproveReview = async (reviewId: string) => {
+    if (!window.confirm('Aprovar esta avaliação? Ela será exibida no serviço.')) return;
 
     setActionLoading(reviewId);
     try {
-      const { error } = await supabase.rpc('approve_anonymous_review', {
-        p_review_id: reviewId,
-      });
+      const { error } = await supabase
+        .from('reviews')
+        .update({ approved: true })
+        .eq('id', reviewId);
 
       if (error) {
         throw error;
       }
 
-      setReviews((prev) => prev.map((r) => 
-        r.id === reviewId ? { ...r, approved: true } : r
-      ));
+      setReviews((prev) => prev.map((r) => (r.id === reviewId ? { ...r, approved: true } : r)));
       await fetchStats();
     } catch (err: any) {
       alert('Erro ao aprovar avaliação: ' + (err.message || 'Erro desconhecido'));
     }
     setActionLoading(null);
   };
-
   const renderStars = (stars: number, size = 14) => {
     return (
       <div className="flex items-center gap-0">
@@ -1207,12 +1204,12 @@ export default function ModerationPage() {
                             ANÔNIMO
                           </span>
                         )}
-                        {review.isAnonymous && !review.approved && (
+                        {review.approved === false && (
                           <span className="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-orange-300/30 shrink-0">
                             PENDENTE
                           </span>
                         )}
-                        {review.isAnonymous && review.approved && (
+                        {review.isAnonymous && review.approved === true && (
                           <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-300/30 shrink-0">
                             APROVADO
                           </span>
@@ -1234,9 +1231,9 @@ export default function ModerationPage() {
                           <span className="text-xs text-on-surface-variant ml-1">({review.stars}/5)</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          {review.isAnonymous && !review.approved && (
+                          {review.approved === false && (
                             <button
-                              onClick={() => handleApproveAnonymousReview(review.id)}
+                              onClick={() => handleApproveReview(review.id)}
                               disabled={actionLoading === review.id}
                               className="text-[#30cc36] hover:bg-[#30cc36]/10 p-2 rounded-full transition-all disabled:opacity-50"
                               title="Aprovar avaliação"
