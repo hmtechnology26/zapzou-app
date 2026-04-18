@@ -25,7 +25,6 @@ type ActiveMember = {
   email: string;
   avatar: string;
   role: 'member' | 'moderator' | 'resident' | 'service_provider';
-  accessType: 'resident' | 'service_provider' | null;
   status: 'active' | 'banned';
   createdAt: string;
   unit?: string;
@@ -73,6 +72,18 @@ type Stats = {
 };
 
 type Tab = 'dashboard' | 'pending' | 'members' | 'services' | 'reviews';
+
+type ModerationMemberRecord = {
+  id: string;
+  user_id: string;
+  created_at: string;
+  status: 'pending' | 'active' | 'banned';
+  role: 'member' | 'moderator';
+  unit?: string | null;
+  name: string | null;
+  avatar_url: string | null;
+  email: string | null;
+};
 
 export default function ModerationPage() {
   const router = useRouter();
@@ -204,21 +215,25 @@ export default function ModerationPage() {
 
     try {
       const { data: rpcData, error: rpcError } = await supabase.rpc(
-        'get_pending_environment_members',
+        'get_moderation_environment_members',
         { p_environment_id: selectedEnvironment.id },
       );
 
       if (!rpcError && Array.isArray(rpcData)) {
+        const members = rpcData as ModerationMemberRecord[];
         setPendingMembers(
-          rpcData.map((member: any) => ({
-            id: member.id,
-            userId: member.user_id,
-            name: member.name || 'Membro',
-            email: member.email || '',
-            avatar: member.avatar_url || '',
-            date: member.created_at ? new Date(member.created_at).toLocaleDateString('pt-BR') : '',
-            createdAt: member.created_at,
-          })),
+          members
+            .filter((member) => member.status === 'pending')
+            .map((member) => ({
+              id: member.id,
+              userId: member.user_id,
+              name: member.name || 'Membro',
+              email: member.email || '',
+              avatar: member.avatar_url || '',
+              date: member.created_at ? new Date(member.created_at).toLocaleDateString('pt-BR') : '',
+              createdAt: member.created_at,
+              unit: member.unit || undefined,
+            })),
         );
         setLoadingPending(false);
         return;
@@ -272,26 +287,15 @@ export default function ModerationPage() {
     setLoadingMembers(true);
 
     try {
-      const { data: membersData, error: membersError } = await supabase
-        .from('environment_members')
-        .select(`
-          id,
-          user_id,
-          role,
-          access_type,
-          status,
-          created_at,
-          unit,
-          user_public_profiles (name, avatar_url),
-          users (email)
-        `)
-        .eq('environment_id', selectedEnvironment.id)
-        .in('status', ['active', 'banned'])
-        .order('created_at', { ascending: false });
+      const { data: rpcData, error: rpcError } = await supabase.rpc(
+        'get_moderation_environment_members',
+        { p_environment_id: selectedEnvironment.id },
+      );
 
-      if (membersData && !membersError) {
-        const memberIds = membersData.map((m: any) => m.user_id);
-        
+      if (rpcData && !rpcError && Array.isArray(rpcData)) {
+        const membersData = rpcData as ModerationMemberRecord[];
+        const memberIds = membersData.map((m) => m.user_id);
+
         const { data: servicesData } = await supabase
           .from('services')
           .select('provider_id, rating')
@@ -307,28 +311,80 @@ export default function ModerationPage() {
         });
 
         setActiveMembers(
-          membersData.map((member: any) => {
-            const providerStats = servicesByProvider.get(member.user_id) || { count: 0, totalRating: 0 };
-            return {
-              id: member.id,
-              userId: member.user_id,
-              name: member.user_public_profiles?.name || 'Membro',
-              email: member.users?.email || '',
-              avatar: member.user_public_profiles?.avatar_url || '',
-              role: member.role,
-              accessType: member.access_type === 'resident' || member.access_type === 'service_provider'
-                ? member.access_type
-                : null,
-              status: member.status,
-              createdAt: member.created_at,
-              unit: member.unit,
-              servicesCount: providerStats.count,
-              avgRating: providerStats.count > 0 ? Number((providerStats.totalRating / providerStats.count).toFixed(1)) : 0,
-            };
-          }),
+          membersData
+            .filter((member) => member.status === 'active' || member.status === 'banned')
+            .map((member) => {
+              const providerStats = servicesByProvider.get(member.user_id) || { count: 0, totalRating: 0 };
+              return {
+                id: member.id,
+                userId: member.user_id,
+                name: member.name || 'Membro',
+                email: member.email || '',
+                avatar: member.avatar_url || '',
+                role: member.role,
+                status: member.status,
+                createdAt: member.created_at,
+                unit: member.unit,
+                servicesCount: providerStats.count,
+                avgRating: providerStats.count > 0 ? Number((providerStats.totalRating / providerStats.count).toFixed(1)) : 0,
+              };
+            }),
         );
       } else {
-        setActiveMembers([]);
+        const { data: membersData, error: membersError } = await supabase
+          .from('environment_members')
+          .select(`
+            id,
+            user_id,
+            role,
+            status,
+            created_at,
+            unit,
+            user_public_profiles (name, avatar_url),
+            users (email)
+          `)
+          .eq('environment_id', selectedEnvironment.id)
+          .in('status', ['active', 'banned'])
+          .order('created_at', { ascending: false });
+
+        if (membersData && !membersError) {
+          const memberIds = membersData.map((m: any) => m.user_id);
+
+          const { data: servicesData } = await supabase
+            .from('services')
+            .select('provider_id, rating')
+            .eq('environment_id', selectedEnvironment.id)
+            .in('provider_id', memberIds);
+
+          const servicesByProvider = new Map<string, { count: number; totalRating: number }>();
+          (servicesData || []).forEach((s: any) => {
+            const existing = servicesByProvider.get(s.provider_id) || { count: 0, totalRating: 0 };
+            existing.count++;
+            if (s.rating) existing.totalRating += s.rating;
+            servicesByProvider.set(s.provider_id, existing);
+          });
+
+          setActiveMembers(
+            membersData.map((member: any) => {
+              const providerStats = servicesByProvider.get(member.user_id) || { count: 0, totalRating: 0 };
+              return {
+                id: member.id,
+                userId: member.user_id,
+                name: member.user_public_profiles?.name || 'Membro',
+                email: member.users?.email || '',
+                avatar: member.user_public_profiles?.avatar_url || '',
+                role: member.role,
+                status: member.status,
+                createdAt: member.created_at,
+                unit: member.unit,
+                servicesCount: providerStats.count,
+                avgRating: providerStats.count > 0 ? Number((providerStats.totalRating / providerStats.count).toFixed(1)) : 0,
+              };
+            }),
+          );
+        } else {
+          setActiveMembers([]);
+        }
       }
     } catch (err) {
       console.error('Error fetching active members:', err);
@@ -550,38 +606,6 @@ export default function ModerationPage() {
       await fetchStats();
     } catch (err: any) {
       alert('Erro ao atualizar serviço: ' + (err.message || 'Erro desconhecido'));
-    }
-    setActionLoading(null);
-  };
-
-  const handleToggleAccessType = async (
-    memberId: string,
-    nextAccessType: 'resident' | 'service_provider',
-  ) => {
-    if (!window.confirm(`Deseja alterar o tipo de acesso para ${nextAccessType === 'resident' ? 'Morador' : 'Prestador'}?`)) {
-      return;
-    }
-
-    setActionLoading(memberId);
-    try {
-      const { error } = await supabase
-        .from('environment_members')
-        .update({ access_type: nextAccessType })
-        .eq('id', memberId);
-
-      if (error) {
-        throw error;
-      }
-
-      setActiveMembers((prev) =>
-        prev.map((member) =>
-          member.id === memberId
-            ? { ...member, accessType: nextAccessType }
-            : member,
-        ),
-      );
-    } catch (err: any) {
-      alert('Erro ao atualizar tipo de acesso: ' + (err.message || 'Erro desconhecido'));
     }
     setActionLoading(null);
   };
@@ -1009,55 +1033,6 @@ export default function ModerationPage() {
                           {formatDate(member.createdAt)}
                         </span>
                       </div>
-
-                      {member.role !== 'moderator' && (
-                        <div className="mt-3 rounded-2xl border border-outline-variant/15 bg-surface-container-low p-1">
-                          <div className="flex items-center justify-between px-3 pt-2 pb-1">
-                            <span className="text-[9px] font-black uppercase tracking-[0.28em] text-on-surface-variant/60">
-                              Tipo de acesso
-                            </span>
-                            <span className="text-[9px] font-black uppercase tracking-[0.18em] text-primary">
-                              {member.accessType === 'resident'
-                                ? 'Morador'
-                                : member.accessType === 'service_provider'
-                                  ? 'Prestador'
-                                  : 'Sem acesso'}
-                            </span>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-1 rounded-full bg-surface-container-high/70 p-1">
-                            <button
-                              type="button"
-                              onClick={() => handleToggleAccessType(member.id, 'resident')}
-                              disabled={actionLoading === member.id}
-                              aria-pressed={member.accessType === 'resident'}
-                              className={`h-10 rounded-full text-[9px] font-black uppercase tracking-[0.12em] flex items-center justify-center gap-1 transition-colors ${
-                                member.accessType === 'resident'
-                                  ? 'bg-primary text-white'
-                                  : 'text-on-surface-variant/80 hover:text-on-surface'
-                              }`}
-                            >
-                              <Icon icon="home" size={14} />
-                              Morador
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleToggleAccessType(member.id, 'service_provider')}
-                              disabled={actionLoading === member.id}
-                              aria-pressed={member.accessType === 'service_provider'}
-                              className={`h-10 rounded-full text-[9px] font-black uppercase tracking-[0.12em] flex items-center justify-center gap-1 transition-colors ${
-                                member.accessType === 'service_provider'
-                                  ? 'bg-primary text-white'
-                                  : 'text-on-surface-variant/80 hover:text-on-surface'
-                              }`}
-                            >
-                              <Icon icon="work" size={14} />
-                              Prestador
-                            </button>
-                          </div>
-                        </div>
-                      )}
 
                       {member.servicesCount !== undefined && member.servicesCount > 0 && (
                         <div className="flex items-center gap-4 mt-3 pt-3 border-t border-outline-variant/10">
