@@ -14,7 +14,7 @@ function buildOfflineResponse() {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Conectae offline</title>
+  <title>ConectaE offline</title>
   <style>
     :root {
       color-scheme: light;
@@ -64,7 +64,7 @@ function buildOfflineResponse() {
 </head>
 <body>
   <main>
-    <div class="badge">Conectae offline</div>
+    <div class="badge">ConectaE offline</div>
     <h1>Sem conexão agora</h1>
     <p>Abra o app novamente quando a internet voltar para ver os ambientes e servicos mais recentes.</p>
   </main>

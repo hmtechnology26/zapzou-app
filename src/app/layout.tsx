@@ -10,7 +10,7 @@ const siteUrl = getSiteUrl();
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Conectae - Hub de Servicos',
+    default: 'ConectaE - Hub de Servicos',
     template: '%s | Conectae',
   },
   description: 'Conecte-se com prestadores de servicos, ambientes e anuncios na sua regiao.',
@@ -32,14 +32,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     url: siteUrl,
-    title: 'Conectae - Hub de Servicos',
+    title: 'ConectaE - Hub de Servicos',
     description: 'Conecte-se com prestadores de servicos, ambientes e anuncios na sua regiao.',
     siteName: 'Conectae',
     locale: 'pt_BR',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Conectae - Hub de Servicos',
+    title: 'ConectaE - Hub de Servicos',
     description: 'Conecte-se com prestadores de servicos, ambientes e anuncios na sua regiao.',
   },
   manifest: '/manifest.json',
@@ -55,6 +55,7 @@ export const viewport: Viewport = {
 };
 
 export const dynamic = 'force-dynamic';
+const isProduction = process.env.NODE_ENV === 'production';
 
 export default function RootLayout({
   children,
@@ -63,6 +64,39 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        {!isProduction && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function () {
+                  try {
+                    if ('serviceWorker' in navigator) {
+                      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                        registrations.forEach(function (registration) {
+                          registration.unregister();
+                        });
+                      });
+                    }
+
+                    if ('caches' in window) {
+                      caches.keys().then(function (keys) {
+                        keys.forEach(function (key) {
+                          if (key.indexOf('zapzou-') === 0) {
+                            caches.delete(key);
+                          }
+                        });
+                      });
+                    }
+                  } catch (error) {
+                    console.warn('Failed to clear dev caches.', error);
+                  }
+                })();
+              `,
+            }}
+          />
+        )}
+      </head>
       <body className="antialiased">
         <Providers>
           <ProtectedLayout>{children}</ProtectedLayout>

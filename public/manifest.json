@@ -1,6 +1,6 @@
 {
-  "name": "Conectae - Hub de Serviços",
-  "short_name": "Conectae",
+  "name": "ConectaE - Hub de Serviços",
+  "short_name": "ConectaE",
   "description": "Conecte-se com prestadores de serviços na sua região",
   "start_url": "/",
   "display": "standalone",

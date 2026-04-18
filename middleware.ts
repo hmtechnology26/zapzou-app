@@ -3,13 +3,16 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
+  const isDev = process.env.NODE_ENV !== 'production';
+  const pathname = request.nextUrl.pathname;
+  const isNextAsset = pathname.startsWith('/_next/');
 
-  if (request.nextUrl.pathname.startsWith('/api/')) {
+  if (isDev || !isNextAsset) {
+    // Keep app pages from being cached aggressively so the browser never
+    // reuses HTML that points to stale Next.js chunks after a rebuild.
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0');
     response.headers.set('Pragma', 'no-cache');
     response.headers.set('Expires', '0');
-  } else {
-    response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=86400');
   }
 
   response.headers.set('X-DNS-Prefetch-Control', 'on');
@@ -22,6 +25,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|manifest.json|apple-touch-icon.png|icons/).*)',
+    '/((?!favicon.ico|manifest.json|apple-touch-icon.png|icons/).*)',
   ],
 };

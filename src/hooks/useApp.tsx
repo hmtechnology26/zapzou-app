@@ -70,8 +70,6 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const APP_FETCH_CACHE_TTL_MS = 30_000;
-
 const normalizeArrayValue = <T,>(value: unknown): T[] => {
   if (Array.isArray(value)) return value as T[];
   if (typeof value === 'string') {
@@ -133,9 +131,75 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMembershipVersion((prev) => prev + 1);
   }, []);
 
+  const refreshSelectedEnvironments = useCallback(async () => {
+    if (!user?.id) {
+      setSelectedEnvironments([]);
+      return;
+    }
+
+    const { data: membersData } = await supabase
+      .from('environment_members')
+      .select('environment_id, role, access_type, status')
+      .eq('user_id', user.id);
+
+    const eligibleMemberships = (membersData || []).filter((membership: any) => {
+      const envId = membership?.environment_id;
+      if (typeof envId !== 'string' || !envId) return false;
+      return membership?.status !== 'banned';
+    });
+
+    if (eligibleMemberships.length === 0) {
+      setSelectedEnvironments([]);
+      return;
+    }
+
+    const envIds = eligibleMemberships.map((m: any) => m.environment_id);
+    const membershipByEnvironmentId = new Map(
+      eligibleMemberships.map((membership: any) => [
+        membership.environment_id,
+        membership,
+      ]),
+    );
+
+    const { data, error } = await supabase
+      .from('environments')
+      .select('*')
+      .in('id', envIds)
+      .order('name');
+
+    if (data && !error) {
+      const formatted = data.map((e: any) => ({
+        id: e.id,
+        name: e.name,
+        slug: e.slug || generateSlug(e.name),
+        type: e.type,
+        members: Number(e.members_count ?? 0),
+        image: e.image_url || '',
+        isSelected: false,
+        status: e.status,
+        latitude: e.latitude,
+        longitude: e.longitude,
+        address: e.address || '',
+        membershipRole: membershipByEnvironmentId.get(e.id)?.role ?? null,
+        membershipAccessType: membershipByEnvironmentId.get(e.id)?.access_type ?? null,
+        requiresModeratorApproval: Boolean(e.requires_moderator_approval),
+        requiresRadiusValidation: Boolean(e.requires_radius_validation),
+      }));
+
+      setSelectedEnvironments(formatted);
+      if (
+        formatted.length > 0 &&
+        (!selectedEnvironment || !formatted.some((env) => env.id === selectedEnvironment.id))
+      ) {
+        setSelectedEnvironment(formatted[0]);
+      }
+    }
+  }, [selectedEnvironment, user?.id]);
+
   const isFresh = <T,>(entry: CacheEntry<T> | null | undefined): entry is CacheEntry<T> => {
     if (!entry) return false;
-    return Date.now() - entry.fetchedAt < APP_FETCH_CACHE_TTL_MS;
+    // Disable in-memory fetch caching so the UI always reflects the latest DB state.
+    return false;
   };
 
   const fetchFavoritePlaces = useCallback(async () => {
@@ -513,88 +577,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function loadEnvironments() {
-      if (!user?.id) {
-        setSelectedEnvironments([]);
-        fetchCacheRef.current.environments = null;
-        return;
-      }
-
-      if (isFresh(fetchCacheRef.current.environments)) {
-        const cachedEnvironments = fetchCacheRef.current.environments.data;
-        setSelectedEnvironments(cachedEnvironments);
-        if (cachedEnvironments.length > 0 && !selectedEnvironment) {
-          setSelectedEnvironment(cachedEnvironments[0]);
-        }
-        return;
-      }
-
-      const { data: membersData } = await supabase
-        .from('environment_members')
-        .select('environment_id, role, access_type, status')
-        .eq('user_id', user.id);
-
-      const eligibleMemberships = (membersData || []).filter((membership: any) => {
-        const envId = membership?.environment_id;
-        if (typeof envId !== 'string' || !envId) return false;
-        return (
-          membership?.status === 'pending' ||
-          membership?.role === 'moderator' ||
-          membership?.access_type === 'resident' ||
-          membership?.access_type === 'service_provider' ||
-          isForcedPendingApprovalEnvironment(envId)
-        );
-      });
-
-      if (eligibleMemberships.length === 0) {
-        setSelectedEnvironments([]);
-        return;
-      }
-
-      const envIds = eligibleMemberships.map((m: any) => m.environment_id);
-      const membershipByEnvironmentId = new Map(
-        eligibleMemberships.map((membership: any) => [
-          membership.environment_id,
-          membership,
-        ]),
-      );
-
-      const { data, error } = await supabase
-        .from('environments')
-        .select('*')
-        .in('id', envIds)
-        .order('name');
-      
-      if (data && !error) {
-        const formatted = data.map((e: any) => ({
-          id: e.id,
-          name: e.name,
-          slug: e.slug || generateSlug(e.name),
-          type: e.type,
-          members: Number(e.members_count ?? 0),
-          image: e.image_url || '',
-          isSelected: false,
-          status: e.status,
-          latitude: e.latitude,
-          longitude: e.longitude,
-          address: e.address || '',
-          membershipRole: membershipByEnvironmentId.get(e.id)?.role ?? null,
-          membershipAccessType: membershipByEnvironmentId.get(e.id)?.access_type ?? null,
-          requiresModeratorApproval: Boolean(e.requires_moderator_approval),
-          requiresRadiusValidation: Boolean(e.requires_radius_validation),
-        }));
-        fetchCacheRef.current.environments = {
-          data: formatted,
-          fetchedAt: Date.now(),
-        };
-        setSelectedEnvironments(formatted);
-        if (formatted.length > 0 && !selectedEnvironment) {
-          setSelectedEnvironment(formatted[0]);
-        }
-      }
+      await refreshSelectedEnvironments();
     }
     loadEnvironments();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, membershipVersion]);
+  }, [user?.id, membershipVersion, refreshSelectedEnvironments]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`environment-members:${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'environment_members',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          signalMembershipChange();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [signalMembershipChange, user?.id]);
 
   useEffect(() => {
     void fetchServices();

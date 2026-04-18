@@ -10,14 +10,17 @@ import { TopAppBar } from "@/components/TopAppBar";
 import { hasCnpj } from "@/lib/cnpj";
 import { SERVICE_CATEGORIES } from "@/lib/service-categories";
 import { SearchField } from "@/components/SearchField";
+import { supabase } from "@/lib/supabase";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 9;
+
+type MembershipAccessType = 'resident' | 'service_provider' | null;
 
 function getAccessTypeBadge(accessType?: 'resident' | 'service_provider' | null) {
   if (accessType === 'resident') {
     return {
       label: 'MORADOR',
-      className: 'bg-orange-500/10 text-orange-700 border-orange-500/20',
+      className: 'bg-orange-500/20 text-orange-700 border-orange-500/20',
     };
   }
 
@@ -47,36 +50,39 @@ function PaginationControls({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
-      <p className="text-sm font-medium text-on-surface-variant">
-        Pagina {currentPage} de {totalPages} • {totalItems} servicos
-      </p>
+  <div className="flex flex-col items-center justify-center gap-3 pt-2">
+    
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={onPrevious}
+        disabled={currentPage <= 1}
+        className="px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container-lowest text-sm font-bold text-on-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-highest"
+      >
+        Anterior
+      </button>
 
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onPrevious}
-          disabled={currentPage <= 1}
-          className="px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container-lowest text-sm font-bold text-on-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-highest"
-        >
-          Anterior
-        </button>
-        <button
-          type="button"
-          onClick={onNext}
-          disabled={currentPage >= totalPages}
-          className="px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container-lowest text-sm font-bold text-on-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-highest"
-        >
-          Proximo
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onNext}
+        disabled={currentPage >= totalPages}
+        className="px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container-lowest text-sm font-bold text-on-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-highest"
+      >
+        Próximo
+      </button>
     </div>
-  );
+
+    <p className="text-sm font-medium text-center text-on-surface-variant">
+      Página {currentPage} de {totalPages}
+    </p>
+
+  </div>
+);
 }
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, selectedEnvironment, selectedEnvironments, services } =
+  const { user, selectedEnvironment, selectedEnvironments, services, membershipVersion } =
     useApp();
 
   const [search, setSearch] = useState("");
@@ -91,6 +97,8 @@ export default function HomePage() {
   } | null>(null);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [membershipAccessByEnvironmentId, setMembershipAccessByEnvironmentId] = useState<Record<string, MembershipAccessType>>({});
+  const [membershipAccessLoaded, setMembershipAccessLoaded] = useState(false);
   const filterDropdownRef = useRef<HTMLDivElement | null>(null);
 
   const toSafeLower = (value: unknown) =>
@@ -110,6 +118,16 @@ export default function HomePage() {
     return Array.from(cats).sort();
   }, [activeServices]);
 
+  const membershipEnvironmentIds = useMemo(() => {
+    return Array.from(
+      new Set(
+        activeServices
+          .map((service) => service.environmentId)
+          .filter((envId): envId is string => typeof envId === 'string' && envId.length > 0),
+      ),
+    ).sort();
+  }, [activeServices]);
+
   const environmentsWithServices = useMemo(() => {
     const map = new Map<string, { id: string; name: string }>();
     activeServices.forEach((service) => {
@@ -127,15 +145,59 @@ export default function HomePage() {
     );
   }, [activeServices]);
 
-  const membershipByEnvironmentId = useMemo(() => {
-    const map = new Map<string, 'resident' | 'service_provider'>();
-    selectedEnvironments.forEach((env) => {
-      if (env.membershipAccessType === 'resident' || env.membershipAccessType === 'service_provider') {
-        map.set(env.id, env.membershipAccessType);
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadMembershipAccessTypes = async () => {
+      if (!user?.id) {
+        if (!cancelled) {
+          setMembershipAccessByEnvironmentId({});
+          setMembershipAccessLoaded(true);
+        }
+        return;
       }
-    });
-    return map;
-  }, [selectedEnvironments]);
+
+      if (membershipEnvironmentIds.length === 0) {
+        if (!cancelled) {
+          setMembershipAccessLoaded(true);
+        }
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('environment_members')
+        .select('environment_id, access_type, status')
+        .eq('user_id', user.id)
+        .in('environment_id', membershipEnvironmentIds)
+        .neq('status', 'banned');
+
+      if (cancelled) return;
+
+      if (error) {
+        console.warn('loadMembershipAccessTypes failed:', error);
+        setMembershipAccessLoaded(true);
+        return;
+      }
+
+      const nextMap: Record<string, MembershipAccessType> = {};
+      (data || []).forEach((row: any) => {
+        if (row?.access_type === 'resident' || row?.access_type === 'service_provider') {
+          if (typeof row.environment_id === 'string' && row.environment_id.length > 0) {
+            nextMap[row.environment_id] = row.access_type;
+          }
+        }
+      });
+
+      setMembershipAccessByEnvironmentId(nextMap);
+      setMembershipAccessLoaded(true);
+    };
+
+    void loadMembershipAccessTypes();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [membershipEnvironmentIds, membershipVersion, user?.id]);
 
   const selectedEnvironmentName = useMemo(() => {
     if (selectedEnvironmentId === "all") return "Filtro";
@@ -494,15 +556,15 @@ export default function HomePage() {
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
                     <div>
-                      <div className="flex items-center justify-between mb-1.5 gap-2">
+                      <div className="mb-2 flex flex-wrap items-center gap-2">
                         <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">
                           {service.category}
                         </span>
                         <span
-                          className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                          className={`ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full ${
                             hasCnpj(service.cnpj)
-                              ? 'text-emerald-700 bg-emerald-500/10'
-                              : 'text-slate-600 bg-slate-500/10'
+                              ? 'text-white bg-[#30cc36] dark:text-black/80 dark:bg-[#30cc36]'
+                              : 'text-white bg-orange-600 dark:text-white dark:bg-orange-700'
                           }`}
                         >
                           {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
@@ -514,6 +576,22 @@ export default function HomePage() {
                       <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">
                         {service.description}
                       </p>
+                      {membershipAccessLoaded &&
+                        (() => {
+                          const accessBadge = getAccessTypeBadge(
+                            membershipAccessByEnvironmentId[service.environmentId ?? ""] ?? null,
+                          );
+
+                          return accessBadge ? (
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <span
+                                className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] ${accessBadge.className}`}
+                              >
+                                {accessBadge.label}
+                              </span>
+                            </div>
+                          ) : null;
+                        })()}
                     </div>
 
                     <div className="mt-3 flex items-center justify-between">
@@ -530,22 +608,9 @@ export default function HomePage() {
                             </div>
                           )}
                           {service.environmentName && (
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-[10px] text-on-surface-variant font-medium">
-                                {service.environmentName}
-                              </span>
-                              {(() => {
-                                const accessBadge = getAccessTypeBadge(
-                                  membershipByEnvironmentId.get(service.environmentId ?? '') ?? null,
-                                );
-
-                                return accessBadge ? (
-                                  <span className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] ${accessBadge.className}`}>
-                                    {accessBadge.label}
-                                  </span>
-                                ) : null;
-                              })()}
-                            </div>
+                            <span className="text-[10px] text-on-surface-variant font-medium">
+                              {service.environmentName}
+                            </span>
                           )}
                         </div>
                       )}
@@ -605,12 +670,12 @@ export default function HomePage() {
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
                       <div>
-                        <div className="flex items-center justify-between mb-1.5 gap-2">
+                        <div className="mb-2 flex flex-wrap items-center gap-2">
                           <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
                             {service.category || "Sem categoria"}
                           </span>
                         <span
-                          className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                          className={`ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full ${
                             hasCnpj(service.cnpj)
                               ? 'text-emerald-700 bg-emerald-500/10'
                               : 'text-slate-600 bg-slate-500/10'
@@ -625,6 +690,22 @@ export default function HomePage() {
                         <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">
                           {service.description}
                         </p>
+                        {membershipAccessLoaded &&
+                          (() => {
+                            const accessBadge = getAccessTypeBadge(
+                              membershipAccessByEnvironmentId[service.environmentId ?? ""] ?? null,
+                            );
+
+                            return accessBadge ? (
+                              <div className="mt-2 flex flex-wrap items-center gap-2">
+                                <span
+                                  className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] ${accessBadge.className}`}
+                                >
+                                  {accessBadge.label}
+                                </span>
+                              </div>
+                            ) : null;
+                          })()}
                       </div>
 
                       <div className="mt-3 flex items-center justify-between">
@@ -645,22 +726,9 @@ export default function HomePage() {
                               </div>
                             )}
                             {service.environmentName && (
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-[10px] text-on-surface-variant font-medium">
-                                  {service.environmentName}
-                                </span>
-                                {(() => {
-                                  const accessBadge = getAccessTypeBadge(
-                                    membershipByEnvironmentId.get(service.environmentId ?? '') ?? null,
-                                  );
-
-                                  return accessBadge ? (
-                                    <span className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] ${accessBadge.className}`}>
-                                      {accessBadge.label}
-                                    </span>
-                                  ) : null;
-                                })()}
-                              </div>
+                              <span className="text-[10px] text-on-surface-variant font-medium">
+                                {service.environmentName}
+                              </span>
                             )}
                           </div>
                         )}

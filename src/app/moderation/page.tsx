@@ -25,6 +25,7 @@ type ActiveMember = {
   email: string;
   avatar: string;
   role: 'member' | 'moderator' | 'resident' | 'service_provider';
+  accessType: 'resident' | 'service_provider' | null;
   status: 'active' | 'banned';
   createdAt: string;
   unit?: string;
@@ -89,6 +90,56 @@ export default function ModerationPage() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [accessLoading, setAccessLoading] = useState(true);
+  const userId = user?.id ?? null;
+  const managedEnvironmentIdsKey = (user?.managedEnvironmentIds ?? []).slice().sort().join('|');
+  const selectedEnvironmentIdsKey = selectedEnvironments
+    .map((env) => env.id)
+    .sort()
+    .join('|');
+
+  const loadVisibleReviews = useCallback(async (environmentId: string) => {
+    const { data: servicesData, error: servicesError } = await supabase
+      .from('services')
+      .select('id, title')
+      .eq('environment_id', environmentId);
+
+    if (servicesError) {
+      throw servicesError;
+    }
+
+    const serviceMap = new Map((servicesData || []).map((service: any) => [service.id, service.title]));
+    const serviceIds = Array.from(serviceMap.keys());
+
+    if (serviceIds.length === 0) {
+      return [];
+    }
+
+    const { data: reviewsData, error: reviewsError } = await supabase
+      .from('reviews')
+      .select('id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved')
+      .in('service_id', serviceIds)
+      .or('is_anonymous.is.null,is_anonymous.eq.false,approved.eq.true')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (reviewsError) {
+      throw reviewsError;
+    }
+
+    return (reviewsData || []).map((review: any) => ({
+      id: review.id,
+      serviceId: review.service_id,
+      serviceTitle: serviceMap.get(review.service_id) || 'Serviço',
+      userId: review.user_id,
+      userName: review.user_name || 'Usuário',
+      userAvatar: review.user_avatar || '',
+      stars: review.stars || 0,
+      comment: review.comment || '',
+      createdAt: review.created_at,
+      isAnonymous: review.is_anonymous,
+      approved: review.approved,
+    })) as ReviewItem[];
+  }, []);
 
   const fetchStats = useCallback(async () => {
     if (!selectedEnvironment?.id) return;
@@ -104,12 +155,12 @@ export default function ModerationPage() {
           .from('services')
           .select('id, is_active, rating, reviews_count')
           .eq('environment_id', selectedEnvironment.id),
-        supabase.rpc('get_environment_reviews', { p_environment_id: selectedEnvironment.id }),
+        loadVisibleReviews(selectedEnvironment.id),
       ]);
 
       const members = membersRes.data || [];
       const servicesData = servicesRes.data || [];
-      const reviewsData = reviewsRes.data || [];
+      const reviewsData = reviewsRes || [];
 
       const activeCount = members.filter((m: any) => m.status === 'active').length;
       const pendingCount = members.filter((m: any) => m.status === 'pending').length;
@@ -140,7 +191,7 @@ export default function ModerationPage() {
     }
 
     setLoadingStats(false);
-  }, [selectedEnvironment?.id]);
+  }, [loadVisibleReviews, selectedEnvironment?.id]);
 
   const fetchPendingMembers = useCallback(async () => {
     if (!selectedEnvironment?.id) {
@@ -227,6 +278,7 @@ export default function ModerationPage() {
           id,
           user_id,
           role,
+          access_type,
           status,
           created_at,
           unit,
@@ -264,6 +316,9 @@ export default function ModerationPage() {
               email: member.users?.email || '',
               avatar: member.user_public_profiles?.avatar_url || '',
               role: member.role,
+              accessType: member.access_type === 'resident' || member.access_type === 'service_provider'
+                ? member.access_type
+                : null,
               status: member.status,
               createdAt: member.created_at,
               unit: member.unit,
@@ -348,71 +403,15 @@ export default function ModerationPage() {
     setLoadingReviews(true);
 
     try {
-      const { data, error } = await supabase.rpc(
-        'get_environment_reviews',
-        { p_environment_id: selectedEnvironment.id },
-      );
-
-      if (!error && Array.isArray(data)) {
-        setReviews(
-          data.map((review: any) => ({
-            id: review.id,
-            serviceId: review.service_id,
-            serviceTitle: review.service_title || 'Serviço',
-            userId: review.user_id,
-            userName: review.user_name || 'Usuário',
-            userAvatar: review.user_avatar || '',
-            stars: review.stars || 0,
-            comment: review.comment || '',
-            createdAt: review.created_at,
-            isAnonymous: review.is_anonymous,
-            approved: review.approved,
-          })),
-        );
-        setLoadingReviews(false);
-        return;
-      }
-
-      const { data: servicesData } = await supabase
-        .from('services')
-        .select('id, title')
-        .eq('environment_id', selectedEnvironment.id);
-
-      const serviceMap = new Map((servicesData || []).map((s: any) => [s.id, s.title]));
-
-      const { data: reviewsData, error: reviewsError } = await supabase
-        .from('reviews')
-        .select('id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved')
-        .in('service_id', Array.from(serviceMap.keys()))
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      if (reviewsData && !reviewsError) {
-        setReviews(
-          reviewsData.map((review: any) => ({
-            id: review.id,
-            serviceId: review.service_id,
-            serviceTitle: serviceMap.get(review.service_id) || 'Serviço',
-            userId: review.user_id,
-            userName: review.user_name || 'Usuário',
-            userAvatar: review.user_avatar || '',
-            stars: review.stars || 0,
-            comment: review.comment || '',
-            createdAt: review.created_at,
-            isAnonymous: review.is_anonymous,
-            approved: review.approved,
-          })),
-        );
-      } else {
-        setReviews([]);
-      }
+      const visibleReviews = await loadVisibleReviews(selectedEnvironment.id);
+      setReviews(visibleReviews);
     } catch (err) {
       console.error('Error fetching reviews:', err);
       setReviews([]);
     }
 
     setLoadingReviews(false);
-  }, [selectedEnvironment?.id]);
+  }, [loadVisibleReviews, selectedEnvironment?.id]);
 
   useEffect(() => {
     if (!user) {
@@ -477,7 +476,7 @@ export default function ModerationPage() {
     };
 
     void verifyAccess();
-  }, [user, selectedEnvironment?.id, selectedEnvironments, fetchStats, fetchPendingMembers, fetchActiveMembers, fetchServices, fetchReviews, router, setSelectedEnvironment]);
+  }, [userId, managedEnvironmentIdsKey, selectedEnvironment?.id, selectedEnvironmentIdsKey, fetchStats, fetchPendingMembers, fetchActiveMembers, fetchServices, fetchReviews, router, setSelectedEnvironment]);
 
   const handleApprove = async (memberId: string) => {
     setActionLoading(memberId);
@@ -551,6 +550,38 @@ export default function ModerationPage() {
       await fetchStats();
     } catch (err: any) {
       alert('Erro ao atualizar serviço: ' + (err.message || 'Erro desconhecido'));
+    }
+    setActionLoading(null);
+  };
+
+  const handleToggleAccessType = async (
+    memberId: string,
+    nextAccessType: 'resident' | 'service_provider',
+  ) => {
+    if (!window.confirm(`Deseja alterar o tipo de acesso para ${nextAccessType === 'resident' ? 'Morador' : 'Prestador'}?`)) {
+      return;
+    }
+
+    setActionLoading(memberId);
+    try {
+      const { error } = await supabase
+        .from('environment_members')
+        .update({ access_type: nextAccessType })
+        .eq('id', memberId);
+
+      if (error) {
+        throw error;
+      }
+
+      setActiveMembers((prev) =>
+        prev.map((member) =>
+          member.id === memberId
+            ? { ...member, accessType: nextAccessType }
+            : member,
+        ),
+      );
+    } catch (err: any) {
+      alert('Erro ao atualizar tipo de acesso: ' + (err.message || 'Erro desconhecido'));
     }
     setActionLoading(null);
   };
@@ -646,44 +677,63 @@ export default function ModerationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(48,204,54,0.12),_transparent_28%),linear-gradient(180deg,_rgba(255,255,255,0)_0%,_rgba(15,23,42,0.03)_100%)] pb-24">
       <TopAppBar />
 
-      <main className="pt-16 mt-12 px-4 max-w-3xl mx-auto space-y-4">
-        <div className="bg-gradient-to-br from-[#30cc36] to-[#259128] rounded-2xl p-5 mb-2 text-white">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-              <Icon icon="admin_panel_settings" size={24} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-black tracking-tight">Painel do Líder</h1>
-              <p className="text-white/80 text-xs">{selectedEnvironment?.name || 'Ambiente'}</p>
-            </div>
-          </div>
-          <p className="text-white/70 text-sm">Gerencie membros, serviços e avaliações da comunidade</p>
-        </div>
+      <main className="mx-auto max-w-6xl space-y-5 px-4 pb-8 pt-16 md:space-y-6 md:px-8 md:pt-20">
+        <section className="relative mt-4 overflow-hidden rounded-[2rem] border border-primary/10 bg-surface-container-lowest/90 shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+          <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
+          <div className="pointer-events-none absolute -left-8 bottom-0 h-28 w-28 rounded-full bg-[#30cc36]/10 blur-3xl" />
 
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
-                activeTab === tab.key
-                  ? 'bg-[#30cc36] text-white shadow-lg shadow-[#30cc36]/25'
-                  : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
-              }`}
-            >
-              <Icon icon={tab.icon} size={18} />
-              {tab.label}
-              {tab.key === 'pending' && stats?.pendingMembers ? (
-                <span className="bg-white/20 px-1.5 py-0.5 rounded-md text-xs">{stats.pendingMembers}</span>
-              ) : null}
-              {tab.key === 'reviews' && stats?.totalReviews ? (
-                <span className="bg-white/20 px-1.5 py-0.5 rounded-md text-xs">{stats.totalReviews}</span>
-              ) : null}
-            </button>
-          ))}
+          <div className="relative flex flex-col gap-6 p-5 md:p-8 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
+            <div className="max-w-2xl space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-sm">
+                  <Icon icon="admin_panel_settings" size={24} />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-black tracking-tight text-on-surface md:text-3xl">Painel do líder</h1>
+                  <p className="text-sm font-medium text-on-surface-variant">{selectedEnvironment?.name || 'Ambiente'}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {stats && (
+                  <span className="inline-flex items-center gap-2 rounded-full border border-[#30cc36]/20 bg-[#30cc36]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-[#1f8a2b]">
+                    <Icon icon="group" size={14} />
+                    {stats.activeMembers} membros ativos
+                  </span>
+                )}
+              </div>
+            </div>
+
+            
+          </div>
+        </section>
+
+        <div className="rounded-[1.5rem] border border-outline-variant/10 bg-surface-container-lowest/80 p-2 shadow-sm backdrop-blur">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex items-center gap-2 rounded-[1rem] px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap ${
+                  activeTab === tab.key
+                    ? 'bg-[#30cc36] text-white shadow-lg shadow-[#30cc36]/25'
+                    : 'bg-transparent text-on-surface-variant hover:bg-surface-container-high'
+                }`}
+              >
+                <Icon icon={tab.icon} size={18} />
+                {tab.label}
+                {tab.key === 'pending' && stats?.pendingMembers ? (
+                  <span className="bg-white/20 px-1.5 py-0.5 rounded-md text-xs">{stats.pendingMembers}</span>
+                ) : null}
+                {tab.key === 'reviews' && stats?.totalReviews ? (
+                  <span className="bg-white/20 px-1.5 py-0.5 rounded-md text-xs">{stats.totalReviews}</span>
+                ) : null}
+              </button>
+            ))}
+          </div>
         </div>
 
         {activeTab === 'dashboard' && (
@@ -694,50 +744,50 @@ export default function ModerationPage() {
               </div>
             ) : stats && (
               <>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/10">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-[#30cc36]/10 flex items-center justify-center">
-                        <Icon icon="group" size={18} className="text-[#30cc36]" />
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
+                  <div className="h-[92px] bg-surface-container-lowest rounded-2xl p-2.5 border border-outline-variant/10 flex flex-col justify-between sm:h-auto sm:min-h-[132px] sm:p-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-6 h-6 rounded-lg bg-[#30cc36]/10 flex items-center justify-center">
+                        <Icon icon="group" size={14} className="text-[#30cc36]" />
                       </div>
                       <span className="text-on-surface-variant text-xs font-medium">Membros</span>
                     </div>
-                    <p className="text-2xl font-black text-on-surface">{stats.activeMembers}</p>
+                    <p className="text-xl font-black leading-none text-on-surface">{stats.activeMembers}</p>
                     <p className="text-on-surface-variant text-xs">de {stats.totalMembers} ativos</p>
                   </div>
 
-                  <div className="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/10">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                        <Icon icon="hourglass_empty" size={18} className="text-amber-500" />
+                  <div className="h-[92px] bg-surface-container-lowest rounded-2xl p-2.5 border border-outline-variant/10 flex flex-col justify-between sm:h-auto sm:min-h-[132px] sm:p-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-6 h-6 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                        <Icon icon="hourglass_empty" size={14} className="text-amber-500" />
                       </div>
                       <span className="text-on-surface-variant text-xs font-medium">Pendências</span>
                     </div>
-                    <p className="text-2xl font-black text-on-surface">{stats.pendingMembers}</p>
-                    <p className="text-on-surface-variant text-xs">solicitações awaiting</p>
+                    <p className="text-xl font-black leading-none text-on-surface">{stats.pendingMembers}</p>
+                    <p className="text-on-surface-variant text-xs">solicitações pendentes</p>
                   </div>
 
-                  <div className="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/10">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                        <Icon icon="storefront" size={18} className="text-blue-500" />
+                  <div className="h-[92px] bg-surface-container-lowest rounded-2xl p-2.5 border border-outline-variant/10 flex flex-col justify-between sm:h-auto sm:min-h-[132px] sm:p-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                        <Icon icon="storefront" size={14} className="text-blue-500" />
                       </div>
                       <span className="text-on-surface-variant text-xs font-medium">Serviços</span>
                     </div>
-                    <p className="text-2xl font-black text-on-surface">{stats.activeServices}</p>
+                    <p className="text-xl font-black leading-none text-on-surface">{stats.activeServices}</p>
                     <p className="text-on-surface-variant text-xs">de {stats.totalServices} publicados</p>
                   </div>
 
-                  <div className="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/10">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-amber-400/10 flex items-center justify-center">
-                        <Icon icon="star" size={18} className="text-amber-400" />
+                  <div className="h-[92px] bg-surface-container-lowest rounded-2xl p-2.5 border border-outline-variant/10 flex flex-col justify-between sm:h-auto sm:min-h-[132px] sm:p-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-6 h-6 rounded-lg bg-amber-400/10 flex items-center justify-center">
+                        <Icon icon="star" size={14} className="text-amber-400" />
                       </div>
-                      <span className="text-on-surface-variant text-xs font-medium">Avaliação</span>
+                      <span className="text-on-surface-variant text-xs font-medium">Avaliações</span>
                     </div>
-                    <p className="text-2xl font-black text-on-surface flex items-center gap-1">
+                    <p className="text-xl font-black leading-none text-on-surface flex items-center gap-1">
                       {stats.avgRating}
-                      <Icon icon="star" size={16} className="text-amber-400" />
+                      <Icon icon="star" size={12} className="text-amber-400" />
                     </p>
                     <p className="text-on-surface-variant text-xs">{stats.totalReviews} avaliações</p>
                   </div>
@@ -959,6 +1009,55 @@ export default function ModerationPage() {
                           {formatDate(member.createdAt)}
                         </span>
                       </div>
+
+                      {member.role !== 'moderator' && (
+                        <div className="mt-3 rounded-2xl border border-outline-variant/15 bg-surface-container-low p-1">
+                          <div className="flex items-center justify-between px-3 pt-2 pb-1">
+                            <span className="text-[9px] font-black uppercase tracking-[0.28em] text-on-surface-variant/60">
+                              Tipo de acesso
+                            </span>
+                            <span className="text-[9px] font-black uppercase tracking-[0.18em] text-primary">
+                              {member.accessType === 'resident'
+                                ? 'Morador'
+                                : member.accessType === 'service_provider'
+                                  ? 'Prestador'
+                                  : 'Sem acesso'}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1 rounded-full bg-surface-container-high/70 p-1">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleAccessType(member.id, 'resident')}
+                              disabled={actionLoading === member.id}
+                              aria-pressed={member.accessType === 'resident'}
+                              className={`h-10 rounded-full text-[9px] font-black uppercase tracking-[0.12em] flex items-center justify-center gap-1 transition-colors ${
+                                member.accessType === 'resident'
+                                  ? 'bg-primary text-white'
+                                  : 'text-on-surface-variant/80 hover:text-on-surface'
+                              }`}
+                            >
+                              <Icon icon="home" size={14} />
+                              Morador
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleToggleAccessType(member.id, 'service_provider')}
+                              disabled={actionLoading === member.id}
+                              aria-pressed={member.accessType === 'service_provider'}
+                              className={`h-10 rounded-full text-[9px] font-black uppercase tracking-[0.12em] flex items-center justify-center gap-1 transition-colors ${
+                                member.accessType === 'service_provider'
+                                  ? 'bg-primary text-white'
+                                  : 'text-on-surface-variant/80 hover:text-on-surface'
+                              }`}
+                            >
+                              <Icon icon="work" size={14} />
+                              Prestador
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
                       {member.servicesCount !== undefined && member.servicesCount > 0 && (
                         <div className="flex items-center gap-4 mt-3 pt-3 border-t border-outline-variant/10">
