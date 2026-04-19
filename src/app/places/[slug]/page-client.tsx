@@ -647,21 +647,23 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
         )}
 
         {!requiresModeratorGate && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {servicesWithDistance.map((service) => (
             <div 
               key={service.id}
               onClick={() => router.push(`/places/${placeSlug}/services/${service.slug}`)}
-              className="bg-surface-container-lowest p-4 rounded-[2rem] flex gap-4 items-center cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
+              className="bg-surface-container-lowest rounded-[2rem] flex flex-col cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
             >
-              <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
+              <div className="h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
                 <img 
                   className="w-full h-full object-cover" 
                   src={service.image} 
                   alt={service.title}
-                loading="lazy" decoding="async" />
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
-              <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
+              <div className="flex flex-1 min-w-0 flex-col justify-between p-4 h-full">
                 <div>
                   <div className="flex items-center justify-between mb-1.5 gap-2">
                     <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">{service.category || 'Sem categoria'}</span>

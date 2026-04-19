@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useApp } from '../hooks/useApp';
 import { useTheme } from '@/hooks/useTheme';
@@ -54,19 +55,28 @@ export function TopAppBar({
   const { theme, toggleTheme } = useTheme();
   const { checkAndShowExitModal } = useExitModal();
 
-  const navItems = useMemo(() => {
-    const items = [...baseNavItems];
-    if (user?.managedEnvironmentIds && user.managedEnvironmentIds.length > 0) {
-      items.push({ path: '/moderation', label: 'Moderação', icon: 'admin_panel_settings' });
-    }
-    return items;
-  }, [user?.managedEnvironmentIds]);
+  const hasManagedEnvironments = (user?.managedEnvironmentIds?.length ?? 0) > 0;
+  const navItems = hasManagedEnvironments
+    ? [...baseNavItems, { path: '/moderation', label: 'Moderação', icon: 'admin_panel_settings' }]
+    : baseNavItems;
 
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const routes = ['/', '/places', '/meus-anuncios', '/favorites', '/contact', '/profile', '/login'];
+
+    if (hasManagedEnvironments) {
+      routes.push('/moderation');
+    }
+
+    routes.forEach((route) => {
+      void router.prefetch(route);
+    });
+  }, [router, hasManagedEnvironments]);
   
   const userAvatar = mounted ? (propAvatar || user?.avatar) : null;
   const onAvatarClick = propAvatarClick || (() => router.push('/profile'));
@@ -108,10 +118,7 @@ export function TopAppBar({
               </button>
             )}
 
-            <div 
-              onClick={() => router.push('/')}
-              className="flex items-center cursor-pointer group"
-            >
+            <Link href="/" prefetch className="flex items-center cursor-pointer group">
               <img
                 src={theme === 'dark' ? '/conectae_logo_light.png' : '/conectae_logo.png'}
                 alt="Conectae"
@@ -120,7 +127,7 @@ export function TopAppBar({
                 fetchPriority="high"
                 decoding="async"
               />
-            </div>
+            </Link>
           </div>
 
           {title && (

@@ -82,7 +82,7 @@ function PaginationControls({
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, selectedEnvironment, selectedEnvironments, services, membershipVersion } =
+  const { user, selectedEnvironment, selectedEnvironments, services, servicesLoading, membershipVersion } =
     useApp();
 
   const [search, setSearch] = useState("");
@@ -298,6 +298,14 @@ export default function HomePage() {
   }, [currentPage, totalPages]);
 
   useEffect(() => {
+    paginatedServices.forEach((service) => {
+      if (service.slug) {
+        void router.prefetch(`/service/${service.slug}`);
+      }
+    });
+  }, [paginatedServices, router]);
+
+  useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -372,6 +380,7 @@ export default function HomePage() {
     { id: "all", label: "Tudo", icon: "apps" },
     ...SERVICE_CATEGORIES,
   ];
+  const showInitialLoading = servicesLoading && services.length === 0;
 
   return (
     <div className={`min-h-screen ${user ? "pb-32" : "pb-10"} bg-background`}>
@@ -527,246 +536,249 @@ export default function HomePage() {
           </div>
         </section>
 
-        {!search ? (
+        {showInitialLoading ? (
           <section className="space-y-4">
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {paginatedServices.map((service) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, index) => (
                 <div
-                  key={service.id}
-                  onClick={() => router.push(`/service/${service.slug}`)}
-                  className="bg-surface-container-lowest p-4 rounded-[2rem] flex gap-4 items-center cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
+                  key={index}
+                  className="overflow-hidden rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest shadow-sm"
+                  aria-busy="true"
+                  aria-live="polite"
                 >
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
-                    {service.image ? (
-                      <img
-                        className="w-full h-full object-cover"
-                        src={service.image}
-                        alt={service.title}
-                      loading="lazy" decoding="async" />
-                    ) : (
-                      <div className="w-full h-full bg-primary/5 flex items-center justify-center">
-                        <Icon
-                          icon="image"
-                          size={24}
-                          className="text-primary/20"
-                        />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
-                    <div>
-                      <div className="mb-2 flex flex-wrap items-center gap-2">
-                        <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">
-                          {service.category}
-                        </span>
-                        <span
-                          className={`ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                            hasCnpj(service.cnpj)
-                              ? 'text-white bg-[#30cc36] dark:text-black/80 dark:bg-[#30cc36]'
-                              : 'text-white bg-orange-600 dark:text-white dark:bg-orange-700'
-                          }`}
-                        >
-                          {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
-                        </span>
-                      </div>
-                      <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#30cc36] transition-colors">
-                        {service.title}
-                      </h4>
-                      <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">
-                        {service.description}
-                      </p>
-                      {membershipAccessLoaded &&
-                        (() => {
-                          const accessBadge = getAccessTypeBadge(
-                            membershipAccessByEnvironmentId[service.environmentId ?? ""] ?? null,
-                          );
-
-                          return accessBadge ? (
-                            <div className="mt-2 flex flex-wrap items-center gap-2">
-                              <span
-                                className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] ${accessBadge.className}`}
-                              >
-                                {accessBadge.label}
-                              </span>
-                            </div>
-                          ) : null;
-                        })()}
+                  <div className="h-44 w-full animate-pulse bg-surface-container-high" />
+                  <div className="flex flex-col gap-3 p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="h-3 w-24 animate-pulse rounded-full bg-surface-container-high" />
+                      <div className="h-3 w-16 animate-pulse rounded-full bg-surface-container-high" />
                     </div>
-
-                    <div className="mt-3 flex items-center justify-between">
-                      {(userLocation || service.environmentName) && (
-                        <div className="flex items-center gap-2">
-                          {userLocation && service.distance !== Infinity && (
-                            <div className="flex items-center gap-1 text-primary">
-                              <Icon icon="location_on" size={12} weight={700} />
-                              <span className="text-[10px] text-[#30cc36] font-bold">
-                                {service.distance < 1
-                                  ? `${Math.round(service.distance * 1000)}m`
-                                  : `${service.distance.toFixed(1)}km`}
-                              </span>
-                            </div>
-                          )}
-                          {service.environmentName && (
-                            <span className="text-[10px] text-on-surface-variant font-medium">
-                              {service.environmentName}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#30cc36] group-hover/card:text-white transition-all duration-300">
-                        <Icon icon="arrow_forward" size={14} weight={700} />
-                      </div>
+                    <div className="h-4 w-3/4 animate-pulse rounded-full bg-surface-container-high" />
+                    <div className="h-3 w-1/2 animate-pulse rounded-full bg-surface-container-high" />
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="h-3 w-20 animate-pulse rounded-full bg-surface-container-high" />
+                      <div className="h-7 w-7 animate-pulse rounded-full bg-surface-container-high" />
                     </div>
                   </div>
                 </div>
               ))}
-              {displayedServices.length === 0 && (
-                <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
-                  Nenhum serviço encontrado próximo a você
-                </div>
-              )}
             </div>
-            <PaginationControls
-              currentPage={safeCurrentPage}
-              totalPages={totalPages}
-              totalItems={displayedServices.length}
-              onPrevious={() =>
-                setCurrentPage((prev) => Math.max(1, prev - 1))
-              }
-              onNext={() =>
-                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-              }
-            />
           </section>
         ) : (
-          <section className="space-y-4">
-            <h3 className="text-xl font-black text-on-surface tracking-tight px-1">
-              Resultados da busca
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {paginatedServices.map((service) => (
-                  <div
-                    key={service.id}
-                    onClick={() => router.push(`/service/${service.slug}`)}
-                    className="bg-surface-container-lowest p-4 rounded-[2rem] flex gap-4 items-center cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
-                  >
-                    <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
-                      {service.image ? (
-                        <img
-                          className="w-full h-full object-cover"
-                          src={service.image}
-                          alt={service.title}
-                        loading="lazy" decoding="async" />
-                      ) : (
-                        <div className="w-full h-full bg-primary/5 flex items-center justify-center">
-                          <Icon
-                            icon="image"
-                            size={24}
-                            className="text-primary/20"
+          <>
+            {!search ? (
+              <section className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                  {paginatedServices.map((service) => (
+                    <div
+                      key={service.id}
+                      onClick={() => router.push(`/service/${service.slug}`)}
+                      className="bg-surface-container-lowest rounded-[2rem] flex flex-col cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
+                    >
+                      <div className="h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
+                        {service.image ? (
+                          <img
+                            className="w-full h-full object-cover"
+                            src={service.image}
+                            alt={service.title}
+                            loading="lazy"
+                            decoding="async"
                           />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0 flex flex-col justify-between py-1 h-full">
-                      <div>
-                        <div className="mb-2 flex flex-wrap items-center gap-2">
-                          <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
-                            {service.category || "Sem categoria"}
-                          </span>
-                        <span
-                          className={`ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                            hasCnpj(service.cnpj)
-                              ? 'text-emerald-700 bg-emerald-500/10'
-                              : 'text-slate-600 bg-slate-500/10'
-                          }`}
-                        >
-                          {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
-                        </span>
-                        </div>
-                        <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">
-                          {service.title}
-                        </h4>
-                        <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">
-                          {service.description}
-                        </p>
-                        {membershipAccessLoaded &&
-                          (() => {
-                            const accessBadge = getAccessTypeBadge(
-                              membershipAccessByEnvironmentId[service.environmentId ?? ""] ?? null,
-                            );
-
-                            return accessBadge ? (
-                              <div className="mt-2 flex flex-wrap items-center gap-2">
-                                <span
-                                  className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] ${accessBadge.className}`}
-                                >
-                                  {accessBadge.label}
-                                </span>
-                              </div>
-                            ) : null;
-                          })()}
-                      </div>
-
-                      <div className="mt-3 flex items-center justify-between">
-                        {(userLocation || service.environmentName) && (
-                          <div className="flex items-center gap-2">
-                            {userLocation && service.distance !== Infinity && (
-                              <div className="flex items-center gap-1 text-primary">
-                                <Icon
-                                  icon="location_on"
-                                  size={12}
-                                  weight={700}
-                                />
-                                <span className="text-[10px] font-bold">
-                                  {service.distance < 1
-                                    ? `${Math.round(service.distance * 1000)}m`
-                                    : `${service.distance.toFixed(1)}km`}
-                                </span>
-                              </div>
-                            )}
-                            {service.environmentName && (
-                              <span className="text-[10px] text-on-surface-variant font-medium">
-                                {service.environmentName}
-                              </span>
-                            )}
+                        ) : (
+                          <div className="w-full h-full bg-primary/5 flex items-center justify-center">
+                            <Icon
+                              icon="image"
+                              size={24}
+                              className="text-primary/20"
+                            />
                           </div>
                         )}
-                        <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-primary group-hover/card:text-white transition-all duration-300">
-                          <Icon icon="arrow_forward" size={14} weight={700} />
+                      </div>
+                      <div className="flex flex-1 min-w-0 flex-col justify-between p-4 h-full">
+                        <div>
+                          <div className="mb-2 flex flex-wrap items-center gap-2">
+                            <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">
+                              {service.category}
+                            </span>
+                            <div className="ml-auto flex flex-col items-end gap-1">
+                              <span
+                                className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                                  hasCnpj(service.cnpj)
+                                    ? 'text-white bg-[#30cc36] dark:text-black/80 dark:bg-[#30cc36]'
+                                    : 'text-white bg-orange-600 dark:text-white dark:bg-orange-700'
+                                }`}
+                              >
+                                {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
+                              </span>
+                            </div>
+                          </div>
+                          <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#30cc36] transition-colors">
+                            {service.title}
+                          </h4>
+                        </div>
+
+                        <div className="mt-1 flex items-center justify-between">
+                          {(userLocation || service.environmentName) && (
+                            <div className="flex items-center gap-2">
+                              {userLocation && service.distance !== Infinity && (
+                                <div className="flex items-center gap-1 text-primary">
+                                  <Icon icon="location_on" size={12} weight={700} />
+                                  <span className="text-[10px] text-[#30cc36] font-bold">
+                                    {service.distance < 1
+                                      ? `${Math.round(service.distance * 1000)}m`
+                                      : `${service.distance.toFixed(1)}km`}
+                                  </span>
+                                </div>
+                              )}
+                              {service.environmentName && (
+                                <span className="text-[9px] text-on-surface-variant font-medium">
+                                  {service.environmentName}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#30cc36] group-hover/card:text-white transition-all duration-300">
+                            <Icon icon="arrow_forward" size={14} weight={700} />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              {servicesWithDistance.filter((service) => {
-                const searchLower = search.toLowerCase().trim();
-                const serviceCategory = toSafeLower(service.category);
-                const serviceTitle = toSafeLower(service.title);
-                const serviceDescription = toSafeLower(service.description);
-                return (
-                  serviceCategory.includes(searchLower) ||
-                  serviceTitle.includes(searchLower) ||
-                  serviceDescription.includes(searchLower)
-                );
-              }).length === 0 && (
-                <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
-                  Nenhum serviço encontrado para "{search}"
+                  ))}
+                  {displayedServices.length === 0 && (
+                    <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
+                      Nenhum serviço encontrado próximo a você
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <PaginationControls
-              currentPage={safeCurrentPage}
-              totalPages={totalPages}
-              totalItems={displayedServices.length}
-              onPrevious={() =>
-                setCurrentPage((prev) => Math.max(1, prev - 1))
-              }
-              onNext={() =>
-                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-              }
-            />
-          </section>
+                <PaginationControls
+                  currentPage={safeCurrentPage}
+                  totalPages={totalPages}
+                  totalItems={displayedServices.length}
+                  onPrevious={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
+                  onNext={() =>
+                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  }
+                />
+              </section>
+            ) : (
+              <section className="space-y-4">
+                <h3 className="text-xl font-black text-on-surface tracking-tight px-1">
+                  Resultados da busca
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                  {paginatedServices.map((service) => (
+                    <div
+                      key={service.id}
+                      onClick={() => router.push(`/service/${service.slug}`)}
+                      className="bg-surface-container-lowest rounded-[2rem] flex flex-col cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
+                    >
+                      <div className="h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
+                        {service.image ? (
+                          <img
+                            className="w-full h-full object-cover"
+                            src={service.image}
+                            alt={service.title}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-primary/5 flex items-center justify-center">
+                            <Icon
+                              icon="image"
+                              size={24}
+                              className="text-primary/20"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-1 min-w-0 flex-col justify-between p-4 h-full">
+                        <div>
+                          <div className="mb-2 flex flex-wrap items-center gap-2">
+                            <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
+                              {service.category || "Sem categoria"}
+                            </span>
+                            <div className="ml-auto flex flex-col items-end gap-1">
+                              <span
+                                className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                                  hasCnpj(service.cnpj)
+                                    ? 'text-emerald-700 bg-emerald-500/10'
+                                    : 'text-slate-600 bg-slate-500/10'
+                                }`}
+                              >
+                                {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
+                              </span>
+                            </div>
+                          </div>
+                          <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">
+                            {service.title}
+                          </h4>
+                          <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">
+                            {service.description}
+                          </p>
+                        </div>
+
+                        <div className="mt-3 flex items-center justify-between">
+                          {(userLocation || service.environmentName) && (
+                            <div className="flex items-center gap-2">
+                              {userLocation && service.distance !== Infinity && (
+                                <div className="flex items-center gap-1 text-primary">
+                                  <Icon
+                                    icon="location_on"
+                                    size={12}
+                                    weight={700}
+                                  />
+                                  <span className="text-[10px] font-bold">
+                                    {service.distance < 1
+                                      ? `${Math.round(service.distance * 1000)}m`
+                                      : `${service.distance.toFixed(1)}km`}
+                                  </span>
+                                </div>
+                              )}
+                              {service.environmentName && (
+                                <span className="text-[10px] text-on-surface-variant font-medium">
+                                  {service.environmentName}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-primary group-hover/card:text-white transition-all duration-300">
+                            <Icon icon="arrow_forward" size={14} weight={700} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {servicesWithDistance.filter((service) => {
+                    const searchLower = search.toLowerCase().trim();
+                    const serviceCategory = toSafeLower(service.category);
+                    const serviceTitle = toSafeLower(service.title);
+                    const serviceDescription = toSafeLower(service.description);
+                    return (
+                      serviceCategory.includes(searchLower) ||
+                      serviceTitle.includes(searchLower) ||
+                      serviceDescription.includes(searchLower)
+                    );
+                  }).length === 0 && (
+                    <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
+                      Nenhum serviço encontrado para "{search}"
+                    </div>
+                  )}
+                </div>
+                <PaginationControls
+                  currentPage={safeCurrentPage}
+                  totalPages={totalPages}
+                  totalItems={displayedServices.length}
+                  onPrevious={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
+                  onNext={() =>
+                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  }
+                />
+              </section>
+            )}
+          </>
         )}
 
         {/* {!selectedEnvironment && (

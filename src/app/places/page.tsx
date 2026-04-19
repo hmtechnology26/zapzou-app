@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { TopAppBar } from "@/components/TopAppBar";
@@ -149,6 +149,12 @@ export default function PlacesPage() {
       return name.includes(search) || typeLabel.includes(search);
     });
   }, [environments, environmentSearch]);
+
+  useEffect(() => {
+    filteredEnvironments.slice(0, 9).forEach((environment) => {
+      void router.prefetch(`/places/${environment.slug}`);
+    });
+  }, [filteredEnvironments, router]);
 
   const openEnvironment = (slug: string) => {
     router.push(`/places/${slug}`);

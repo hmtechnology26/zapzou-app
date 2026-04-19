@@ -55,13 +55,14 @@ export const viewport: Viewport = {
 };
 
 export const dynamic = 'force-dynamic';
-const isProduction = process.env.NODE_ENV === 'production';
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const isProduction = process.env.NODE_ENV === 'production';
+
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
@@ -90,6 +91,57 @@ export default function RootLayout({
                     }
                   } catch (error) {
                     console.warn('Failed to clear dev caches.', error);
+                  }
+                })();
+              `,
+            }}
+          />
+        )}
+        {isProduction && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function () {
+                  try {
+                    var flagKey = 'zapzou-pwa-cleanup-v1';
+
+                    if (window.localStorage && window.localStorage.getItem(flagKey) === 'done') {
+                      return;
+                    }
+
+                    Promise.resolve()
+                      .then(function () {
+                        if ('serviceWorker' in navigator) {
+                          return navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                            return Promise.all(
+                              registrations.map(function (registration) {
+                                return registration.unregister();
+                              })
+                            );
+                          });
+                        }
+                      })
+                      .then(function () {
+                        if ('caches' in window) {
+                          return caches.keys().then(function (keys) {
+                            return Promise.all(
+                              keys.map(function (key) {
+                                return caches.delete(key);
+                              })
+                            );
+                          });
+                        }
+                      })
+                      .then(function () {
+                        if (window.localStorage) {
+                          window.localStorage.setItem(flagKey, 'done');
+                        }
+                      })
+                      .catch(function (error) {
+                        console.warn('Failed to clear legacy PWA caches.', error);
+                      });
+                  } catch (error) {
+                    console.warn('Failed to initialize legacy PWA cleanup.', error);
                   }
                 })();
               `,

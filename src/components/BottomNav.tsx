@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Icon } from './Icon';
 import { usePublishModal } from '@/contexts/PublishModalContext';
@@ -26,6 +27,14 @@ export function BottomNav() {
   const { open } = usePublishModal();
   const { user, selectedEnvironments } = useApp();
   const { checkAndShowExitModal } = useExitModal();
+
+  useEffect(() => {
+    const routes = ['/', '/places', '/meus-anuncios', '/favorites', '/contact', '/login'];
+
+    routes.forEach((route) => {
+      void router.prefetch(route);
+    });
+  }, [router]);
 
   const handleNavClick = (e: React.MouseEvent, itemPath: string) => {
     if (itemPath === '/post') {

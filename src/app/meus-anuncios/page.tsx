@@ -426,7 +426,7 @@ export default function MyAdsPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
               {myContexts.map((env) => {
                 const membership = affiliations[env.id];
                 const isActive = membership?.status === "active";
@@ -444,157 +444,160 @@ export default function MyAdsPage() {
                 return (
                   <article
                     key={env.id}
-                    className="relative flex flex-col justify-between gap-5 overflow-hidden rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest p-5 shadow-sm transition-all lg:flex-row lg:items-center lg:pr-16"
+                    className="relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest shadow-sm transition-all"
                   >
-  <button
-    onClick={() => handleDeleteClick(env)}
-    disabled={deletingId === env.id}
-    className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-error/10 hover:text-error transition-colors disabled:opacity-50"
-  >
-    {deletingId === env.id ? (
-      <div className="w-4 h-4 border-2 border-error/30 border-t-error rounded-full animate-spin" />
-    ) : (
-      <Icon icon="close" size={16} />
-    )}
-  </button>
+                    <button
+                      onClick={() => handleDeleteClick(env)}
+                      disabled={deletingId === env.id}
+                      className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant transition-colors hover:bg-error/10 hover:text-error disabled:opacity-50"
+                    >
+                      {deletingId === env.id ? (
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-error/30 border-t-error" />
+                      ) : (
+                        <Icon icon="close" size={16} />
+                      )}
+                    </button>
 
-  <div className="flex items-center gap-4 flex-1 min-w-0 pr-10 lg:pr-0">
-    <div className="w-16 h-16 rounded-2xl bg-surface-container overflow-hidden flex-shrink-0 shadow-inner">
-      {env.image ? (
-        <img
-          src={env.image}
-          alt={env.name}
-          className="w-full h-full object-cover"
-          loading="lazy"
-          decoding="async"
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
-          <Icon icon="domain" size={28} />
-        </div>
-      )}
-    </div>
+                    {/* <div className="h-44 w-full overflow-hidden bg-surface-container">
+                      {env.image ? (
+                        <img
+                          src={env.image}
+                          alt={env.name}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-on-surface-variant">
+                          <Icon icon="domain" size={32} />
+                        </div>
+                      )}
+                    </div> */}
 
-    <div className="flex-1 min-w-0">
-      <div className="flex flex-wrap items-center gap-2 mb-1.5 pr-1">
-        <h4 className="font-bold text-on-surface truncate">{env.name}</h4>
-                <span
-                  className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border ${
-                    isActive
-                      ? 'bg-[#30CC36]/10 text-[#30CC36] border-[#30CC36]/20'
-                      : isPending
-              ? 'bg-amber-500/10 text-amber-700 border-amber-500/20'
-              : 'bg-error/10 text-error border-error/20'
-          }`}
-        >
-          {isActive ? 'ATIVO' : isPending ? pendingLabel : 'BLOQUEADO'}
-        </span>
-      </div>
+                    <div className="flex flex-1 flex-col gap-4 p-5">
+                      <div className="min-w-0">
+                        <div className="mb-2 flex flex-wrap items-center gap-2 pr-10">
+                          <h4 className="truncate font-bold text-on-surface">{env.name}</h4>
+                          <span
+                            className={`rounded-lg border px-2 py-0.5 text-[8px] font-black uppercase tracking-widest ${
+                              isActive
+                                ? 'border-[#30CC36]/20 bg-[#30CC36]/10 text-[#30CC36]'
+                                : isPending
+                                  ? 'border-amber-500/20 bg-amber-500/10 text-amber-700'
+                                  : 'border-error/20 bg-error/10 text-error'
+                            }`}
+                          >
+                            {isActive ? 'ATIVO' : isPending ? pendingLabel : 'BLOQUEADO'}
+                          </span>
+                        </div>
 
-      <div className="flex items-center gap-3">
-        <span className="text-[10px] text-primary font-bold uppercase tracking-wider flex items-center gap-1">
-          <Icon icon="category" size={12} />
-          {TYPE_LABELS[env.type]}
-        </span>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                            <Icon icon="category" size={12} />
+                            {TYPE_LABELS[env.type]}
+                          </span>
 
-        {env.members > 0 && (
-          <span className="text-[10px] text-on-surface-variant/60 font-bold flex items-center gap-1">
-            <Icon icon="groups" size={14} />
-            {env.members}
-          </span>
-        )}
-      </div>
-    </div>
-  </div>
+                          {env.members > 0 && (
+                            <span className="flex items-center gap-1 text-[10px] font-bold text-on-surface-variant/60">
+                              <Icon icon="groups" size={14} />
+                              {env.members}
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-  <div className="-mx-5 grid w-[calc(100%+2.5rem)] gap-3 min-w-0 px-5 lg:mx-0 lg:w-auto lg:flex-shrink-0 lg:px-0">
-    {isActive && membership?.role && (
-      <div className="w-full min-w-0 lg:w-[260px] rounded-[1.6rem] border border-outline-variant/30 dark:border-[#30cc36]/28 bg-surface-container-low p-1 shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_24px_rgba(48,204,54,0.08)]">
-        <div className="flex items-center justify-between px-3 pt-2 pb-1">
-          <span className="text-[9px] font-black uppercase tracking-[0.28em] text-on-surface-variant/60">
-            Tipo de acesso
-          </span>
-          <span className="text-[9px] font-black uppercase tracking-[0.18em] text-primary">
-            {displayedRole === "resident"
-              ? "Morador"
-              : displayedRole === "service_provider"
-                ? "Prestador"
-                : "Sem acesso"}
-          </span>
-        </div>
+                      <div className="grid gap-3">
+                        {isActive && membership?.role && (
+                          <div className="rounded-[1.6rem] border border-outline-variant/30 bg-surface-container-low p-1 shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-[#30cc36]/28 dark:shadow-[0_8px_24px_rgba(48,204,54,0.08)]">
+                            <div className="flex items-center justify-between px-3 pb-1 pt-2">
+                              <span className="text-[9px] font-black uppercase tracking-[0.28em] text-on-surface-variant/60">
+                                Tipo de acesso
+                              </span>
+                              <span className="text-[9px] font-black uppercase tracking-[0.18em] text-primary">
+                                {displayedRole === "resident"
+                                  ? "Morador"
+                                  : displayedRole === "service_provider"
+                                    ? "Prestador"
+                                    : "Sem acesso"}
+                              </span>
+                            </div>
 
-        <div className="relative grid w-full grid-cols-2 rounded-full bg-surface-container-high/70 p-1 overflow-hidden border border-outline-variant/15 dark:border-[#30cc36]/15">
-          <div
-            className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-lg shadow-primary/25 transition-transform duration-300 ease-out ${
-              isServiceProviderRole
-                ? "translate-x-full"
-                : "translate-x-0"
-            }`}
-          />
+                            <div className="relative grid grid-cols-2 overflow-hidden rounded-full border border-outline-variant/15 bg-surface-container-high/70 p-1 dark:border-[#30cc36]/15">
+                              <div
+                                className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-lg shadow-primary/25 transition-transform duration-300 ease-out ${
+                                  isServiceProviderRole
+                                    ? "translate-x-full"
+                                    : "translate-x-0"
+                                }`}
+                              />
 
-          <button
-            type="button"
-            onClick={() => handleToggleRole(env.id, "resident")}
-            disabled={togglingRoleId === env.id}
-            aria-pressed={isResidentRole}
-            className={`relative z-10 h-11 w-full rounded-full font-black uppercase text-[9px] flex items-center justify-center gap-2 transition-colors ${
-              togglingRoleTarget[env.id] === "resident"
-                ? "text-white"
-                : isResidentRole
-                  ? "text-white"
-                  : "text-on-surface-variant/80 hover:text-on-surface"
-            }`}
-          >
-            {togglingRoleTarget[env.id] === "resident" ? (
-              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Icon icon="home" size={14} />
-            )}
-            Morador
-          </button>
+                              <button
+                                type="button"
+                                onClick={() => handleToggleRole(env.id, "resident")}
+                                disabled={togglingRoleId === env.id}
+                                aria-pressed={isResidentRole}
+                                className={`relative z-10 flex h-11 w-full items-center justify-center gap-2 rounded-full text-[9px] font-black uppercase transition-colors ${
+                                  togglingRoleTarget[env.id] === "resident"
+                                    ? "text-white"
+                                    : isResidentRole
+                                      ? "text-white"
+                                      : "text-on-surface-variant/80 hover:text-on-surface"
+                                }`}
+                              >
+                                {togglingRoleTarget[env.id] === "resident" ? (
+                                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                ) : (
+                                  <Icon icon="home" size={14} />
+                                )}
+                                Morador
+                              </button>
 
-          <button
-            type="button"
-            onClick={() => handleToggleRole(env.id, "service_provider")}
-            disabled={togglingRoleId === env.id}
-            aria-pressed={isServiceProviderRole}
-            className={`relative z-10 h-11 w-full rounded-full font-black uppercase text-[9px] flex items-center justify-center gap-2 transition-colors ${
-              togglingRoleTarget[env.id] === "service_provider"
-                ? "text-white"
-                : isServiceProviderRole
-                  ? "text-white"
-                  : "text-on-surface-variant/80 hover:text-on-surface"
-            }`}
-          >
-            {togglingRoleTarget[env.id] === "service_provider" ? (
-              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Icon icon="work" size={14} />
-            )}
-            Prestador
-          </button>
-        </div>
-      </div>
-    )}
+                              <button
+                                type="button"
+                                onClick={() => handleToggleRole(env.id, "service_provider")}
+                                disabled={togglingRoleId === env.id}
+                                aria-pressed={isServiceProviderRole}
+                                className={`relative z-10 flex h-11 w-full items-center justify-center gap-2 rounded-full text-[9px] font-black uppercase transition-colors ${
+                                  togglingRoleTarget[env.id] === "service_provider"
+                                    ? "text-white"
+                                    : isServiceProviderRole
+                                      ? "text-white"
+                                      : "text-on-surface-variant/80 hover:text-on-surface"
+                                }`}
+                              >
+                                {togglingRoleTarget[env.id] === "service_provider" ? (
+                                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                ) : (
+                                  <Icon icon="work" size={14} />
+                                )}
+                                Prestador
+                              </button>
+                            </div>
+                          </div>
+                        )}
 
-    {isActive && (
-      <button
-        onClick={() => router.push(`/meus-anuncios/${env.id}`)}
-        className="w-full lg:w-[260px] h-12 rounded-2xl bg-surface-container-high/80 text-on-surface border border-outline-variant/35 shadow-[0_8px_20px_rgba(15,23,42,0.05)] transition-all duration-300 ease-out font-black uppercase text-[10px] md:text-sm active:scale-95 flex items-center justify-center gap-2 whitespace-nowrap hover:bg-surface-container-high hover:border-primary/25 hover:text-primary dark:bg-[#223626] dark:text-[#e8f8ea] dark:border-[#30cc36]/28 dark:shadow-[0_8px_20px_rgba(48,204,54,0.08)] dark:hover:bg-[#2b4a2f] dark:hover:border-[#30cc36]/45 dark:hover:text-white"
-      >
-        <Icon icon="store" size={18} />
-        Gerenciar Anúncios
-      </button>
-    )}
+                        {isActive && (
+                          <button
+                            onClick={() => router.push(`/meus-anuncios/${env.id}`)}
+                            className="flex h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-outline-variant/35 bg-surface-container-high/80 text-[10px] font-black uppercase text-on-surface shadow-[0_8px_20px_rgba(15,23,42,0.05)] transition-all duration-300 ease-out active:scale-95 hover:border-primary/25 hover:bg-surface-container-high hover:text-primary dark:border-[#30cc36]/28 dark:bg-[#223626] dark:text-[#e8f8ea] dark:shadow-[0_8px_20px_rgba(48,204,54,0.08)] dark:hover:border-[#30cc36]/45 dark:hover:bg-[#2b4a2f] dark:hover:text-white md:text-sm"
+                          >
+                            <Icon icon="store" size={18} />
+                            Gerenciar Anúncios
+                          </button>
+                        )}
 
-    {!isActive && isPending && (
-      <div className="w-full lg:w-[220px] h-12 rounded-2xl bg-amber-500/10 text-amber-700 border border-amber-500/20 text-[10px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2">
-        <Icon icon={needsModeratorApproval ? "admin_panel_settings" : "hourglass_empty"} size={16} />
-        {needsModeratorApproval ? "Aguardando Aprovação" : "Aguardando Aprovação"}
-      </div>
-    )}
-  </div>
-</article>
+                        {!isActive && isPending && (
+                          <div className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/10 text-[10px] font-black uppercase tracking-[0.1em] text-amber-700">
+                            <Icon
+                              icon={needsModeratorApproval ? "admin_panel_settings" : "hourglass_empty"}
+                              size={16}
+                            />
+                            {needsModeratorApproval ? "Aguardando Aprovação" : "Aguardando Aprovação"}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </article>
                 );
               })}
             </div>

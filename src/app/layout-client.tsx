@@ -4,7 +4,6 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useApp } from "@/hooks/useApp";
 import { BottomNav } from "@/components/BottomNav";
-import { useServiceWorkerRegistration } from "@/app/useServiceWorkerRegistration";
 
 function ProtectedLayoutSkeleton() {
   const rows = Array.from({ length: 3 });
@@ -58,8 +57,6 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
       router.push("/login");
     }
   }, [user, loading, isPublicPage, router]);
-
-  useServiceWorkerRegistration();
 
   if (isPublicPage) {
     return (
