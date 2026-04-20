@@ -39,6 +39,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   const [memberCount, setMemberCount] = useState<number | null>(null);
   const [loadingEnvironment, setLoadingEnvironment] = useState(true);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [resolvedEnvironment, setResolvedEnvironment] = useState<any | null>(null);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [publicationMode, setPublicationMode] = useState<PublicationMode | null>(null);
   const [publishingModeLoading, setPublishingModeLoading] = useState(false);
@@ -53,8 +54,16 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     ...env,
     slug: env.slug || generateSlug(env.name)
   }));
-  
-  const environment = environmentsWithSlug.find(e => e.slug === placeSlug || generateSlug(e.name) === placeSlug);
+  const environmentFromContext = environmentsWithSlug.find(
+    (e) => e.slug === placeSlug || generateSlug(e.name) === placeSlug,
+  );
+  const environment = environmentFromContext || resolvedEnvironment;
+
+  useEffect(() => {
+    setLoadingEnvironment(true);
+    setShowWelcomeModal(false);
+    setResolvedEnvironment(null);
+  }, [placeSlug]);
 
   // Se encontrou o ambiente no banco, remover o placeId da URL
   useEffect(() => {
@@ -66,7 +75,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
 
   // Se nÃƒÂ£o encontrou no estado local, buscar diretamente do banco
   useEffect(() => {
-    if (!environment && placeSlug && !placeFromSearch && loadingEnvironment) {
+    if (!environmentFromContext && placeSlug && !placeFromSearch && loadingEnvironment) {
       const fetchEnvironmentFromDb = async () => {
         try {
           const { data, error } = await supabase
@@ -111,12 +120,16 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
               requiresModeratorApproval: Boolean(data.requires_moderator_approval),
               requiresRadiusValidation: Boolean(data.requires_radius_validation),
             };
-            setSelectedEnvironments(prev => {
-              if (prev.some(e => e.id === envWithSlug.id)) return prev;
-              return [...prev, envWithSlug];
-            });
+            setResolvedEnvironment(envWithSlug);
+
+            if (user?.id) {
+              setSelectedEnvironments(prev => {
+                if (prev.some(e => e.id === envWithSlug.id)) return prev;
+                return [...prev, envWithSlug];
+              });
+            }
           } else {
-            // Ambiente nÃƒÂ£o encontrado no banco - mostrar modal de boas-vindas
+            // Ambiente não encontrado no banco - mostrar modal de boas-vindas
             setShowWelcomeModal(true);
           }
         } catch (err) {
@@ -128,7 +141,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
       };
       fetchEnvironmentFromDb();
     }
-  }, [placeSlug, environment, placeFromSearch, placeId, setSelectedEnvironments, loadingEnvironment]);
+  }, [placeSlug, environmentFromContext, placeFromSearch, setSelectedEnvironments, loadingEnvironment, user?.id]);
 
   const effectiveEnvironment = environment || (placeFromSearch ? {
     id: placeFromSearch.id,
@@ -176,11 +189,11 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
        setSelectedEnvironment(effectiveEnvironment as any);
        
        // Also ensure it's in selectedEnvironments for RLS/logic consistency
-       if (!selectedEnvironments.some(e => e.id === effectiveEnvironment.id)) {
+       if (user?.id && !selectedEnvironments.some(e => e.id === effectiveEnvironment.id)) {
          setSelectedEnvironments(prev => [...prev, effectiveEnvironment as any]);
        }
     }
-  }, [effectiveEnvironment?.id, setSelectedEnvironment, setSelectedEnvironments]);
+  }, [effectiveEnvironment?.id, selectedEnvironments, setSelectedEnvironment, setSelectedEnvironments, user?.id]);
 
   // Fetch membership
   useEffect(() => {
@@ -295,7 +308,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           typeof effectiveEnvironment.latitude !== 'number' ||
           typeof effectiveEnvironment.longitude !== 'number'
         ) {
-          throw new Error('Este ambiente nÃƒÂ£o possui coordenadas para validaÃƒÂ§ÃƒÂ£o.');
+          throw new Error('Este ambiente não possui coordenadas para validação.');
         }
 
         const distance = calculateDistanceKm(
@@ -412,7 +425,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
         <TopAppBar {...topBarProps} />
         <main className="mt-20 px-4 md:px-8 max-w-4xl mx-auto flex items-center justify-center flex-col gap-4 pb-32">
           <Icon icon="error_outline" size={48} className="text-outline" />
-          <p className="text-on-surface-variant">Ambiente nÃƒÂ£o encontrado</p>
+          <p className="text-on-surface-variant">Ambiente não encontrado</p>
           <button onClick={() => router.back()} className="text-primary font-bold">
             Voltar
           </button>
@@ -718,7 +731,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
         )}
       </main>
 
-      {/* Modal de boas-vindas para ambiente nÃƒÂ£o cadastrado */}
+      {/* Modal de boas-vindas para ambiente não cadastrado */}
         {showWelcomeModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-surface-container-lowest rounded-3xl p-8 w-full max-w-md space-y-6 animate-in zoom-in-95 duration-200">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/Avatar';
@@ -60,7 +60,7 @@ function RegisterServiceContent() {
     website: '',
   });
   const [images, setImages] = useState<string[]>([]);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imageFiles, setImageFiles] = useState<(File | null)[]>([]);
   
   const [menuItems, setMenuItems] = useState<{id?: string; name: string; description: string; price: string; image?: string}[]>([]);
   const [showMenuItemModal, setShowMenuItemModal] = useState(false);
@@ -75,31 +75,48 @@ function RegisterServiceContent() {
   const [uploading, setUploading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const hydratedServiceIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (existingService) {
-      setForm({
-        title: existingService.title || '',
-        description: existingService.description || '',
-        category: existingService.category || categories[0],
-        cnpj: existingService.cnpj || '',
-        WhatsApp: existingService.WhatsApp || '',
-        instagram: existingService.instagram || '',
-        website: existingService.website || '',
-      });
-      setImages(existingService.images || []);
-      setIsActive(existingService.isActive ?? true);
-      setMenuItems(existingService.menu || []);
-      
-      // Load environment for existing service
-      if (existingService.environmentId) {
-        const env = selectedEnvironments.find(e => e.id === existingService.environmentId);
-        if (env) {
-          setSelectedEnvironment(env);
-        }
-      }
+    if (!existingService) {
+      hydratedServiceIdRef.current = null;
+      return;
     }
+
+    if (hydratedServiceIdRef.current === existingService.id) {
+      return;
+    }
+
+    const existingImages =
+      Array.isArray(existingService.images) && existingService.images.length > 0
+        ? existingService.images
+        : existingService.image
+          ? [existingService.image]
+          : [];
+
+    setForm({
+      title: existingService.title || '',
+      description: existingService.description || '',
+      category: existingService.category || categories[0],
+      cnpj: formatCnpj(existingService.cnpj || ''),
+      WhatsApp: existingService.WhatsApp || '',
+      instagram: existingService.instagram || '',
+      website: existingService.website || '',
+    });
+    setImages(existingImages);
+    setImageFiles(existingImages.map(() => null));
+    setIsActive(existingService.isActive ?? true);
+    setMenuItems(existingService.menu || []);
+    hydratedServiceIdRef.current = existingService.id;
   }, [existingService]);
+
+  useEffect(() => {
+    if (!existingService?.environmentId) return;
+    const env = selectedEnvironments.find(e => e.id === existingService.environmentId);
+    if (env) {
+      setSelectedEnvironment(env);
+    }
+  }, [existingService?.environmentId, selectedEnvironments, setSelectedEnvironment]);
 
   useEffect(() => {
     setMounted(true);
@@ -250,8 +267,8 @@ function RegisterServiceContent() {
     try {
       setErrorMsg('');
       const previewUrl = URL.createObjectURL(file);
-      setImages([...images, previewUrl]);
-      setImageFiles([...imageFiles, file]);
+      setImages((prev) => [...prev, previewUrl]);
+      setImageFiles((prev) => [...prev, file]);
     } catch (error: any) {
       setErrorMsg(error?.message || 'Erro ao selecionar imagem.');
     } finally {
@@ -385,20 +402,25 @@ function RegisterServiceContent() {
     try {
       console.log('Starting submit...');
       
-      const uploadedImages: string[] = [];
-      
-      for (let i = 0; i < imageFiles.length; i++) {
-        if (images[i].startsWith('blob:')) {
-          const uploadedUrl = await uploadImageToR2(imageFiles[i], 'services');
-          uploadedImages.push(uploadedUrl);
+      const finalImages: string[] = [];
+
+      for (let i = 0; i < images.length; i++) {
+        const currentImage = images[i];
+        const currentFile = imageFiles[i];
+
+        if (currentImage.startsWith('blob:')) {
+          if (!currentFile) {
+            continue;
+          }
+          const uploadedUrl = await uploadImageToR2(currentFile, 'services');
+          finalImages.push(uploadedUrl);
           console.log('Image uploaded:', uploadedUrl);
-        } else {
-          uploadedImages.push(images[i]);
+        } else if (currentImage) {
+          finalImages.push(currentImage);
         }
       }
-      
-      const finalImage = uploadedImages[0] || '';
-      const finalImages = uploadedImages;
+
+      const finalImage = finalImages[0] || '';
 
       const menuItemsWithImages = await Promise.all(menuItems.map(async (item, index) => {
         if (item.image && item.image.startsWith('blob:') && menuItemFiles.has(index)) {
@@ -914,7 +936,7 @@ function RegisterServiceContent() {
                 value={form.cnpj}
                 onChange={(e) => {
                   const digits = normalizeCnpj(e.target.value);
-                  setForm({ ...form, cnpj: formatCnpj(digits) });
+                  setForm((prev) => ({ ...prev, cnpj: formatCnpj(digits) }));
                 }}
               />
             </div>
