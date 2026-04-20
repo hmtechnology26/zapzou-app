@@ -245,6 +245,11 @@ export default function HomePage() {
     return storyGroups.find((group) => group.userId === activeStoryViewerUserId) || null;
   }, [activeStoryViewerUserId, storyGroups]);
 
+  const activeStoryViewerItem = useMemo(() => {
+    if (!activeStoryViewerGroup) return null;
+    return activeStoryViewerGroup.items[activeStoryViewerIndex] || null;
+  }, [activeStoryViewerGroup, activeStoryViewerIndex]);
+
   useEffect(() => {
     if (!isStoryViewerOpen) return;
 
@@ -907,11 +912,6 @@ export default function HomePage() {
     if (!activeProviderGroupKey) return null;
     return providerGroups.find((group) => group.key === activeProviderGroupKey) || null;
   }, [activeProviderGroupKey, providerGroups]);
-
-  const activeStoryViewerItem = useMemo(() => {
-    if (!activeStoryViewerGroup) return null;
-    return activeStoryViewerGroup.items[activeStoryViewerIndex] || null;
-  }, [activeStoryViewerGroup, activeStoryViewerIndex]);
 
   const handleOpenProviderServices = (groupKey: string) => {
     setActiveProviderGroupKey(groupKey);
