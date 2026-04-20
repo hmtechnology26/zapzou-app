@@ -42,7 +42,6 @@ export const metadata: Metadata = {
     title: 'ConectaE - Hub de Servicos',
     description: 'Conecte-se com prestadores de servicos, ambientes e anuncios na sua regiao.',
   },
-  manifest: '/manifest.json',
 };
 
 export const viewport: Viewport = {
@@ -61,93 +60,47 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const isProduction = process.env.NODE_ENV === 'production';
-
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
-        {!isProduction && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function () {
-                  try {
-                    if ('serviceWorker' in navigator) {
-                      navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                        registrations.forEach(function (registration) {
-                          registration.unregister();
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                try {
+                  Promise.resolve()
+                    .then(function () {
+                      if ('serviceWorker' in navigator) {
+                        return navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                          return Promise.all(
+                            registrations.map(function (registration) {
+                              return registration.unregister();
+                            })
+                          );
                         });
-                      });
-                    }
-
-                    if ('caches' in window) {
-                      caches.keys().then(function (keys) {
-                        keys.forEach(function (key) {
-                          if (key.indexOf('zapzou-') === 0) {
-                            caches.delete(key);
-                          }
+                      }
+                    })
+                    .then(function () {
+                      if ('caches' in window) {
+                        return caches.keys().then(function (keys) {
+                          return Promise.all(
+                            keys.map(function (key) {
+                              return caches.delete(key);
+                            })
+                          );
                         });
-                      });
-                    }
-                  } catch (error) {
-                    console.warn('Failed to clear dev caches.', error);
-                  }
-                })();
-              `,
-            }}
-          />
-        )}
-        {isProduction && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function () {
-                  try {
-                    var flagKey = 'zapzou-pwa-cleanup-v1';
-
-                    if (window.localStorage && window.localStorage.getItem(flagKey) === 'done') {
-                      return;
-                    }
-
-                    Promise.resolve()
-                      .then(function () {
-                        if ('serviceWorker' in navigator) {
-                          return navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                            return Promise.all(
-                              registrations.map(function (registration) {
-                                return registration.unregister();
-                              })
-                            );
-                          });
-                        }
-                      })
-                      .then(function () {
-                        if ('caches' in window) {
-                          return caches.keys().then(function (keys) {
-                            return Promise.all(
-                              keys.map(function (key) {
-                                return caches.delete(key);
-                              })
-                            );
-                          });
-                        }
-                      })
-                      .then(function () {
-                        if (window.localStorage) {
-                          window.localStorage.setItem(flagKey, 'done');
-                        }
-                      })
-                      .catch(function (error) {
-                        console.warn('Failed to clear legacy PWA caches.', error);
-                      });
-                  } catch (error) {
-                    console.warn('Failed to initialize legacy PWA cleanup.', error);
-                  }
-                })();
-              `,
-            }}
-          />
-        )}
+                      }
+                    })
+                    .catch(function (error) {
+                      console.warn('PWA cleanup failed.', error);
+                    });
+                } catch (error) {
+                  console.warn('PWA cleanup init failed.', error);
+                }
+              })();
+            `,
+          }}
+        />
       </head>
       <body className="antialiased">
         <Providers>

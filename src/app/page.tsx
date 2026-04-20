@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { Avatar } from "@/components/Avatar";
 import { useApp } from "@/hooks/useApp";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, type ChangeEvent } from "react";
 import { MapComponent } from "@/components/GoogleMap";
 import { TopAppBar } from "@/components/TopAppBar";
 import { hasCnpj } from "@/lib/cnpj";
@@ -15,6 +15,57 @@ import { supabase } from "@/lib/supabase";
 const PAGE_SIZE = 9;
 
 type MembershipAccessType = 'resident' | 'service_provider' | null;
+type StoryMediaType = "image" | "video";
+
+type StoryDbRow = {
+  id: string;
+  user_id: string;
+  media_url: string;
+  media_type: StoryMediaType;
+  created_at: string;
+  expires_at: string;
+  is_active: boolean;
+};
+
+type StoryProfileRow = {
+  id: string;
+  name: string;
+  avatar: string | null;
+};
+
+type StoryItem = {
+  id: string;
+  userId: string;
+  name: string;
+  avatar: string | null;
+  mediaUrl: string;
+  mediaType: StoryMediaType;
+  createdAt: string;
+};
+
+type StoryGroup = {
+  userId: string;
+  name: string;
+  avatar: string | null;
+  items: StoryItem[];
+};
+
+type SelectedStoryMedia = {
+  id: string;
+  file: File;
+  previewUrl: string;
+  kind: StoryMediaType;
+};
+
+type ProviderGroup = {
+  key: string;
+  providerId: string | null;
+  providerName: string;
+  services: Array<any>;
+  totalServices: number;
+  totalEnvironments: number;
+  primaryService: any;
+};
 
 function getAccessTypeBadge(accessType?: 'resident' | 'service_provider' | null) {
   if (accessType === 'resident') {
@@ -97,9 +148,26 @@ export default function HomePage() {
   } | null>(null);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isStoryComposerOpen, setIsStoryComposerOpen] = useState(false);
+  const [selectedStoryFiles, setSelectedStoryFiles] = useState<File[]>([]);
+  const [storyItems, setStoryItems] = useState<StoryItem[]>([]);
+  const [storiesLoading, setStoriesLoading] = useState(false);
+  const [storiesError, setStoriesError] = useState("");
+  const [storyPublishError, setStoryPublishError] = useState("");
+  const [isPublishingStory, setIsPublishingStory] = useState(false);
+  const [storiesRefreshKey, setStoriesRefreshKey] = useState(0);
+  const [isProviderServicesOpen, setIsProviderServicesOpen] = useState(false);
+  const [activeProviderGroupKey, setActiveProviderGroupKey] = useState<string | null>(null);
+  const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
+  const [activeStoryViewerUserId, setActiveStoryViewerUserId] = useState<string | null>(null);
+  const [activeStoryViewerIndex, setActiveStoryViewerIndex] = useState(0);
+  const [isDeletingStory, setIsDeletingStory] = useState(false);
+  const [storyDeleteError, setStoryDeleteError] = useState("");
   const [membershipAccessByEnvironmentId, setMembershipAccessByEnvironmentId] = useState<Record<string, MembershipAccessType>>({});
   const [membershipAccessLoaded, setMembershipAccessLoaded] = useState(false);
   const filterDropdownRef = useRef<HTMLDivElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
 
   const toSafeLower = (value: unknown) =>
     typeof value === "string" ? value.toLowerCase() : "";
@@ -107,6 +175,87 @@ export default function HomePage() {
   const activeServices = useMemo(() => {
     return services.filter((s) => s.isActive && s.status === "active");
   }, [services]);
+
+  const normalizeAvatar = (value: unknown) => {
+    if (typeof value !== "string") return null;
+    const cleaned = value.trim();
+    if (!cleaned || cleaned === "null" || cleaned === "undefined") return null;
+    return cleaned;
+  };
+
+  const getStoryMediaType = (value: string): StoryMediaType => {
+    return value.startsWith("video/") ? "video" : "image";
+  };
+
+  const selectedStoryMedia = useMemo<SelectedStoryMedia[]>(() => {
+    return selectedStoryFiles.map((file, index) => ({
+      id: `${file.name}-${file.lastModified}-${index}`,
+      file,
+      previewUrl: URL.createObjectURL(file),
+      kind: getStoryMediaType(file.type),
+    }));
+  }, [selectedStoryFiles]);
+
+  const storyGroups = useMemo<StoryGroup[]>(() => {
+    const grouped = new Map<string, StoryGroup>();
+
+    storyItems.forEach((item) => {
+      const existing = grouped.get(item.userId);
+      if (!existing) {
+        grouped.set(item.userId, {
+          userId: item.userId,
+          name: item.name,
+          avatar: item.avatar,
+          items: [item],
+        });
+        return;
+      }
+
+      existing.items.push(item);
+    });
+
+    const groups = Array.from(grouped.values());
+    if (!user?.id) return groups;
+
+    return groups.map((group) => {
+      if (group.userId !== user.id) return group;
+      return {
+        ...group,
+        name: user.name || group.name,
+        avatar: normalizeAvatar(user.avatar) ?? group.avatar,
+      };
+    });
+  }, [storyItems, user?.avatar, user?.id, user?.name]);
+
+  const ownStoryGroup = useMemo(() => {
+    if (!user?.id) return null;
+    return storyGroups.find((group) => group.userId === user.id) || null;
+  }, [storyGroups, user?.id]);
+
+  const otherStoryGroups = useMemo(() => {
+    if (!user?.id) return storyGroups;
+    return storyGroups.filter((group) => group.userId !== user.id);
+  }, [storyGroups, user?.id]);
+
+  const activeStoryViewerGroup = useMemo(() => {
+    if (!activeStoryViewerUserId) return null;
+    return storyGroups.find((group) => group.userId === activeStoryViewerUserId) || null;
+  }, [activeStoryViewerUserId, storyGroups]);
+
+  useEffect(() => {
+    if (!isStoryViewerOpen) return;
+
+    if (!activeStoryViewerGroup || activeStoryViewerGroup.items.length === 0) {
+      setIsStoryViewerOpen(false);
+      setActiveStoryViewerUserId(null);
+      setActiveStoryViewerIndex(0);
+      return;
+    }
+
+    if (activeStoryViewerIndex >= activeStoryViewerGroup.items.length) {
+      setActiveStoryViewerIndex(0);
+    }
+  }, [activeStoryViewerGroup, activeStoryViewerIndex, isStoryViewerOpen]);
 
   const availableCategories = useMemo(() => {
     const cats = new Set<string>();
@@ -199,6 +348,135 @@ export default function HomePage() {
     };
   }, [membershipEnvironmentIds, membershipVersion, user?.id]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadStories = async () => {
+      setStoriesLoading(true);
+      setStoriesError("");
+
+      const nowIso = new Date().toISOString();
+      const { data, error } = await supabase
+        .from("stories")
+        .select("id, user_id, media_url, media_type, created_at, expires_at, is_active")
+        .eq("is_active", true)
+        .gt("expires_at", nowIso)
+        .order("created_at", { ascending: false })
+        .limit(80);
+
+      if (cancelled) return;
+
+      if (error) {
+        console.warn("loadStories failed:", error);
+        setStoriesError("Nao foi possivel carregar os stories agora.");
+        setStoryItems([]);
+        setStoriesLoading(false);
+        return;
+      }
+
+      const rows = Array.isArray(data) ? (data as StoryDbRow[]) : [];
+      const uniqueUserIds = Array.from(
+        new Set(
+          rows
+            .map((row) => row.user_id)
+            .filter((userId): userId is string => typeof userId === "string" && userId.length > 0),
+        ),
+      );
+
+      let profilesById: Record<string, StoryProfileRow> = {};
+
+      if (uniqueUserIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from("user_public_profiles")
+          .select("id, name, avatar")
+          .in("id", uniqueUserIds);
+
+        if (!cancelled && profilesError) {
+          console.warn("loadStories profiles lookup failed:", profilesError);
+        }
+
+        if (!cancelled && Array.isArray(profilesData)) {
+          profilesById = profilesData.reduce<Record<string, StoryProfileRow>>((acc, profile: any) => {
+            if (typeof profile?.id !== "string" || !profile.id) return acc;
+            acc[profile.id] = {
+              id: profile.id,
+              name: typeof profile?.name === "string" && profile.name.trim().length > 0 ? profile.name.trim() : "Usuario",
+              avatar: normalizeAvatar(profile?.avatar),
+            };
+            return acc;
+          }, {});
+        }
+      }
+
+      const normalizedStories: StoryItem[] = rows
+        .filter((row) => typeof row.user_id === "string" && row.user_id.length > 0)
+        .map((row) => {
+          const profile = profilesById[row.user_id];
+          return {
+            id: row.id,
+            userId: row.user_id,
+            name: profile?.name || "Usuario",
+            avatar: profile?.avatar ?? null,
+            mediaUrl: row.media_url,
+            mediaType: row.media_type === "video" ? "video" : "image",
+            createdAt: row.created_at,
+          };
+        });
+
+      if (cancelled) return;
+      setStoryItems(normalizedStories);
+      setStoriesLoading(false);
+    };
+
+    void loadStories();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [storiesRefreshKey, user?.id]);
+
+  useEffect(() => {
+    return () => {
+      selectedStoryMedia.forEach((media) => {
+        URL.revokeObjectURL(media.previewUrl);
+      });
+    };
+  }, [selectedStoryMedia]);
+
+  useEffect(() => {
+    if (!isStoryComposerOpen && !isProviderServicesOpen && !isStoryViewerOpen) return;
+
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+
+      if (isStoryComposerOpen && !isPublishingStory) {
+        setIsStoryComposerOpen(false);
+        return;
+      }
+
+      if (isProviderServicesOpen) {
+        handleCloseProviderServices();
+        return;
+      }
+
+      if (isStoryViewerOpen) {
+        setIsStoryViewerOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", onEscape);
+    return () => document.removeEventListener("keydown", onEscape);
+  }, [isProviderServicesOpen, isPublishingStory, isStoryComposerOpen, isStoryViewerOpen]);
+
+  useEffect(() => {
+    if (!isStoryComposerOpen && !isProviderServicesOpen && !isStoryViewerOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isProviderServicesOpen, isStoryComposerOpen, isStoryViewerOpen]);
+
   const selectedEnvironmentName = useMemo(() => {
     if (selectedEnvironmentId === "all") return "Filtro";
     return (
@@ -275,7 +553,57 @@ export default function HomePage() {
     });
   }, [search, servicesWithDistance]);
 
-  const displayedServices = filteredServices;
+  const providerGroups = useMemo<ProviderGroup[]>(() => {
+    const grouped = new Map<string, { providerId: string | null; providerName: string; services: Array<any> }>();
+
+    filteredServices.forEach((service) => {
+      const providerId = typeof service.provider_id === "string" && service.provider_id.trim().length > 0
+        ? service.provider_id.trim()
+        : null;
+      const providerName = (service.provider || "Usuario").trim() || "Usuario";
+      const groupKey = providerId ? `uid:${providerId}` : `name:${providerName.toLowerCase()}`;
+      const current = grouped.get(groupKey);
+
+      if (!current) {
+        grouped.set(groupKey, {
+          providerId,
+          providerName,
+          services: [service],
+        });
+        return;
+      }
+
+      current.services.push(service);
+    });
+
+    return Array.from(grouped.entries()).map(([key, group]) => {
+      const uniqueEnvironments = new Set(
+        group.services
+          .map((service) => service.environmentId)
+          .filter((envId): envId is string => typeof envId === "string" && envId.length > 0),
+      );
+      return {
+        key,
+        providerId: group.providerId,
+        providerName: group.providerName,
+        services: group.services,
+        totalServices: group.services.length,
+        totalEnvironments: uniqueEnvironments.size,
+        primaryService: group.services[0],
+      };
+    });
+  }, [filteredServices]);
+
+  const displayedServices = useMemo(() => {
+    return providerGroups.map((group) => ({
+      ...group.primaryService,
+      groupKey: group.key,
+      groupProviderName: group.providerName,
+      groupTotalServices: group.totalServices,
+      groupTotalEnvironments: group.totalEnvironments,
+    }));
+  }, [providerGroups]);
+
   const totalPages = Math.max(1, Math.ceil(displayedServices.length / PAGE_SIZE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
   const paginatedServices = displayedServices.slice(
@@ -298,6 +626,21 @@ export default function HomePage() {
   }, [currentPage, totalPages]);
 
   useEffect(() => {
+    let shouldPrefetch = true;
+
+    if (typeof window !== "undefined") {
+      const connection = (navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }).connection;
+      const saveData = Boolean(connection?.saveData);
+      const effectiveType = String(connection?.effectiveType || "");
+      const isSlowConnection = effectiveType.includes("2g") || effectiveType === "3g";
+      const isMobileViewport = window.matchMedia("(max-width: 767px)").matches;
+      shouldPrefetch = !(saveData || isSlowConnection || isMobileViewport);
+    }
+
+    if (!shouldPrefetch) return;
+
     paginatedServices.forEach((service) => {
       if (service.slug) {
         void router.prefetch(`/service/${service.slug}`);
@@ -306,24 +649,40 @@ export default function HomePage() {
   }, [paginatedServices, router]);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          console.log(
-            "User location obtained:",
-            position.coords.latitude,
-            position.coords.longitude,
-          );
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (err) => {
-          console.log("Geolocation error:", err.code, err.message);
-        },
-      );
-    }
+    let cancelled = false;
+
+    const loadLocationIfGranted = async () => {
+      if (!("geolocation" in navigator)) return;
+      if (!("permissions" in navigator)) return;
+
+      try {
+        const status = await navigator.permissions.query({
+          name: "geolocation",
+        } as PermissionDescriptor);
+
+        if (cancelled || status.state !== "granted") return;
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            if (cancelled) return;
+            setUserLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            });
+          },
+          () => {},
+          { enableHighAccuracy: false, maximumAge: 60000, timeout: 5000 },
+        );
+      } catch {
+        // Ignore permission query failures to keep initial render fast.
+      }
+    };
+
+    void loadLocationIfGranted();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -343,6 +702,265 @@ export default function HomePage() {
   }, []);
 
   const userAvatar = mounted ? user?.avatar : null;
+
+  const getFileExtension = (file: File) => {
+    const fromName = file.name?.split(".").pop()?.toLowerCase();
+    if (fromName && fromName.length <= 8) {
+      return fromName.replace(/[^a-z0-9]/g, "") || "bin";
+    }
+
+    const fromMime = file.type.split("/")[1]?.toLowerCase().split(";")[0];
+    if (fromMime && fromMime.length <= 12) {
+      return fromMime.replace(/[^a-z0-9]/g, "") || "bin";
+    }
+
+    return "bin";
+  };
+
+  const resolveStoryUploadEndpoint = () => {
+    let edgeFunctionUrl = process.env.NEXT_PUBLIC_SUPABASE_EDGE_FUNCTION_URL;
+    if (!edgeFunctionUrl) {
+      throw new Error("Configuracao de upload nao encontrada.");
+    }
+
+    if (!edgeFunctionUrl.includes("r2-signed-upload")) {
+      edgeFunctionUrl = edgeFunctionUrl.endsWith("/")
+        ? `${edgeFunctionUrl}r2-signed-upload`
+        : `${edgeFunctionUrl}/r2-signed-upload`;
+    }
+
+    return edgeFunctionUrl;
+  };
+
+  const uploadStoryFileToR2 = async (file: File) => {
+    if (!user?.id) {
+      throw new Error("Voce precisa estar logado para publicar stories.");
+    }
+
+    const r2PublicUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const edgeFunctionUrl = resolveStoryUploadEndpoint();
+
+    if (!r2PublicUrl || !supabaseAnonKey) {
+      throw new Error("Configuracao de storage incompleta.");
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      throw new Error("Sessao expirada. Faca login novamente.");
+    }
+
+    const extension = getFileExtension(file);
+    const randomPart = Math.random().toString(36).slice(2, 8);
+    const filePath = `tenants/${user.id}/stories/${Date.now()}-${randomPart}.${extension}`;
+    const contentType = file.type || "application/octet-stream";
+
+    const signResponse = await fetch(edgeFunctionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: supabaseAnonKey,
+      },
+      body: JSON.stringify({
+        path: filePath,
+        contentType,
+      }),
+    });
+
+    if (!signResponse.ok) {
+      const payload = await signResponse.json().catch(() => null);
+      throw new Error(payload?.error || "Nao foi possivel gerar URL de upload.");
+    }
+
+    const { uploadUrl } = await signResponse.json();
+    if (!uploadUrl || typeof uploadUrl !== "string") {
+      throw new Error("URL de upload invalida.");
+    }
+
+    const uploadResponse = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: { "Content-Type": contentType },
+      body: file,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error("Falha no envio da midia para o Cloudflare R2.");
+    }
+
+    const normalizedPublicUrl = r2PublicUrl.replace(/\/+$/, "");
+    return `${normalizedPublicUrl}/${filePath}`;
+  };
+
+  const handleStoryFilesSelected = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length > 0) {
+      const nextFiles = [...selectedStoryFiles, ...files];
+      if (nextFiles.length > 10) {
+        setStoryPublishError("Voce pode selecionar no maximo 10 midias por envio.");
+      } else {
+        setStoryPublishError("");
+      }
+      setSelectedStoryFiles(nextFiles.slice(0, 10));
+    }
+    event.target.value = "";
+  };
+
+  const handleOpenStoryComposer = () => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    setStoryPublishError("");
+    setIsStoryComposerOpen(true);
+  };
+
+  const handleCloseStoryComposer = () => {
+    if (isPublishingStory) return;
+    setIsStoryComposerOpen(false);
+    setStoryPublishError("");
+    setSelectedStoryFiles([]);
+  };
+
+  const handleOpenCamera = () => {
+    cameraInputRef.current?.click();
+  };
+
+  const handleOpenGallery = () => {
+    galleryInputRef.current?.click();
+  };
+
+  const handleOpenStoryViewer = (storyGroup: StoryGroup, storyIndex = 0) => {
+    if (!storyGroup.items.length) return;
+    const safeIndex = Math.min(Math.max(storyIndex, 0), storyGroup.items.length - 1);
+    setActiveStoryViewerUserId(storyGroup.userId);
+    setActiveStoryViewerIndex(safeIndex);
+    setStoryDeleteError("");
+    setIsStoryViewerOpen(true);
+  };
+
+  const handleCloseStoryViewer = () => {
+    setIsStoryViewerOpen(false);
+    setActiveStoryViewerUserId(null);
+    setActiveStoryViewerIndex(0);
+    setStoryDeleteError("");
+  };
+
+  const handleStoryViewerPrevious = () => {
+    if (!activeStoryViewerGroup) return;
+    setActiveStoryViewerIndex((prev) =>
+      prev > 0 ? prev - 1 : activeStoryViewerGroup.items.length - 1,
+    );
+  };
+
+  const handleStoryViewerNext = () => {
+    if (!activeStoryViewerGroup) return;
+    setActiveStoryViewerIndex((prev) =>
+      prev < activeStoryViewerGroup.items.length - 1 ? prev + 1 : 0,
+    );
+  };
+
+  const handleDeleteCurrentStory = async () => {
+    if (!user?.id || !activeStoryViewerItem) return;
+    if (activeStoryViewerItem.userId !== user.id) return;
+
+    const confirmed = window.confirm("Remover este story agora?");
+    if (!confirmed) return;
+
+    setIsDeletingStory(true);
+    setStoryDeleteError("");
+
+    try {
+      const { error } = await supabase
+        .from("stories")
+        .delete()
+        .eq("id", activeStoryViewerItem.id)
+        .eq("user_id", user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setStoriesRefreshKey((prev) => prev + 1);
+      handleCloseStoryViewer();
+    } catch (err: any) {
+      console.warn("handleDeleteCurrentStory failed:", err);
+      setStoryDeleteError(err?.message || "Nao foi possivel remover o story.");
+    } finally {
+      setIsDeletingStory(false);
+    }
+  };
+
+  const activeProviderGroup = useMemo(() => {
+    if (!activeProviderGroupKey) return null;
+    return providerGroups.find((group) => group.key === activeProviderGroupKey) || null;
+  }, [activeProviderGroupKey, providerGroups]);
+
+  const activeStoryViewerItem = useMemo(() => {
+    if (!activeStoryViewerGroup) return null;
+    return activeStoryViewerGroup.items[activeStoryViewerIndex] || null;
+  }, [activeStoryViewerGroup, activeStoryViewerIndex]);
+
+  const handleOpenProviderServices = (groupKey: string) => {
+    setActiveProviderGroupKey(groupKey);
+    setIsProviderServicesOpen(true);
+  };
+
+  const handleCloseProviderServices = () => {
+    setIsProviderServicesOpen(false);
+    setActiveProviderGroupKey(null);
+  };
+
+  const handleRemoveSelectedStoryMedia = (mediaId: string) => {
+    setSelectedStoryFiles((prev) =>
+      prev.filter((file, index) => `${file.name}-${file.lastModified}-${index}` !== mediaId),
+    );
+  };
+
+  const handlePublishStories = async () => {
+    if (!user?.id) {
+      router.push("/login");
+      return;
+    }
+
+    if (selectedStoryFiles.length === 0) {
+      setStoryPublishError("Selecione pelo menos uma foto ou video.");
+      return;
+    }
+
+    setIsPublishingStory(true);
+    setStoryPublishError("");
+
+    try {
+      const payload: Array<{ user_id: string; media_url: string; media_type: StoryMediaType }> = [];
+
+      for (const file of selectedStoryFiles) {
+        const mediaUrl = await uploadStoryFileToR2(file);
+        payload.push({
+          user_id: user.id,
+          media_url: mediaUrl,
+          media_type: getStoryMediaType(file.type),
+        });
+      }
+
+      const { error } = await supabase
+        .from("stories")
+        .insert(payload);
+
+      if (error) {
+        throw error;
+      }
+
+      setSelectedStoryFiles([]);
+      setIsStoryComposerOpen(false);
+      setStoriesRefreshKey((prev) => prev + 1);
+    } catch (err: any) {
+      console.warn("handlePublishStories failed:", err);
+      setStoryPublishError(err?.message || "Nao foi possivel publicar seu story.");
+    } finally {
+      setIsPublishingStory(false);
+    }
+  };
 
   const handleGetLocation = () => {
     setLocationLoading(true);
@@ -387,6 +1005,118 @@ export default function HomePage() {
       <TopAppBar />
 
       <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-8 pb-32">
+        <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-sm font-black tracking-[0.2em] uppercase text-on-surface-variant">
+              
+            </h2>
+            {/* {user && (
+              <button
+                type="button"
+                onClick={handleOpenStoryComposer}
+                className="text-xs font-bold px-3 py-1.5 rounded-full bg-[#30cc36]/10 text-[#30cc36] hover:bg-[#30cc36]/20 transition-colors"
+              >
+                Adicionar
+              </button>
+            )} */}
+          </div>
+
+          {storiesError && (
+            <p className="px-1 text-xs text-red-600">{storiesError}</p>
+          )}
+
+          <div className="flex overflow-x-auto px-1 pb-2 gap-4 no-scrollbar">
+            {user && (
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  if (ownStoryGroup) {
+                    handleOpenStoryViewer(ownStoryGroup, 0);
+                  }
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    if (ownStoryGroup) {
+                      handleOpenStoryViewer(ownStoryGroup, 0);
+                    }
+                  }
+                }}
+                className="w-[78px] shrink-0 flex flex-col items-center gap-2"
+                aria-label={ownStoryGroup ? "Visualizar seu story" : "Seu story"}
+              >
+                <div className="relative">
+                  <div className={`rounded-full p-[2px] ${
+                    ownStoryGroup
+                      ? "bg-[conic-gradient(at_top,_#f58529,_#dd2a7b,_#8134af,_#515bd4,_#f58529)]"
+                      : "bg-surface-container-high"
+                  }`}>
+                    <div className="rounded-full bg-background p-[2px]">
+                      <Avatar
+                        src={userAvatar || undefined}
+                        name={user.name}
+                        alt="Seu avatar"
+                        className="w-16 h-16"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleOpenStoryComposer();
+                    }}
+                    className="absolute -right-1 -bottom-1 w-6 h-6 rounded-full bg-[#30cc36] text-white border-2 border-background flex items-center justify-center shadow-md"
+                    aria-label="Adicionar story"
+                  >
+                    <Icon icon="add" size={15} weight={700} />
+                  </button>
+                </div>
+                <span className="text-[11px] font-semibold text-on-surface truncate max-w-full">
+                  Seu story
+                </span>
+              </div>
+            )}
+
+            {otherStoryGroups.map((storyGroup) => (
+              <button
+                key={storyGroup.userId}
+                type="button"
+                onClick={() => handleOpenStoryViewer(storyGroup, 0)}
+                className="w-[78px] shrink-0 flex flex-col items-center gap-2"
+                aria-label={`Story de ${storyGroup.name}`}
+              >
+                <div className="rounded-full p-[2px] bg-[conic-gradient(at_top,_#f58529,_#dd2a7b,_#8134af,_#515bd4,_#f58529)]">
+                  <div className="rounded-full bg-background p-[2px]">
+                    <Avatar
+                      src={storyGroup.avatar || undefined}
+                      name={storyGroup.name}
+                      alt={storyGroup.name}
+                      className="w-16 h-16"
+                    />
+                  </div>
+                </div>
+                <span className="text-[11px] font-semibold text-on-surface truncate max-w-full">
+                  {storyGroup.name}
+                </span>
+              </button>
+            ))}
+
+            {!storiesLoading && !user && otherStoryGroups.length === 0 && (
+              <div className="w-full py-4 px-4 rounded-2xltext-center text-xs text-on-surface-variant">
+                
+              </div>
+            )}
+
+            {storiesLoading && (
+              <div className="w-full py-4 px-4 rounded-2xl text-center text-xs text-on-surface-variant">
+                
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* <section className="mb-1 mt-1 text-left md:text-left">
           <h2 className="text-3xl font-black text-on-surface tracking-tighter">
             Anúncios
@@ -599,6 +1329,9 @@ export default function HomePage() {
                             <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">
                               {service.category}
                             </span>
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">
+                              {service.groupTotalEnvironments} ambiente{service.groupTotalEnvironments === 1 ? "" : "s"}
+                            </span>
                             <div className="ml-auto flex flex-col items-end gap-1">
                               <span
                                 className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
@@ -614,9 +1347,13 @@ export default function HomePage() {
                           <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#30cc36] transition-colors">
                             {service.title}
                           </h4>
+                          <p className="text-xs text-on-surface-variant font-semibold mt-1 truncate">
+                            {service.groupProviderName}
+                          </p>
                         </div>
 
-                        <div className="mt-1 flex items-center justify-between">
+                        <div className="mt-1 space-y-2">
+                          <div className="flex items-center justify-between">
                           {(userLocation || service.environmentName) && (
                             <div className="flex items-center gap-2">
                               {userLocation && service.distance !== Infinity && (
@@ -636,16 +1373,35 @@ export default function HomePage() {
                               )}
                             </div>
                           )}
-                          <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#30cc36] group-hover/card:text-white transition-all duration-300">
+                          {/* <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#30cc36] group-hover/card:text-white transition-all duration-300">
                             <Icon icon="arrow_forward" size={14} weight={700} />
+                          </div> */}
                           </div>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              if (service.groupTotalServices > 1) {
+                                handleOpenProviderServices(service.groupKey);
+                                return;
+                              }
+                              if (service.slug) {
+                                router.push(`/service/${service.slug}`);
+                              }
+                            }}
+                            className="w-full rounded-full border border-[#30cc36]/30 text-[#30cc36] text-xs font-black py-2 hover:bg-[#30cc36]/10 transition-colors"
+                          >
+                            {service.groupTotalServices > 1
+                              ? `Ver anuncios (${service.groupTotalServices})`
+                              : "Ver anuncio"}
+                          </button>
                         </div>
                       </div>
                     </div>
                   ))}
                   {displayedServices.length === 0 && (
                     <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
-                      Nenhum serviço encontrado próximo a você
+                      Nenhum prestador encontrado proximo a voce
                     </div>
                   )}
                 </div>
@@ -698,6 +1454,9 @@ export default function HomePage() {
                             <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
                               {service.category || "Sem categoria"}
                             </span>
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">
+                              {service.groupTotalEnvironments} ambiente{service.groupTotalEnvironments === 1 ? "" : "s"}
+                            </span>
                             <div className="ml-auto flex flex-col items-end gap-1">
                               <span
                                 className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
@@ -713,55 +1472,68 @@ export default function HomePage() {
                           <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">
                             {service.title}
                           </h4>
+                          <p className="text-xs text-on-surface-variant font-semibold mt-1 truncate">
+                            {service.groupProviderName}
+                          </p>
                           <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">
                             {service.description}
                           </p>
                         </div>
 
-                        <div className="mt-3 flex items-center justify-between">
-                          {(userLocation || service.environmentName) && (
-                            <div className="flex items-center gap-2">
-                              {userLocation && service.distance !== Infinity && (
-                                <div className="flex items-center gap-1 text-primary">
-                                  <Icon
-                                    icon="location_on"
-                                    size={12}
-                                    weight={700}
-                                  />
-                                  <span className="text-[10px] font-bold">
-                                    {service.distance < 1
-                                      ? `${Math.round(service.distance * 1000)}m`
-                                      : `${service.distance.toFixed(1)}km`}
+                        <div className="mt-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            {(userLocation || service.environmentName) && (
+                              <div className="flex items-center gap-2">
+                                {userLocation && service.distance !== Infinity && (
+                                  <div className="flex items-center gap-1 text-primary">
+                                    <Icon
+                                      icon="location_on"
+                                      size={12}
+                                      weight={700}
+                                    />
+                                    <span className="text-[10px] font-bold">
+                                      {service.distance < 1
+                                        ? `${Math.round(service.distance * 1000)}m`
+                                        : `${service.distance.toFixed(1)}km`}
+                                    </span>
+                                  </div>
+                                )}
+                                {service.environmentName && (
+                                  <span className="text-[10px] text-on-surface-variant font-medium truncate">
+                                    {service.environmentName}
                                   </span>
-                                </div>
-                              )}
-                              {service.environmentName && (
-                                <span className="text-[10px] text-on-surface-variant font-medium">
-                                  {service.environmentName}
-                                </span>
-                              )}
+                                )}
+                              </div>
+                            )}
+                            <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-primary group-hover/card:text-white transition-all duration-300">
+                              <Icon icon="arrow_forward" size={14} weight={700} />
                             </div>
-                          )}
-                          <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-primary group-hover/card:text-white transition-all duration-300">
-                            <Icon icon="arrow_forward" size={14} weight={700} />
                           </div>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              if (service.groupTotalServices > 1) {
+                                handleOpenProviderServices(service.groupKey);
+                                return;
+                              }
+                              if (service.slug) {
+                                router.push(`/service/${service.slug}`);
+                              }
+                            }}
+                            className="w-full rounded-full border border-primary/30 text-primary text-xs font-black py-2 hover:bg-primary/10 transition-colors"
+                          >
+                            {service.groupTotalServices > 1
+                              ? `Ver anuncios (${service.groupTotalServices})`
+                              : "Ver anuncio"}
+                          </button>
                         </div>
                       </div>
                     </div>
                   ))}
-                  {servicesWithDistance.filter((service) => {
-                    const searchLower = search.toLowerCase().trim();
-                    const serviceCategory = toSafeLower(service.category);
-                    const serviceTitle = toSafeLower(service.title);
-                    const serviceDescription = toSafeLower(service.description);
-                    return (
-                      serviceCategory.includes(searchLower) ||
-                      serviceTitle.includes(searchLower) ||
-                      serviceDescription.includes(searchLower)
-                    );
-                  }).length === 0 && (
+                  {displayedServices.length === 0 && (
                     <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
-                      Nenhum serviço encontrado para "{search}"
+                      Nenhum prestador encontrado para "{search}"
                     </div>
                   )}
                 </div>
@@ -800,6 +1572,319 @@ export default function HomePage() {
           </section>
         )} */}
       </main>
+
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*,video/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleStoryFilesSelected}
+      />
+      <input
+        ref={galleryInputRef}
+        type="file"
+        accept="image/*,video/*"
+        multiple
+        className="hidden"
+        onChange={handleStoryFilesSelected}
+      />
+
+      {isStoryViewerOpen && activeStoryViewerGroup && activeStoryViewerItem && (
+        <div className="fixed inset-0 z-[67] bg-black/85 backdrop-blur-sm md:flex md:items-center md:justify-center">
+          <div className="w-full h-full bg-black text-white flex flex-col md:max-w-md md:h-[90vh] md:max-h-[840px] md:rounded-3xl md:border md:border-white/10 md:overflow-hidden">
+            <div className="px-4 pt-4">
+              <div className="flex items-center gap-1">
+                {activeStoryViewerGroup.items.map((item, index) => (
+                  <span
+                    key={item.id}
+                    className={`h-1 flex-1 rounded-full ${
+                      index === activeStoryViewerIndex ? "bg-white" : "bg-white/30"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <Avatar
+                  src={activeStoryViewerGroup.avatar || undefined}
+                  name={activeStoryViewerGroup.name}
+                  alt={activeStoryViewerGroup.name}
+                  className="w-9 h-9"
+                />
+                <p className="text-sm font-semibold truncate">
+                  {activeStoryViewerGroup.name}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {activeStoryViewerItem.userId === user?.id && (
+                  <button
+                    type="button"
+                    onClick={handleDeleteCurrentStory}
+                    disabled={isDeletingStory}
+                    className="h-9 px-3 rounded-full bg-red-500/25 text-red-100 text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Remover story"
+                  >
+                    {isDeletingStory ? "Removendo..." : "Remover"}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleCloseStoryViewer}
+                  className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center"
+                  aria-label="Fechar visualizacao de story"
+                >
+                  <Icon icon="close" size={20} />
+                </button>
+              </div>
+            </div>
+
+            {storyDeleteError && (
+              <p className="px-4 pb-2 text-xs text-rose-300">{storyDeleteError}</p>
+            )}
+
+            <div className="relative flex-1 flex items-center justify-center px-2 pb-4">
+              <button
+                type="button"
+                onClick={handleStoryViewerPrevious}
+                className="absolute left-3 z-10 w-9 h-9 rounded-full bg-black/50 flex items-center justify-center"
+                aria-label="Story anterior"
+              >
+                <Icon icon="chevron_left" size={20} />
+              </button>
+
+              <div className="w-full h-full rounded-2xl overflow-hidden bg-black">
+                {activeStoryViewerItem.mediaType === "video" ? (
+                  <video
+                    src={activeStoryViewerItem.mediaUrl}
+                    className="w-full h-full object-contain"
+                    autoPlay
+                    controls
+                    playsInline
+                  />
+                ) : (
+                  <img
+                    src={activeStoryViewerItem.mediaUrl}
+                    alt={`Story de ${activeStoryViewerGroup.name}`}
+                    className="w-full h-full object-contain"
+                  />
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleStoryViewerNext}
+                className="absolute right-3 z-10 w-9 h-9 rounded-full bg-black/50 flex items-center justify-center"
+                aria-label="Proximo story"
+              >
+                <Icon icon="chevron_right" size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isProviderServicesOpen && activeProviderGroup && (
+        <div className="fixed inset-0 z-[65] bg-black/70 backdrop-blur-sm md:flex md:items-center md:justify-center">
+          <div className="w-full h-full bg-surface-container-lowest md:max-w-2xl md:h-[82vh] md:rounded-3xl md:overflow-hidden md:border md:border-outline-variant/20">
+            <div className="h-full flex flex-col">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-outline-variant/20">
+                <div>
+                  <h3 className="text-base font-black text-on-surface">
+                    {activeProviderGroup.providerName}
+                  </h3>
+                  <p className="text-xs text-on-surface-variant mt-0.5">
+                    {activeProviderGroup.totalServices} anuncio{activeProviderGroup.totalServices === 1 ? "" : "s"} em {activeProviderGroup.totalEnvironments} ambiente{activeProviderGroup.totalEnvironments === 1 ? "" : "s"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCloseProviderServices}
+                  className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface"
+                  aria-label="Fechar lista de anuncios"
+                >
+                  <Icon icon="close" size={20} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {activeProviderGroup.services.map((service) => (
+                  <button
+                    key={service.id}
+                    type="button"
+                    onClick={() => {
+                      handleCloseProviderServices();
+                      if (service.slug) {
+                        router.push(`/service/${service.slug}`);
+                      }
+                    }}
+                    className="w-full rounded-2xl border border-outline-variant/10 bg-surface-container-highest/40 p-3 flex items-center gap-3 text-left hover:bg-surface-container-highest transition-colors"
+                  >
+                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-surface-container-high shrink-0">
+                      {service.image ? (
+                        <img
+                          src={service.image}
+                          alt={service.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Icon icon="image" size={18} className="text-on-surface-variant" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-black uppercase tracking-wide text-[#30cc36]">
+                        {service.category || "Sem categoria"}
+                      </p>
+                      <p className="text-sm font-bold text-on-surface truncate mt-0.5">
+                        {service.title}
+                      </p>
+                      {service.environmentName && (
+                        <p className="text-xs text-on-surface-variant truncate mt-0.5">
+                          {service.environmentName}
+                        </p>
+                      )}
+                    </div>
+                    <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+                      <Icon icon="arrow_forward" size={14} weight={700} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isStoryComposerOpen && (
+        <div className="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm md:flex md:items-center md:justify-center">
+          <div className="w-full h-full bg-black text-white flex flex-col md:max-w-md md:h-[92vh] md:max-h-[840px] md:rounded-3xl md:border md:border-white/10 md:overflow-hidden">
+            <div className="flex items-center justify-between px-4 pt-4 pb-3">
+              {/* <button
+                type="button"
+                onClick={handleCloseStoryComposer}
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center"
+                aria-label="Fechar"
+              >
+                <Icon icon="close" size={20} />
+              </button> */}
+              <h3 className="font-semibold text-base">Adicionar ao story</h3>
+              <button
+                type="button"
+                onClick={handleCloseStoryComposer}
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center"
+                aria-label="Fechar"
+              >
+                <Icon icon="close" size={20} />
+              </button>
+              {/* <button
+                type="button"
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center"
+                aria-label="Configuracoes"
+              >
+                <Icon icon="settings" size={20} />
+              </button> */}
+            </div>
+
+            <div className="px-4 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={handleOpenCamera}
+                disabled={isPublishingStory}
+                className="rounded-2xl bg-white/10 px-3 py-3 text-left hover:bg-white/15 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <p className="text-sm font-bold">Abrir camera</p>
+                <p className="text-[11px] text-white/70 mt-1">
+                  Tire uma foto ou grave agora
+                </p>
+              </button>
+              <button
+                type="button"
+                onClick={handleOpenGallery}
+                disabled={isPublishingStory}
+                className="rounded-2xl bg-white/10 px-3 py-3 text-left hover:bg-white/15 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <p className="text-sm font-bold">Fotos do aparelho</p>
+                <p className="text-[11px] text-white/70 mt-1">
+                  Escolha da sua galeria
+                </p>
+              </button>
+            </div>
+
+            <div className="mt-5 px-4">
+              <p className="text-xs text-white/75">
+                Selecione uma ou mais midias e toque em publicar.
+              </p>
+            </div>
+
+            {storyPublishError && (
+              <p className="mt-3 px-4 text-xs text-rose-400">{storyPublishError}</p>
+            )}
+
+            <div className="mt-3 flex-1 overflow-y-auto px-1 pb-4">
+              {selectedStoryMedia.length === 0 ? (
+                <div className="mx-3 h-full min-h-[180px] rounded-2xl border border-dashed border-white/25 bg-white/5 flex items-center justify-center px-5 text-center">
+                  <p className="text-sm text-white/75">
+                    Nenhuma midia selecionada ainda.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-1">
+                  {selectedStoryMedia.map((media) => (
+                    <div
+                      key={media.id}
+                      className="relative aspect-[3/4] rounded-md overflow-hidden bg-black"
+                    >
+                      {media.kind === "video" ? (
+                        <video
+                          src={media.previewUrl}
+                          className="w-full h-full object-cover"
+                          muted
+                          loop
+                          autoPlay
+                          playsInline
+                        />
+                      ) : (
+                        <img
+                          src={media.previewUrl}
+                          alt="Midia selecionada"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSelectedStoryMedia(media.id)}
+                        disabled={isPublishingStory}
+                        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white flex items-center justify-center disabled:opacity-40"
+                        aria-label="Remover midia"
+                      >
+                        <Icon icon="close" size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-white/10 px-4 py-3">
+              <button
+                type="button"
+                onClick={handlePublishStories}
+                disabled={isPublishingStory || selectedStoryMedia.length === 0}
+                className="w-full rounded-full bg-[#30cc36] text-white font-black text-sm py-3 transition-all hover:brightness-110 disabled:opacity-45 disabled:cursor-not-allowed"
+              >
+                {isPublishingStory ? "Publicando..." : "Publicar nos stories"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

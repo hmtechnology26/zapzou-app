@@ -73,6 +73,20 @@ export function TopAppBar({
       routes.push('/moderation');
     }
 
+    if (typeof window !== 'undefined') {
+      const connection = (navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }).connection;
+      const saveData = Boolean(connection?.saveData);
+      const effectiveType = String(connection?.effectiveType || '');
+      const isSlowConnection = effectiveType.includes('2g') || effectiveType === '3g';
+      const isMobileViewport = window.matchMedia('(max-width: 767px)').matches;
+
+      if (saveData || isSlowConnection || isMobileViewport) {
+        return;
+      }
+    }
+
     routes.forEach((route) => {
       void router.prefetch(route);
     });
