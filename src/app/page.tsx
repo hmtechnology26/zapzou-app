@@ -22,15 +22,11 @@ type StoryDbRow = {
   user_id: string;
   media_url: string;
   media_type: StoryMediaType;
+  author_name?: string | null;
+  author_avatar?: string | null;
   created_at: string;
   expires_at: string;
   is_active: boolean;
-};
-
-type StoryProfileRow = {
-  id: string;
-  name: string;
-  avatar: string | null;
 };
 
 type StoryItem = {
@@ -168,6 +164,7 @@ export default function HomePage() {
   const filterDropdownRef = useRef<HTMLDivElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
+  const storyViewerVideoRef = useRef<HTMLVideoElement | null>(null);
 
   const toSafeLower = (value: unknown) =>
     typeof value === "string" ? value.toLowerCase() : "";
@@ -181,6 +178,12 @@ export default function HomePage() {
     const cleaned = value.trim();
     if (!cleaned || cleaned === "null" || cleaned === "undefined") return null;
     return cleaned;
+  };
+
+  const isMissingColumnError = (error: any, column: string) => {
+    const message = String(error?.message || "").toLowerCase();
+    const col = column.toLowerCase();
+    return error?.code === "42703" || (message.includes(col) && message.includes("column"));
   };
 
   const getStoryMediaType = (value: string): StoryMediaType => {
@@ -356,67 +359,58 @@ export default function HomePage() {
       setStoriesError("");
 
       const nowIso = new Date().toISOString();
-      const { data, error } = await supabase
-        .from("stories")
-        .select("id, user_id, media_url, media_type, created_at, expires_at, is_active")
-        .eq("is_active", true)
-        .gt("expires_at", nowIso)
-        .order("created_at", { ascending: false })
-        .limit(80);
+      let storiesData: StoryDbRow[] | null = null;
+      let storiesErrorResult: any = null;
+
+      {
+        const { data, error } = await supabase
+          .from("stories")
+          .select("id, user_id, media_url, media_type, author_name, author_avatar, created_at, expires_at, is_active")
+          .eq("is_active", true)
+          .gt("expires_at", nowIso)
+          .order("created_at", { ascending: false })
+          .limit(80);
+        storiesData = Array.isArray(data) ? (data as StoryDbRow[]) : null;
+        storiesErrorResult = error;
+      }
+
+      if (storiesErrorResult && isMissingColumnError(storiesErrorResult, "author_name")) {
+        const { data, error } = await supabase
+          .from("stories")
+          .select("id, user_id, media_url, media_type, created_at, expires_at, is_active")
+          .eq("is_active", true)
+          .gt("expires_at", nowIso)
+          .order("created_at", { ascending: false })
+          .limit(80);
+        storiesData = Array.isArray(data) ? (data as StoryDbRow[]) : null;
+        storiesErrorResult = error;
+      }
 
       if (cancelled) return;
 
-      if (error) {
-        console.warn("loadStories failed:", error);
+      if (storiesErrorResult) {
+        console.warn("loadStories failed:", storiesErrorResult);
         setStoriesError("Nao foi possivel carregar os stories agora.");
         setStoryItems([]);
         setStoriesLoading(false);
         return;
       }
 
-      const rows = Array.isArray(data) ? (data as StoryDbRow[]) : [];
-      const uniqueUserIds = Array.from(
-        new Set(
-          rows
-            .map((row) => row.user_id)
-            .filter((userId): userId is string => typeof userId === "string" && userId.length > 0),
-        ),
-      );
-
-      let profilesById: Record<string, StoryProfileRow> = {};
-
-      if (uniqueUserIds.length > 0) {
-        const { data: profilesData, error: profilesError } = await supabase
-          .from("user_public_profiles")
-          .select("id, name, avatar")
-          .in("id", uniqueUserIds);
-
-        if (!cancelled && profilesError) {
-          console.warn("loadStories profiles lookup failed:", profilesError);
-        }
-
-        if (!cancelled && Array.isArray(profilesData)) {
-          profilesById = profilesData.reduce<Record<string, StoryProfileRow>>((acc, profile: any) => {
-            if (typeof profile?.id !== "string" || !profile.id) return acc;
-            acc[profile.id] = {
-              id: profile.id,
-              name: typeof profile?.name === "string" && profile.name.trim().length > 0 ? profile.name.trim() : "Usuario",
-              avatar: normalizeAvatar(profile?.avatar),
-            };
-            return acc;
-          }, {});
-        }
-      }
+      const rows = Array.isArray(storiesData) ? storiesData : [];
 
       const normalizedStories: StoryItem[] = rows
         .filter((row) => typeof row.user_id === "string" && row.user_id.length > 0)
         .map((row) => {
-          const profile = profilesById[row.user_id];
+          const storyAuthorName =
+            typeof row.author_name === "string" && row.author_name.trim().length > 0
+              ? row.author_name.trim()
+              : "Usuario";
+
           return {
             id: row.id,
             userId: row.user_id,
-            name: profile?.name || "Usuario",
-            avatar: profile?.avatar ?? null,
+            name: storyAuthorName,
+            avatar: normalizeAvatar(row.author_avatar),
             mediaUrl: row.media_url,
             mediaType: row.media_type === "video" ? "video" : "image",
             createdAt: row.created_at,
@@ -476,6 +470,19 @@ export default function HomePage() {
       document.body.style.overflow = originalOverflow;
     };
   }, [isProviderServicesOpen, isStoryComposerOpen, isStoryViewerOpen]);
+
+  useEffect(() => {
+    if (!isStoryViewerOpen) return;
+    if (activeStoryViewerItem?.mediaType !== "video") return;
+
+    const video = storyViewerVideoRef.current;
+    if (!video) return;
+
+    const playPromise = video.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(() => {});
+    }
+  }, [activeStoryViewerItem?.id, activeStoryViewerItem?.mediaType, isStoryViewerOpen]);
 
   const selectedEnvironmentName = useMemo(() => {
     if (selectedEnvironmentId === "all") return "Filtro";
@@ -651,34 +658,28 @@ export default function HomePage() {
   useEffect(() => {
     let cancelled = false;
 
-    const loadLocationIfGranted = async () => {
+    const requestLocationOnEntry = () => {
       if (!("geolocation" in navigator)) return;
-      if (!("permissions" in navigator)) return;
 
-      try {
-        const status = await navigator.permissions.query({
-          name: "geolocation",
-        } as PermissionDescriptor);
-
-        if (cancelled || status.state !== "granted") return;
-
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            if (cancelled) return;
-            setUserLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            });
-          },
-          () => {},
-          { enableHighAccuracy: false, maximumAge: 60000, timeout: 5000 },
-        );
-      } catch {
-        // Ignore permission query failures to keep initial render fast.
-      }
+      setLocationLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          if (cancelled) return;
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setLocationLoading(false);
+        },
+        () => {
+          if (cancelled) return;
+          setLocationLoading(false);
+        },
+        { enableHighAccuracy: false, maximumAge: 60000, timeout: 10000 },
+      );
     };
 
-    void loadLocationIfGranted();
+    requestLocationOnEntry();
 
     return () => {
       cancelled = true;
@@ -860,6 +861,17 @@ export default function HomePage() {
     );
   };
 
+  const handleStoryViewerAutoAdvance = () => {
+    if (!activeStoryViewerGroup) return;
+
+    if (activeStoryViewerIndex < activeStoryViewerGroup.items.length - 1) {
+      setActiveStoryViewerIndex((prev) => prev + 1);
+      return;
+    }
+
+    handleCloseStoryViewer();
+  };
+
   const handleDeleteCurrentStory = async () => {
     if (!user?.id || !activeStoryViewerItem) return;
     if (activeStoryViewerItem.userId !== user.id) return;
@@ -932,7 +944,16 @@ export default function HomePage() {
     setStoryPublishError("");
 
     try {
-      const payload: Array<{ user_id: string; media_url: string; media_type: StoryMediaType }> = [];
+      const payload: Array<{
+        user_id: string;
+        media_url: string;
+        media_type: StoryMediaType;
+        author_name: string;
+        author_avatar: string | null;
+      }> = [];
+
+      const authorName = (user.name || "").trim() || "Usuario";
+      const authorAvatar = normalizeAvatar(user.avatar);
 
       for (const file of selectedStoryFiles) {
         const mediaUrl = await uploadStoryFileToR2(file);
@@ -940,6 +961,8 @@ export default function HomePage() {
           user_id: user.id,
           media_url: mediaUrl,
           media_type: getStoryMediaType(file.type),
+          author_name: authorName,
+          author_avatar: authorAvatar,
         });
       }
 
@@ -1658,11 +1681,16 @@ export default function HomePage() {
               <div className="w-full h-full rounded-2xl overflow-hidden bg-black">
                 {activeStoryViewerItem.mediaType === "video" ? (
                   <video
+                    key={activeStoryViewerItem.id}
+                    ref={storyViewerVideoRef}
                     src={activeStoryViewerItem.mediaUrl}
                     className="w-full h-full object-contain"
                     autoPlay
+                    muted
                     controls
                     playsInline
+                    preload="metadata"
+                    onEnded={handleStoryViewerAutoAdvance}
                   />
                 ) : (
                   <img
