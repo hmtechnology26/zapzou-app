@@ -68,12 +68,12 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   // Se encontrou o ambiente no banco, remover o placeId da URL
   useEffect(() => {
     if (environment && placeId) {
-      // Remover o placeId da URL quando o ambiente estÃƒÂ¡ cadastrado
+      // Remover o placeId da URL quando o ambiente estÒ¡ cadastrado
       router.replace(`/places/${placeSlug}`, { scroll: false });
     }
   }, [environment, placeId, placeSlug]);
 
-  // Se nÃƒÂ£o encontrou no estado local, buscar diretamente do banco
+  // Se nÒ£o encontrou no estado local, buscar diretamente do banco
   useEffect(() => {
     if (!environmentFromContext && placeSlug && !placeFromSearch && loadingEnvironment) {
       const fetchEnvironmentFromDb = async () => {
@@ -261,7 +261,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     if (userLocation) return userLocation;
 
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
-      throw new Error('GeolocalizaÃƒÂ§ÃƒÂ£o indisponÃƒÂ­vel neste dispositivo.');
+      throw new Error('GeolocalizaÒ§Ò£o indisponÒ­vel neste dispositivo.');
     }
 
     return new Promise((resolve, reject) => {
@@ -274,7 +274,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           setUserLocation(nextLocation);
           resolve(nextLocation);
         },
-        (error) => reject(new Error(error.message || 'Falha ao obter sua localizaÃƒÂ§ÃƒÂ£o.')),
+        (error) => reject(new Error(error.message || 'Falha ao obter sua localizaÒ§Ò£o.')),
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
       );
     });
@@ -319,7 +319,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
         );
 
         if (!isWithinAutoApprovalRadius(distance)) {
-          throw new Error(`VocÃƒÂª precisa estar dentro de ${AUTO_APPROVAL_RADIUS_KM * 1000}m para publicar como residente neste ambiente.`);
+          throw new Error(`VocÒª precisa estar dentro de ${AUTO_APPROVAL_RADIUS_KM * 1000}m para publicar como residente neste ambiente.`);
         }
       }
 
@@ -332,7 +332,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
       setMembership({ status: 'active', accessType: mode });
     } catch (error: any) {
       console.error('Error handling Plus request:', error);
-      alert(error?.message || 'NÃƒÂ£o foi possÃƒÂ­vel concluir sua solicitaÃƒÂ§ÃƒÂ£o.');
+      alert(error?.message || 'NÒ£o foi possÒ­vel concluir sua solicitaÒ§Ò£o.');
     } finally {
       setPublishingModeLoading(false);
     }
@@ -418,7 +418,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     );
   }
 
-  // Se nÃƒÂ£o encontrou ambiente e nÃƒÂ£o estÃƒÂ¡ mostrando modal, mostra erro
+  // Se nÒ£o encontrou ambiente e nÒ£o estÒ¡ mostrando modal, mostra erro
   if (!effectiveEnvironment && !showWelcomeModal) {
     return (
       <div className="min-h-screen pb-24 md:pb-8 bg-background">
@@ -434,7 +434,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     );
   }
 
-  // Se nÃƒÂ£o encontrou ambiente mas tem o modal, mostrar modal inline
+  // Se nÒ£o encontrou ambiente mas tem o modal, mostrar modal inline
   if (!effectiveEnvironment && showWelcomeModal && placeSlug) {
     const envName = placeSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     return (
@@ -455,10 +455,10 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                 {envName.toUpperCase()}!
               </h2>
               <p className="text-on-surface-variant text-center mt-4">
-                VocÃƒÂª ÃƒÂ© o primeiro a descobrir este ambiente!
+                VocÒª Ò© o primeiro a descobrir este ambiente!
               </p>
               <p className="text-on-surface-variant text-center mt-4">
-                Seja o primeiro a fazer parte e publicar seus serviÃƒÂ§os aqui.
+                Seja o primeiro a fazer parte e publicar seus serviÒ§os aqui.
               </p>
               <div className="p-4 bg-surface-container-lowest rounded-2xl">
                 <p className="text-xs font-black text-primary uppercase tracking-widest mb-2"></p>
@@ -559,7 +559,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
         {/* {effectiveEnvironment && (
           <div className="text-center">
             <p className="text-xs font-black uppercase tracking-widest text-primary/60">
-              VocÃƒÂª estÃƒÂ¡ vendo os serviÃƒÂ§os de
+              VocÒª estÒ¡ vendo os serviÒ§os de
             </p>
             <h2 className="text-xl font-black text-on-surface mt-1">
               {effectiveEnvironment.name}
@@ -614,28 +614,17 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
              <div>
                 <h3 className="text-xl font-black text-on-surface tracking-tight">Vincule-se a este ambiente</h3>
                 <p className="text-sm text-on-surface-variant font-medium mt-1">
-                  {user?.plan === 'plus'
-                    ? 'No Plus, escolha como vocÃƒÂª atua aqui antes de publicar.'
-                    : 'Para publicar serviços aqui, você precisa solicitar acesso à liderança.'}
+                  Para publicar serviços aqui, você precisa solicitar acesso à liderança.
                 </p>
              </div>
              {user ? (
-               <div className="grid w-full gap-3 sm:grid-cols-2">
-                 <button
-                   onClick={() => handlePlusRequest('resident')}
-                   disabled={publishingModeLoading}
-                   className="px-6 py-4 rounded-full bg-surface-container-high text-on-surface text-sm font-black shadow-sm active:scale-95 transition-all hover:bg-surface-container-highest disabled:opacity-50"
-                 >
-                   Morador 
-                 </button>
-                 <button
-                   onClick={() => handlePlusRequest('service_provider')}
-                   disabled={publishingModeLoading}
-                   className="px-6 py-4 rounded-full primary-gradient text-white text-sm font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105 disabled:opacity-50"
-                 >
-                   Presto ServiÃƒÂ§o
-                 </button>
-               </div>
+               <button
+                 onClick={() => handlePlusRequest('service_provider')}
+                 disabled={publishingModeLoading}
+                 className="px-10 py-4.5 rounded-full primary-gradient text-white text-sm font-black shadow-2xl shadow-primary/30 active:scale-95 transition-all hover:scale-105 disabled:opacity-50"
+               >
+                 Solicitar vínculo
+               </button>
              ) : (
                <button 
                  onClick={() => router.push('/login')}
@@ -653,8 +642,8 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                 <Icon icon="hourglass_empty" size={32} className="text-amber-600" weight={700} />
              </div>
              <div>
-                <h3 className="text-xl font-black text-amber-900 tracking-tight">Acesso em anÃƒÂ¡lise</h3>
-                <p className="text-sm text-amber-800 font-medium mt-1">Sua solicitaÃƒÂ§ÃƒÂ£o de vÃƒÂ­nculo com {effectiveEnvironment!.name} estÃƒÂ¡ aguardando aprovaÃƒÂ§ÃƒÂ£o.</p>
+                <h3 className="text-xl font-black text-amber-900 tracking-tight">Acesso em anÒ¡lise</h3>
+                <p className="text-sm text-amber-800 font-medium mt-1">Sua solicitaÒ§Ò£o de vÒ­nculo com {effectiveEnvironment!.name} estÒ¡ aguardando aprovaÒ§Ò£o.</p>
              </div>
           </div>
         )}
@@ -743,7 +732,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                 SEJA BEM VINDO AO {placeFromSearch?.displayName?.text?.toUpperCase() || placeSlug?.toUpperCase() || 'AMBIENTE'}!
               </h2>
               <p className="text-on-surface-variant text-center mt-4">
-                VocÃƒÂª ÃƒÂ© o primeiro a descobrir este ambiente! Seja o primeiro a fazer parte e publicar seus serviÃƒÂ§os aqui.
+                VocÒª Ò© o primeiro a descobrir este ambiente! Seja o primeiro a fazer parte e publicar seus serviÒ§os aqui.
               </p>
               <div className="mt-6 p-4 bg-surface-container-lowest rounded-2xl">
                 <p className="text-xs font-black text-primary uppercase tracking-widest mb-2">Como funciona?</p>
@@ -754,7 +743,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                   </li>
                   <li className="flex items-start gap-2">
                     <Icon icon="admin_panel_settings" size={16} className="text-primary mt-0.5" />
-                    <span>PeÃƒÂ§a autorizaÃƒÂ§ÃƒÂ£o para um moderador</span>
+                    <span>PeÒ§a autorizaÒ§Ò£o para um moderador</span>
                   </li>
                 </ul>
               </div>
@@ -766,7 +755,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                       return;
                     }
                     try {
-                      // Criar solicitaÃƒÂ§ÃƒÂ£o de novo ambiente
+                      // Criar solicitaÒ§Ò£o de novo ambiente
                       const envName = placeFromSearch?.displayName?.text || placeSlug || 'Novo Ambiente';
                       const { error } = await supabase
                         .from('environment_requests')
@@ -778,7 +767,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                         }]);
                       if (error) throw error;
                       setShowWelcomeModal(false);
-                      alert('SolicitaÃƒÂ§ÃƒÂ£o enviada! Em breve este ambiente serÃƒÂ¡ aprovado.');
+                      alert('SolicitaÒ§Ò£o enviada! Em breve este ambiente serÒ¡ aprovado.');
                     } catch (err) {
                       console.error('Error requesting environment:', err);
                       alert('Erro ao solicitar. Tente novamente.');

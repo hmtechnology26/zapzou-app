@@ -4,7 +4,8 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 
 interface PublishModalContextType {
   isOpen: boolean;
-  open: () => void;
+  purpose: 'publish' | 'link';
+  open: (purpose?: 'publish' | 'link') => void;
   close: () => void;
 }
 
@@ -12,12 +13,19 @@ const PublishModalContext = createContext<PublishModalContextType | undefined>(u
 
 export function PublishModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [purpose, setPurpose] = useState<'publish' | 'link'>('publish');
 
-  const open = () => setIsOpen(true);
-  const close = () => setIsOpen(false);
+  const open = (nextPurpose: 'publish' | 'link' = 'publish') => {
+    setPurpose(nextPurpose);
+    setIsOpen(true);
+  };
+  const close = () => {
+    setIsOpen(false);
+    setPurpose('publish');
+  };
 
   return (
-    <PublishModalContext.Provider value={{ isOpen, open, close }}>
+    <PublishModalContext.Provider value={{ isOpen, purpose, open, close }}>
       {children}
     </PublishModalContext.Provider>
   );

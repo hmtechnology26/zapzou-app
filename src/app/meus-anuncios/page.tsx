@@ -384,7 +384,7 @@ export default function MyAdsPage() {
               </div>
 
               <button
-                onClick={open}
+                onClick={() => open('link')}
                 className="mt-3 w-full rounded-full px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-primary/25 transition-transform hover:scale-[1.02] active:scale-95 primary-gradient"
               >
                 Procurar Ambiente

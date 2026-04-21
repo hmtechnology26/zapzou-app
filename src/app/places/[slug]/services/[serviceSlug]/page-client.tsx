@@ -146,7 +146,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
   };
 
   const WhatsAppMessage = encodeURIComponent(
-    `OlÃƒÆ’Ã‚Â¡! Vim pelo Conectae e tenho interesse no serviÃƒÆ’Ã‚Â§o:\n\n${service.title}.\nGostaria de mais informaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes!`
+    `Olá! Vim pelo Conectae e tenho interesse no serviço:\n\n${service.title}.\nGostaria de mais informações!`
   );
 
   const handleWhatsApp = () => {
@@ -464,7 +464,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
           {menuItems.length > 0 && (
             <section className="mt-10">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-on-surface tracking-tight">CardÃƒÆ’Ã‚Â¡pio / ServiÃƒÆ’Ã‚Â§os</h3>
+                <h3 className="text-lg font-bold text-on-surface tracking-tight">Cardápio / Serviços</h3>
               </div>
               <div className="space-y-3">
                 {menuItems.map((item: any) => (
@@ -532,7 +532,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
               <div className="col-span-1 bg-secondary-container/30 p-4 rounded-3xl flex flex-col gap-3">
                 <Icon icon="verified_user" weight={400} size={32} className="text-secondary" />
                 <div>
-                  <p className="font-bold text-secondary text-sm">SeguranÃƒÆ’Ã‚Â§a</p>
+                  <p className="font-bold text-secondary text-sm">Segurança</p>
                   <p className="text-xs text-on-secondary-container/80">Pagamento direto e seguro no delivery.</p>
                 </div>
               </div>
@@ -557,9 +557,9 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             <div className="flex items-center justify-center w-14 h-14 rounded-full bg-error/10 mx-auto mb-4">
               <Icon icon="warning" size={32} className="text-error" />
             </div>
-            <h3 className="text-lg font-bold text-on-surface text-center mb-2">Excluir ServiÃƒÆ’Ã‚Â§o?</h3>
+            <h3 className="text-lg font-bold text-on-surface text-center mb-2">Excluir Serviço?</h3>
             <p className="text-sm text-on-surface-variant text-center mb-6">
-              Esta aÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o nÃƒÆ’Ã‚Â£o pode ser desfeita. O serviÃƒÆ’Ã‚Â§o serÃƒÆ’Ã‚Â¡ removido permanentemente.
+              Esta ação não pode ser desfeita. O serviço será removido permanentemente.
             </p>
             <div className="flex gap-3">
               <button

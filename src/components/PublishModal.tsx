@@ -37,8 +37,9 @@ const serviceCategories = SERVICE_CATEGORIES.map((category) => category.label);
 
 export function PublishModal() {
   const router = useRouter();
-  const { isOpen, close } = usePublishModal();
+  const { isOpen, purpose, close } = usePublishModal();
   const { user, services, addService, selectedEnvironments, setSelectedEnvironments, setSelectedEnvironment, signalMembershipChange } = useApp();
+  const isLinkOnlyFlow = purpose === 'link';
   
   const [step, setStep] = useState<'search' | 'mode' | 'radius' | 'moderator' | 'form'>('search');
   const [searchQuery, setSearchQuery] = useState('');
@@ -140,7 +141,7 @@ export function PublishModal() {
       void fetchResidentEnvironment(user.id);
       const userPlan = user.plan ?? 'free';
       const userServicesCount = services.filter(s => s.provider_id === user.id).length;
-      if (isPlanAtServiceLimit(userPlan, userServicesCount)) {
+      if (!isLinkOnlyFlow && isPlanAtServiceLimit(userPlan, userServicesCount)) {
         close();
         setAlertTitle(userPlan === 'free' ? 'Limite do Plano Grátis' : 'Limite do Plano Pró');
         setAlertMessage(
@@ -161,7 +162,7 @@ export function PublishModal() {
         );
       }
     }
-  }, [isOpen]);
+  }, [isOpen, isLinkOnlyFlow]);
 
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
@@ -235,7 +236,10 @@ export function PublishModal() {
       const nextRole = existingMembership?.role === 'moderator' || options?.role === 'moderator'
         ? 'moderator'
         : 'member';
-      const nextAccessType = options?.accessType ?? (existingMembership?.access_type ?? null);
+      const nextAccessType =
+        options?.accessType ??
+        existingMembership?.access_type ??
+        'service_provider';
 
       const { error } = await supabase
         .from('environment_members')
@@ -466,6 +470,32 @@ export function PublishModal() {
         return [normalizedEnvironment, ...filtered];
       });
 
+      if (isLinkOnlyFlow) {
+        const shouldStayPending =
+          decision.mode === 'moderator' ||
+          (isForcedPendingApprovalEnvironment(normalizedEnvironment.id) && !hasUnlockedPublicationRole);
+
+        if (shouldStayPending) {
+          await syncEnvironmentMembership(normalizedEnvironment.id, 'pending', {
+            role: 'member',
+            accessType: null,
+          });
+          setSelectedEnvironment(normalizedEnvironment);
+          setActiveEnvId(null);
+          showEnvironmentAddedAlert(normalizedEnvironment.name, { pending: true });
+          return;
+        }
+
+        await syncEnvironmentMembership(normalizedEnvironment.id, 'active', {
+          role: membershipInfo?.role === 'moderator' ? 'moderator' : 'member',
+          accessType: effectivePublicationMode ?? 'service_provider',
+        });
+        setSelectedEnvironment(normalizedEnvironment);
+        setActiveEnvId(normalizedEnvironment.id);
+        showEnvironmentAddedAlert(normalizedEnvironment.name);
+        return;
+      }
+
       if (decision.mode === 'moderator') {
         const approvalVariant = await getModeratorApprovalVariant(normalizedEnvironment.id);
         setModeratorApprovalVariant(approvalVariant);
@@ -547,6 +577,7 @@ export function PublishModal() {
     searchQuery,
     syncEnvironmentMembership,
     showEnvironmentAddedAlert,
+    isLinkOnlyFlow,
     user?.id,
     user?.plan,
     userLocation,

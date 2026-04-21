@@ -810,7 +810,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         : null;
       const requestedAccessType = options?.accessType ?? null;
       const preservedAccessType =
-        requestedAccessType ?? (existingMembership?.access_type as EnvironmentMembershipAccessType | null);
+        requestedAccessType ??
+        (existingMembership?.access_type as EnvironmentMembershipAccessType | null) ??
+        'service_provider';
       const nextRole = existingMembership?.role === 'moderator' || options?.role === 'moderator'
         ? 'moderator'
         : 'member';
@@ -1147,7 +1149,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               .order('created_at', { ascending: false })
               .limit(50),
             25000,
-            'Tempo esgotado ao carregar avaliaÃ§Ãµes'
+            'Tempo esgotado ao carregar avaliações'
           )) as any);
         } catch (err) {
           console.warn('fetchServiceReviews failed (exception/timeout):', err);
@@ -1250,7 +1252,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           reviewsHasUserAvatarColumnRef.current !== false
         ),
         15000,
-        'Tempo esgotado ao enviar avaliaÃ§Ã£o'
+        'Tempo esgotado ao enviar avaliação'
       );
       ({ data, error } = insertResult as { data: any; error: any });
     }
