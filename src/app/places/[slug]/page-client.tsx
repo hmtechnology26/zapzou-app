@@ -588,7 +588,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           </div>
         )}
 
-        <div className="flex overflow-x-auto pb-4 -mx-4 px-4 gap-3 no-scrollbar scroll-smooth">
+        <div className="flex flex-nowrap overflow-x-auto overflow-y-hidden pb-4 -mx-4 px-4 md:-mx-8 md:px-8 gap-3 no-scrollbar scroll-smooth">
           {categories.map((cat) => (
             <button 
               key={cat.id} 
