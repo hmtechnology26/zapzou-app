@@ -418,7 +418,7 @@ export default function MyAdsPage() {
               onClick={() => router.push("/register-service")}
               className="w-full md:w-auto rounded-full px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-primary/25 transition-transform hover:scale-[1.02] active:scale-95 primary-gradient"
             >
-              Novo anuncio
+              Novo anúncio
             </button>
           </div>
         </section>
@@ -428,7 +428,7 @@ export default function MyAdsPage() {
             <Icon icon="lock" size={40} className="mx-auto text-on-surface-variant/50" />
             <h3 className="text-xl font-black text-on-surface">Entre para ver seus anuncios</h3>
             <p className="text-sm text-on-surface-variant">
-              Faca login para gerenciar seus anuncios e vincular ambientes.
+              Faca login para gerenciar seus anúncios e vincular ambientes.
             </p>
             <button
               type="button"

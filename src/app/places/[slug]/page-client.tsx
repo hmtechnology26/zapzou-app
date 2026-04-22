@@ -260,7 +260,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     if (userLocation) return userLocation;
 
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
-      throw new Error('GeolocalizaÃƒâ€™Ã‚Â§Ãƒâ€™Ã‚Â£o indisponÃƒâ€™Ã‚Â­vel neste dispositivo.');
+      throw new Error('Geolocalização indisponí­vel neste dispositivo.');
     }
 
     return new Promise((resolve, reject) => {
@@ -273,7 +273,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           setUserLocation(nextLocation);
           resolve(nextLocation);
         },
-        (error) => reject(new Error(error.message || 'Falha ao obter sua localizaÃƒâ€™Ã‚Â§Ãƒâ€™Ã‚Â£o.')),
+        (error) => reject(new Error(error.message || 'Falha ao obter sua localização.')),
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
       );
     });
@@ -307,7 +307,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           typeof effectiveEnvironment.latitude !== 'number' ||
           typeof effectiveEnvironment.longitude !== 'number'
         ) {
-          throw new Error('Este ambiente nÃƒÂ£o possui coordenadas para validaÃƒÂ§ÃƒÂ£o.');
+          throw new Error('Este ambiente não possui coordenadas para validação.');
         }
 
         const distance = calculateDistanceKm(
@@ -318,7 +318,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
         );
 
         if (!isWithinAutoApprovalRadius(distance)) {
-          throw new Error(`VocÃƒâ€™Ã‚Âª precisa estar dentro de ${AUTO_APPROVAL_RADIUS_KM * 1000}m para publicar como residente neste ambiente.`);
+          throw new Error(`Você precisa estar dentro de ${AUTO_APPROVAL_RADIUS_KM * 1000}m para publicar como residente neste ambiente.`);
         }
       }
 
@@ -331,7 +331,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
       setMembership({ status: 'active', accessType: mode });
     } catch (error: any) {
       console.error('Error handling Plus request:', error);
-      alert(error?.message || 'NÃƒâ€™Ã‚Â£o foi possÃƒâ€™Ã‚Â­vel concluir sua solicitaÃƒâ€™Ã‚Â§Ãƒâ€™Ã‚Â£o.');
+      alert(error?.message || 'Não foi possível concluir sua solicitação.');
     } finally {
       setPublishingModeLoading(false);
     }
@@ -342,7 +342,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     { id: 'Tecnologia', label: 'Tecnologia', icon: 'terminal' },
     { id: 'Manutenção', label: "Manutenção", icon: 'engineering'},
     { id: 'Limpeza', label: 'Limpeza', icon: 'cleaning_services' },
-    { id: "Alimentação", label: "Alimentaçãoo", icon: "restaurant" },
+    { id: "Alimentação", label: "Alimentação", icon: "restaurant" },
     { id: 'Construção', label: 'Construção', icon: 'construction' },
     { id: 'Saúde', label: 'Saúde', icon: 'medical_services' },
     { id: 'Beleza', label: 'Beleza', icon: 'content_cut' },
@@ -579,7 +579,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
             </div>
             <div className="min-w-0">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant/60">
-                EndereÃƒÂ§o do ambiente
+                Endereço do ambiente
               </p>
               <p className="mt-1 text-sm leading-relaxed text-on-surface-variant">
                 {effectiveEnvironment.address}
