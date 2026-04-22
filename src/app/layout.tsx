@@ -13,14 +13,14 @@ export const metadata: Metadata = {
     default: 'ConectaE - Hub de Servicos',
     template: '%s | Conectae',
   },
-  description: 'Conecte-se com prestadores de servicos, ambientes e anuncios na sua regiao.',
+  description: 'Conecte-se com prestadores de servicos, ambientes e anúncios na sua regiao.',
   icons: {
     icon: '/favicon.png',
     apple: '/apple-touch-icon.png',
   },
   keywords: [
     'servicos locais',
-    'anuncios',
+    'anúncios',
     'ambientes',
     'igreja',
     'condominio',
@@ -33,14 +33,14 @@ export const metadata: Metadata = {
     type: 'website',
     url: siteUrl,
     title: 'ConectaE - Hub de Servicos',
-    description: 'Conecte-se com prestadores de servicos, ambientes e anuncios na sua regiao.',
+    description: 'Conecte-se com prestadores de servicos, ambientes e anúncios na sua regiao.',
     siteName: 'Conectae',
     locale: 'pt_BR',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'ConectaE - Hub de Servicos',
-    description: 'Conecte-se com prestadores de servicos, ambientes e anuncios na sua regiao.',
+    description: 'Conecte-se com prestadores de servicos, ambientes e anúncios na sua regiao.',
   },
 };
 

@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const siteUrl = getSiteUrl();
   const title = env?.name || humanizeSlug(params.slug) || 'Ambiente';
   const description =
-    `Veja anuncios, servicos e informacoes do ambiente ${title} na Conectae.`;
+    `Veja anúncios, servicos e informacoes do ambiente ${title} na Conectae.`;
   const canonical = `${siteUrl}/places/${params.slug}`;
   const isIndexable = env?.status === 'active' || !env;
 

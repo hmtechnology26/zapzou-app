@@ -30,9 +30,10 @@ interface NavItem {
 }
 
 const baseNavItems: NavItem[] = [
-  { path: '/', label: 'Anúncios', icon: 'home' },
+  { path: '/', label: 'An\u00fancios', icon: 'home' },
   { path: '/places', label: 'Ambientes', icon: 'explore' },
   { path: '/meus-anuncios', label: 'Meus Anúncios', icon: 'storefront' },
+  { path: '/meus-ambientes', label: 'Meus Ambientes', icon: 'apartment' },
   { path: '/favorites', label: 'Favoritos', icon: 'favorite' },
   { path: '/contact', label: 'Suporte', icon: 'support_agent' },
 ];
@@ -67,7 +68,7 @@ export function TopAppBar({
   }, []);
 
   useEffect(() => {
-    const routes = ['/', '/places', '/meus-anuncios', '/favorites', '/contact', '/profile', '/login'];
+    const routes = ['/', '/places', '/meus-anuncios', '/meus-ambientes', '/favorites', '/contact', '/profile', '/login'];
 
     if (hasManagedEnvironments) {
       routes.push('/moderation');
@@ -166,15 +167,15 @@ export function TopAppBar({
                 <button
                   key={item.path}
                   onClick={() => handleNavClick(item.path)}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 relative group ${
+                  className={`px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all flex items-center gap-2 relative group ${
                     isActive 
                       ? 'text-[#30cc36]' 
                       : 'text-on-surface-variant hover:text-[#30cc36] transition-colors'
                   }`}
                 >
                   <Icon icon={item.icon} size={20} weight={isActive ? 700 : 400} />
-                  <span className="hidden lg:inline">{item.label}</span>
-                  {isActive && <span className="lg:hidden">{item.label}</span>}
+                  <span className="hidden lg:inline whitespace-nowrap">{item.label}</span>
+                  {isActive && <span className="lg:hidden whitespace-nowrap">{item.label}</span>}
                 </button>
               );
             })}
@@ -220,16 +221,17 @@ export function TopAppBar({
                 <button 
                   onClick={() => router.push('/moderation')}
                 className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary active:scale-95 transition-all shadow-sm"
-                  title="Moderação"
+                  title={"Moderação"}
                 >
                   <Icon icon="admin_panel_settings" size={22} weight={700} />
                 </button>
               )}
               
+               
               {user ? (
                 <button
                   onClick={onAvatarClick as any}
-                  className="flex items-center gap-2 p-1 pr-3 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/10 active:scale-95 group"
+                  className="flex items-center p-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/10 active:scale-95 group"
                 >
                   <div className="relative">
                     <Avatar 
@@ -243,10 +245,6 @@ export function TopAppBar({
                         <Icon icon="check" size={10} className="text-white" weight={900} />
                       </div>
                     )}
-                  </div>
-                  <div className="hidden sm:block text-left">
-                    <p className="text-xs font-black leading-none text-on-surface truncate max-w-[100px]">{user.name}</p>
-                    <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1 opacity-70 group-hover:opacity-100">Plano Plus</p>
                   </div>
                 </button>
               ) : (

@@ -139,7 +139,7 @@ export function PublishModal() {
         return;
       }
       void fetchResidentEnvironment(user.id);
-      const userPlan = user.plan ?? 'free';
+      const userPlan = user.plan ?? 'plus';
       const userServicesCount = services.filter(s => s.provider_id === user.id).length;
       if (!isLinkOnlyFlow && isPlanAtServiceLimit(userPlan, userServicesCount)) {
         close();
@@ -324,7 +324,7 @@ export function PublishModal() {
     }
 
     const userId = user.id;
-    const userPlan = user.plan ?? 'free';
+    const userPlan = user.plan ?? 'plus';
 
     setSelectedPlace(place);
     setUploading(true);

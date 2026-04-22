@@ -14,7 +14,7 @@ import { supabase } from "@/lib/supabase";
 
 const PAGE_SIZE = 9;
 
-type MembershipAccessType = 'resident' | 'service_provider' | null;
+type MembershipAccessType = "resident" | "service_provider" | null;
 type StoryMediaType = "image" | "video";
 
 type StoryDbRow = {
@@ -63,18 +63,20 @@ type ProviderGroup = {
   primaryService: any;
 };
 
-function getAccessTypeBadge(accessType?: 'resident' | 'service_provider' | null) {
-  if (accessType === 'resident') {
+function getAccessTypeBadge(
+  accessType?: "resident" | "service_provider" | null,
+) {
+  if (accessType === "resident") {
     return {
-      label: 'MORADOR',
-      className: 'bg-orange-500/20 text-orange-700 border-orange-500/20',
+      label: "MORADOR",
+      className: "bg-orange-500/20 text-orange-700 border-orange-500/20",
     };
   }
 
-  if (accessType === 'service_provider') {
+  if (accessType === "service_provider") {
     return {
-      label: 'PRESTADOR',
-      className: 'bg-sky-500/10 text-sky-700 border-sky-500/20',
+      label: "PRESTADOR",
+      className: "bg-sky-500/10 text-sky-700 border-sky-500/20",
     };
   }
 
@@ -97,40 +99,44 @@ function PaginationControls({
   if (totalPages <= 1) return null;
 
   return (
-  <div className="flex flex-col items-center justify-center gap-3 pt-2">
-    
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onPrevious}
-        disabled={currentPage <= 1}
-        className="px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container-lowest text-sm font-bold text-on-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-highest"
-      >
-        Anterior
-      </button>
+    <div className="flex flex-col items-center justify-center gap-3 pt-2">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onPrevious}
+          disabled={currentPage <= 1}
+          className="px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container-lowest text-sm font-bold text-on-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-highest"
+        >
+          Anterior
+        </button>
 
-      <button
-        type="button"
-        onClick={onNext}
-        disabled={currentPage >= totalPages}
-        className="px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container-lowest text-sm font-bold text-on-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-highest"
-      >
-        Próximo
-      </button>
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={currentPage >= totalPages}
+          className="px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container-lowest text-sm font-bold text-on-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-highest"
+        >
+          Próximo
+        </button>
+      </div>
+
+      <p className="text-sm font-medium text-center text-on-surface-variant">
+        Página {currentPage} de {totalPages}
+      </p>
     </div>
-
-    <p className="text-sm font-medium text-center text-on-surface-variant">
-      Página {currentPage} de {totalPages}
-    </p>
-
-  </div>
-);
+  );
 }
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, selectedEnvironment, selectedEnvironments, services, servicesLoading, membershipVersion } =
-    useApp();
+  const {
+    user,
+    selectedEnvironment,
+    selectedEnvironments,
+    services,
+    servicesLoading,
+    membershipVersion,
+  } = useApp();
 
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -153,13 +159,18 @@ export default function HomePage() {
   const [isPublishingStory, setIsPublishingStory] = useState(false);
   const [storiesRefreshKey, setStoriesRefreshKey] = useState(0);
   const [isProviderServicesOpen, setIsProviderServicesOpen] = useState(false);
-  const [activeProviderGroupKey, setActiveProviderGroupKey] = useState<string | null>(null);
+  const [activeProviderGroupKey, setActiveProviderGroupKey] = useState<
+    string | null
+  >(null);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
-  const [activeStoryViewerUserId, setActiveStoryViewerUserId] = useState<string | null>(null);
+  const [activeStoryViewerUserId, setActiveStoryViewerUserId] = useState<
+    string | null
+  >(null);
   const [activeStoryViewerIndex, setActiveStoryViewerIndex] = useState(0);
   const [isDeletingStory, setIsDeletingStory] = useState(false);
   const [storyDeleteError, setStoryDeleteError] = useState("");
-  const [membershipAccessByEnvironmentId, setMembershipAccessByEnvironmentId] = useState<Record<string, MembershipAccessType>>({});
+  const [membershipAccessByEnvironmentId, setMembershipAccessByEnvironmentId] =
+    useState<Record<string, MembershipAccessType>>({});
   const [membershipAccessLoaded, setMembershipAccessLoaded] = useState(false);
   const filterDropdownRef = useRef<HTMLDivElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
@@ -183,7 +194,10 @@ export default function HomePage() {
   const isMissingColumnError = (error: any, column: string) => {
     const message = String(error?.message || "").toLowerCase();
     const col = column.toLowerCase();
-    return error?.code === "42703" || (message.includes(col) && message.includes("column"));
+    return (
+      error?.code === "42703" ||
+      (message.includes(col) && message.includes("column"))
+    );
   };
 
   const getStoryMediaType = (value: string): StoryMediaType => {
@@ -242,7 +256,10 @@ export default function HomePage() {
 
   const activeStoryViewerGroup = useMemo(() => {
     if (!activeStoryViewerUserId) return null;
-    return storyGroups.find((group) => group.userId === activeStoryViewerUserId) || null;
+    return (
+      storyGroups.find((group) => group.userId === activeStoryViewerUserId) ||
+      null
+    );
   }, [activeStoryViewerUserId, storyGroups]);
 
   const activeStoryViewerItem = useMemo(() => {
@@ -280,7 +297,10 @@ export default function HomePage() {
       new Set(
         activeServices
           .map((service) => service.environmentId)
-          .filter((envId): envId is string => typeof envId === 'string' && envId.length > 0),
+          .filter(
+            (envId): envId is string =>
+              typeof envId === "string" && envId.length > 0,
+          ),
       ),
     ).sort();
   }, [activeServices]);
@@ -322,24 +342,30 @@ export default function HomePage() {
       }
 
       const { data, error } = await supabase
-        .from('environment_members')
-        .select('environment_id, access_type, status')
-        .eq('user_id', user.id)
-        .in('environment_id', membershipEnvironmentIds)
-        .neq('status', 'banned');
+        .from("environment_members")
+        .select("environment_id, access_type, status")
+        .eq("user_id", user.id)
+        .in("environment_id", membershipEnvironmentIds)
+        .neq("status", "banned");
 
       if (cancelled) return;
 
       if (error) {
-        console.warn('loadMembershipAccessTypes failed:', error);
+        console.warn("loadMembershipAccessTypes failed:", error);
         setMembershipAccessLoaded(true);
         return;
       }
 
       const nextMap: Record<string, MembershipAccessType> = {};
       (data || []).forEach((row: any) => {
-        if (row?.access_type === 'resident' || row?.access_type === 'service_provider') {
-          if (typeof row.environment_id === 'string' && row.environment_id.length > 0) {
+        if (
+          row?.access_type === "resident" ||
+          row?.access_type === "service_provider"
+        ) {
+          if (
+            typeof row.environment_id === "string" &&
+            row.environment_id.length > 0
+          ) {
             nextMap[row.environment_id] = row.access_type;
           }
         }
@@ -370,7 +396,9 @@ export default function HomePage() {
       {
         const { data, error } = await supabase
           .from("stories")
-          .select("id, user_id, media_url, media_type, author_name, author_avatar, created_at, expires_at, is_active")
+          .select(
+            "id, user_id, media_url, media_type, author_name, author_avatar, created_at, expires_at, is_active",
+          )
           .eq("is_active", true)
           .gt("expires_at", nowIso)
           .order("created_at", { ascending: false })
@@ -379,10 +407,15 @@ export default function HomePage() {
         storiesErrorResult = error;
       }
 
-      if (storiesErrorResult && isMissingColumnError(storiesErrorResult, "author_name")) {
+      if (
+        storiesErrorResult &&
+        isMissingColumnError(storiesErrorResult, "author_name")
+      ) {
         const { data, error } = await supabase
           .from("stories")
-          .select("id, user_id, media_url, media_type, created_at, expires_at, is_active")
+          .select(
+            "id, user_id, media_url, media_type, created_at, expires_at, is_active",
+          )
           .eq("is_active", true)
           .gt("expires_at", nowIso)
           .order("created_at", { ascending: false })
@@ -404,10 +437,13 @@ export default function HomePage() {
       const rows = Array.isArray(storiesData) ? storiesData : [];
 
       const normalizedStories: StoryItem[] = rows
-        .filter((row) => typeof row.user_id === "string" && row.user_id.length > 0)
+        .filter(
+          (row) => typeof row.user_id === "string" && row.user_id.length > 0,
+        )
         .map((row) => {
           const storyAuthorName =
-            typeof row.author_name === "string" && row.author_name.trim().length > 0
+            typeof row.author_name === "string" &&
+            row.author_name.trim().length > 0
               ? row.author_name.trim()
               : "Usuario";
 
@@ -443,7 +479,8 @@ export default function HomePage() {
   }, [selectedStoryMedia]);
 
   useEffect(() => {
-    if (!isStoryComposerOpen && !isProviderServicesOpen && !isStoryViewerOpen) return;
+    if (!isStoryComposerOpen && !isProviderServicesOpen && !isStoryViewerOpen)
+      return;
 
     const onEscape = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
@@ -465,10 +502,16 @@ export default function HomePage() {
 
     document.addEventListener("keydown", onEscape);
     return () => document.removeEventListener("keydown", onEscape);
-  }, [isProviderServicesOpen, isPublishingStory, isStoryComposerOpen, isStoryViewerOpen]);
+  }, [
+    isProviderServicesOpen,
+    isPublishingStory,
+    isStoryComposerOpen,
+    isStoryViewerOpen,
+  ]);
 
   useEffect(() => {
-    if (!isStoryComposerOpen && !isProviderServicesOpen && !isStoryViewerOpen) return;
+    if (!isStoryComposerOpen && !isProviderServicesOpen && !isStoryViewerOpen)
+      return;
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -487,7 +530,11 @@ export default function HomePage() {
     if (playPromise && typeof playPromise.catch === "function") {
       playPromise.catch(() => {});
     }
-  }, [activeStoryViewerItem?.id, activeStoryViewerItem?.mediaType, isStoryViewerOpen]);
+  }, [
+    activeStoryViewerItem?.id,
+    activeStoryViewerItem?.mediaType,
+    isStoryViewerOpen,
+  ]);
 
   const selectedEnvironmentName = useMemo(() => {
     if (selectedEnvironmentId === "all") return "Filtro";
@@ -566,14 +613,21 @@ export default function HomePage() {
   }, [search, servicesWithDistance]);
 
   const providerGroups = useMemo<ProviderGroup[]>(() => {
-    const grouped = new Map<string, { providerId: string | null; providerName: string; services: Array<any> }>();
+    const grouped = new Map<
+      string,
+      { providerId: string | null; providerName: string; services: Array<any> }
+    >();
 
     filteredServices.forEach((service) => {
-      const providerId = typeof service.provider_id === "string" && service.provider_id.trim().length > 0
-        ? service.provider_id.trim()
-        : null;
+      const providerId =
+        typeof service.provider_id === "string" &&
+        service.provider_id.trim().length > 0
+          ? service.provider_id.trim()
+          : null;
       const providerName = (service.provider || "Usuario").trim() || "Usuario";
-      const groupKey = providerId ? `uid:${providerId}` : `name:${providerName.toLowerCase()}`;
+      const groupKey = providerId
+        ? `uid:${providerId}`
+        : `name:${providerName.toLowerCase()}`;
       const current = grouped.get(groupKey);
 
       if (!current) {
@@ -592,7 +646,10 @@ export default function HomePage() {
       const uniqueEnvironments = new Set(
         group.services
           .map((service) => service.environmentId)
-          .filter((envId): envId is string => typeof envId === "string" && envId.length > 0),
+          .filter(
+            (envId): envId is string =>
+              typeof envId === "string" && envId.length > 0,
+          ),
       );
       return {
         key,
@@ -616,7 +673,10 @@ export default function HomePage() {
     }));
   }, [providerGroups]);
 
-  const totalPages = Math.max(1, Math.ceil(displayedServices.length / PAGE_SIZE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(displayedServices.length / PAGE_SIZE),
+  );
   const safeCurrentPage = Math.min(currentPage, totalPages);
   const paginatedServices = displayedServices.slice(
     (safeCurrentPage - 1) * PAGE_SIZE,
@@ -641,12 +701,15 @@ export default function HomePage() {
     let shouldPrefetch = true;
 
     if (typeof window !== "undefined") {
-      const connection = (navigator as Navigator & {
-        connection?: { saveData?: boolean; effectiveType?: string };
-      }).connection;
+      const connection = (
+        navigator as Navigator & {
+          connection?: { saveData?: boolean; effectiveType?: string };
+        }
+      ).connection;
       const saveData = Boolean(connection?.saveData);
       const effectiveType = String(connection?.effectiveType || "");
-      const isSlowConnection = effectiveType.includes("2g") || effectiveType === "3g";
+      const isSlowConnection =
+        effectiveType.includes("2g") || effectiveType === "3g";
       const isMobileViewport = window.matchMedia("(max-width: 767px)").matches;
       shouldPrefetch = !(saveData || isSlowConnection || isMobileViewport);
     }
@@ -751,7 +814,9 @@ export default function HomePage() {
       throw new Error("Configuracao de storage incompleta.");
     }
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session?.access_token) {
       throw new Error("Sessao expirada. Faca login novamente.");
     }
@@ -776,7 +841,9 @@ export default function HomePage() {
 
     if (!signResponse.ok) {
       const payload = await signResponse.json().catch(() => null);
-      throw new Error(payload?.error || "Nao foi possivel gerar URL de upload.");
+      throw new Error(
+        payload?.error || "Nao foi possivel gerar URL de upload.",
+      );
     }
 
     const { uploadUrl } = await signResponse.json();
@@ -803,7 +870,9 @@ export default function HomePage() {
     if (files.length > 0) {
       const nextFiles = [...selectedStoryFiles, ...files];
       if (nextFiles.length > 10) {
-        setStoryPublishError("Voce pode selecionar no maximo 10 midias por envio.");
+        setStoryPublishError(
+          "Voce pode selecionar no maximo 10 midias por envio.",
+        );
       } else {
         setStoryPublishError("");
       }
@@ -838,7 +907,10 @@ export default function HomePage() {
 
   const handleOpenStoryViewer = (storyGroup: StoryGroup, storyIndex = 0) => {
     if (!storyGroup.items.length) return;
-    const safeIndex = Math.min(Math.max(storyIndex, 0), storyGroup.items.length - 1);
+    const safeIndex = Math.min(
+      Math.max(storyIndex, 0),
+      storyGroup.items.length - 1,
+    );
     setActiveStoryViewerUserId(storyGroup.userId);
     setActiveStoryViewerIndex(safeIndex);
     setStoryDeleteError("");
@@ -910,7 +982,10 @@ export default function HomePage() {
 
   const activeProviderGroup = useMemo(() => {
     if (!activeProviderGroupKey) return null;
-    return providerGroups.find((group) => group.key === activeProviderGroupKey) || null;
+    return (
+      providerGroups.find((group) => group.key === activeProviderGroupKey) ||
+      null
+    );
   }, [activeProviderGroupKey, providerGroups]);
 
   const handleOpenProviderServices = (groupKey: string) => {
@@ -925,7 +1000,10 @@ export default function HomePage() {
 
   const handleRemoveSelectedStoryMedia = (mediaId: string) => {
     setSelectedStoryFiles((prev) =>
-      prev.filter((file, index) => `${file.name}-${file.lastModified}-${index}` !== mediaId),
+      prev.filter(
+        (file, index) =>
+          `${file.name}-${file.lastModified}-${index}` !== mediaId,
+      ),
     );
   };
 
@@ -966,9 +1044,7 @@ export default function HomePage() {
         });
       }
 
-      const { error } = await supabase
-        .from("stories")
-        .insert(payload);
+      const { error } = await supabase.from("stories").insert(payload);
 
       if (error) {
         throw error;
@@ -979,7 +1055,9 @@ export default function HomePage() {
       setStoriesRefreshKey((prev) => prev + 1);
     } catch (err: any) {
       console.warn("handlePublishStories failed:", err);
-      setStoryPublishError(err?.message || "Nao foi possivel publicar seu story.");
+      setStoryPublishError(
+        err?.message || "Nao foi possivel publicar seu story.",
+      );
     } finally {
       setIsPublishingStory(false);
     }
@@ -1030,9 +1108,7 @@ export default function HomePage() {
       <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-8 pb-32">
         <section className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h2 className="text-sm font-black tracking-[0.2em] uppercase text-on-surface-variant">
-              
-            </h2>
+            <h2 className="text-sm font-black tracking-[0.2em] uppercase text-on-surface-variant"></h2>
             {/* {user && (
               <button
                 type="button"
@@ -1067,14 +1143,18 @@ export default function HomePage() {
                   }
                 }}
                 className="w-[78px] shrink-0 flex flex-col items-center gap-2"
-                aria-label={ownStoryGroup ? "Visualizar seu story" : "Seu story"}
+                aria-label={
+                  ownStoryGroup ? "Visualizar seu story" : "Seu story"
+                }
               >
                 <div className="relative">
-                  <div className={`rounded-full p-[2px] ${
-                    ownStoryGroup
-                      ? "bg-[conic-gradient(at_top,_#f58529,_#dd2a7b,_#8134af,_#515bd4,_#f58529)]"
-                      : "bg-surface-container-high"
-                  }`}>
+                  <div
+                    className={`rounded-full p-[2px] ${
+                      ownStoryGroup
+                        ? "bg-[conic-gradient(at_top,_#f58529,_#dd2a7b,_#8134af,_#515bd4,_#f58529)]"
+                        : "bg-surface-container-high"
+                    }`}
+                  >
                     <div className="rounded-full bg-background p-[2px]">
                       <Avatar
                         src={userAvatar || undefined}
@@ -1127,15 +1207,11 @@ export default function HomePage() {
             ))}
 
             {!storiesLoading && !user && otherStoryGroups.length === 0 && (
-              <div className="w-full py-4 px-4 rounded-2xltext-center text-xs text-on-surface-variant">
-                
-              </div>
+              <div className="w-full py-4 px-4 rounded-2xltext-center text-xs text-on-surface-variant"></div>
             )}
 
             {storiesLoading && (
-              <div className="w-full py-4 px-4 rounded-2xl text-center text-xs text-on-surface-variant">
-                
-              </div>
+              <div className="w-full py-4 px-4 rounded-2xl text-center text-xs text-on-surface-variant"></div>
             )}
           </div>
         </section>
@@ -1194,10 +1270,7 @@ export default function HomePage() {
             </div>
 
             {/* DROPDOWN CUSTOMIZADO */}
-            <div
-              ref={filterDropdownRef}
-              className="relative flex-shrink-0"
-            >
+            <div ref={filterDropdownRef} className="relative flex-shrink-0">
               <button
                 type="button"
                 onClick={() =>
@@ -1327,7 +1400,7 @@ export default function HomePage() {
                       onClick={() => router.push(`/service/${service.slug}`)}
                       className="bg-surface-container-lowest rounded-[2rem] flex flex-col cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
                     >
-                      <div className="h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
+                      <div className="relative h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
                         {service.image ? (
                           <img
                             className="w-full h-full object-cover"
@@ -1345,6 +1418,16 @@ export default function HomePage() {
                             />
                           </div>
                         )}
+                        {service.image &&
+                          service.publisherType === "resident" && (
+                            <img
+                              src="/pin.png"
+                              alt="Morador"
+                              className="pointer-events-none absolute bottom-2 left-2 h-6 w-6 object-contain drop-shadow-md"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          )}
                       </div>
                       <div className="flex flex-1 min-w-0 flex-col justify-between p-4 h-full">
                         <div>
@@ -1352,18 +1435,17 @@ export default function HomePage() {
                             <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">
                               {service.category}
                             </span>
-                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">
-                              {service.groupTotalEnvironments} ambiente{service.groupTotalEnvironments === 1 ? "" : "s"}
-                            </span>
                             <div className="ml-auto flex flex-col items-end gap-1">
                               <span
                                 className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                                   hasCnpj(service.cnpj)
-                                    ? 'text-white bg-[#30cc36] dark:text-black/80 dark:bg-[#30cc36]'
-                                    : 'text-white bg-orange-600 dark:text-white dark:bg-orange-700'
+                                    ? "text-white bg-[#30cc36] dark:text-black/80 dark:bg-[#30cc36]"
+                                    : "text-white bg-orange-600 dark:text-white dark:bg-orange-700"
                                 }`}
                               >
-                                {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
+                                {hasCnpj(service.cnpj)
+                                  ? "PROFISSIONAL"
+                                  : "AUTÔNOMO"}
                               </span>
                             </div>
                           </div>
@@ -1377,26 +1459,31 @@ export default function HomePage() {
 
                         <div className="mt-1 space-y-2">
                           <div className="flex items-center justify-between">
-                          {(userLocation || service.environmentName) && (
-                            <div className="flex items-center gap-2">
-                              {userLocation && service.distance !== Infinity && (
-                                <div className="flex items-center gap-1 text-primary">
-                                  <Icon icon="location_on" size={12} weight={700} />
-                                  <span className="text-[10px] text-[#30cc36] font-bold">
-                                    {service.distance < 1
-                                      ? `${Math.round(service.distance * 1000)}m`
-                                      : `${service.distance.toFixed(1)}km`}
+                            {(userLocation || service.environmentName) && (
+                              <div className="flex items-center gap-2">
+                                {userLocation &&
+                                  service.distance !== Infinity && (
+                                    <div className="flex items-center gap-1 text-primary">
+                                      <Icon
+                                        icon="location_on"
+                                        size={12}
+                                        weight={700}
+                                      />
+                                      <span className="text-[10px] text-[#30cc36] font-bold">
+                                        {service.distance < 1
+                                          ? `${Math.round(service.distance * 1000)}m`
+                                          : `${service.distance.toFixed(1)}km`}
+                                      </span>
+                                    </div>
+                                  )}
+                                {service.environmentName && (
+                                  <span className="text-[9px] text-on-surface-variant font-medium">
+                                    {service.environmentName}
                                   </span>
-                                </div>
-                              )}
-                              {service.environmentName && (
-                                <span className="text-[9px] text-on-surface-variant font-medium">
-                                  {service.environmentName}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          {/* <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#30cc36] group-hover/card:text-white transition-all duration-300">
+                                )}
+                              </div>
+                            )}
+                            {/* <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#30cc36] group-hover/card:text-white transition-all duration-300">
                             <Icon icon="arrow_forward" size={14} weight={700} />
                           </div> */}
                           </div>
@@ -1404,19 +1491,13 @@ export default function HomePage() {
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
-                              if (service.groupTotalServices > 1) {
-                                handleOpenProviderServices(service.groupKey);
-                                return;
-                              }
                               if (service.slug) {
                                 router.push(`/service/${service.slug}`);
                               }
                             }}
-                            className="w-full rounded-full border border-[#30cc36]/30 text-[#30cc36] text-xs font-black py-2 hover:bg-[#30cc36]/10 transition-colors"
+                            className="w-full rounded-full uppercase border border-[#30cc36]/30 text-[#30cc36] text-xs font-black py-2 hover:bg-[#30cc36]/10 transition-colors"
                           >
-                            {service.groupTotalServices > 1
-                              ? `Ver anuncios (${service.groupTotalServices})`
-                              : "Ver anuncio"}
+                            Ver anúncio
                           </button>
                         </div>
                       </div>
@@ -1452,7 +1533,7 @@ export default function HomePage() {
                       onClick={() => router.push(`/service/${service.slug}`)}
                       className="bg-surface-container-lowest rounded-[2rem] flex flex-col cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
                     >
-                      <div className="h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
+                      <div className="relative h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
                         {service.image ? (
                           <img
                             className="w-full h-full object-cover"
@@ -1470,6 +1551,16 @@ export default function HomePage() {
                             />
                           </div>
                         )}
+                        {service.image &&
+                          service.publisherType === "resident" && (
+                            <img
+                              src="/pin.png"
+                              alt="Morador"
+                              className="pointer-events-none absolute bottom-2 left-2 h-6 w-6 object-contain drop-shadow-md"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          )}
                       </div>
                       <div className="flex flex-1 min-w-0 flex-col justify-between p-4 h-full">
                         <div>
@@ -1477,18 +1568,17 @@ export default function HomePage() {
                             <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
                               {service.category || "Sem categoria"}
                             </span>
-                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">
-                              {service.groupTotalEnvironments} ambiente{service.groupTotalEnvironments === 1 ? "" : "s"}
-                            </span>
                             <div className="ml-auto flex flex-col items-end gap-1">
                               <span
                                 className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                                   hasCnpj(service.cnpj)
-                                    ? 'text-emerald-700 bg-emerald-500/10'
-                                    : 'text-slate-600 bg-slate-500/10'
+                                    ? "text-emerald-700 bg-emerald-500/10"
+                                    : "text-slate-600 bg-slate-500/10"
                                 }`}
                               >
-                                {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
+                                {hasCnpj(service.cnpj)
+                                  ? "PROFISSIONAL"
+                                  : "AUTÔNOMO"}
                               </span>
                             </div>
                           </div>
@@ -1507,20 +1597,21 @@ export default function HomePage() {
                           <div className="flex items-center justify-between">
                             {(userLocation || service.environmentName) && (
                               <div className="flex items-center gap-2">
-                                {userLocation && service.distance !== Infinity && (
-                                  <div className="flex items-center gap-1 text-primary">
-                                    <Icon
-                                      icon="location_on"
-                                      size={12}
-                                      weight={700}
-                                    />
-                                    <span className="text-[10px] font-bold">
-                                      {service.distance < 1
-                                        ? `${Math.round(service.distance * 1000)}m`
-                                        : `${service.distance.toFixed(1)}km`}
-                                    </span>
-                                  </div>
-                                )}
+                                {userLocation &&
+                                  service.distance !== Infinity && (
+                                    <div className="flex items-center gap-1 text-primary">
+                                      <Icon
+                                        icon="location_on"
+                                        size={12}
+                                        weight={700}
+                                      />
+                                      <span className="text-[10px] font-bold">
+                                        {service.distance < 1
+                                          ? `${Math.round(service.distance * 1000)}m`
+                                          : `${service.distance.toFixed(1)}km`}
+                                      </span>
+                                    </div>
+                                  )}
                                 {service.environmentName && (
                                   <span className="text-[10px] text-on-surface-variant font-medium truncate">
                                     {service.environmentName}
@@ -1529,26 +1620,24 @@ export default function HomePage() {
                               </div>
                             )}
                             <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-primary group-hover/card:text-white transition-all duration-300">
-                              <Icon icon="arrow_forward" size={14} weight={700} />
+                              <Icon
+                                icon="arrow_forward"
+                                size={14}
+                                weight={700}
+                              />
                             </div>
                           </div>
                           <button
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
-                              if (service.groupTotalServices > 1) {
-                                handleOpenProviderServices(service.groupKey);
-                                return;
-                              }
                               if (service.slug) {
                                 router.push(`/service/${service.slug}`);
                               }
                             }}
                             className="w-full rounded-full border border-primary/30 text-primary text-xs font-black py-2 hover:bg-primary/10 transition-colors"
                           >
-                            {service.groupTotalServices > 1
-                              ? `Ver anuncios (${service.groupTotalServices})`
-                              : "Ver anuncio"}
+                            Ver anuncio
                           </button>
                         </div>
                       </div>
@@ -1622,7 +1711,9 @@ export default function HomePage() {
                   <span
                     key={item.id}
                     className={`h-1 flex-1 rounded-full ${
-                      index === activeStoryViewerIndex ? "bg-white" : "bg-white/30"
+                      index === activeStoryViewerIndex
+                        ? "bg-white"
+                        : "bg-white/30"
                     }`}
                   />
                 ))}
@@ -1665,7 +1756,9 @@ export default function HomePage() {
             </div>
 
             {storyDeleteError && (
-              <p className="px-4 pb-2 text-xs text-rose-300">{storyDeleteError}</p>
+              <p className="px-4 pb-2 text-xs text-rose-300">
+                {storyDeleteError}
+              </p>
             )}
 
             <div className="relative flex-1 flex items-center justify-center px-2 pb-4">
@@ -1724,14 +1817,15 @@ export default function HomePage() {
                     {activeProviderGroup.providerName}
                   </h3>
                   <p className="text-xs text-on-surface-variant mt-0.5">
-                    {activeProviderGroup.totalServices} anuncio{activeProviderGroup.totalServices === 1 ? "" : "s"} em {activeProviderGroup.totalEnvironments} ambiente{activeProviderGroup.totalEnvironments === 1 ? "" : "s"}
+                    {activeProviderGroup.totalServices} anuncio
+                    {activeProviderGroup.totalServices === 1 ? "" : "s"}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={handleCloseProviderServices}
                   className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface"
-                  aria-label="Fechar lista de anuncios"
+                  aria-label="Fechar lista de anúncios"
                 >
                   <Icon icon="close" size={20} />
                 </button>
@@ -1750,7 +1844,7 @@ export default function HomePage() {
                     }}
                     className="w-full rounded-2xl border border-outline-variant/10 bg-surface-container-highest/40 p-3 flex items-center gap-3 text-left hover:bg-surface-container-highest transition-colors"
                   >
-                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-surface-container-high shrink-0">
+                    <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-surface-container-high shrink-0">
                       {service.image ? (
                         <img
                           src={service.image}
@@ -1761,9 +1855,23 @@ export default function HomePage() {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Icon icon="image" size={18} className="text-on-surface-variant" />
+                          <Icon
+                            icon="image"
+                            size={18}
+                            className="text-on-surface-variant"
+                          />
                         </div>
                       )}
+                      {service.image &&
+                        service.publisherType === "resident" && (
+                          <img
+                            src="/pin.png"
+                            alt="Morador"
+                            className="pointer-events-none absolute bottom-1 left-1 h-4 w-4 object-contain drop-shadow-md"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[11px] font-black uppercase tracking-wide text-[#30cc36]">
@@ -1851,7 +1959,9 @@ export default function HomePage() {
             </div>
 
             {storyPublishError && (
-              <p className="mt-3 px-4 text-xs text-rose-400">{storyPublishError}</p>
+              <p className="mt-3 px-4 text-xs text-rose-400">
+                {storyPublishError}
+              </p>
             )}
 
             <div className="mt-3 flex-1 overflow-y-auto px-1 pb-4">

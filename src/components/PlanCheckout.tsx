@@ -160,7 +160,7 @@ export function PlanCheckout({ plan }: { plan: PlanCheckoutConfig }) {
   const searchParams = useSearchParams();
   const { user, setUser } = useApp();
 
-  const currentPlan = user?.plan || 'free';
+  const currentPlan = user?.plan || 'plus';
   const isCurrent = currentPlan === plan.id;
   const returnTo = normalizeReturnTo(searchParams?.get('returnTo'));
 

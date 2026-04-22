@@ -19,6 +19,7 @@ export default function robots(): MetadataRoute.Robots {
           '/login',
           '/members',
           '/meus-anuncios',
+          '/meus-ambientes',
           '/moderation',
           '/notifications',
           '/profile',

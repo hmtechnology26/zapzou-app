@@ -386,8 +386,8 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
               <span
                 className={`inline-flex text-[10px] font-bold px-2.5 py-1 rounded-full ${
                   hasCnpj(service.cnpj)
-                    ? 'text-emerald-700 bg-emerald-500/10'
-                    : 'text-slate-600 bg-slate-500/10'
+                    ? 'text-white bg-[#30cc36] dark:text-black/80 dark:bg-[#30cc36]'
+                    : 'text-white bg-orange-600 dark:text-white dark:bg-orange-700'
                 }`}
               >
                 {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}

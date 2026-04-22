@@ -14,9 +14,10 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { path: '/', label: 'Anúncios', icon: 'home' },
+  { path: '/', label: 'An\u00fancios', icon: 'home' },
   { path: '/places', label: 'Ambientes', icon: 'explore' },
-  { path: '/meus-anuncios', label: 'Meus Anúncios', icon: 'storefront' },
+  { path: '/meus-anuncios', label: 'Meus An\u00fancios', icon: 'storefront' },
+  { path: '/meus-ambientes', label: 'Meus Amb.', icon: 'apartment' },
   { path: '/favorites', label: 'Favoritos', icon: 'favorite' },
   { path: '/contact', label: 'Suporte', icon: 'support_agent' },
 ];
@@ -29,7 +30,7 @@ export function BottomNav() {
   const { checkAndShowExitModal } = useExitModal();
 
   useEffect(() => {
-    const routes = ['/', '/places', '/meus-anuncios', '/favorites', '/contact', '/login'];
+    const routes = ['/', '/places', '/meus-anuncios', '/meus-ambientes', '/favorites', '/contact', '/login'];
 
     routes.forEach((route) => {
       void router.prefetch(route);
@@ -58,7 +59,7 @@ export function BottomNav() {
       return;
     }
 
-    if ((itemPath === '/meus-anuncios' || itemPath === '/favorites') && !user) {
+    if ((itemPath === '/meus-anuncios' || itemPath === '/meus-ambientes' || itemPath === '/favorites') && !user) {
       e.preventDefault();
       router.push('/login');
       return;

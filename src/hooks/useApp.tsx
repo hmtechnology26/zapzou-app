@@ -137,10 +137,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const { data: membersData } = await supabase
+    let membersData: any[] | null = null;
+    const { data: membersWithAccessType, error: membersWithAccessTypeError } = await supabase
       .from('environment_members')
       .select('environment_id, role, access_type, status')
       .eq('user_id', user.id);
+
+    if (membersWithAccessTypeError) {
+      console.warn('refreshSelectedEnvironments (with access_type) failed:', membersWithAccessTypeError);
+
+      const { data: membersLegacy, error: membersLegacyError } = await supabase
+        .from('environment_members')
+        .select('environment_id, role, status')
+        .eq('user_id', user.id);
+
+      if (membersLegacyError) {
+        console.warn('refreshSelectedEnvironments (legacy) failed:', membersLegacyError);
+        return;
+      }
+
+      membersData = (membersLegacy || []).map((membership: any) => ({
+        ...membership,
+        access_type: null,
+      }));
+    } else {
+      membersData = membersWithAccessType || [];
+    }
 
     const eligibleMemberships = (membersData || []).filter((membership: any) => {
       const envId = membership?.environment_id;
@@ -167,7 +189,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .in('id', envIds)
       .order('name');
 
-    if (data && !error) {
+    if (error) {
+      console.warn('refreshSelectedEnvironments (environments fetch) failed:', error);
+      return;
+    }
+
+    if (data) {
       const formatted = data.map((e: any) => ({
         id: e.id,
         name: e.name,
@@ -691,59 +718,103 @@ export function AppProvider({ children }: { children: ReactNode }) {
         .from('services')
         .select('*, environments(name, slug, latitude, longitude, address, type, image_url)')
         .order('created_at', { ascending: false });
-        
-      const { data, error } = await query;
-      
-      if (data && !error) {
-        const formatted = data.map((s: any) => {
-          const environment = normalizeRelatedRecord<{
-            name?: string;
-            slug?: string;
-            latitude?: number;
-            longitude?: number;
-            address?: string;
-            type?: string;
-            image_url?: string;
-          }>(s.environments);
 
-          return {
-            environmentName: environment?.name || '',
-            environmentSlug: environment?.slug || '',
-            environmentType: environment?.type || '',
-            environmentLatitude: environment?.latitude,
-            environmentLongitude: environment?.longitude,
-            environmentAddress: environment?.address || '',
-            environmentImage: environment?.image_url || '',
-            id: s.id,
-            slug: s.slug || generateSlug(s.title),
-            title: s.title,
-            description: s.description,
-            category: s.category,
-            image: s.image_url || '',
-            images: normalizeArrayValue<string>(s.images_urls),
-            provider: s.provider || 'Prestador',
-            provider_id: s.provider_id,
-            publisherType: s.publisher_type as 'resident' | 'service_provider' | null,
-            status: s.status as any,
-            isActive: s.is_active,
-            environmentId: s.environment_id,
-            WhatsApp: s.whatsapp,
-            instagram: s.instagram,
-            website: s.website_url,
-            cnpj: s.cnpj || '',
-            frequency: s.frequency,
-            menu: normalizeArrayValue<any>(s.menu),
-            rating: s.rating ?? 0,
-            reviews_count: s.reviews_count ?? 0,
-            views: s.views ?? 0,
-          };
-        });
-        setServices(formatted);
-        fetchCacheRef.current.services = {
-          data: formatted,
-          fetchedAt: Date.now(),
-        };
+      const { data, error } = await query;
+
+      let rows: any[] = data || [];
+      if (error) {
+        console.warn('fetchServices (relation query) failed:', error);
+
+        const { data: legacyData, error: legacyError } = await supabase
+          .from('services')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (legacyError) {
+          throw legacyError;
+        }
+
+        const envIds = Array.from(
+          new Set(
+            (legacyData || [])
+              .map((service: any) => service.environment_id)
+              .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0),
+          ),
+        );
+
+        const environmentById = new Map<string, any>();
+        if (envIds.length > 0) {
+          const { data: environmentsData, error: environmentsError } = await supabase
+            .from('environments')
+            .select('id, name, slug, latitude, longitude, address, type, image_url')
+            .in('id', envIds);
+
+          if (environmentsError) {
+            console.warn('fetchServices (legacy environments query) failed:', environmentsError);
+          } else {
+            (environmentsData || []).forEach((environment: any) => {
+              environmentById.set(environment.id, environment);
+            });
+          }
+        }
+
+        rows = (legacyData || []).map((service: any) => ({
+          ...service,
+          environments: environmentById.get(service.environment_id) ?? null,
+        }));
       }
+
+      const formatted = rows.map((s: any) => {
+        const environment = normalizeRelatedRecord<{
+          name?: string;
+          slug?: string;
+          latitude?: number;
+          longitude?: number;
+          address?: string;
+          type?: string;
+          image_url?: string;
+        }>(s.environments);
+
+        return {
+          environmentName: environment?.name || '',
+          environmentSlug: environment?.slug || '',
+          environmentType: environment?.type || '',
+          environmentLatitude: environment?.latitude,
+          environmentLongitude: environment?.longitude,
+          environmentAddress: environment?.address || '',
+          environmentImage: environment?.image_url || '',
+          id: s.id,
+          slug: s.slug || generateSlug(s.title),
+          title: s.title,
+          description: s.description,
+          category: s.category,
+          image: s.image_url || '',
+          images: normalizeArrayValue<string>(s.images_urls),
+          provider: s.provider || 'Prestador',
+          provider_id: s.provider_id,
+          publisherType: s.publisher_type as 'resident' | 'service_provider' | null,
+          status: s.status as any,
+          isActive: s.is_active,
+          environmentId: s.environment_id,
+          WhatsApp: s.whatsapp,
+          instagram: s.instagram,
+          website: s.website_url,
+          cnpj: s.cnpj || '',
+          frequency: s.frequency,
+          menu: normalizeArrayValue<any>(s.menu),
+          rating: s.rating ?? 0,
+          reviews_count: s.reviews_count ?? 0,
+          views: s.views ?? 0,
+        };
+      });
+
+      setServices(formatted);
+      fetchCacheRef.current.services = {
+        data: formatted,
+        fetchedAt: Date.now(),
+      };
+    } catch (error) {
+      console.error('fetchServices failed:', error);
     } finally {
       setServicesLoading(false);
     }
@@ -838,14 +909,58 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const { data, error } = await supabase
-      .from('services')
-      .select('*, environments(name, slug, latitude, longitude, address, type, image_url)')
-      .eq('provider_id', userId)
-      .order('created_at', { ascending: false });
-    
-    if (data && !error) {
-      const formatted = data.map((s: any) => {
+    try {
+      const { data, error } = await supabase
+        .from('services')
+        .select('*, environments(name, slug, latitude, longitude, address, type, image_url)')
+        .eq('provider_id', userId)
+        .order('created_at', { ascending: false });
+
+      let rows: any[] = data || [];
+      if (error) {
+        console.warn('fetchUserServices (relation query) failed:', error);
+
+        const { data: legacyData, error: legacyError } = await supabase
+          .from('services')
+          .select('*')
+          .eq('provider_id', userId)
+          .order('created_at', { ascending: false });
+
+        if (legacyError) {
+          throw legacyError;
+        }
+
+        const envIds = Array.from(
+          new Set(
+            (legacyData || [])
+              .map((service: any) => service.environment_id)
+              .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0),
+          ),
+        );
+
+        const environmentById = new Map<string, any>();
+        if (envIds.length > 0) {
+          const { data: environmentsData, error: environmentsError } = await supabase
+            .from('environments')
+            .select('id, name, slug, latitude, longitude, address, type, image_url')
+            .in('id', envIds);
+
+          if (environmentsError) {
+            console.warn('fetchUserServices (legacy environments query) failed:', environmentsError);
+          } else {
+            (environmentsData || []).forEach((environment: any) => {
+              environmentById.set(environment.id, environment);
+            });
+          }
+        }
+
+        rows = (legacyData || []).map((service: any) => ({
+          ...service,
+          environments: environmentById.get(service.environment_id) ?? null,
+        }));
+      }
+
+      const formatted = rows.map((s: any) => {
         const environment = normalizeRelatedRecord<{
           name?: string;
           slug?: string;
@@ -886,11 +1001,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
           views: s.views ?? 0,
         };
       });
+
       setUserServices(formatted);
       fetchCacheRef.current.userServices.set(userId, {
         data: formatted,
         fetchedAt: Date.now(),
       });
+    } catch (error) {
+      console.error('fetchUserServices failed:', error);
     }
   };
 

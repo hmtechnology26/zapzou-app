@@ -1,43 +1,33 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { TopAppBar } from "@/components/TopAppBar";
 import { Icon } from "@/components/Icon";
 import { useApp } from "@/hooks/useApp";
-import { TopAppBar } from "@/components/TopAppBar";
 import { usePublishModal } from "@/contexts/PublishModalContext";
 import { supabase } from "@/lib/supabase";
-import { isForcedPendingApprovalEnvironment } from "@/lib/environment-rules";
+import type { Environment, Service } from "@/types";
 import type { PublicationMode } from "@/lib/plan-rules";
-import type { Environment } from "@/types";
 
-const TYPE_LABELS: Record<Environment["type"], string> = {
-  residential: "Residencial",
-  church: "Igreja",
-  club: "Clube",
-  association: "Associação",
-};
-
-type AffiliationRecord = {
+type LinkedMembership = {
   id: string;
   environmentId: string;
   role: "member" | "moderator" | null;
   accessType: PublicationMode | null;
   status: "active" | "pending" | "banned";
-  createdAt?: string;
 };
 
-const getStatusRank = (status?: AffiliationRecord["status"]) => {
-  switch (status) {
-    case "active":
-      return 0;
-    case "pending":
-      return 1;
-    case "banned":
-      return 2;
-    default:
-      return 3;
-  }
+type LinkedEnvironment = {
+  environment: Environment;
+  membership: LinkedMembership;
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  residential: "Residencial",
+  church: "Igreja",
+  club: "Clube",
+  association: "Associacao",
 };
 
 const normalizeSlug = (value: string) =>
@@ -61,34 +51,43 @@ const normalizeEnvironmentRecord = (env: any): Environment => ({
   requiresRadiusValidation: Boolean(env.requires_radius_validation),
 });
 
+const getStatusBadge = (status: LinkedMembership["status"]) => {
+  if (status === "active") {
+    return "border-[#30CC36]/20 bg-[#30CC36]/10 text-[#30CC36]";
+  }
+
+  if (status === "pending") {
+    return "border-amber-500/20 bg-amber-500/10 text-amber-700";
+  }
+
+  return "border-error/20 bg-error/10 text-error";
+};
+
+const isMissingRelationError = (error: any) => {
+  const message = String(error?.message || "").toLowerCase();
+  return error?.code === "42P01" || message.includes("service_environment_links");
+};
+
 export default function MyAdsPage() {
   const router = useRouter();
+  const { open } = usePublishModal();
   const {
     user,
-    membershipVersion,
+    services,
+    servicesLoading,
+    removeService,
+    updateService,
     selectedEnvironments,
-    setSelectedEnvironments,
-    selectedEnvironment,
-    setSelectedEnvironment,
-    signalMembershipChange,
   } = useApp();
-  const { open } = usePublishModal();
-  const [affiliations, setAffiliations] = useState<
-    Record<string, AffiliationRecord>
-  >({});
-  const [affiliationLoading, setAffiliationLoading] = useState(false);
-  const [statusNotice, setStatusNotice] = useState<string | null>(null);
-  const [myContexts, setMyContexts] = useState<Environment[]>([]);
-  const [loadingContexts, setLoadingContexts] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [environmentToDelete, setEnvironmentToDelete] =
-    useState<Environment | null>(null);
-  const [togglingRoleId, setTogglingRoleId] = useState<string | null>(null);
-  const [togglingRoleTarget, setTogglingRoleTarget] = useState<
-    Record<string, PublicationMode | null>
-  >({});
+
   const [mounted, setMounted] = useState(false);
+  const [expandedServiceId, setExpandedServiceId] = useState<string | null>(null);
+  const [linkedLoading, setLinkedLoading] = useState(false);
+  const [linkedLoaded, setLinkedLoaded] = useState(false);
+  const [linkedEnvironments, setLinkedEnvironments] = useState<LinkedEnvironment[]>([]);
+  const [serviceLinkedEnvironmentIds, setServiceLinkedEnvironmentIds] = useState<Record<string, string[]>>({});
+  const [linkingKey, setLinkingKey] = useState<string | null>(null);
+  const [statusNotice, setStatusNotice] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -102,240 +101,287 @@ export default function MyAdsPage() {
     return map;
   }, [selectedEnvironments]);
 
-  const fetchUserContexts = useCallback(async () => {
-    if (!user?.id) return;
-    setLoadingContexts(true);
-    setAffiliationLoading(true);
-    try {
-      const { data: membersData, error: membersError } = await supabase
-        .from("environment_members")
-        .select("id, status, role, access_type, environment_id")
-        .eq("user_id", user.id)
-        .in("status", ["active", "pending"]);
+  const userServices = useMemo(() => {
+    if (!user?.id) return [];
+    return services
+      .filter((service) => service.provider_id === user.id)
+      .sort((a, b) => {
+        const dateA = new Date((a as any).created_at || 0).getTime();
+        const dateB = new Date((b as any).created_at || 0).getTime();
+        return dateB - dateA;
+      });
+  }, [services, user?.id]);
 
-      if (membersError) {
-        console.error("fetchUserContexts failed:", membersError);
-        return;
+  const activeServices = useMemo(
+    () => userServices.filter((service) => service.status === "active").length,
+    [userServices],
+  );
+
+  const pendingServices = useMemo(
+    () => userServices.filter((service) => service.status === "pending").length,
+    [userServices],
+  );
+
+  const createFallbackLinkMap = useCallback(() => {
+    const next: Record<string, string[]> = {};
+    userServices.forEach((service) => {
+      if (service.environmentId) {
+        next[service.id] = [service.environmentId];
       }
+    });
+    return next;
+  }, [userServices]);
 
-      const affiliationsPayload: Record<string, AffiliationRecord> = {};
-      const contextsPayload: Environment[] = [];
-      const missingEnvIds = new Set<string>();
-      const seenEnvIds = new Set<string>();
-      const envCache: Record<string, Environment> = {
-        ...selectedEnvironmentMap,
-      };
+  const fetchLinkedEnvironments = useCallback(async () => {
+    if (!user?.id) {
+      setLinkedEnvironments([]);
+      return;
+    }
 
-      (membersData ?? []).forEach((record: any) => {
-        const envId = record.environment_id;
-        if (!envId) return;
+    const { data: membersData, error: membersError } = await supabase
+      .from("environment_members")
+      .select("id, status, role, access_type, environment_id")
+      .eq("user_id", user.id)
+      .in("status", ["active", "pending"]);
 
-        affiliationsPayload[envId] = {
-          id: record.id,
-          environmentId: envId,
-          role: record.role,
-          accessType: record.access_type ?? null,
-          status: record.status,
-        };
+    if (membersError) {
+      console.error("fetchLinkedEnvironments failed:", membersError);
+      setLinkedEnvironments([]);
+      return;
+    }
 
-        const shouldShowContext =
-          record.status === "pending" ||
-          record.role === "moderator" ||
-          record.access_type === "resident" ||
-          record.access_type === "service_provider" ||
-          isForcedPendingApprovalEnvironment(envId);
+    const envCache: Record<string, Environment> = {
+      ...selectedEnvironmentMap,
+    };
+    const missingEnvIds = new Set<string>();
+    const memberships: LinkedMembership[] = [];
 
-        if (shouldShowContext) {
-          const cachedEnv = envCache[envId];
-          if (cachedEnv) {
-            if (!seenEnvIds.has(envId)) {
-              contextsPayload.push(cachedEnv);
-              seenEnvIds.add(envId);
-            }
-          } else {
-            missingEnvIds.add(envId);
-          }
-        }
+    (membersData ?? []).forEach((record: any) => {
+      if (!record?.environment_id) return;
+
+      memberships.push({
+        id: record.id,
+        environmentId: record.environment_id,
+        role: record.role,
+        accessType: record.access_type ?? null,
+        status: record.status,
       });
 
-      if (missingEnvIds.size > 0) {
-        const { data: missingEnvRecords } = await supabase
-          .from("environments")
-          .select("*")
-          .in("id", Array.from(missingEnvIds));
-
-        missingEnvRecords?.forEach((env) => {
-          const normalizedEnv = normalizeEnvironmentRecord(env);
-          envCache[env.id] = normalizedEnv;
-          if (!seenEnvIds.has(env.id)) {
-            contextsPayload.push(normalizedEnv);
-            seenEnvIds.add(env.id);
-          }
-        });
+      if (!envCache[record.environment_id]) {
+        missingEnvIds.add(record.environment_id);
       }
+    });
 
-      setAffiliations(affiliationsPayload);
-      setMyContexts(
-        contextsPayload.sort((a, b) => {
-          const rankA = getStatusRank(affiliationsPayload[a.id]?.status);
-          const rankB = getStatusRank(affiliationsPayload[b.id]?.status);
-          if (rankA !== rankB) return rankA - rankB;
-          return a.name.localeCompare(b.name);
-        }),
-      );
-    } catch (err) {
-      console.error("fetchUserContexts exception:", err);
-    } finally {
-      setLoadingContexts(false);
-      setAffiliationLoading(false);
+    if (missingEnvIds.size > 0) {
+      const { data: missingEnvRecords } = await supabase
+        .from("environments")
+        .select("*")
+        .in("id", Array.from(missingEnvIds));
+
+      missingEnvRecords?.forEach((env) => {
+        const normalizedEnv = normalizeEnvironmentRecord(env);
+        envCache[env.id] = normalizedEnv;
+      });
     }
-  }, [user?.id, selectedEnvironmentMap]);
+
+    const linkedPayload: LinkedEnvironment[] = memberships
+      .map((membership) => {
+        const environment = envCache[membership.environmentId];
+        if (!environment) return null;
+        return {
+          environment,
+          membership,
+        };
+      })
+      .filter((item): item is LinkedEnvironment => Boolean(item))
+      .sort((a, b) => a.environment.name.localeCompare(b.environment.name));
+
+    setLinkedEnvironments(linkedPayload);
+  }, [selectedEnvironmentMap, user?.id]);
+
+  const fetchServiceEnvironmentLinks = useCallback(async () => {
+    const fallback = createFallbackLinkMap();
+    const serviceIds = userServices.map((service) => service.id);
+
+    if (serviceIds.length === 0) {
+      setServiceLinkedEnvironmentIds({});
+      setLinkedLoaded(true);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("service_environment_links")
+      .select("service_id, environment_id")
+      .in("service_id", serviceIds);
+
+    if (error) {
+      if (!isMissingRelationError(error)) {
+        console.error("fetchServiceEnvironmentLinks failed:", error);
+      }
+      setServiceLinkedEnvironmentIds(fallback);
+      setLinkedLoaded(true);
+      return;
+    }
+
+    const next: Record<string, string[]> = { ...fallback };
+    (data || []).forEach((row: any) => {
+      const serviceId = row?.service_id;
+      const environmentId = row?.environment_id;
+      if (typeof serviceId !== "string" || typeof environmentId !== "string") return;
+      if (!next[serviceId]) next[serviceId] = [];
+      if (!next[serviceId].includes(environmentId)) {
+        next[serviceId].push(environmentId);
+      }
+    });
+
+    setServiceLinkedEnvironmentIds(next);
+    setLinkedLoaded(true);
+  }, [createFallbackLinkMap, userServices]);
 
   useEffect(() => {
-    if (user?.id) {
-      fetchUserContexts();
-    }
-  }, [user?.id, fetchUserContexts, membershipVersion]);
+    setServiceLinkedEnvironmentIds((prev) => {
+      const fallback = createFallbackLinkMap();
+      const merged: Record<string, string[]> = { ...fallback };
 
-  const handleDeleteClick = (env: Environment) => {
-    setEnvironmentToDelete(env);
-    setDeleteModalOpen(true);
+      Object.entries(prev).forEach(([serviceId, envIds]) => {
+        if (!merged[serviceId]) return;
+        const nextIds = Array.from(new Set([...(merged[serviceId] || []), ...envIds]));
+        merged[serviceId] = nextIds;
+      });
+
+      return merged;
+    });
+  }, [createFallbackLinkMap]);
+
+  const handleToggleLinkedForService = async (serviceId: string) => {
+    const nextServiceId = expandedServiceId === serviceId ? null : serviceId;
+    setExpandedServiceId(nextServiceId);
+
+    if (!nextServiceId) return;
+
+    setLinkedLoading(true);
+    try {
+      await Promise.all([fetchLinkedEnvironments(), fetchServiceEnvironmentLinks()]);
+    } finally {
+      setLinkedLoading(false);
+    }
   };
 
-  const handleToggleRole = async (
-    envId: string,
-    nextAccessType: PublicationMode,
+  const handleToggleServiceEnvironment = async (
+    service: Service,
+    targetEnvironmentId: string,
+    isCurrentlyLinked: boolean,
   ) => {
     if (!user?.id) return;
 
-    const currentAccessType = affiliations[envId]?.accessType ?? null;
-    if (currentAccessType === nextAccessType) return;
-
-    if (nextAccessType === "resident") {
-      const residentEnvId = Object.entries(affiliations).find(
-        ([id, aff]) => id !== envId && aff.accessType === "resident",
-      )?.[0];
-
-      if (residentEnvId) {
-        const residentEnvName = myContexts.find(
-          (e) => e.id === residentEnvId,
-        )?.name;
-        setStatusNotice(
-          `Você já é morador de "${residentEnvName}". Altere para prestador primeiro.`,
-        );
-        setTimeout(() => setStatusNotice(null), 4000);
-        return;
-      }
-    }
-
-    setTogglingRoleId(envId);
-      setTogglingRoleTarget((prev) => ({
-        ...prev,
-        [envId]: nextAccessType,
-      }));
+    const currentLinks = serviceLinkedEnvironmentIds[service.id] ?? (service.environmentId ? [service.environmentId] : []);
+    const actionKey = `${service.id}:${targetEnvironmentId}`;
+    setLinkingKey(actionKey);
 
     try {
-      const currentMembership = affiliations[envId];
-      const { error } = await supabase
-        .from("environment_members")
-        .upsert(
-          {
-            environment_id: envId,
-            user_id: user.id,
-            role: currentMembership?.role === "moderator" ? "moderator" : "member",
-            access_type: nextAccessType,
-            status: currentMembership?.status ?? "active",
-          },
-          { onConflict: "environment_id,user_id" },
-        );
+      if (isCurrentlyLinked) {
+        if (currentLinks.length <= 1) {
+          setStatusNotice("Cada anuncio precisa manter pelo menos 1 ambiente vinculado.");
+          setTimeout(() => setStatusNotice(null), 2500);
+          return;
+        }
 
-      if (error) {
-        console.error("Error toggling role:", error);
-        setStatusNotice("Erro ao alterar função");
+        let nextPrimaryEnvironmentId = service.environmentId ?? null;
+        if (service.environmentId === targetEnvironmentId) {
+          nextPrimaryEnvironmentId = currentLinks.find((id) => id !== targetEnvironmentId) ?? null;
+          if (!nextPrimaryEnvironmentId) {
+            setStatusNotice("Nao foi possivel definir um novo ambiente principal.");
+            setTimeout(() => setStatusNotice(null), 2500);
+            return;
+          }
+          await updateService(service.id, { environmentId: nextPrimaryEnvironmentId });
+        }
+
+        const { error: deleteError } = await supabase
+          .from("service_environment_links")
+          .delete()
+          .eq("service_id", service.id)
+          .eq("environment_id", targetEnvironmentId);
+
+        if (deleteError && !isMissingRelationError(deleteError)) {
+          throw deleteError;
+        }
+
+        setServiceLinkedEnvironmentIds((prev) => {
+          const next = { ...prev };
+          next[service.id] = (next[service.id] || []).filter((id) => id !== targetEnvironmentId);
+          if (next[service.id].length === 0 && nextPrimaryEnvironmentId) {
+            next[service.id] = [nextPrimaryEnvironmentId];
+          }
+          return next;
+        });
+
+        setStatusNotice("Ambiente desvinculado do anuncio.");
       } else {
-        setAffiliations((prev) => ({
-          ...prev,
-          [envId]: { ...prev[envId], accessType: nextAccessType },
-        }));
-        setStatusNotice(
-          nextAccessType === "resident"
-            ? "Agora você é morador neste ambiente"
-            : "Agora você é prestador neste ambiente",
-        );
-        signalMembershipChange();
+        const { error: upsertError } = await supabase
+          .from("service_environment_links")
+          .upsert(
+            {
+              service_id: service.id,
+              environment_id: targetEnvironmentId,
+              created_by: user.id,
+            },
+            { onConflict: "service_id,environment_id" },
+          );
+
+        if (upsertError) {
+          if (isMissingRelationError(upsertError)) {
+            await updateService(service.id, { environmentId: targetEnvironmentId });
+            setServiceLinkedEnvironmentIds((prev) => ({
+              ...prev,
+              [service.id]: [targetEnvironmentId],
+            }));
+            setStatusNotice("Seu banco ainda esta em modo 1 ambiente. Ambiente principal atualizado.");
+            return;
+          }
+          throw upsertError;
+        }
+
+        setServiceLinkedEnvironmentIds((prev) => {
+          const next = { ...prev };
+          const current = next[service.id] || (service.environmentId ? [service.environmentId] : []);
+          next[service.id] = Array.from(new Set([...current, targetEnvironmentId]));
+          return next;
+        });
+
+        setStatusNotice("Ambiente vinculado ao anuncio.");
       }
-    } catch (err) {
-      console.error("Error toggling role:", err);
+    } catch (error) {
+      console.error("Error toggling service environment link:", error);
+      setStatusNotice("Nao foi possivel atualizar os ambientes do anuncio.");
     } finally {
-      setTogglingRoleId(null);
-      setTogglingRoleTarget((prev) => ({
-        ...prev,
-        [envId]: null,
-      }));
+      setLinkingKey(null);
       setTimeout(() => setStatusNotice(null), 3000);
     }
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!environmentToDelete || !user?.id) return;
+  const handleDeleteService = async (serviceId: string) => {
+    const confirmed = confirm("Deseja excluir este anuncio?");
+    if (!confirmed) return;
 
-    setDeletingId(environmentToDelete.id);
-
-    const { error } = await supabase
-      .from("environment_members")
-      .delete()
-      .eq("environment_id", environmentToDelete.id)
-      .eq("user_id", user.id);
-
-    if (error) {
-      console.error("Error leaving environment:", error);
-      setStatusNotice("Não foi possível sair deste ambiente.");
-      setDeletingId(null);
-      setTimeout(() => setStatusNotice(null), 4000);
-      return;
+    try {
+      await removeService(serviceId);
+      setStatusNotice("Anuncio removido com sucesso.");
+    } catch (error) {
+      console.error("Error removing service:", error);
+      setStatusNotice("Nao foi possivel remover este anuncio.");
+    } finally {
+      setTimeout(() => setStatusNotice(null), 3000);
     }
-
-    const envIdToDelete = environmentToDelete.id;
-
-    setMyContexts((prev) => prev.filter((env) => env.id !== envIdToDelete));
-    setAffiliations((prev) => {
-      const next = { ...prev };
-      delete next[envIdToDelete];
-      return next;
-    });
-    const nextSelectedEnvironments = selectedEnvironments.filter(
-      (env) => env.id !== envIdToDelete,
-    );
-    setSelectedEnvironments(nextSelectedEnvironments);
-    if (selectedEnvironment?.id === envIdToDelete) {
-      const nextEnvironment = nextSelectedEnvironments[0] ?? null;
-      setSelectedEnvironment(nextEnvironment);
-    }
-
-    setStatusNotice("Ambiente removido com sucesso");
-    setTimeout(() => setStatusNotice(null), 3000);
-    
-    signalMembershipChange();
-    
-    setDeletingId(null);
-    setDeleteModalOpen(false);
-    setEnvironmentToDelete(null);
   };
 
   if (!mounted) return null;
-
-  const activeContextsCount = myContexts.filter(
-    (env) => affiliations[env.id]?.status === "active",
-  ).length;
-  const pendingContextsCount = myContexts.filter(
-    (env) => affiliations[env.id]?.status === "pending",
-  ).length;
 
   return (
     <div className="relative min-h-screen bg-background overflow-x-hidden pb-24">
       <TopAppBar />
 
-      <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-12 pb-32">
+      <main className="pt-24 px-4 md:px-8 max-w-6xl mx-auto space-y-8 pb-32">
         <section className="relative overflow-hidden rounded-[2.5rem] border border-primary/10 bg-gradient-to-br from-surface-container-lowest via-surface-container-lowest to-[#30cc36]/[0.08] p-6 shadow-sm md:p-8">
           <div className="pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-16 left-24 h-32 w-32 rounded-full bg-primary/5 blur-3xl" />
@@ -349,305 +395,278 @@ export default function MyAdsPage() {
                 Meus anúncios
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-on-surface-variant md:text-base">
-                Gerencie seus ambientes vinculados, altere seu tipo de acesso e
-                abra a central de anúncios de cada local sem perder o contexto.
+                Agora cada anúncio pode ser vinculado a varios ambientes.
               </p>
 
               <div className="mt-5 flex flex-wrap gap-2">
                 <span className="inline-flex items-center rounded-full border border-outline-variant/10 bg-background/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant shadow-sm">
-                  {myContexts.length} ambientes
+                  {userServices.length} anúncios
                 </span>
                 <span className="inline-flex items-center rounded-full border border-outline-variant/10 bg-background/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant shadow-sm">
-                  {activeContextsCount} ativos
+                  {activeServices} ativos
                 </span>
-                {pendingContextsCount > 0 && (
+                {pendingServices > 0 && (
                   <span className="inline-flex items-center rounded-full border border-outline-variant/10 bg-background/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant shadow-sm">
-                    {pendingContextsCount} pendentes
+                    {pendingServices} pendentes
                   </span>
                 )}
               </div>
             </div>
 
-            <div className="w-full md:max-w-sm">
-              <div className="flex items-center gap-3 rounded-[1.5rem] border border-outline-variant/10 bg-background/70 px-4 py-4 shadow-sm">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <Icon icon="add_location_alt" size={28} weight={700} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-black text-on-surface">
-                    Procurar um novo ambiente
-                  </p>
-                  <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">
-                    Solicite vínculo quando quiser anunciar em outro local.
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => open('link')}
-                className="mt-3 w-full rounded-full px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-primary/25 transition-transform hover:scale-[1.02] active:scale-95 primary-gradient"
-              >
-                Procurar Ambiente
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => router.push("/register-service")}
+              className="w-full md:w-auto rounded-full px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-primary/25 transition-transform hover:scale-[1.02] active:scale-95 primary-gradient"
+            >
+              Novo anuncio
+            </button>
           </div>
         </section>
 
-        <section className="space-y-6">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-xs font-black uppercase tracking-[0.25em] text-primary/70">
-              Ambientes de Atuação
-            </h3>
-            <span className="text-[9px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest border border-primary/10">
-              {myContexts.length} Vinculados
-            </span>
-          </div>
-
-          {loadingContexts || affiliationLoading ? (
-            <div className="py-24 flex justify-center flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#30cc36] border-t-transparent"></div>
-              <p className="text-xs font-black uppercase tracking-widest text-primary/40">
-                Carregando seus locais...
-              </p>
+        {!user ? (
+          <section className="rounded-[2rem] border border-outline-variant/15 bg-surface-container-lowest p-8 text-center space-y-4">
+            <Icon icon="lock" size={40} className="mx-auto text-on-surface-variant/50" />
+            <h3 className="text-xl font-black text-on-surface">Entre para ver seus anuncios</h3>
+            <p className="text-sm text-on-surface-variant">
+              Faca login para gerenciar seus anuncios e vincular ambientes.
+            </p>
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 bg-[#30cc36] text-white text-sm font-black"
+            >
+              <Icon icon="login" size={18} />
+              Entrar
+            </button>
+          </section>
+        ) : (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-xs font-black uppercase tracking-[0.25em] text-primary/70">Meus anuncios</h3>
+              <span className="text-[9px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest border border-primary/10">
+                {userServices.length} total
+              </span>
             </div>
-          ) : myContexts.length === 0 ? (
-            <div className="rounded-[3rem] border-2 border-dashed border-outline-variant/10 py-24 text-center bg-surface-container-low/20">
-              <Icon
-                icon="explore"
-                size={56}
-                className="mx-auto mb-6 opacity-10 text-primary"
-              />
-              <h4 className="text-xl font-black text-on-surface/40">
-                Nenhum vínculo ativo
-              </h4>
-              <p className="text-sm text-on-surface-variant/60 font-medium max-w-xs mx-auto mt-2">
-                Você ainda não solicitou entrada em nenhum ambiente para
-                anunciar.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              {myContexts.map((env) => {
-                const membership = affiliations[env.id];
-                const isActive = membership?.status === "active";
-                const isPending = membership?.status === "pending";
-                const needsModeratorApproval =
-                  env.type === "church" || env.requiresModeratorApproval;
-                const pendingLabel = needsModeratorApproval
-                  ? "AGUARDANDO APROVAÇÃO"
-                  : "PENDENTE";
-                const displayedRole =
-                  togglingRoleTarget[env.id] ?? membership?.accessType ?? null;
-                const isResidentRole = displayedRole === "resident";
-                const isServiceProviderRole = displayedRole === "service_provider";
 
-                return (
-                  <article
-                    key={env.id}
-                    className="relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest shadow-sm transition-all"
-                  >
-                    <button
-                      onClick={() => handleDeleteClick(env)}
-                      disabled={deletingId === env.id}
-                      className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant transition-colors hover:bg-error/10 hover:text-error disabled:opacity-50"
+            {servicesLoading ? (
+              <div className="py-20 flex justify-center flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#30cc36] border-t-transparent"></div>
+                <p className="text-xs font-black uppercase tracking-widest text-primary/40">
+                  Carregando seus anuncios...
+                </p>
+              </div>
+            ) : userServices.length === 0 ? (
+              <div className="rounded-[2rem] border-2 border-dashed border-outline-variant/10 py-16 text-center bg-surface-container-low/20">
+                <Icon icon="post_add" size={56} className="mx-auto mb-4 opacity-10 text-primary" />
+                <h4 className="text-xl font-black text-on-surface/50">Voce ainda nao tem anuncios</h4>
+                <p className="text-sm text-on-surface-variant/70 font-medium max-w-md mx-auto mt-2">
+                  Clique em "Novo anuncio" para publicar seu primeiro servico.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                {userServices.map((service) => {
+                  const linkedIds = serviceLinkedEnvironmentIds[service.id] ?? (service.environmentId ? [service.environmentId] : []);
+                  const linkedSet = new Set(linkedIds);
+
+                  return (
+                    <article
+                      key={service.id}
+                      className="bg-surface-container-lowest rounded-[2rem] border border-outline-variant/10 shadow-sm overflow-hidden flex flex-col"
                     >
-                      {deletingId === env.id ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-error/30 border-t-error" />
-                      ) : (
-                        <Icon icon="close" size={16} />
-                      )}
-                    </button>
+                      <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-container">
+                        {service.image ? (
+                          <img
+                            src={service.image}
+                            alt={service.title}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
+                            <Icon icon="image" size={28} />
+                          </div>
+                        )}
 
-                    {/* <div className="h-44 w-full overflow-hidden bg-surface-container">
-                      {env.image ? (
-                        <img
-                          src={env.image}
-                          alt={env.name}
-                          className="h-full w-full object-cover"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-on-surface-variant">
-                          <Icon icon="domain" size={32} />
-                        </div>
-                      )}
-                    </div> */}
-
-                    <div className="flex flex-1 flex-col gap-4 p-5">
-                      <div className="min-w-0">
-                        <div className="mb-2 flex flex-wrap items-center gap-2 pr-10">
-                          <h4 className="truncate font-bold text-on-surface">{env.name}</h4>
+                        <div className="absolute top-3 left-3">
                           <span
-                            className={`rounded-lg border px-2 py-0.5 text-[8px] font-black uppercase tracking-widest ${
-                              isActive
-                                ? 'border-[#30CC36]/20 bg-[#30CC36]/10 text-[#30CC36]'
-                                : isPending
-                                  ? 'border-amber-500/20 bg-amber-500/10 text-amber-700'
-                                  : 'border-error/20 bg-error/10 text-error'
+                            className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                              service.status === "active"
+                                ? "bg-[#30CC36] text-white shadow-lg shadow-[#30CC36]/20"
+                                : "bg-amber-500 text-white shadow-lg shadow-amber-500/20"
                             }`}
                           >
-                            {isActive ? 'ATIVO' : isPending ? pendingLabel : 'BLOQUEADO'}
+                            {service.status === "active" ? "ATIVO" : "PENDENTE"}
                           </span>
                         </div>
+                      </div>
 
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                            <Icon icon="category" size={12} />
-                            {TYPE_LABELS[env.type]}
-                          </span>
+                      <div className="p-4 flex-1 flex flex-col">
+                        <span className="text-[10px] font-bold text-primary tracking-widest uppercase">
+                          {service.category || "Sem categoria"}
+                        </span>
+                        <h4 className="font-bold text-on-surface mt-1 line-clamp-2">{service.title}</h4>
 
-                          {env.members > 0 && (
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-on-surface-variant/60">
-                              <Icon icon="groups" size={14} />
-                              {env.members}
-                            </span>
+                        {service.environmentName && (
+                          <p className="text-xs text-on-surface-variant mt-1">
+                            Ambiente principal: {service.environmentName}
+                          </p>
+                        )}
+
+                        <p className="text-xs text-on-surface-variant/80 mt-1">
+                          Ambientes vinculados: {linkedIds.length}
+                        </p>
+
+                        <div className="mt-4 space-y-2 border-t border-outline-variant/10 pt-4">
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => router.push(`/register-service?id=${service.id}`)}
+                              className="flex-1 flex items-center justify-center gap-1 py-2 px-3 rounded-xl bg-surface-container-high text-on-surface text-xs font-bold hover:bg-surface-container-highest transition-colors"
+                            >
+                              <Icon icon="edit" size={16} />
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteService(service.id)}
+                              className="p-2 rounded-xl bg-surface-container-high text-error hover:bg-error/10 transition-colors"
+                            >
+                              <Icon icon="delete" size={18} />
+                            </button>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleToggleLinkedForService(service.id)}
+                            className="w-full rounded-xl py-2 px-3 text-xs font-black uppercase tracking-wide border border-[#30cc36]/30 text-[#30cc36] hover:bg-[#30cc36]/10 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Icon icon="add_location_alt" size={16} />
+                            VINCULAR AMBIENTES
+                          </button>
+
+                          {expandedServiceId === service.id && (
+                            <div className="rounded-xl border border-outline-variant/20 bg-surface-container-low p-3 space-y-2">
+                              <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/70">
+                                Ambientes vinculados a voce
+                              </p>
+
+                              {linkedLoading && !linkedLoaded ? (
+                                <div className="py-4 flex justify-center">
+                                  <div className="animate-spin rounded-full h-6 w-6 border-4 border-[#30cc36] border-t-transparent"></div>
+                                </div>
+                              ) : linkedEnvironments.length === 0 ? (
+                                <div className="space-y-2">
+                                  <p className="text-xs text-on-surface-variant">
+                                    Voce nao esta vinculado a nenhum ambiente.
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={() => open("link")}
+                                    className="w-full inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 bg-[#30cc36] text-white text-[11px] font-black uppercase tracking-wide"
+                                  >
+                                    <Icon icon="search" size={14} />
+                                    PROCURAR AMBIENTE
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="space-y-2">
+                                  {linkedEnvironments.map(({ environment, membership }) => {
+                                    const isActiveMembership = membership.status === "active";
+                                    const isLinked = linkedSet.has(environment.id);
+                                    const isPrimary = service.environmentId === environment.id;
+                                    const isLastLinked = isLinked && linkedIds.length <= 1;
+                                    const actionKey = `${service.id}:${environment.id}`;
+                                    const isLinking = linkingKey === actionKey;
+
+                                    return (
+                                      <div
+                                        key={`${service.id}-${environment.id}`}
+                                        className="rounded-lg border border-outline-variant/15 bg-surface-container-high/50 p-2"
+                                      >
+                                        <div className="flex items-center justify-between gap-2">
+                                          <div className="min-w-0">
+                                            <p className="text-xs font-bold text-on-surface truncate">
+                                              {environment.name}
+                                            </p>
+                                            <p className="text-[10px] text-on-surface-variant truncate">
+                                              {TYPE_LABELS[environment.type] || environment.type || "Ambiente"}
+                                            </p>
+                                          </div>
+                                          <span
+                                            className={`rounded-md border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest ${getStatusBadge(
+                                              membership.status,
+                                            )}`}
+                                          >
+                                            {membership.status === "active" ? "ATIVO" : "PENDENTE"}
+                                          </span>
+                                        </div>
+
+                                        <div className="mt-2 flex items-center justify-between gap-2">
+                                          <span className="text-[10px] font-bold text-on-surface-variant">
+                                            {isPrimary ? "Principal" : isLinked ? "Vinculado" : "Nao vinculado"}
+                                          </span>
+
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              handleToggleServiceEnvironment(
+                                                service,
+                                                environment.id,
+                                                isLinked,
+                                              )
+                                            }
+                                            disabled={!isActiveMembership || isLinking || isLastLinked}
+                                            className={`rounded-md px-2 py-1 text-[10px] font-black uppercase tracking-wide transition-colors ${
+                                              !isActiveMembership
+                                                ? "bg-surface-container text-on-surface-variant/60 cursor-not-allowed"
+                                                : isLinking
+                                                  ? "bg-[#30cc36]/15 text-[#30cc36]"
+                                                  : isLinked
+                                                    ? isLastLinked
+                                                      ? "bg-[#30cc36]/15 text-[#30cc36] cursor-not-allowed"
+                                                      : "bg-orange-500/15 text-orange-700 hover:bg-orange-500/20"
+                                                    : "bg-[#30cc36] text-white hover:brightness-110"
+                                            }`}
+                                          >
+                                            {!isActiveMembership
+                                              ? "Aguardando aprovacao"
+                                              : isLinking
+                                                ? isLinked
+                                                  ? "Desvinculando..."
+                                                  : "Vinculando..."
+                                                : isLinked
+                                                  ? isLastLinked
+                                                    ? "Vinculado"
+                                                    : "Desvincular"
+                                                  : "Vincular"}
+                                          </button>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
-
-                      <div className="grid gap-3">
-                        {isActive && membership?.role && (
-                          <div className="rounded-[1.6rem] border border-outline-variant/30 bg-surface-container-low p-1 shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-[#30cc36]/28 dark:shadow-[0_8px_24px_rgba(48,204,54,0.08)]">
-                            <div className="flex items-center justify-between px-3 pb-1 pt-2">
-                              <span className="text-[9px] font-black uppercase tracking-[0.28em] text-on-surface-variant/60">
-                                Tipo de acesso
-                              </span>
-                              <span className="text-[9px] font-black uppercase tracking-[0.18em] text-primary">
-                                {displayedRole === "resident"
-                                  ? "Morador"
-                                  : displayedRole === "service_provider"
-                                    ? "Prestador"
-                                    : "Sem acesso"}
-                              </span>
-                            </div>
-
-                            <div className="relative grid grid-cols-2 overflow-hidden rounded-full border border-outline-variant/15 bg-surface-container-high/70 p-1 dark:border-[#30cc36]/15">
-                              <div
-                                className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-lg shadow-primary/25 transition-transform duration-300 ease-out ${
-                                  isServiceProviderRole
-                                    ? "translate-x-full"
-                                    : "translate-x-0"
-                                }`}
-                              />
-
-                              <button
-                                type="button"
-                                onClick={() => handleToggleRole(env.id, "resident")}
-                                disabled={togglingRoleId === env.id}
-                                aria-pressed={isResidentRole}
-                                className={`relative z-10 flex h-11 w-full items-center justify-center gap-2 rounded-full text-[9px] font-black uppercase transition-colors ${
-                                  togglingRoleTarget[env.id] === "resident"
-                                    ? "text-white"
-                                    : isResidentRole
-                                      ? "text-white"
-                                      : "text-on-surface-variant/80 hover:text-on-surface"
-                                }`}
-                              >
-                                {togglingRoleTarget[env.id] === "resident" ? (
-                                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                                ) : (
-                                  <Icon icon="home" size={14} />
-                                )}
-                                Morador
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => handleToggleRole(env.id, "service_provider")}
-                                disabled={togglingRoleId === env.id}
-                                aria-pressed={isServiceProviderRole}
-                                className={`relative z-10 flex h-11 w-full items-center justify-center gap-2 rounded-full text-[9px] font-black uppercase transition-colors ${
-                                  togglingRoleTarget[env.id] === "service_provider"
-                                    ? "text-white"
-                                    : isServiceProviderRole
-                                      ? "text-white"
-                                      : "text-on-surface-variant/80 hover:text-on-surface"
-                                }`}
-                              >
-                                {togglingRoleTarget[env.id] === "service_provider" ? (
-                                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                                ) : (
-                                  <Icon icon="work" size={14} />
-                                )}
-                                Prestador
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        {isActive && (
-                          <button
-                            onClick={() => router.push(`/meus-anuncios/${env.id}`)}
-                            className="flex h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-outline-variant/35 bg-surface-container-high/80 text-[10px] font-black uppercase text-on-surface shadow-[0_8px_20px_rgba(15,23,42,0.05)] transition-all duration-300 ease-out active:scale-95 hover:border-primary/25 hover:bg-surface-container-high hover:text-primary dark:border-[#30cc36]/28 dark:bg-[#223626] dark:text-[#e8f8ea] dark:shadow-[0_8px_20px_rgba(48,204,54,0.08)] dark:hover:border-[#30cc36]/45 dark:hover:bg-[#2b4a2f] dark:hover:text-white md:text-sm"
-                          >
-                            <Icon icon="store" size={18} />
-                            Gerenciar Anúncios
-                          </button>
-                        )}
-
-                        {!isActive && isPending && (
-                          <div className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/10 text-[10px] font-black uppercase tracking-[0.1em] text-amber-700">
-                            <Icon
-                              icon={needsModeratorApproval ? "admin_panel_settings" : "hourglass_empty"}
-                              size={16}
-                            />
-                            {needsModeratorApproval ? "Aguardando Aprovação" : "Aguardando Aprovação"}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {deleteModalOpen && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-surface-container-lowest rounded-[2rem] p-6 max-w-sm w-full shadow-2xl border border-outline-variant/10">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon icon="warning" size={32} className="text-error" />
-                </div>
-                <h3 className="text-xl font-black text-on-surface mb-2">
-                  Sair do Ambiente?
-                </h3>
-                <p className="text-sm text-on-surface-variant mb-6">
-                  Ao confirmar, todos os seus anúncios neste ambiente serão
-                  excluídos permanentemente.
-                </p>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setDeleteModalOpen(false)}
-                    className="flex-1 py-3 rounded-2xl border border-outline-variant/20 text-on-surface font-black text-sm"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleDeleteConfirm}
-                    className="flex-1 py-3 rounded-2xl bg-error text-white font-black text-sm"
-                  >
-                    Confirmar
-                  </button>
-                </div>
+                    </article>
+                  );
+                })}
               </div>
-            </div>
-          </div>
+            )}
+          </section>
         )}
 
         {statusNotice && (
           <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-surface-container-lowest px-6 py-3 rounded-full shadow-2xl border border-outline-variant/10 flex items-center gap-2 animate-fade-in z-50">
             <Icon icon="check_circle" size={18} className="text-[#30cc36]" />
-            <span className="text-sm font-bold text-on-surface">
-              {statusNotice}
-            </span>
+            <span className="text-sm font-bold text-on-surface">{statusNotice}</span>
           </div>
         )}
       </main>
     </div>
   );
 }
-
-
