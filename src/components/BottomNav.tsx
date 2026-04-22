@@ -14,10 +14,10 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { path: '/', label: 'An\u00fancios', icon: 'home' },
+  { path: '/', label: 'Anuncios', icon: 'home' },
   { path: '/places', label: 'Ambientes', icon: 'explore' },
-  { path: '/meus-anuncios', label: 'Meus An\u00fancios', icon: 'storefront' },
-  { path: '/meus-ambientes', label: 'Meus Amb.', icon: 'apartment' },
+  { path: '/meus-anuncios', label: 'Meus Anúncios', icon: 'storefront' },
+  { path: '/meus-ambientes', label: 'Meus Ambientes', icon: 'apartment' },
   { path: '/favorites', label: 'Favoritos', icon: 'favorite' },
   { path: '/contact', label: 'Suporte', icon: 'support_agent' },
 ];
@@ -115,7 +115,7 @@ export function BottomNav() {
               />
             )}
 
-            <span className="mt-1 text-[10px] font-medium tracking-wide text-center leading-tight">
+            <span className="mt-1 text-[9px] font-medium tracking-wide text-center leading-tight">
               {item.label}
             </span>
           </button>

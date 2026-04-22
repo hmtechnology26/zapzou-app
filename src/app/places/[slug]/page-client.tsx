@@ -340,11 +340,11 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   const categories = [
     { id: 'all', label: 'Tudo', icon: 'apps' },
     { id: 'Tecnologia', label: 'Tecnologia', icon: 'terminal' },
-    { id: 'ManutenÃƒÂ§ÃƒÂ£o', label: "ManutenÃƒÂ§ÃƒÂ£o", icon: 'engineering'},
+    { id: 'Manutenção', label: "Manutenção", icon: 'engineering'},
     { id: 'Limpeza', label: 'Limpeza', icon: 'cleaning_services' },
-    { id: "AlimentaÃƒÂ§ÃƒÂ£o", label: "AlimentaÃƒÂ§ÃƒÂ£o", icon: "restaurant" },
-    { id: 'ConstruÃƒÂ§ÃƒÂ£o', label: 'ConstruÃƒÂ§ÃƒÂ£o', icon: 'construction' },
-    { id: 'SaÃƒÂºde', label: 'SaÃƒÂºde', icon: 'medical_services' },
+    { id: "Alimentação", label: "Alimentaçãoo", icon: "restaurant" },
+    { id: 'Construção', label: 'Construção', icon: 'construction' },
+    { id: 'Saúde', label: 'Saúde', icon: 'medical_services' },
     { id: 'Beleza', label: 'Beleza', icon: 'content_cut' },
     { id: 'Eventos', label: 'Eventos', icon: 'event' },
     { id: 'Pet Sitting', label: 'Pet Sitting', icon: 'pets' }
@@ -523,9 +523,9 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                </div>
                
                <div className="space-y-1">
-                  <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter">NegÃ³cios com PropÃ³sito</h2>
+                  <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter">Negócios com Propósito</h2>
                   <p className="text-white text-base font-medium max-w-lg leading-relaxed">
-                    Plantando princÃƒÂ­pios eternos para gerar frutos que permanecem!!
+                    Plantando princípios eternos para gerar frutos que permanecem!!
                   </p>
                </div>
 
@@ -569,7 +569,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
         <SearchField
           value={search}
           onChange={setSearch}
-          placeholder="Buscar serviÃƒÂ§os..."
+          placeholder="Buscar serviços..."
         />
 
         {effectiveEnvironment?.address && (
