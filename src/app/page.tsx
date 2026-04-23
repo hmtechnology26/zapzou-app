@@ -4,7 +4,14 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { Avatar } from "@/components/Avatar";
 import { useApp } from "@/hooks/useApp";
-import { useState, useEffect, useMemo, useRef, type ChangeEvent } from "react";
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+  type ChangeEvent,
+} from "react";
 import { MapComponent } from "@/components/GoogleMap";
 import { TopAppBar } from "@/components/TopAppBar";
 import { hasCnpj } from "@/lib/cnpj";
@@ -292,35 +299,53 @@ export default function HomePage() {
     return Array.from(cats).sort();
   }, [activeServices]);
 
+  const getLinkedEnvironments = useCallback((service: any) => {
+    const linked = Array.isArray(service?.linkedEnvironments)
+      ? service.linkedEnvironments.filter(
+          (env: any) => typeof env?.id === "string" && env.id.length > 0,
+        )
+      : [];
+
+    return linked;
+  }, []);
+
+  const getLinkedEnvironmentIds = useCallback((service: any) => {
+    return getLinkedEnvironments(service).map((env: any) => env.id);
+  }, [getLinkedEnvironments]);
+
   const membershipEnvironmentIds = useMemo(() => {
     return Array.from(
       new Set(
-        activeServices
-          .map((service) => service.environmentId)
-          .filter(
-            (envId): envId is string =>
-              typeof envId === "string" && envId.length > 0,
-          ),
+        activeServices.flatMap((service) => getLinkedEnvironmentIds(service)),
       ),
     ).sort();
-  }, [activeServices]);
+  }, [activeServices, getLinkedEnvironmentIds]);
 
   const environmentsWithServices = useMemo(() => {
     const map = new Map<string, { id: string; name: string }>();
     activeServices.forEach((service) => {
-      if (!service.environmentId) return;
-      const label = service.environmentName?.trim() || "Ambiente";
-      if (!map.has(service.environmentId)) {
-        map.set(service.environmentId, {
-          id: service.environmentId,
-          name: label,
-        });
-      }
+      getLinkedEnvironments(service).forEach((env: any) => {
+        const envId = typeof env?.id === "string" ? env.id : "";
+        if (!envId) return;
+        const label =
+          (typeof env?.name === "string" && env.name.trim().length > 0
+            ? env.name.trim()
+            : "") ||
+          service.environmentName?.trim() ||
+          "Ambiente";
+
+        if (!map.has(envId)) {
+          map.set(envId, {
+            id: envId,
+            name: label,
+          });
+        }
+      });
     });
     return Array.from(map.values()).sort((a, b) =>
       a.name.localeCompare(b.name),
     );
-  }, [activeServices]);
+  }, [activeServices, getLinkedEnvironments]);
 
   useEffect(() => {
     let cancelled = false;
@@ -568,29 +593,51 @@ export default function HomePage() {
       .filter((s) => {
         const matchesCategory =
           selectedCategory === "all" || s.category === selectedCategory;
+        const linkedEnvironmentIds = getLinkedEnvironmentIds(s);
+        const hasLinkedEnvironments = linkedEnvironmentIds.length > 0;
         const matchesEnvironment =
           selectedEnvironmentId === "all" ||
-          s.environmentId === selectedEnvironmentId;
-        return matchesCategory && matchesEnvironment;
+          linkedEnvironmentIds.includes(selectedEnvironmentId);
+        return matchesCategory && hasLinkedEnvironments && matchesEnvironment;
       })
       .map((s) => {
         if (userLocation) {
-          const serviceLat = s.environmentLatitude;
-          const serviceLng = s.environmentLongitude;
-          if (serviceLat && serviceLng) {
-            const distance = calculateDistance(
-              userLocation.lat,
-              userLocation.lng,
-              serviceLat,
-              serviceLng,
+          const distanceCandidates = getLinkedEnvironments(s)
+            .map((env: any) => {
+              if (
+                typeof env?.latitude !== "number" ||
+                typeof env?.longitude !== "number"
+              ) {
+                return null;
+              }
+              return calculateDistance(
+                userLocation.lat,
+                userLocation.lng,
+                env.latitude,
+                env.longitude,
+              );
+            })
+            .filter(
+              (distance): distance is number =>
+                typeof distance === "number" && Number.isFinite(distance),
             );
+
+          if (distanceCandidates.length > 0) {
+            const distance = Math.min(...distanceCandidates);
             return { ...s, distance };
           }
         }
         return { ...s, distance: Infinity };
       })
       .sort((a, b) => a.distance - b.distance);
-  }, [activeServices, userLocation, selectedCategory, selectedEnvironmentId]);
+  }, [
+    activeServices,
+    getLinkedEnvironmentIds,
+    getLinkedEnvironments,
+    userLocation,
+    selectedCategory,
+    selectedEnvironmentId,
+  ]);
 
   const filteredServices = useMemo(() => {
     const searchLower = search.toLowerCase().trim();
@@ -644,12 +691,7 @@ export default function HomePage() {
 
     return Array.from(grouped.entries()).map(([key, group]) => {
       const uniqueEnvironments = new Set(
-        group.services
-          .map((service) => service.environmentId)
-          .filter(
-            (envId): envId is string =>
-              typeof envId === "string" && envId.length > 0,
-          ),
+        group.services.flatMap((service) => getLinkedEnvironmentIds(service)),
       );
       return {
         key,
@@ -661,7 +703,7 @@ export default function HomePage() {
         primaryService: group.services[0],
       };
     });
-  }, [filteredServices]);
+  }, [filteredServices, getLinkedEnvironmentIds]);
 
   const displayedServices = useMemo(() => {
     return providerGroups.map((group) => ({
@@ -779,7 +821,8 @@ export default function HomePage() {
           setLocationLoading(false);
           return;
         }
-      } catch (_) {
+      } catch (permissionError) {
+        void permissionError;
       }
 
       window.addEventListener("pointerdown", requestOnFirstInteraction, { once: true });

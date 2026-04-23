@@ -77,6 +77,7 @@ export default function MyAdsPage() {
     servicesLoading,
     removeService,
     updateService,
+    refreshServices,
     selectedEnvironments,
   } = useApp();
 
@@ -121,16 +122,6 @@ export default function MyAdsPage() {
     () => userServices.filter((service) => service.status === "pending").length,
     [userServices],
   );
-
-  const createFallbackLinkMap = useCallback(() => {
-    const next: Record<string, string[]> = {};
-    userServices.forEach((service) => {
-      if (service.environmentId) {
-        next[service.id] = [service.environmentId];
-      }
-    });
-    return next;
-  }, [userServices]);
 
   const fetchLinkedEnvironments = useCallback(async () => {
     if (!user?.id) {
@@ -200,7 +191,6 @@ export default function MyAdsPage() {
   }, [selectedEnvironmentMap, user?.id]);
 
   const fetchServiceEnvironmentLinks = useCallback(async () => {
-    const fallback = createFallbackLinkMap();
     const serviceIds = userServices.map((service) => service.id);
 
     if (serviceIds.length === 0) {
@@ -218,12 +208,12 @@ export default function MyAdsPage() {
       if (!isMissingRelationError(error)) {
         console.error("fetchServiceEnvironmentLinks failed:", error);
       }
-      setServiceLinkedEnvironmentIds(fallback);
+      setServiceLinkedEnvironmentIds({});
       setLinkedLoaded(true);
       return;
     }
 
-    const next: Record<string, string[]> = { ...fallback };
+    const next: Record<string, string[]> = {};
     (data || []).forEach((row: any) => {
       const serviceId = row?.service_id;
       const environmentId = row?.environment_id;
@@ -236,22 +226,7 @@ export default function MyAdsPage() {
 
     setServiceLinkedEnvironmentIds(next);
     setLinkedLoaded(true);
-  }, [createFallbackLinkMap, userServices]);
-
-  useEffect(() => {
-    setServiceLinkedEnvironmentIds((prev) => {
-      const fallback = createFallbackLinkMap();
-      const merged: Record<string, string[]> = { ...fallback };
-
-      Object.entries(prev).forEach(([serviceId, envIds]) => {
-        if (!merged[serviceId]) return;
-        const nextIds = Array.from(new Set([...(merged[serviceId] || []), ...envIds]));
-        merged[serviceId] = nextIds;
-      });
-
-      return merged;
-    });
-  }, [createFallbackLinkMap]);
+  }, [userServices]);
 
   const handleToggleLinkedForService = async (serviceId: string) => {
     const nextServiceId = expandedServiceId === serviceId ? null : serviceId;
@@ -274,29 +249,12 @@ export default function MyAdsPage() {
   ) => {
     if (!user?.id) return;
 
-    const currentLinks = serviceLinkedEnvironmentIds[service.id] ?? (service.environmentId ? [service.environmentId] : []);
     const actionKey = `${service.id}:${targetEnvironmentId}`;
     setLinkingKey(actionKey);
+    let didChangeLinks = false;
 
     try {
       if (isCurrentlyLinked) {
-        if (currentLinks.length <= 1) {
-          setStatusNotice("Cada anuncio precisa manter pelo menos 1 ambiente vinculado.");
-          setTimeout(() => setStatusNotice(null), 2500);
-          return;
-        }
-
-        let nextPrimaryEnvironmentId = service.environmentId ?? null;
-        if (service.environmentId === targetEnvironmentId) {
-          nextPrimaryEnvironmentId = currentLinks.find((id) => id !== targetEnvironmentId) ?? null;
-          if (!nextPrimaryEnvironmentId) {
-            setStatusNotice("Nao foi possivel definir um novo ambiente principal.");
-            setTimeout(() => setStatusNotice(null), 2500);
-            return;
-          }
-          await updateService(service.id, { environmentId: nextPrimaryEnvironmentId });
-        }
-
         const { error: deleteError } = await supabase
           .from("service_environment_links")
           .delete()
@@ -310,14 +268,13 @@ export default function MyAdsPage() {
         setServiceLinkedEnvironmentIds((prev) => {
           const next = { ...prev };
           next[service.id] = (next[service.id] || []).filter((id) => id !== targetEnvironmentId);
-          if (next[service.id].length === 0 && nextPrimaryEnvironmentId) {
-            next[service.id] = [nextPrimaryEnvironmentId];
-          }
           return next;
         });
 
         setStatusNotice("Ambiente desvinculado do anuncio.");
+        didChangeLinks = true;
       } else {
+        let usedLegacyFallback = false;
         const { error: upsertError } = await supabase
           .from("service_environment_links")
           .upsert(
@@ -336,20 +293,29 @@ export default function MyAdsPage() {
               ...prev,
               [service.id]: [targetEnvironmentId],
             }));
-            setStatusNotice("Seu banco ainda esta em modo 1 ambiente. Ambiente principal atualizado.");
-            return;
+            setStatusNotice("Seu banco ainda esta em modo antigo de 1 ambiente.");
+            didChangeLinks = true;
+            usedLegacyFallback = true;
+          } else {
+            throw upsertError;
           }
-          throw upsertError;
         }
 
-        setServiceLinkedEnvironmentIds((prev) => {
-          const next = { ...prev };
-          const current = next[service.id] || (service.environmentId ? [service.environmentId] : []);
-          next[service.id] = Array.from(new Set([...current, targetEnvironmentId]));
-          return next;
-        });
+        if (!usedLegacyFallback) {
+          setServiceLinkedEnvironmentIds((prev) => {
+            const next = { ...prev };
+            const current = next[service.id] || [];
+            next[service.id] = Array.from(new Set([...current, targetEnvironmentId]));
+            return next;
+          });
 
-        setStatusNotice("Ambiente vinculado ao anuncio.");
+          setStatusNotice("Ambiente vinculado ao anuncio.");
+          didChangeLinks = true;
+        }
+      }
+
+      if (didChangeLinks) {
+        await refreshServices();
       }
     } catch (error) {
       console.error("Error toggling service environment link:", error);
@@ -466,7 +432,7 @@ export default function MyAdsPage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {userServices.map((service) => {
-                  const linkedIds = serviceLinkedEnvironmentIds[service.id] ?? (service.environmentId ? [service.environmentId] : []);
+                  const linkedIds = serviceLinkedEnvironmentIds[service.id] ?? [];
                   const linkedSet = new Set(linkedIds);
 
                   return (
@@ -508,12 +474,6 @@ export default function MyAdsPage() {
                         </span>
                         <h4 className="font-bold text-on-surface mt-1 line-clamp-2">{service.title}</h4>
 
-                        {service.environmentName && (
-                          <p className="text-xs text-on-surface-variant mt-1">
-                            Ambiente principal: {service.environmentName}
-                          </p>
-                        )}
-
                         <p className="text-xs text-on-surface-variant/80 mt-1">
                           Ambientes vinculados: {linkedIds.length}
                         </p>
@@ -543,7 +503,7 @@ export default function MyAdsPage() {
                             className="w-full rounded-xl py-2 px-3 text-xs font-black uppercase tracking-wide border border-[#30cc36]/30 text-[#30cc36] hover:bg-[#30cc36]/10 transition-colors flex items-center justify-center gap-2"
                           >
                             <Icon icon="add_location_alt" size={16} />
-                            VINCULAR AMBIENTES
+                            VINCULAR A AMBIENTES
                           </button>
 
                           {expandedServiceId === service.id && (
@@ -575,8 +535,6 @@ export default function MyAdsPage() {
                                   {linkedEnvironments.map(({ environment, membership }) => {
                                     const isActiveMembership = membership.status === "active";
                                     const isLinked = linkedSet.has(environment.id);
-                                    const isPrimary = service.environmentId === environment.id;
-                                    const isLastLinked = isLinked && linkedIds.length <= 1;
                                     const actionKey = `${service.id}:${environment.id}`;
                                     const isLinking = linkingKey === actionKey;
 
@@ -605,7 +563,7 @@ export default function MyAdsPage() {
 
                                         <div className="mt-2 flex items-center justify-between gap-2">
                                           <span className="text-[10px] font-bold text-on-surface-variant">
-                                            {isPrimary ? "Principal" : isLinked ? "Vinculado" : "Nao vinculado"}
+                                            {isLinked ? "Vinculado" : "Nao vinculado"}
                                           </span>
 
                                           <button
@@ -617,16 +575,14 @@ export default function MyAdsPage() {
                                                 isLinked,
                                               )
                                             }
-                                            disabled={!isActiveMembership || isLinking || isLastLinked}
+                                            disabled={!isActiveMembership || isLinking}
                                             className={`rounded-md px-2 py-1 text-[10px] font-black uppercase tracking-wide transition-colors ${
                                               !isActiveMembership
                                                 ? "bg-surface-container text-on-surface-variant/60 cursor-not-allowed"
-                                                : isLinking
+                                              : isLinking
                                                   ? "bg-[#30cc36]/15 text-[#30cc36]"
                                                   : isLinked
-                                                    ? isLastLinked
-                                                      ? "bg-[#30cc36]/15 text-[#30cc36] cursor-not-allowed"
-                                                      : "bg-orange-500/15 text-orange-700 hover:bg-orange-500/20"
+                                                    ? "bg-orange-500/15 text-orange-700 hover:bg-orange-500/20"
                                                     : "bg-[#30cc36] text-white hover:brightness-110"
                                             }`}
                                           >
@@ -637,9 +593,7 @@ export default function MyAdsPage() {
                                                   ? "Desvinculando..."
                                                   : "Vinculando..."
                                                 : isLinked
-                                                  ? isLastLinked
-                                                    ? "Vinculado"
-                                                    : "Desvincular"
+                                                  ? "Desvincular"
                                                   : "Vincular"}
                                           </button>
                                         </div>

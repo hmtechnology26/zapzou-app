@@ -20,7 +20,7 @@ export interface Service {
   website?: string;
   cnpj?: string;
   status: 'active' | 'pending' | 'rejected';
-  environmentId?: string;
+  environmentId?: string | null;
   environmentSlug?: string;
   environmentName?: string;
   environmentType?: string;
@@ -29,6 +29,16 @@ export interface Service {
   environmentAddress?: string;
   environmentImage?: string;
   environments?: { id: string; slug: string }[];
+  linkedEnvironments?: Array<{
+    id: string;
+    slug: string;
+    name?: string;
+    type?: string;
+    latitude?: number;
+    longitude?: number;
+    address?: string;
+    image?: string;
+  }>;
   reviewList?: Review[];
   verified?: boolean;
   location?: string;

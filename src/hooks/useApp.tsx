@@ -36,6 +36,7 @@ interface AppContextType {
   updateEnvironment: (id: string, updates: Partial<Environment>) => void;
   services: Service[];
   servicesLoading: boolean;
+  refreshServices: () => Promise<void>;
   userServices: Service[];
   fetchUserServices: (userId: string) => Promise<void>;
   toggleServiceStatus: (id: string) => Promise<void>;
@@ -704,6 +705,104 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
   };
 
+  const isMissingServiceEnvironmentLinksError = (error: any) => {
+    const message = String(error?.message || '').toLowerCase();
+    return (
+      error?.code === '42P01' ||
+      message.includes('service_environment_links')
+    );
+  };
+
+  const fetchServiceLinkEnvironmentMap = async (rows: any[]) => {
+    const serviceIds = Array.from(
+      new Set(
+        (rows || [])
+          .map((service: any) => service?.id)
+          .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0),
+      ),
+    );
+
+    const emptyMap = new Map<string, Array<{
+      id: string;
+      slug: string;
+      name: string;
+      type: string;
+      latitude?: number;
+      longitude?: number;
+      address: string;
+      image: string;
+    }>>();
+
+    if (serviceIds.length === 0) {
+      return emptyMap;
+    }
+
+    const { data, error } = await supabase
+      .from('service_environment_links')
+      .select('service_id, environment_id, environments(id, name, slug, latitude, longitude, address, type, image_url)')
+      .in('service_id', serviceIds);
+
+    if (error) {
+      if (!isMissingServiceEnvironmentLinksError(error)) {
+        console.warn('fetchServiceLinkEnvironmentMap failed:', error);
+      }
+      return emptyMap;
+    }
+
+    const linkedMap = new Map<string, Array<{
+      id: string;
+      slug: string;
+      name: string;
+      type: string;
+      latitude?: number;
+      longitude?: number;
+      address: string;
+      image: string;
+    }>>();
+
+    (data || []).forEach((row: any) => {
+      const serviceId = row?.service_id;
+      if (typeof serviceId !== 'string' || serviceId.length === 0) return;
+
+      const environment = normalizeRelatedRecord<{
+        id?: string;
+        name?: string;
+        slug?: string;
+        latitude?: number;
+        longitude?: number;
+        address?: string;
+        type?: string;
+        image_url?: string;
+      }>(row?.environments);
+
+      const environmentId =
+        (typeof row?.environment_id === 'string' && row.environment_id.length > 0
+          ? row.environment_id
+          : environment?.id) || '';
+
+      if (!environmentId) return;
+
+      const linkedEnvironment = {
+        id: environmentId,
+        slug: environment?.slug || generateSlug(environment?.name || environmentId),
+        name: environment?.name || '',
+        type: environment?.type || '',
+        latitude: environment?.latitude,
+        longitude: environment?.longitude,
+        address: environment?.address || '',
+        image: environment?.image_url || '',
+      };
+
+      const current = linkedMap.get(serviceId) || [];
+      if (!current.some((env) => env.id === linkedEnvironment.id)) {
+        current.push(linkedEnvironment);
+      }
+      linkedMap.set(serviceId, current);
+    });
+
+    return linkedMap;
+  };
+
   const fetchServices = async () => {
     setServicesLoading(true);
 
@@ -764,8 +863,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }));
       }
 
+      const serviceLinkEnvironmentMap = await fetchServiceLinkEnvironmentMap(rows);
+
       const formatted = rows.map((s: any) => {
         const environment = normalizeRelatedRecord<{
+          id?: string;
           name?: string;
           slug?: string;
           latitude?: number;
@@ -774,6 +876,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           type?: string;
           image_url?: string;
         }>(s.environments);
+
+        const linkedEnvironments = serviceLinkEnvironmentMap.get(s.id) || [];
 
         return {
           environmentName: environment?.name || '',
@@ -795,7 +899,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
           publisherType: s.publisher_type as 'resident' | 'service_provider' | null,
           status: s.status as any,
           isActive: s.is_active,
-          environmentId: s.environment_id,
+          environmentId:
+            typeof s.environment_id === 'string' && s.environment_id.length > 0
+              ? s.environment_id
+              : null,
+          environments: linkedEnvironments.map((env) => ({
+            id: env.id,
+            slug: env.slug,
+          })),
+          linkedEnvironments,
           WhatsApp: s.whatsapp,
           instagram: s.instagram,
           website: s.website_url,
@@ -960,8 +1072,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }));
       }
 
+      const serviceLinkEnvironmentMap = await fetchServiceLinkEnvironmentMap(rows);
+
       const formatted = rows.map((s: any) => {
         const environment = normalizeRelatedRecord<{
+          id?: string;
           name?: string;
           slug?: string;
           latitude?: number;
@@ -970,6 +1085,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           type?: string;
           image_url?: string;
         }>(s.environments);
+
+        const linkedEnvironments = serviceLinkEnvironmentMap.get(s.id) || [];
 
         return {
           environmentName: environment?.name || '',
@@ -990,7 +1107,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
           provider_id: s.provider_id,
           status: s.status as any,
           isActive: s.is_active,
-          environmentId: s.environment_id,
+          environmentId:
+            typeof s.environment_id === 'string' && s.environment_id.length > 0
+              ? s.environment_id
+              : null,
+          environments: linkedEnvironments.map((env) => ({
+            id: env.id,
+            slug: env.slug,
+          })),
+          linkedEnvironments,
           WhatsApp: s.whatsapp,
           instagram: s.instagram,
           cnpj: s.cnpj || '',
@@ -1012,10 +1137,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refreshServices = async () => {
+    fetchCacheRef.current.services = null;
+    await fetchServices();
+
+    if (user?.id) {
+      fetchCacheRef.current.userServices.delete(user.id);
+      await fetchUserServices(user.id);
+    }
+  };
+
   const addService = async (service: any) => {
     console.log('addService called', { service, user: !!user });
     if (!user) throw new Error("User not found");
-    if (!service?.environmentId) throw new Error('Selecione um ambiente para publicar.');
 
     const { error } = await supabase
       .from('services')
@@ -1034,7 +1168,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         frequency: service.frequency,
         status: service.status || 'active',
         is_active: true,
-        environment_id: service.environmentId,
+        environment_id:
+          typeof service.environmentId === 'string' && service.environmentId.length > 0
+            ? service.environmentId
+            : null,
         provider_id: user.id,
         provider: user.name || 'Prestador',
         publisher_type: service.publisherType || 'service_provider',
@@ -1067,7 +1204,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (updatedFields.frequency !== undefined) payload.frequency = updatedFields.frequency;
     if (updatedFields.status !== undefined) payload.status = updatedFields.status;
     if (updatedFields.isActive !== undefined) payload.is_active = updatedFields.isActive;
-    if (updatedFields.environmentId !== undefined) payload.environment_id = updatedFields.environmentId;
+    if (updatedFields.environmentId !== undefined) {
+      payload.environment_id =
+        typeof updatedFields.environmentId === 'string' && updatedFields.environmentId.length > 0
+          ? updatedFields.environmentId
+          : null;
+    }
 
     const { error } = await supabase
       .from('services')
@@ -1516,6 +1658,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateEnvironment,
       services,
       servicesLoading,
+      refreshServices,
       userServices,
       fetchUserServices,
       toggleServiceStatus,

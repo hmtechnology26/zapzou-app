@@ -232,14 +232,6 @@ function RegisterServiceContent() {
        return;
     }
 
-    if (!selectedEnvironment) {
-      setAlertTitle('Nenhum ambiente selecionado');
-      setAlertMessage('Selecione um ambiente para continuar.');
-      setAlertAction({ label: 'Selecionar Ambiente', onClick: () => router.push('/places') });
-      setShowAlert(true);
-      return;
-    }
-    
     const userCreatedServices = services.filter(s => s.provider_id === user.id);
     if (!serviceId && isPlanAtServiceLimit(user.plan, userCreatedServices.length)) {
       setAlertTitle(user.plan === 'free' ? 'Limite do Plano Grátis' : 'Limite do Plano Pró');
@@ -390,7 +382,7 @@ function RegisterServiceContent() {
       return;
     }
 
-    if (user?.plan === 'plus' && !publicationMode) {
+    if (user?.plan === 'plus' && selectedEnvironment?.id && !publicationMode) {
       setErrorMsg('Escolha se você reside neste ambiente ou apenas presta serviço nele.');
       return;
     }
@@ -519,7 +511,7 @@ function RegisterServiceContent() {
       let nextPublicationStatus = existingService?.status || (environmentAvailability.status === 'pending' ? 'pending' : 'active');
       let nextIsActive = existingService ? Boolean(existingService.isActive) : nextPublicationStatus === 'active';
 
-      if (user?.plan === 'plus') {
+      if (user?.plan === 'plus' && selectedEnvironment?.id) {
         const publicationRole = normalizedPublicationMode;
 
         if (!publicationRole) {
@@ -601,7 +593,7 @@ function RegisterServiceContent() {
         website: normalizeWebsiteUrl(form.website),
         isActive: nextIsActive,
         status: nextPublicationStatus,
-        environmentId: selectedEnvironment?.id || '',
+        environmentId: selectedEnvironment?.id || null,
         menu: menuItemsWithImages.map((item, idx) => ({ ...item, id: item.id || `menu-${Date.now()}-${idx}` })),
       };
 
@@ -864,8 +856,24 @@ function RegisterServiceContent() {
           </div>
         )}
 
-        {selectedEnvironment && (
-          <div className="space-y-4 animate-in fade-in duration-500">
+        {!selectedEnvironment && (
+          <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4">
+            <p className="text-sm font-bold text-on-surface">Anuncio sem ambiente vinculado</p>
+            <p className="text-xs text-on-surface-variant mt-1">
+              Você pode criar o anúncio agora. Depois, vincule ambientes em "Meus Ambientes" para ele aparecer no feed.
+            </p>
+            <button
+              type="button"
+              onClick={() => router.push('/meus-ambientes')}
+              className="mt-3 inline-flex items-center gap-2 rounded-full bg-on-surface text-white px-4 py-2 text-xs font-black uppercase tracking-wide"
+            >
+              <Icon icon="apartment" size={14} />
+              Ir para Meus Ambientes
+            </button>
+          </div>
+        )}
+
+        <div className="space-y-4 animate-in fade-in duration-500">
             <div className="space-y-4">
             {errorMsg && (
               <div className="bg-error/10 border border-error/20 p-4 rounded-xl text-error text-sm font-medium">
@@ -1066,7 +1074,7 @@ function RegisterServiceContent() {
             
             <button 
               onClick={handleSubmit} 
-              disabled={!form.title || !form.WhatsApp || uploading || (user?.plan === 'plus' && !publicationMode)}
+              disabled={!form.title || !form.WhatsApp || uploading || (user?.plan === 'plus' && selectedEnvironment?.id && !publicationMode)}
               className="w-full primary-gradient text-white font-bold py-4 rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitStatus === 'uploading' ? 'Enviando imagens...' : 
@@ -1076,7 +1084,6 @@ function RegisterServiceContent() {
             </button>
           </div>
         </div>
-        )}
 
         {/* Modal Options */}
         {showMenuItemModal && (

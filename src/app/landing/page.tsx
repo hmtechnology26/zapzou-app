@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: "ConectaE para condomínios, igrejas, clubes e associações",
     description:
       "Menos bagunca nos grupos, mais ordem nos servicos da comunidade.",
-    images: [`${siteUrl}/conectae_logo.png`],
+    images: [`${siteUrl}/apple-touch-icon.png`],
   },
 };
 
