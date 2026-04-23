@@ -725,10 +725,12 @@ export default function HomePage() {
 
   useEffect(() => {
     let cancelled = false;
+    let hasRequestedLocation = false;
 
     const requestLocationOnEntry = () => {
-      if (!("geolocation" in navigator)) return;
+      if (cancelled || hasRequestedLocation || !("geolocation" in navigator)) return;
 
+      hasRequestedLocation = true;
       setLocationLoading(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -747,10 +749,52 @@ export default function HomePage() {
       );
     };
 
-    requestLocationOnEntry();
+    const requestOnFirstInteraction = () => {
+      requestLocationOnEntry();
+      window.removeEventListener("pointerdown", requestOnFirstInteraction);
+      window.removeEventListener("touchstart", requestOnFirstInteraction);
+      window.removeEventListener("keydown", requestOnFirstInteraction);
+    };
+
+    const setupLocationRequest = async () => {
+      if (!("geolocation" in navigator)) return;
+
+      try {
+        if (typeof navigator.permissions?.query === "function") {
+          const permission = await navigator.permissions.query({ name: "geolocation" as PermissionName });
+
+          if (permission.state === "granted") {
+            requestLocationOnEntry();
+            return;
+          }
+
+          if (permission.state === "prompt") {
+            window.addEventListener("pointerdown", requestOnFirstInteraction, { once: true });
+            window.addEventListener("touchstart", requestOnFirstInteraction, { once: true });
+            window.addEventListener("keydown", requestOnFirstInteraction, { once: true });
+            window.setTimeout(requestLocationOnEntry, 1200);
+            return;
+          }
+
+          setLocationLoading(false);
+          return;
+        }
+      } catch (_) {
+      }
+
+      window.addEventListener("pointerdown", requestOnFirstInteraction, { once: true });
+      window.addEventListener("touchstart", requestOnFirstInteraction, { once: true });
+      window.addEventListener("keydown", requestOnFirstInteraction, { once: true });
+      window.setTimeout(requestLocationOnEntry, 1200);
+    };
+
+    void setupLocationRequest();
 
     return () => {
       cancelled = true;
+      window.removeEventListener("pointerdown", requestOnFirstInteraction);
+      window.removeEventListener("touchstart", requestOnFirstInteraction);
+      window.removeEventListener("keydown", requestOnFirstInteraction);
     };
   }, []);
 

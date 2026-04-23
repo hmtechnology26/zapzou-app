@@ -18,6 +18,7 @@ export const metadata: Metadata = {
     icon: '/favicon.png',
     apple: '/apple-touch-icon.png',
   },
+  manifest: '/manifest.json',
   keywords: [
     'servicos locais',
     'anúncios',
@@ -62,46 +63,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function () {
-                try {
-                  Promise.resolve()
-                    .then(function () {
-                      if ('serviceWorker' in navigator) {
-                        return navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                          return Promise.all(
-                            registrations.map(function (registration) {
-                              return registration.unregister();
-                            })
-                          );
-                        });
-                      }
-                    })
-                    .then(function () {
-                      if ('caches' in window) {
-                        return caches.keys().then(function (keys) {
-                          return Promise.all(
-                            keys.map(function (key) {
-                              return caches.delete(key);
-                            })
-                          );
-                        });
-                      }
-                    })
-                    .catch(function (error) {
-                      console.warn('PWA cleanup failed.', error);
-                    });
-                } catch (error) {
-                  console.warn('PWA cleanup init failed.', error);
-                }
-              })();
-            `,
-          }}
-        />
-      </head>
       <body className="antialiased" suppressHydrationWarning>
         <Providers>
           <ProtectedLayout>{children}</ProtectedLayout>
