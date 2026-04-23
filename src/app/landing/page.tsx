@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: "ConectaE para condomínios, igrejas, clubes e associações",
     description:
       "Menos bagunca nos grupos, mais ordem nos servicos da comunidade.",
-    images: [`${siteUrl}/conectae_logo_light.png`],
+    images: [`${siteUrl}/conectae_logo.png`],
   },
 };
 
@@ -109,7 +109,7 @@ const faq = [
   },
   {
     q: "Meu ambiente consegue começar sem complicação?",
-    a: "Sim. A implantação e simples, com apoio do nosso time do começo ao uso no dia a dia.",
+    a: "Sim. A implantação é super simples, com o apoio do nosso time do começo ao uso no dia a dia.",
   },
   {
     q: "Isso substitui o grupo de WhatsApp?",
