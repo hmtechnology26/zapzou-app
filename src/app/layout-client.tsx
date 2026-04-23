@@ -41,8 +41,9 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "";
   const [hasMounted, setHasMounted] = useState(false);
 
-  const publicExact = ["/", "/login", "/search", "/places", "/contact", "/favorites"];
+  const publicExact = ["/", "/home", "/landing", "/login", "/search", "/places", "/contact", "/favorites"];
   const publicPrefixes = ["/service/", "/places/", "/auth/"];
+  const hideBottomNavExact = ["/home", "/landing"];
 
   const isPublicPage =
     publicExact.includes(pathname) ||
@@ -58,11 +59,13 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
     }
   }, [user, loading, isPublicPage, router]);
 
+  const shouldShowBottomNav = hasMounted && pathname && !hideBottomNavExact.includes(pathname);
+
   if (isPublicPage) {
     return (
       <div className="min-h-screen">
         {children}
-        {hasMounted && pathname && <BottomNav />}
+        {shouldShowBottomNav && <BottomNav />}
       </div>
     );
   }

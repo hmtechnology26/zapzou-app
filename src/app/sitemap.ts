@@ -8,6 +8,8 @@ export const revalidate = 0;
 
 const staticRoutes: MetadataRoute.Sitemap = [
   '/',
+  '/home',
+  '/landing',
   '/contact',
   '/explore',
   '/places',
@@ -17,7 +19,7 @@ const staticRoutes: MetadataRoute.Sitemap = [
 ].map((path) => ({
   url: `${siteUrl}${path}`,
   changeFrequency: 'weekly',
-  priority: path === '/' ? 1 : 0.7,
+  priority: path === '/' ? 1 : path === '/home' || path === '/landing' ? 0.95 : 0.7,
   lastModified: new Date(),
 }));
 
