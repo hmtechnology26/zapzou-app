@@ -306,6 +306,65 @@ export default function HomePage() {
         )
       : [];
 
+    const fallbackEnvironmentId =
+      typeof service?.environmentId === "string" &&
+      service.environmentId.trim().length > 0
+        ? service.environmentId.trim()
+        : "";
+    const fallbackEnvironmentName =
+      typeof service?.environmentName === "string"
+        ? service.environmentName.trim()
+        : "";
+    const fallbackEnvironmentSlug =
+      typeof service?.environmentSlug === "string"
+        ? service.environmentSlug.trim()
+        : "";
+    const fallbackEnvironmentAddress =
+      typeof service?.environmentAddress === "string"
+        ? service.environmentAddress.trim()
+        : "";
+    const fallbackEnvironmentType =
+      typeof service?.environmentType === "string"
+        ? service.environmentType.trim()
+        : "";
+    const fallbackEnvironmentImage =
+      typeof service?.environmentImage === "string"
+        ? service.environmentImage.trim()
+        : "";
+
+    const hasFallbackCoordinates =
+      typeof service?.environmentLatitude === "number" &&
+      typeof service?.environmentLongitude === "number";
+
+    if (fallbackEnvironmentId || fallbackEnvironmentName || hasFallbackCoordinates) {
+      const hasSameEnvironment = linked.some((env: any) => {
+        if (fallbackEnvironmentId) {
+          return env.id === fallbackEnvironmentId;
+        }
+
+        if (!fallbackEnvironmentName) return false;
+        return (
+          typeof env?.name === "string" &&
+          env.name.trim().toLowerCase() === fallbackEnvironmentName.toLowerCase()
+        );
+      });
+
+      if (!hasSameEnvironment) {
+        linked.push({
+          id: fallbackEnvironmentId || `published:${service?.id || "service"}`,
+          slug:
+            fallbackEnvironmentSlug ||
+            fallbackEnvironmentName.toLowerCase().replace(/\s+/g, "-"),
+          name: fallbackEnvironmentName || "Ambiente",
+          type: fallbackEnvironmentType,
+          latitude: service?.environmentLatitude,
+          longitude: service?.environmentLongitude,
+          address: fallbackEnvironmentAddress,
+          image: fallbackEnvironmentImage,
+        });
+      }
+    }
+
     return linked;
   }, []);
 
@@ -594,15 +653,24 @@ export default function HomePage() {
         const matchesCategory =
           selectedCategory === "all" || s.category === selectedCategory;
         const linkedEnvironmentIds = getLinkedEnvironmentIds(s);
-        const hasLinkedEnvironments = linkedEnvironmentIds.length > 0;
         const matchesEnvironment =
           selectedEnvironmentId === "all" ||
           linkedEnvironmentIds.includes(selectedEnvironmentId);
-        return matchesCategory && hasLinkedEnvironments && matchesEnvironment;
+        return matchesCategory && matchesEnvironment;
       })
       .map((s) => {
+        const linkedEnvironments = getLinkedEnvironments(s);
+        const defaultEnvironmentName =
+          (typeof s.environmentName === "string" ? s.environmentName.trim() : "") ||
+          (typeof linkedEnvironments[0]?.name === "string"
+            ? linkedEnvironments[0].name
+            : "");
+
+        let distance = Infinity;
+        let distanceEnvironmentName = defaultEnvironmentName;
+
         if (userLocation) {
-          const distanceCandidates = getLinkedEnvironments(s)
+          const distanceCandidates = linkedEnvironments
             .map((env: any) => {
               if (
                 typeof env?.latitude !== "number" ||
@@ -610,24 +678,44 @@ export default function HomePage() {
               ) {
                 return null;
               }
-              return calculateDistance(
-                userLocation.lat,
-                userLocation.lng,
-                env.latitude,
-                env.longitude,
-              );
+              const envName =
+                typeof env?.name === "string" && env.name.trim().length > 0
+                  ? env.name.trim()
+                  : defaultEnvironmentName;
+              return {
+                value: calculateDistance(
+                  userLocation.lat,
+                  userLocation.lng,
+                  env.latitude,
+                  env.longitude,
+                ),
+                name: envName,
+              };
             })
             .filter(
-              (distance): distance is number =>
-                typeof distance === "number" && Number.isFinite(distance),
+              (
+                candidate,
+              ): candidate is {
+                value: number;
+                name: string;
+              } =>
+                Boolean(
+                  candidate &&
+                    typeof candidate.value === "number" &&
+                    Number.isFinite(candidate.value),
+                ),
             );
 
           if (distanceCandidates.length > 0) {
-            const distance = Math.min(...distanceCandidates);
-            return { ...s, distance };
+            const nearest = distanceCandidates.reduce((closest, current) =>
+              current.value < closest.value ? current : closest,
+            );
+            distance = nearest.value;
+            distanceEnvironmentName = nearest.name || defaultEnvironmentName;
           }
         }
-        return { ...s, distance: Infinity };
+
+        return { ...s, distance, distanceEnvironmentName };
       })
       .sort((a, b) => a.distance - b.distance);
   }, [
@@ -1546,7 +1634,7 @@ export default function HomePage() {
 
                         <div className="mt-1 space-y-2">
                           <div className="flex items-center justify-between">
-                            {(userLocation || service.environmentName) && (
+                            {(userLocation || service.distanceEnvironmentName) && (
                               <div className="flex items-center gap-2">
                                 {userLocation &&
                                   service.distance !== Infinity && (
@@ -1563,9 +1651,9 @@ export default function HomePage() {
                                       </span>
                                     </div>
                                   )}
-                                {service.environmentName && (
+                                {service.distanceEnvironmentName && (
                                   <span className="text-[9px] text-on-surface-variant font-medium">
-                                    {service.environmentName}
+                                    {service.distanceEnvironmentName}
                                   </span>
                                 )}
                               </div>
@@ -1682,7 +1770,7 @@ export default function HomePage() {
 
                         <div className="mt-3 space-y-2">
                           <div className="flex items-center justify-between">
-                            {(userLocation || service.environmentName) && (
+                            {(userLocation || service.distanceEnvironmentName) && (
                               <div className="flex items-center gap-2">
                                 {userLocation &&
                                   service.distance !== Infinity && (
@@ -1699,9 +1787,9 @@ export default function HomePage() {
                                       </span>
                                     </div>
                                   )}
-                                {service.environmentName && (
+                                {service.distanceEnvironmentName && (
                                   <span className="text-[10px] text-on-surface-variant font-medium truncate">
-                                    {service.environmentName}
+                                    {service.distanceEnvironmentName}
                                   </span>
                                 )}
                               </div>
@@ -1967,9 +2055,9 @@ export default function HomePage() {
                       <p className="text-sm font-bold text-on-surface truncate mt-0.5">
                         {service.title}
                       </p>
-                      {service.environmentName && (
+                      {(service.distanceEnvironmentName || service.environmentName) && (
                         <p className="text-xs text-on-surface-variant truncate mt-0.5">
-                          {service.environmentName}
+                          {service.distanceEnvironmentName || service.environmentName}
                         </p>
                       )}
                     </div>
