@@ -21,6 +21,7 @@ import { supabase } from '@/lib/supabase';
 import { hasCnpj } from '@/lib/cnpj';
 import { SearchField } from '@/components/SearchField';
 import { type PublicationMode } from '@/lib/plan-rules';
+import { trackServiceInteraction } from '@/lib/service-interactions';
 
 interface PlaceDetailPageProps {
   seoContent?: ReactNode;
@@ -350,6 +351,18 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
     { id: 'Pet Sitting', label: 'Pet Sitting', icon: 'pets' }
   ];
 
+  const handleOpenServiceDetails = (service: { id?: string; slug?: string }) => {
+    if (!service?.slug) return;
+    if (service.id) {
+      void trackServiceInteraction({
+        serviceId: service.id,
+        interactionType: 'service_click',
+        source: 'place_listing_page',
+      });
+    }
+    router.push(`/places/${placeSlug}/services/${service.slug}`);
+  };
+
   const servicesWithSlug = services.map(s => ({
     ...s,
     slug: s.slug || generateSlug(s.title)
@@ -613,7 +626,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
              <div>
                 <h3 className="text-xl font-black text-on-surface tracking-tight">Vincule-se a este ambiente</h3>
                 <p className="text-sm text-on-surface-variant font-medium mt-1">
-                  Para publicar serviÃƒÂ§os aqui, vocÃƒÂª precisa solicitar acesso ÃƒÂ  lideranÃƒÂ§a.
+                  Para publicar servicos aqui, voce precisa solicitar acesso a lideranca.
                 </p>
              </div>
              {user ? (
@@ -652,7 +665,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           {servicesWithDistance.map((service) => (
             <div 
               key={service.id}
-              onClick={() => router.push(`/places/${placeSlug}/services/${service.slug}`)}
+              onClick={() => handleOpenServiceDetails(service)}
               className="bg-surface-container-lowest rounded-[2rem] flex flex-col cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
             >
               <div className="h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">

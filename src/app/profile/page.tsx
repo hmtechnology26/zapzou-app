@@ -188,6 +188,52 @@ export default function ProfilePage() {
                     className=" text-end text-on-surface-variant"
                   />
                 </button>
+
+                {user.plan === "plus" ? (
+                  <button
+                    onClick={() => router.push("/dashboard")}
+                    className="flex flex-col gap-3 rounded-2xl border border-primary/10 bg-background/80 p-4 text-left transition-all hover:border-primary/25 hover:bg-primary/5 sm:flex-row sm:items-center sm:gap-4"
+                  >
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                      <Icon icon="insights" weight={400} grade={0} size={22} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-on-surface">Dashboard</p>
+                      <p className="text-sm text-on-surface-variant">
+                        Veja visualizações e cliques dos seus serviços.
+                      </p>
+                    </div>
+                    <Icon
+                      icon="chevron_right"
+                      weight={400}
+                      grade={0}
+                      size={24}
+                      className=" text-end text-on-surface-variant"
+                    />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => router.push("/plans/plus?returnTo=/dashboard")}
+                    className="flex flex-col gap-3 rounded-2xl border border-primary/10 bg-background/80 p-4 text-left transition-all hover:border-primary/25 hover:bg-primary/5 sm:flex-row sm:items-center sm:gap-4"
+                  >
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                      <Icon icon="workspace_premium" weight={400} grade={0} size={22} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-on-surface">Dashboard Plus</p>
+                      <p className="text-sm text-on-surface-variant">
+                        Faça upgrade para liberar métricas avançadas.
+                      </p>
+                    </div>
+                    <Icon
+                      icon="chevron_right"
+                      weight={400}
+                      grade={0}
+                      size={24}
+                      className=" text-end text-on-surface-variant"
+                    />
+                  </button>
+                )}
                 
                 <button
                 disabled

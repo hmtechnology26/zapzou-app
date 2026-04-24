@@ -1,10 +1,14 @@
 'use client';
 
-const BUILDING_PRIMARY_TYPES = [
+const CONDOMINIUM_PRIMARY_TYPES = [
   'apartment_building',
   'apartment_complex',
   'condominium_complex',
   'housing_complex',
+] as const;
+
+const BUILDING_PRIMARY_TYPES = [
+  ...CONDOMINIUM_PRIMARY_TYPES,
   'shopping_mall'
 ] as const;
 
@@ -23,6 +27,42 @@ const STRUCTURAL_NAME_HINTS = [
   'mall',
   'galeria',
   'centro empresarial'
+];
+
+const COMMUNITY_PRIMARY_TYPES = [
+  ...CONDOMINIUM_PRIMARY_TYPES,
+  'neighborhood',
+] as const;
+
+const NEIGHBORHOOD_TYPES = [
+  'neighborhood',
+  'sublocality',
+  'sublocality_level_1',
+  'sublocality_level_2',
+] as const;
+
+const CONDOMINIUM_NAME_HINTS = [
+  'condominio',
+  'edificio',
+  'edificio residencial',
+  'predio',
+  'predio residencial',
+  'torre',
+  'residencial',
+  'apartamento',
+  'apartamentos',
+];
+
+const COMMUNITY_NAME_HINTS = [
+  'bairro',
+  'bairros',
+  'vila',
+  'jardim',
+  'jd',
+  'setor',
+  'distrito',
+  'comunidade',
+  'comunidades',
 ];
 
 const RELIGIOUS_NAME_HINTS = [
@@ -78,6 +118,10 @@ const QUERY_VARIANT_STOPWORDS = [
   'santuarios',
   'condominio',
   'condominios',
+  'bairro',
+  'bairros',
+  'comunidade',
+  'comunidades',
   'residencial',
   'residenciais',
   'shopping',
@@ -85,7 +129,7 @@ const QUERY_VARIANT_STOPWORDS = [
   'comercial',
 ];
 
-type PlaceCategory = 'condominium' | 'church';
+type PlaceCategory = 'community' | 'church';
 
 const NEGATIVE_NAME_HINTS = [
   'administracao',
@@ -130,6 +174,20 @@ function isBuildingType(type: string | undefined) {
   return Boolean(
     normalizedType &&
       BUILDING_PRIMARY_TYPES.includes(normalizedType as (typeof BUILDING_PRIMARY_TYPES)[number])
+  );
+}
+
+function isCommunityType(type: string | undefined) {
+  const normalizedType = normalizePrimaryType(type);
+  return Boolean(
+    normalizedType &&
+      COMMUNITY_PRIMARY_TYPES.includes(normalizedType as (typeof COMMUNITY_PRIMARY_TYPES)[number])
+  );
+}
+
+function hasNeighborhoodType(types: string[]) {
+  return types.some((type) =>
+    NEIGHBORHOOD_TYPES.includes(type as (typeof NEIGHBORHOOD_TYPES)[number]),
   );
 }
 
@@ -232,6 +290,10 @@ function inferType(query: string) {
     return 'apartment_building';
   }
 
+  if (hasAny(text, ['bairro', 'bairros', 'comunidade', 'comunidades'])) {
+    return 'neighborhood';
+  }
+
   return '';
 }
 
@@ -273,6 +335,14 @@ function isStructuralName(name: string) {
   return hasAny(name, STRUCTURAL_NAME_HINTS) && !hasAny(name, NEGATIVE_NAME_HINTS);
 }
 
+function isCommunityName(name: string) {
+  return hasAny(name, COMMUNITY_NAME_HINTS) && !hasAny(name, NEGATIVE_NAME_HINTS);
+}
+
+function isCondominiumName(name: string) {
+  return hasAny(name, CONDOMINIUM_NAME_HINTS) && !hasAny(name, NEGATIVE_NAME_HINTS);
+}
+
 function isReligiousName(name: string) {
   return hasAny(name, RELIGIOUS_NAME_HINTS);
 }
@@ -302,6 +372,10 @@ function scorePlace(place: { displayName?: { text?: string }; formattedAddress?:
     score += 50;
   }
 
+  if (type === 'neighborhood' && hasAny(q, ['bairro', 'bairros', 'comunidade', 'comunidades'])) {
+    score += 55;
+  }
+
   if (type === 'church' && hasAny(q, ['igreja', 'templo', 'paroquia'])) {
     score += 45;
   }
@@ -316,6 +390,10 @@ function scorePlace(place: { displayName?: { text?: string }; formattedAddress?:
 
   if (isStructuralName(name)) {
     score += 25;
+  }
+
+  if (isCommunityName(name)) {
+    score += 22;
   }
 
   if (hasAny(name, NEGATIVE_NAME_HINTS)) {
@@ -429,14 +507,13 @@ export async function searchPlaces(
   const explicitType = inferType(query);
   console.log('[maps] Location scope:', locationScope, 'Explicit type:', explicitType);
 
+  const normalizedQuery = normalize(query);
   let rawPlaces: any[] = [];
   const categoryType = options?.categoryType;
   const forcedType =
     categoryType === 'church'
       ? 'church'
-      : categoryType === 'condominium'
-        ? 'condominium_complex'
-        : undefined;
+      : undefined;
 
   const queryVariants = buildSearchVariants(query, categoryType);
   console.log('[maps] Query variants:', queryVariants);
@@ -446,8 +523,43 @@ export async function searchPlaces(
     rawPlaces = await searchPlacesTextVariants(apiKey, queryVariants, 'church');
   } else {
     console.log('[maps] Searching by place name...');
-    const includedType = forcedType ?? (explicitType || undefined);
+    const allowedCommunityTypes = new Set([
+      'condominium_complex',
+      'apartment_building',
+      'apartment_complex',
+      'housing_complex',
+      'neighborhood',
+    ]);
+    const includedType =
+      categoryType === 'community'
+        ? (allowedCommunityTypes.has(explicitType) ? explicitType : undefined)
+        : forcedType ?? (explicitType || undefined);
     rawPlaces = await searchPlacesTextVariants(apiKey, queryVariants, includedType);
+
+    if (categoryType === 'community') {
+      try {
+        const neighborhoodPlaces = await searchPlacesTextVariants(
+          apiKey,
+          queryVariants,
+          'neighborhood',
+        );
+        rawPlaces = uniquePlaces([...rawPlaces, ...neighborhoodPlaces]);
+      } catch (error) {
+        console.warn(
+          '[maps] Neighborhood enrichment query failed, continuing:',
+          error,
+        );
+      }
+    }
+  }
+
+  if (rawPlaces.length === 0 && locationScope && categoryType === 'community') {
+    console.log('[maps] Trying community neighborhoods by text...');
+    try {
+      rawPlaces = await searchPlacesTextVariants(apiKey, queryVariants, 'neighborhood');
+    } catch (error) {
+      console.warn('[maps] Neighborhood includedType failed, falling back:', error);
+    }
   }
 
   if (rawPlaces.length === 0 && locationScope) {
@@ -480,6 +592,9 @@ export async function searchPlaces(
       const neighborhood = pickComponent(addressComponents, ['neighborhood', 'sublocality', 'sublocality_level_1']);
       const primaryType = normalizePrimaryType(String(place.primaryType ?? ''));
       const displayName = place.displayName?.text ?? '';
+      const placeTypes = Array.isArray(place.types)
+        ? place.types.map((type: unknown) => normalize(String(type ?? '')))
+        : [];
 
       return {
         id: place.id,
@@ -495,7 +610,8 @@ export async function searchPlaces(
         city,
         neighborhood,
         primaryTypeText: primaryType,
-        displayNameText: displayName
+        displayNameText: displayName,
+        placeTypesText: placeTypes,
       };
     })
     .filter((place: any) => {
@@ -504,7 +620,19 @@ export async function searchPlaces(
         isBuildingType(place.primaryTypeText) ||
         RELIGIOUS_PRIMARY_TYPES.includes(place.primaryTypeText);
       const structuralOk = isStructuralName(normalizedName);
+      const communityNameOk = isCommunityName(normalizedName);
+      const condominiumNameOk = isCondominiumName(normalizedName);
       const religiousOk = isReligiousName(normalizedName);
+      const neighborhoodTypeOk = isCommunityType(place.primaryTypeText);
+      const neighborhoodTypesOk = hasNeighborhoodType(place.placeTypesText ?? []);
+      const normalizedNeighborhood = normalize(place.neighborhood ?? '');
+      const neighborhoodMatchesQuery =
+        normalizedNeighborhood.length > 0 &&
+        (normalizedQuery.includes(normalizedNeighborhood) ||
+          normalizedNeighborhood.includes(normalizedQuery));
+      const religiousTypeOk = RELIGIOUS_PRIMARY_TYPES.includes(
+        place.primaryTypeText,
+      );
       
       console.log('[maps] Filtering place:', place.displayNameText, 'type:', place.primaryTypeText, 'typeOk:', typeOk, 'structuralOk:', structuralOk, 'religiousOk:', religiousOk, 'categoryType:', categoryType);
       
@@ -516,14 +644,31 @@ export async function searchPlaces(
         );
       }
 
-      if (categoryType === 'condominium') {
-        return Boolean(isBuildingType(place.primaryTypeText) || structuralOk);
+      if (categoryType === 'community') {
+        return Boolean(
+          !religiousTypeOk &&
+            !religiousOk &&
+            (
+              neighborhoodTypeOk ||
+              neighborhoodTypesOk ||
+              neighborhoodMatchesQuery ||
+              condominiumNameOk ||
+              communityNameOk
+            ),
+        );
       }
 
       return (typeOk && (structuralOk || religiousOk)) || religiousOk;
     })
     .sort((a: any, b: any) => scorePlace(b, query) - scorePlace(a, query))
-    .map(({ primaryTypeText, displayNameText, ...place }: any) => place);
+    .map(
+      ({
+        primaryTypeText,
+        displayNameText,
+        placeTypesText,
+        ...place
+      }: any) => place,
+    );
 
   console.log('[maps] Filtered results:', results.length);
   return uniquePlaces(results);

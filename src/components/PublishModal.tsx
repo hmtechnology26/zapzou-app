@@ -26,7 +26,7 @@ import { searchPlaces, type PlaceSearchResult } from '@/lib/maps';
 import type { Environment } from '@/types';
 
 const PLACE_CATEGORIES = [
-  { id: 'condominium', label: 'Condomínios', icon: 'domain' },
+  { id: 'community', label: 'Comunidades', icon: 'domain' },
   { id: 'church', label: 'Igrejas', icon: 'church' },
 ] as const;
 
@@ -43,7 +43,7 @@ export function PublishModal() {
   
   const [step, setStep] = useState<'search' | 'mode' | 'radius' | 'moderator' | 'form'>('search');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<PlaceCategory>('condominium');
+  const [selectedCategory, setSelectedCategory] = useState<PlaceCategory>('community');
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
   const [selectedPlaceDistanceKm, setSelectedPlaceDistanceKm] = useState<number | null>(null);
   const [selectedPlaceDecision, setSelectedPlaceDecision] = useState<ReturnType<typeof resolveEnvironmentAccessDecision> | null>(null);
@@ -313,6 +313,7 @@ export function PublishModal() {
       association: 'Associação',
       apartment_building: 'Prédio',
       condominium_complex: 'Condomínio',
+      neighborhood: 'Bairro',
       shopping_mall: 'Shopping'
     };
     return labels[type] || type;
@@ -661,7 +662,7 @@ export function PublishModal() {
       setSearchQuery('');
       setSearchResults([]);
       setHasSearched(false);
-      setSelectedCategory('condominium');
+      setSelectedCategory('community');
       setSelectedPlace(null);
       setActiveEnvId(null);
       setSelectedEnvironmentRecord(null);
@@ -908,7 +909,7 @@ export function PublishModal() {
                   placeholder={
                     selectedCategory === 'church'
                       ? 'Nome da igreja, templo ou capela...'
-                      : 'Nome do condomínio ou residencial...'
+                      : 'Nome do condomínio, residencial ou bairro...'
                   }
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}

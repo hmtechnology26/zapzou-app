@@ -614,8 +614,8 @@ export default function MyAdsPage() {
                   Sair do Ambiente?
                 </h3>
                 <p className="text-sm text-on-surface-variant mb-6">
-                  Ao confirmar, todos os seus anÃºncios neste ambiente serÃ£o
-                  excluÃ­dos permanentemente.
+                  Ao confirmar, todos os seus anúncios neste ambiente serão
+                  excluídos permanentemente.
                 </p>
                 <div className="flex gap-3">
                   <button

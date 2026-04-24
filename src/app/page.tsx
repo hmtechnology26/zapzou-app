@@ -18,6 +18,7 @@ import { hasCnpj } from "@/lib/cnpj";
 import { SERVICE_CATEGORIES } from "@/lib/service-categories";
 import { SearchField } from "@/components/SearchField";
 import { supabase } from "@/lib/supabase";
+import { trackServiceInteraction } from "@/lib/service-interactions";
 
 const PAGE_SIZE = 9;
 
@@ -1168,6 +1169,21 @@ export default function HomePage() {
     setIsProviderServicesOpen(true);
   };
 
+  const handleOpenServiceDetails = (
+    service: { id?: string; slug?: string },
+    source: string,
+  ) => {
+    if (!service?.slug) return;
+    if (service.id) {
+      void trackServiceInteraction({
+        serviceId: service.id,
+        interactionType: "service_click",
+        source,
+      });
+    }
+    router.push(`/service/${service.slug}`);
+  };
+
   const handleCloseProviderServices = () => {
     setIsProviderServicesOpen(false);
     setActiveProviderGroupKey(null);
@@ -1572,7 +1588,9 @@ export default function HomePage() {
                   {paginatedServices.map((service) => (
                     <div
                       key={service.id}
-                      onClick={() => router.push(`/service/${service.slug}`)}
+                      onClick={() =>
+                        handleOpenServiceDetails(service, "home_list_card")
+                      }
                       className="bg-surface-container-lowest rounded-[2rem] flex flex-col cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
                     >
                       <div className="relative h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
@@ -1666,9 +1684,10 @@ export default function HomePage() {
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
-                              if (service.slug) {
-                                router.push(`/service/${service.slug}`);
-                              }
+                              handleOpenServiceDetails(
+                                service,
+                                "home_list_button",
+                              );
                             }}
                             className="w-full rounded-full uppercase border border-[#30cc36]/30 text-[#30cc36] text-xs font-black py-2 hover:bg-[#30cc36]/10 transition-colors"
                           >
@@ -1705,7 +1724,9 @@ export default function HomePage() {
                   {paginatedServices.map((service) => (
                     <div
                       key={service.id}
-                      onClick={() => router.push(`/service/${service.slug}`)}
+                      onClick={() =>
+                        handleOpenServiceDetails(service, "home_search_card")
+                      }
                       className="bg-surface-container-lowest rounded-[2rem] flex flex-col cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
                     >
                       <div className="relative h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
@@ -1806,9 +1827,10 @@ export default function HomePage() {
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
-                              if (service.slug) {
-                                router.push(`/service/${service.slug}`);
-                              }
+                              handleOpenServiceDetails(
+                                service,
+                                "home_search_button",
+                              );
                             }}
                             className="w-full rounded-full border border-primary/30 text-primary text-xs font-black py-2 hover:bg-primary/10 transition-colors"
                           >
@@ -2013,9 +2035,7 @@ export default function HomePage() {
                     type="button"
                     onClick={() => {
                       handleCloseProviderServices();
-                      if (service.slug) {
-                        router.push(`/service/${service.slug}`);
-                      }
+                      handleOpenServiceDetails(service, "home_provider_modal");
                     }}
                     className="w-full rounded-2xl border border-outline-variant/10 bg-surface-container-highest/40 p-3 flex items-center gap-3 text-left hover:bg-surface-container-highest transition-colors"
                   >

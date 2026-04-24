@@ -12,6 +12,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { Review } from '@/types';
 import { hasCnpj } from '@/lib/cnpj';
 import { normalizeWebsiteUrl } from '@/lib/website';
+import { trackServiceInteraction } from '@/lib/service-interactions';
 
 interface ServiceDetailPageProps {
   seoContent?: ReactNode;
@@ -72,6 +73,11 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
     if (lastViewIncrementedServiceIdRef.current === serviceId) return;
     lastViewIncrementedServiceIdRef.current = serviceId;
     void incrementServiceViews(serviceId);
+    void trackServiceInteraction({
+      serviceId,
+      interactionType: 'service_view',
+      source: 'place_service_detail_page',
+    });
   }, [serviceId, incrementServiceViews]);
 
   useEffect(() => {
@@ -151,11 +157,25 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
 
   const handleWhatsApp = () => {
     if (!service?.WhatsApp) return;
+    void trackServiceInteraction({
+      serviceId: service.id,
+      interactionType: 'whatsapp_click',
+      source: 'place_service_detail_page',
+    });
 
     window.open(
       `https://wa.me/${formatWhatsApp(service.WhatsApp)}?text=${WhatsAppMessage}`,
       '_blank'
     );
+  };
+
+  const handleInstagramClick = () => {
+    if (!service?.id) return;
+    void trackServiceInteraction({
+      serviceId: service.id,
+      interactionType: 'instagram_click',
+      source: 'place_service_detail_page',
+    });
   };
 
   const websiteHref = normalizeWebsiteUrl(service.website);
@@ -447,7 +467,8 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
               {service.instagram && (
                 <a 
                   href={service.instagram.startsWith('http') ? service.instagram : `https://instagram.com/${service.instagram.replace('@', '')}`}
-                target="_blank"
+                  onClick={handleInstagramClick}
+                  target="_blank"
                   rel="noreferrer"
                   className="col-span-1 h-12 w-full min-w-0 rounded-full gap-2 bg-gradient-to-r from-[#f09433] via-[#e6683c] to-[#bc1888] text-white font-bold flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-pink-500/20"
                 >
