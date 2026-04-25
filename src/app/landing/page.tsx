@@ -298,7 +298,7 @@ export default function LandingSalesPage() {
       <section className="relative overflow-hidden bg-gradient-to-br from-[#f7fbf8] via-[#f0fbf4] to-[#ecf8ef]">
         <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-14 sm:py-16 md:px-6 lg:grid-cols-2 lg:gap-16 lg:py-28">
           <div className="flex flex-col justify-center">
-            <div className="mb-6 inline-flex w-fit uppercase items-center gap-2 rounded-full border border-[#30cc36]/30 bg-[#e8f9ed] px-4 py-1.5 text-xs font-medium text-[#30cc36]">
+            <div className="mb-6 inline-flex w-fit uppercase items-center gap-2 rounded-full border border-[#30cc36]/30 bg-[#e8f9ed] px-4 py-1.5 text-[10px] font-medium text-[#30cc36]">
               Nova forma de conectar serviços e comunidades
             </div>
 
@@ -640,7 +640,7 @@ export default function LandingSalesPage() {
 
             <Link
               href="/"
-              className="mt-8 uppercase inline-flex w-full justify-center items-center gap-2 rounded-full bg-[#30cc36] px-6 py-3 text-sm font-bold text-white shadow-[0_10px_30px_rgba(39,201,88,0.3)] transition hover:brightness-110 sm:w-auto sm:px-8"
+              className="mt-8 uppercase inline-flex w-full justify-center items-center gap-2 rounded-full bg-[#30cc36] px-6 py-3 text-[11px] text-white shadow-[0_10px_30px_rgba(39,201,88,0.3)] transition hover:brightness-110 sm:w-auto sm:px-8"
             >
               Buscar profissionais perto de mim
               <Icon icon="arrow_forward" size={14} weight={700} />
