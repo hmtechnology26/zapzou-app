@@ -1,7 +1,7 @@
 export default function Head() {
   return (
     <>
-      <title>Entrar na Conectae</title>
+      <title>Entrar na ConectaE</title>
       <meta name="robots" content="noindex,nofollow" />
       <meta
         name="description"

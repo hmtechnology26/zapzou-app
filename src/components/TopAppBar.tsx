@@ -124,14 +124,14 @@ export function TopAppBar({
       <div className="max-w-7xl mx-auto w-full flex items-center justify-between px-4 h-16 md:h-20">
         <div className="flex items-center gap-3 md:gap-8">
           <div className="flex items-center gap-3">
-            {showBack && (
+            {/* {showBack && (
               <button
                 onClick={onBack}
                 className={`hover:bg-surface-container-high/70 dark:hover:bg-surface-container-high/70 rounded-full transition-colors p-2 active:scale-95 duration-200 ${textColor}`}
               >
                 <Icon icon="arrow_back" weight={400} grade={0} size={24} />
               </button>
-            )}
+            )} */}
 
             <Link href="/" prefetch className="flex items-center cursor-pointer group">
               <img
