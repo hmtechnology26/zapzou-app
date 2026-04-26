@@ -51,7 +51,7 @@ const plans = [
     description: 'Para prestadores que querem mais visibilidade local.',
     highlight: 'Mais visibilidade',
     features: [
-      'Selo de verificado',
+      'Selo de verificado PRÓ',
       'Até 3 publicações',
       'Até 2 comunidades',
       'Relatório básico de visualizações',
@@ -68,11 +68,10 @@ const plans = [
     description: 'Para quem quer escala, dados e alcance máximo.',
     highlight: 'Mais escolhido',
     features: [
-      'Tudo do PRO',
+      'Selo de Verificado PLUS',
       'Publicações ilimitadas',
       'Comunidades ilimitadas',
-      'Dashboard avançado',
-      'Relatório de visualizações',
+      'Relatório de visualizações avançado',
       'Suporte prioritário',
     ],
     cta: 'Falar sobre o PLUS',

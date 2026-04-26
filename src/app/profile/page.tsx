@@ -87,32 +87,38 @@ export default function ProfilePage() {
   ];
 
   const actions = [
-    {
-      title: "Meus anúncios",
-      description: "Gerencie seus serviços publicados.",
-      icon: "storefront",
-      onClick: () => router.push("/meus-anuncios"),
-    },
-    {
-      title: user.plan === "plus" ? "Dashboard" : "Dashboard Plus",
-      description:
-        user.plan === "plus"
-          ? "Veja visualizações e cliques dos seus serviços."
-          : "Desbloqueie métricas avançadas do seu negócio.",
-      icon: user.plan === "plus" ? "insights" : "workspace_premium",
-      onClick: () =>
-        user.plan === "plus"
-          ? router.push("/dashboard")
-          : router.push("/plans/plus?returnTo=/dashboard"),
-      featured: true,
-    },
-    {
-      title: "Ver planos",
-      description: "Compare recursos e escolha o melhor plano.",
-      icon: "diamond",
-      onClick: () => router.push("/plans?returnTo=/profile"),
-    },
-  ];
+  {
+    title: "Meus anúncios",
+    description: "Gerencie seus serviços publicados.",
+    icon: "storefront",
+    onClick: () => router.push("/meus-anuncios"),
+  },
+  {
+    title: "Suporte",
+    description: "Fale com nosso time e tire dúvidas rapidamente.",
+    icon: "support_agent",
+    onClick: () => router.push("/contact"),
+  },
+  {
+    title: user.plan === "plus" ? "Dashboard" : "Dashboard Plus",
+    description:
+      user.plan === "plus"
+        ? "Veja visualizações e cliques dos seus serviços."
+        : "Desbloqueie métricas avançadas do seu negócio.",
+    icon: user.plan === "plus" ? "insights" : "workspace_premium",
+    onClick: () =>
+      user.plan === "plus"
+        ? router.push("/dashboard")
+        : router.push("/plans/plus?returnTo=/dashboard"),
+    featured: true,
+  },
+  {
+    title: "Ver planos",
+    description: "Compare recursos e escolha o melhor plano.",
+    icon: "diamond",
+    onClick: () => router.push("/plans?returnTo=/profile"),
+  },
+];
 
   return (
     <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(48,204,54,0.16),_transparent_36%),linear-gradient(180deg,_#ffffff_0%,_#f7faf8_100%)] pb-24 dark:bg-[radial-gradient(circle_at_top,_rgba(48,204,54,0.14),_transparent_36%),linear-gradient(180deg,_#080a0c_0%,_#101215_100%)]">

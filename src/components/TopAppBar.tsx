@@ -35,7 +35,7 @@ const baseNavItems: NavItem[] = [
   { path: '/meus-anuncios', label: 'Meus Anúncios', icon: 'storefront' },
   { path: '/meus-ambientes', label: 'Minhas Comunidades', icon: 'apartment' },
   { path: '/favorites', label: 'Favoritos', icon: 'favorite' },
-  { path: '/contact', label: 'Suporte', icon: 'support_agent' },
+  
 ];
 
 export function TopAppBar({
@@ -120,146 +120,167 @@ export function TopAppBar({
   };
 
   return (
-    <header className={`fixed top-0 w-full z-50 ${bgColor} backdrop-blur-xl border-b border-outline-variant/20 transition-all duration-300`}>
-      <div className="max-w-7xl mx-auto w-full flex items-center justify-between px-4 h-16 md:h-20">
-        <div className="flex items-center gap-3 md:gap-8">
-          <div className="flex items-center gap-3">
-            {/* {showBack && (
-              <button
-                onClick={onBack}
-                className={`hover:bg-surface-container-high/70 dark:hover:bg-surface-container-high/70 rounded-full transition-colors p-2 active:scale-95 duration-200 ${textColor}`}
-              >
-                <Icon icon="arrow_back" weight={400} grade={0} size={24} />
-              </button>
-            )} */}
+  <header
+    className="
+      fixed top-2 left-3 right-3 z-50
+      rounded-[2rem]
+      border border-white/20
+      bg-white/[0.08]
+      shadow-[0_18px_60px_rgba(0,0,0,0.16)]
+      backdrop-blur-3xl
+      supports-[backdrop-filter]:bg-white/[0.10]
+      dark:border-white/10
+      dark:bg-zinc-950/55
+      dark:supports-[backdrop-filter]:bg-zinc-950/45
+      transition-all duration-300
+      overflow-hidden
+    "
+  >
+    <div className="pointer-events-none absolute inset-0 rounded-[2rem] bg-gradient-to-b from-white/25 via-white/[0.06] to-transparent dark:from-white/10" />
+    <div className="pointer-events-none absolute inset-[1px] rounded-[1.9rem] border border-white/10" />
 
-            <Link href="/" prefetch className="flex items-center cursor-pointer group">
+    <div className="relative mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 md:h-20 md:px-6">
+      <div className="flex items-center gap-3 md:gap-8">
+        <Link href="/" prefetch className="flex items-center cursor-pointer group">
+          <img
+            src={theme === 'dark' ? '/conectae_logo_light.png' : '/conectae_logo.png'}
+            alt="Conectae"
+            className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03] md:h-11"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+          />
+        </Link>
+
+        {title && (
+          <h1 className="hidden items-center gap-2 text-lg font-black tracking-tight text-on-surface md:flex">
+            {leftAvatar && (
               <img
-                src={theme === 'dark' ? '/conectae_logo_light.png' : '/conectae_logo.png'}
-                alt="Conectae"
-                className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
-                loading="eager"
-                fetchPriority="high"
+                src={leftAvatar}
+                alt=""
+                className="h-7 w-7 rounded-full border border-white/20 object-cover shadow-sm"
+                loading="lazy"
                 decoding="async"
               />
-            </Link>
-          </div>
+            )}
+            {title}
+          </h1>
+        )}
 
-          {title && (
-            <div className="flex items-center gap-2 ml-2">
-              <h1 className={`font-semibold text-lg tracking-tight ${textColor} flex items-center gap-2`}>
-                {leftAvatar && (
-                  <img src={leftAvatar} alt="" className="w-7 h-7 rounded-full object-cover border border-outline-variant/20 shadow-sm" loading="lazy" decoding="async" />
-                )}
-                {title}
-              </h1>
-            </div>
-          )}
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1.5 p-1 rounded-2xl">
-            {navItems.map((item) => {
-              const isActive = item.path === '/' 
-                ? currentPath === '/' 
+        <nav className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.06] p-1 backdrop-blur-xl md:flex">
+          {navItems.map((item) => {
+            const isActive =
+              item.path === '/'
+                ? currentPath === '/'
                 : currentPath === item.path || currentPath.startsWith(item.path + '/');
-                
-              return (
-                <button
-                  key={item.path}
-                  onClick={() => handleNavClick(item.path)}
-                  className={`px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-all flex items-center gap-2 relative group ${
-                    isActive 
-                      ? 'text-[#30cc36]' 
-                      : 'text-on-surface-variant hover:text-[#30cc36] transition-colors'
-                  }`}
-                >
-                  <Icon icon={item.icon} size={20} weight={isActive ? 700 : 400} />
-                  <span className="hidden lg:inline whitespace-nowrap">{item.label}</span>
-                  {isActive && <span className="lg:hidden whitespace-nowrap">{item.label}</span>}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
 
-        <div className="flex items-center gap-2 md:gap-4">
-          {rightAction === 'search' ? (
-            <div className="flex items-center gap-2">
-              {mounted && (
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  className={`w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-full active:scale-95 transition-all shadow-sm ${themeButtonClass}`}
-                  aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
-                  title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
-                >
-                  <Icon icon={themeIcon} size={20} weight={700} />
-                </button>
-              )}
+            return (
               <button
-                 onClick={onRightAction}
-                 className="p-3 rounded-full bg-surface-container-high text-primary hover:bg-primary/5 active:scale-95 transition-all shadow-sm"
+                key={item.path}
+                type="button"
+                onClick={() => handleNavClick(item.path)}
+                className={`
+                  group relative flex items-center gap-2 rounded-full px-4 py-2.5
+                  text-[13px] font-bold transition-all duration-300
+                  ${
+                    isActive
+                      ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                      : 'text-on-surface-variant hover:bg-white/[0.08] hover:text-primary'
+                  }
+                `}
               >
-                 <Icon icon="search" size={24} weight={700} />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 md:gap-4">
-              {mounted && (
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  className={`w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-full active:scale-95 transition-all shadow-sm ${themeButtonClass}`}
-                  aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
-                  title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
-                >
-                  <Icon icon={themeIcon} size={20} weight={700} />
-                </button>
-              )}
+                <Icon icon={item.icon} size={19} weight={isActive ? 700 : 400} />
 
-              {mounted && canManageMembers && (
-                <button 
-                  onClick={() => router.push('/moderation')}
-                className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary active:scale-95 transition-all shadow-sm"
-                  title={"Moderação"}
-                >
-                  <Icon icon="admin_panel_settings" size={22} weight={700} />
-                </button>
-              )}
-              
-               
-              {user ? (
-                <button
-                  onClick={onAvatarClick as any}
-                  className="flex items-center p-1 rounded-full hover:bg-primary/5 transition-all border border-transparent hover:border-primary/10 active:scale-95 group"
-                >
-                  <div className="relative">
-                    <Avatar 
-                      src={userAvatar || undefined} 
-                      name={user?.name || ''} 
-                      alt="User" 
-                      className="w-10 h-10 md:w-11 md:h-11 ring-2 ring-primary/20 shadow-sm group-hover:ring-primary transition-all duration-300" 
-                    />
-                    {user.plan === 'plus' && (
-                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#30CC36] rounded-full flex items-center justify-center border-2 border-white">
-                        <Icon icon="check" size={10} className="text-white" weight={900} />
-                      </div>
-                    )}
-                  </div>
-                </button>
-              ) : (
-                <button 
-                  onClick={() => router.push('/login')}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#30cc36] text-white text-[13px] font-black shadow-lg shadow-primary/20 active:scale-95 transition-all hover:brightness-110"
-                >
-                  <Icon icon="login" size={18} weight={700} />
-                  <span>Entrar</span>
-                </button>
+                <span className="hidden whitespace-nowrap lg:inline">
+                  {item.label}
+                </span>
+
+                {isActive && (
+                  <span className="absolute inset-0 rounded-full bg-gradient-to-b from-white/20 to-transparent" />
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      <div className="flex items-center gap-2 md:gap-3">
+        {mounted && (
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="
+              flex h-10 w-10 items-center justify-center rounded-full
+              border border-white/10 bg-white/[0.08]
+              text-on-surface shadow-sm backdrop-blur-xl
+              transition-all duration-200 hover:bg-white/[0.12]
+              active:scale-95 md:h-11 md:w-11
+            "
+            aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+            title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+          >
+            <Icon icon={themeIcon} size={20} weight={700} />
+          </button>
+        )}
+
+        {mounted && canManageMembers && (
+          <button
+            onClick={() => router.push('/moderation')}
+            className="
+              flex h-10 w-10 items-center justify-center rounded-full
+              border border-primary/10 bg-primary/10 text-primary
+              shadow-sm transition-all active:scale-95 md:hidden
+            "
+            title="Moderação"
+          >
+            <Icon icon="admin_panel_settings" size={22} weight={700} />
+          </button>
+        )}
+
+        {user ? (
+          <button
+            onClick={onAvatarClick as any}
+            className="
+              group flex items-center rounded-full border border-white/10
+              bg-white/[0.08] p-1 backdrop-blur-xl
+              transition-all duration-300 hover:bg-white/[0.12]
+              active:scale-95
+            "
+          >
+            <div className="relative">
+              <Avatar
+                src={userAvatar || undefined}
+                name={user?.name || ''}
+                alt="User"
+                className="
+                  h-10 w-10 shadow-sm ring-2 ring-primary/20
+                  transition-all duration-300 group-hover:ring-primary
+                  md:h-11 md:w-11
+                "
+              />
+
+              {user.plan === 'plus' && (
+                <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-primary">
+                  <Icon icon="check" size={10} className="text-white" weight={900} />
+                </div>
               )}
             </div>
-          )}
-        </div>
+          </button>
+        ) : (
+          <button
+            onClick={() => router.push('/login')}
+            className="
+              flex items-center gap-2 rounded-full bg-primary px-5 py-2.5
+              text-[13px] font-black text-white shadow-lg shadow-primary/25
+              transition-all hover:brightness-110 active:scale-95
+            "
+          >
+            <Icon icon="login" size={18} weight={700} />
+            <span>Entrar</span>
+          </button>
+        )}
       </div>
-    </header>
-  );
+    </div>
+  </header>
+);
 }

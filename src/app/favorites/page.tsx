@@ -45,13 +45,11 @@ export default function FavoritesPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(48,204,54,0.16),_transparent_36%),linear-gradient(180deg,_#ffffff_0%,_#f7faf8_100%)] pb-24 dark:bg-[radial-gradient(circle_at_top,_rgba(48,204,54,0.14),_transparent_36%),linear-gradient(180deg,_#080a0c_0%,_#101215_100%)]">
+    <div className="min-h-screen overflow-hidden bg-background]">
       <TopAppBar />
 
       <main className="mx-auto max-w-5xl px-4 pt-24 md:px-8">
         <section className="relative overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[#0f1115] sm:p-8 md:p-10">
-          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#30cc36]/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[#30cc36]/10 blur-3xl" />
 
           <div className="relative flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <div>

@@ -21,6 +21,7 @@ import { supabase } from "@/lib/supabase";
 import { trackServiceInteraction } from "@/lib/service-interactions";
 
 const PAGE_SIZE = 9;
+const DUPLICATE_COLLAPSE_DISTANCE_KM = 0.5;
 
 type MembershipAccessType = "resident" | "service_provider" | null;
 type StoryMediaType = "image" | "video";
@@ -113,7 +114,7 @@ function PaginationControls({
           type="button"
           onClick={onPrevious}
           disabled={currentPage <= 1}
-          className="px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container-lowest text-sm font-bold text-on-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-highest"
+          className="rounded-full border border-white/20 bg-white/70 px-4 py-2 text-sm font-black text-zinc-700 shadow-sm backdrop-blur-xl transition-all hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/[0.04] dark:text-white"
         >
           Anterior
         </button>
@@ -122,13 +123,13 @@ function PaginationControls({
           type="button"
           onClick={onNext}
           disabled={currentPage >= totalPages}
-          className="px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container-lowest text-sm font-bold text-on-surface transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-container-highest"
+          className="rounded-full border border-white/20 bg-white/70 px-4 py-2 text-sm font-black text-zinc-700 shadow-sm backdrop-blur-xl transition-all hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/[0.04] dark:text-white"
         >
           Próximo
         </button>
       </div>
 
-      <p className="text-sm font-medium text-center text-on-surface-variant">
+      <p className="text-center text-sm font-bold text-zinc-400 dark:text-white/45">
         Página {currentPage} de {totalPages}
       </p>
     </div>
@@ -158,6 +159,7 @@ export default function HomePage() {
   } | null>(null);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const [isStoryComposerOpen, setIsStoryComposerOpen] = useState(false);
   const [selectedStoryFiles, setSelectedStoryFiles] = useState<File[]>([]);
   const [storyItems, setStoryItems] = useState<StoryItem[]>([]);
@@ -337,7 +339,11 @@ export default function HomePage() {
       typeof service?.environmentLatitude === "number" &&
       typeof service?.environmentLongitude === "number";
 
-    if (fallbackEnvironmentId || fallbackEnvironmentName || hasFallbackCoordinates) {
+    if (
+      fallbackEnvironmentId ||
+      fallbackEnvironmentName ||
+      hasFallbackCoordinates
+    ) {
       const hasSameEnvironment = linked.some((env: any) => {
         if (fallbackEnvironmentId) {
           return env.id === fallbackEnvironmentId;
@@ -346,7 +352,8 @@ export default function HomePage() {
         if (!fallbackEnvironmentName) return false;
         return (
           typeof env?.name === "string" &&
-          env.name.trim().toLowerCase() === fallbackEnvironmentName.toLowerCase()
+          env.name.trim().toLowerCase() ===
+            fallbackEnvironmentName.toLowerCase()
         );
       });
 
@@ -369,9 +376,12 @@ export default function HomePage() {
     return linked;
   }, []);
 
-  const getLinkedEnvironmentIds = useCallback((service: any) => {
-    return getLinkedEnvironments(service).map((env: any) => env.id);
-  }, [getLinkedEnvironments]);
+  const getLinkedEnvironmentIds = useCallback(
+    (service: any) => {
+      return getLinkedEnvironments(service).map((env: any) => env.id);
+    },
+    [getLinkedEnvironments],
+  );
 
   const membershipEnvironmentIds = useMemo(() => {
     return Array.from(
@@ -662,7 +672,9 @@ export default function HomePage() {
       .map((s) => {
         const linkedEnvironments = getLinkedEnvironments(s);
         const defaultEnvironmentName =
-          (typeof s.environmentName === "string" ? s.environmentName.trim() : "") ||
+          (typeof s.environmentName === "string"
+            ? s.environmentName.trim()
+            : "") ||
           (typeof linkedEnvironments[0]?.name === "string"
             ? linkedEnvironments[0].name
             : "");
@@ -671,7 +683,8 @@ export default function HomePage() {
           linkedEnvironments[0].id.trim().length > 0
             ? linkedEnvironments[0].id.trim()
             : "") ||
-          (typeof s.environmentId === "string" && s.environmentId.trim().length > 0
+          (typeof s.environmentId === "string" &&
+          s.environmentId.trim().length > 0
             ? s.environmentId.trim()
             : "");
 
@@ -710,13 +723,15 @@ export default function HomePage() {
               };
             })
             .filter(
-              (candidate: DistanceCandidate | null): candidate is DistanceCandidate =>
+              (
+                candidate: DistanceCandidate | null,
+              ): candidate is DistanceCandidate =>
                 Boolean(
                   candidate &&
-                    typeof candidate.value === "number" &&
-                    typeof candidate.id === "string" &&
-                    candidate.id.length > 0 &&
-                    Number.isFinite(candidate.value),
+                  typeof candidate.value === "number" &&
+                  typeof candidate.id === "string" &&
+                  candidate.id.length > 0 &&
+                  Number.isFinite(candidate.value),
                 ),
             );
 
@@ -731,7 +746,9 @@ export default function HomePage() {
           }
         } else if (
           selectedEnvironmentId !== "all" &&
-          linkedEnvironments.some((env: any) => env?.id === selectedEnvironmentId)
+          linkedEnvironments.some(
+            (env: any) => env?.id === selectedEnvironmentId,
+          )
         ) {
           const selectedEnvironment = linkedEnvironments.find(
             (env: any) => env?.id === selectedEnvironmentId,
@@ -742,7 +759,12 @@ export default function HomePage() {
           }
         }
 
-        return { ...s, distance, distanceEnvironmentName, distanceEnvironmentId };
+        return {
+          ...s,
+          distance,
+          distanceEnvironmentName,
+          distanceEnvironmentId,
+        };
       })
       .sort((a, b) => a.distance - b.distance);
   }, [
@@ -773,6 +795,27 @@ export default function HomePage() {
       );
     });
   }, [search, servicesWithDistance]);
+
+  const getDuplicateServiceKey = useCallback((service: any) => {
+    const normalize = (value: unknown) =>
+      typeof value === "string" ? value.trim().toLowerCase() : "";
+
+    const providerId =
+      typeof service?.provider_id === "string"
+        ? service.provider_id.trim().toLowerCase()
+        : "";
+    const providerName = normalize(service?.provider);
+    const title = normalize(service?.title);
+    const fallbackIdentity =
+      normalize(service?.slug) ||
+      normalize(service?.description).slice(0, 120) ||
+      normalize(service?.image || service?.image_url);
+
+    return [
+      providerId || `provider:${providerName}`,
+      title || fallbackIdentity,
+    ].join("::");
+  }, []);
 
   const shouldShowResidentPin = useCallback(
     (service: any) => {
@@ -849,14 +892,81 @@ export default function HomePage() {
   }, [filteredServices, getLinkedEnvironmentIds]);
 
   const displayedServices = useMemo(() => {
-    return providerGroups.map((group) => ({
-      ...group.primaryService,
-      groupKey: group.key,
-      groupProviderName: group.providerName,
-      groupTotalServices: group.totalServices,
-      groupTotalEnvironments: group.totalEnvironments,
-    }));
-  }, [providerGroups]);
+    if (selectedCategory !== "all") {
+      return filteredServices;
+    }
+
+    if (!user?.id || !userLocation) {
+      return filteredServices;
+    }
+
+    const groups = new Map<string, Array<any>>();
+
+    filteredServices.forEach((service) => {
+      const key = getDuplicateServiceKey(service);
+      const bucket = groups.get(key);
+      if (bucket) {
+        bucket.push(service);
+        return;
+      }
+      groups.set(key, [service]);
+    });
+
+    const result: Array<any> = [];
+
+    groups.forEach((group) => {
+      if (group.length <= 1) {
+        result.push(group[0]);
+        return;
+      }
+
+      const sortedGroup = [...group].sort((a, b) => {
+        const distanceA =
+          typeof a?.distance === "number" && Number.isFinite(a.distance)
+            ? a.distance
+            : Infinity;
+        const distanceB =
+          typeof b?.distance === "number" && Number.isFinite(b.distance)
+            ? b.distance
+            : Infinity;
+        return distanceA - distanceB;
+      });
+
+      const nearestService = sortedGroup[0];
+      const nearbyServices = sortedGroup.filter((service) => {
+        return (
+          typeof service?.distance === "number" &&
+          Number.isFinite(service.distance) &&
+          service.distance <= DUPLICATE_COLLAPSE_DISTANCE_KM
+        );
+      });
+
+      if (nearbyServices.length > 0) {
+        result.push(...nearbyServices);
+        return;
+      }
+
+      result.push(nearestService);
+    });
+
+    return result.sort((a, b) => {
+      const distanceA =
+        typeof a?.distance === "number" && Number.isFinite(a.distance)
+          ? a.distance
+          : Infinity;
+      const distanceB =
+        typeof b?.distance === "number" && Number.isFinite(b.distance)
+          ? b.distance
+          : Infinity;
+      return distanceA - distanceB;
+    });
+  }, [
+    filteredServices,
+    getDuplicateServiceKey,
+    selectedCategory,
+    user?.id,
+    userLocation,
+  ]);
 
   const totalPages = Math.max(
     1,
@@ -913,7 +1023,8 @@ export default function HomePage() {
     let hasRequestedLocation = false;
 
     const requestLocationOnEntry = () => {
-      if (cancelled || hasRequestedLocation || !("geolocation" in navigator)) return;
+      if (cancelled || hasRequestedLocation || !("geolocation" in navigator))
+        return;
 
       hasRequestedLocation = true;
       setLocationLoading(true);
@@ -946,7 +1057,9 @@ export default function HomePage() {
 
       try {
         if (typeof navigator.permissions?.query === "function") {
-          const permission = await navigator.permissions.query({ name: "geolocation" as PermissionName });
+          const permission = await navigator.permissions.query({
+            name: "geolocation" as PermissionName,
+          });
 
           if (permission.state === "granted") {
             requestLocationOnEntry();
@@ -954,9 +1067,15 @@ export default function HomePage() {
           }
 
           if (permission.state === "prompt") {
-            window.addEventListener("pointerdown", requestOnFirstInteraction, { once: true });
-            window.addEventListener("touchstart", requestOnFirstInteraction, { once: true });
-            window.addEventListener("keydown", requestOnFirstInteraction, { once: true });
+            window.addEventListener("pointerdown", requestOnFirstInteraction, {
+              once: true,
+            });
+            window.addEventListener("touchstart", requestOnFirstInteraction, {
+              once: true,
+            });
+            window.addEventListener("keydown", requestOnFirstInteraction, {
+              once: true,
+            });
             window.setTimeout(requestLocationOnEntry, 1200);
             return;
           }
@@ -968,9 +1087,15 @@ export default function HomePage() {
         void permissionError;
       }
 
-      window.addEventListener("pointerdown", requestOnFirstInteraction, { once: true });
-      window.addEventListener("touchstart", requestOnFirstInteraction, { once: true });
-      window.addEventListener("keydown", requestOnFirstInteraction, { once: true });
+      window.addEventListener("pointerdown", requestOnFirstInteraction, {
+        once: true,
+      });
+      window.addEventListener("touchstart", requestOnFirstInteraction, {
+        once: true,
+      });
+      window.addEventListener("keydown", requestOnFirstInteraction, {
+        once: true,
+      });
       window.setTimeout(requestLocationOnEntry, 1200);
     };
 
@@ -1340,19 +1465,120 @@ export default function HomePage() {
         .replace(/^-|-$/g, ""),
   }));
 
-  const categories = [
-    { id: "all", label: "Tudo", icon: "apps" },
-    ...SERVICE_CATEGORIES,
-  ];
+  const categories = useMemo(
+    () => [{ id: "all", label: "Tudo", icon: "apps" }, ...SERVICE_CATEGORIES],
+    [],
+  );
+
+  const categoryUsageMap = useMemo(() => {
+    const map = new Map<string, number>();
+    activeServices.forEach((service) => {
+      const category =
+        typeof service.category === "string" ? service.category.trim() : "";
+      if (!category) return;
+      map.set(category, (map.get(category) || 0) + 1);
+    });
+    return map;
+  }, [activeServices]);
+
+  const mobileQuickCategories = useMemo(() => {
+    const allCategory = categories[0];
+    const categoryOrder = new Map<string, number>(
+      SERVICE_CATEGORIES.map((category, index) => [category.id, index]),
+    );
+
+    const rankedCategories = [...SERVICE_CATEGORIES].sort((a, b) => {
+      const usageDiff =
+        (categoryUsageMap.get(b.label) || 0) - (categoryUsageMap.get(a.label) || 0);
+      if (usageDiff !== 0) return usageDiff;
+      return (categoryOrder.get(a.id) || 0) - (categoryOrder.get(b.id) || 0);
+    });
+
+    const topCategories = rankedCategories.slice(0, 4);
+    const selectedCategoryOption = categories.find(
+      (category) =>
+        (category.id === "all" && selectedCategory === "all") ||
+        category.label === selectedCategory,
+    );
+
+    if (
+      selectedCategoryOption &&
+      selectedCategoryOption.id !== "all" &&
+      !topCategories.some((category) => category.id === selectedCategoryOption.id)
+    ) {
+      return [allCategory, selectedCategoryOption, ...topCategories].slice(0, 5);
+    }
+
+    return [allCategory, ...topCategories];
+  }, [categories, categoryUsageMap, selectedCategory]);
+
+  const handleSelectCategory = useCallback((category: { id: string; label: string }) => {
+    setSelectedCategory(category.id === "all" ? "all" : category.label);
+    setIsCategorySheetOpen(false);
+  }, []);
+
   const showInitialLoading = servicesLoading && services.length === 0;
 
   return (
-    <div className={`min-h-screen ${user ? "pb-32" : "pb-10"} bg-background`}>
+    <div className="min-h-screen overflow-hidden bg-background">
       <TopAppBar />
 
-      <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-8 pb-32">
-        <section className="space-y-3">
-          <div className="flex items-center justify-between px-1">
+      <main className="mx-auto max-w-7xl space-y-8 px-4 pb-32 pt-24 md:px-8 md:pt-28">
+        {/* <section className="relative overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/70 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04] md:p-8">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#30cc36]/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 left-10 h-56 w-56 rounded-full bg-[#30cc36]/10 blur-3xl" />
+
+          <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#30cc36]/20 bg-[#30cc36]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#1eb34b]">
+                <Icon icon="verified" size={14} weight={700} />
+                Rede de confiança
+              </span>
+
+              <p className="mt-5 text-sm font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-white/35">
+                {user?.name ? `Olá, ${user.name.split(" ")[0]}` : "Bem-vindo ao Conectaê"}
+              </p>
+
+              <h1 className="mt-2 text-4xl font-black tracking-tight text-zinc-950 dark:text-white md:text-6xl">
+                Encontre serviços perto de você.
+              </h1>
+
+              <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed text-zinc-500 dark:text-white/55 md:text-base">
+                Profissionais, autônomos e moradores anunciando dentro das suas comunidades.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 rounded-[2rem] border border-white/20 bg-white/60 p-2 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
+              <div className="rounded-[1.5rem] bg-[#30cc36]/10 px-4 py-3 text-center">
+                <p className="text-xl font-black text-[#30cc36]">{activeServices.length}</p>
+                <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
+                  Ativos
+                </p>
+              </div>
+
+              <div className="rounded-[1.5rem] bg-white/70 px-4 py-3 text-center dark:bg-white/[0.06]">
+                <p className="text-xl font-black text-zinc-950 dark:text-white">
+                  {environmentsWithServices.length}
+                </p>
+                <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
+                  Locais
+                </p>
+              </div>
+
+              <div className="rounded-[1.5rem] bg-white/70 px-4 py-3 text-center dark:bg-white/[0.06]">
+                <p className="text-xl font-black text-zinc-950 dark:text-white">
+                  {categories.length - 1}
+                </p>
+                <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
+                  Categorias
+                </p>
+              </div>
+            </div>
+          </div>
+        </section> */}
+        <section className="relative overflow-visible rounded-[2rem] border border-white/20 bg-white/55 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.035]">
+          <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#30cc36]/10 blur-3xl" />
+          <div className="relative flex items-center justify-between px-1">
             <h2 className="text-sm font-black tracking-[0.2em] uppercase text-on-surface-variant"></h2>
             {/* {user && (
               <button
@@ -1369,7 +1595,7 @@ export default function HomePage() {
             <p className="px-1 text-xs text-red-600">{storiesError}</p>
           )}
 
-          <div className="flex overflow-x-auto px-1 pb-2 gap-4 no-scrollbar">
+          <div className="relative flex overflow-x-auto px-1 pb-2 gap-4 no-scrollbar">
             {user && (
               <div
                 role="button"
@@ -1503,108 +1729,200 @@ export default function HomePage() {
           </button>
         </section> */}
 
-        <section className="space-y-6">
-          <div className="flex items-center gap-2">
-            {/* INPUT */}
-            <div className="flex-1 min-w-0">
-              <SearchField
-                value={search}
-                onChange={setSearch}
-                placeholder="Encontre um serviço..."
-              />
-            </div>
+        <section className="space-y-5">
+          <div className="rounded-[2rem] border border-white/20 bg-white/70 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04]">
+            <div className="flex items-center gap-2">
+              <div className="min-w-0 flex-1">
+                <SearchField
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Encontre eletricista, manicure, pedreiro..."
+                />
+              </div>
 
-            {/* DROPDOWN CUSTOMIZADO */}
-            <div ref={filterDropdownRef} className="relative flex-shrink-0">
+              {/* <div
+                ref={filterDropdownRef}
+                className="absolute right-0 top-full z-[9999] z-[80] shrink-0"
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    environmentsWithServices.length > 0 &&
+                    setIsFilterOpen((prev) => !prev)
+                  }
+                  disabled={environmentsWithServices.length === 0}
+                  className="flex h-[46px] max-w-[126px] items-center gap-2 truncate rounded-full border border-white/20 bg-white/80 px-4 pr-9 text-xs font-black text-zinc-700 shadow-sm backdrop-blur-xl transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/[0.06] dark:text-white sm:max-w-[200px]"
+                >
+                  <Icon icon="location_on" size={16} weight={700} />
+                  <span className="truncate">{selectedEnvironmentName}</span>
+                </button>
+
+                <Icon
+                  icon="expand_more"
+                  size={16}
+                  className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 transition-transform ${
+                    isFilterOpen ? "rotate-180" : ""
+                  }`}
+                />
+
+                {isFilterOpen && (
+                  <div
+                    className="
+    absolute right-0 top-full z-[9999] mt-3
+    w-72 max-w-[calc(100vw-24px)]
+    overflow-hidden rounded-[1.5rem]
+    border border-white/20 bg-white/95
+    shadow-[0_24px_80px_rgba(15,23,42,0.22)]
+    backdrop-blur-2xl
+    dark:border-white/10 dark:bg-zinc-950/95
+  "
+                  >
+                    {" "}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedEnvironmentId("all");
+                        setIsFilterOpen(false);
+                      }}
+                      className={`w-full px-4 py-3 text-left text-sm font-black transition-colors ${
+                        selectedEnvironmentId === "all"
+                          ? "bg-[#30cc36]/10 text-[#30cc36]"
+                          : "text-zinc-700 hover:bg-[#30cc36]/5 dark:text-white"
+                      }`}
+                    >
+                      Todos os locais
+                    </button>
+                    <div className="max-h-72 overflow-y-auto">
+                      {environmentsWithServices.map((env) => (
+                        <button
+                          key={env.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedEnvironmentId(env.id);
+                            setIsFilterOpen(false);
+                          }}
+                          className={`w-full px-4 py-3 text-left text-sm transition-colors ${
+                            selectedEnvironmentId === env.id
+                              ? "bg-[#30cc36]/10 font-black text-[#30cc36]"
+                              : "font-bold text-zinc-700 hover:bg-[#30cc36]/5 dark:text-white"
+                          }`}
+                        >
+                          {env.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div> */}
+            </div>
+          </div>
+
+          <div className="-mx-4 flex items-center gap-2 overflow-x-auto overflow-y-hidden px-4 pb-3 no-scrollbar scroll-smooth md:hidden">
+            {mobileQuickCategories.map((category) => {
+              const isSelected =
+                (category.id === "all" && selectedCategory === "all") ||
+                selectedCategory === category.label;
+
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() => handleSelectCategory(category)}
+                  className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-black whitespace-nowrap shadow-sm transition-all active:scale-95 ${
+                    isSelected
+                      ? "border-[#30cc36] bg-[#30cc36] text-white shadow-lg shadow-[#30cc36]/25"
+                      : "border-white/20 bg-white/70 text-zinc-500 backdrop-blur-xl hover:border-[#30cc36]/30 hover:text-[#30cc36] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/60"
+                  }`}
+                >
+                  <Icon icon={category.icon} size={14} weight={isSelected ? 700 : 400} />
+                  {category.label}
+                </button>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={() => setIsCategorySheetOpen(true)}
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/75 px-3 py-2 text-[11px] font-black text-zinc-600 shadow-sm backdrop-blur-xl transition-all active:scale-95 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/70"
+            >
+              <Icon icon="tune" size={14} weight={700} />
+              Mais
+            </button>
+          </div>
+
+          <div className="hidden md:-mx-8 md:flex md:flex-wrap md:gap-2 md:px-8 md:pb-0">
+            {categories.map((cat) => {
+              const isSelected =
+                (cat.id === "all" && selectedCategory === "all") ||
+                selectedCategory === cat.label;
+
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => handleSelectCategory(cat)}
+                  className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-black whitespace-nowrap shadow-sm transition-all active:scale-95 ${
+                    isSelected
+                      ? "border-[#30cc36] bg-[#30cc36] text-white shadow-lg shadow-[#30cc36]/25"
+                      : "border-white/20 bg-white/70 text-zinc-500 backdrop-blur-xl hover:border-[#30cc36]/30 hover:text-[#30cc36] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/60"
+                  }`}
+                >
+                  <Icon icon={cat.icon} size={14} weight={isSelected ? 700 : 400} />
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {isCategorySheetOpen && (
+            <div className="fixed inset-0 z-[85] md:hidden">
               <button
                 type="button"
-                onClick={() =>
-                  environmentsWithServices.length > 0 &&
-                  setIsFilterOpen((prev) => !prev)
-                }
-                disabled={environmentsWithServices.length === 0}
-                className="bg-surface-container-highest rounded-[2.5rem] pl-3 pr-8 py-2.5 text-xs font-bold text-on-surface cursor-pointer shadow-md border border-outline-variant/10 focus:outline-none focus:ring-2 focus:ring-primary/20 h-[44px] max-w-[118px] sm:max-w-[180px] flex items-center truncate disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                <span className="truncate">{selectedEnvironmentName}</span>
-              </button>
-
-              <Icon
-                icon="expand_more"
-                size={16}
-                className={`absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none transition-transform ${
-                  isFilterOpen ? "rotate-180" : ""
-                }`}
+                aria-label="Fechar seleção de categorias"
+                onClick={() => setIsCategorySheetOpen(false)}
+                className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
               />
 
-              {isFilterOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-24px)] rounded-2xl bg-surface-container-lowest shadow-2xl border border-outline-variant/10 z-50 overflow-hidden">
+              <div className="absolute inset-x-0 bottom-0 max-h-[82vh] overflow-y-auto rounded-t-[1.6rem] border border-white/20 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-zinc-950">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-sm font-black uppercase tracking-[0.15em] text-zinc-700 dark:text-white/80">
+                    Categorias
+                  </h3>
                   <button
                     type="button"
-                    onClick={() => {
-                      setSelectedEnvironmentId("all");
-                      setIsFilterOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-3 text-sm font-medium transition-colors ${
-                      selectedEnvironmentId === "all"
-                        ? "bg-primary/5 text-primary font-bold"
-                        : "hover:bg-surface-container-highest text-on-surface"
-                    }`}
+                    onClick={() => setIsCategorySheetOpen(false)}
+                    className="rounded-full border border-zinc-200 p-1.5 text-zinc-500 dark:border-white/10 dark:text-white/70"
                   >
-                    Filtro
+                    <Icon icon="close" size={18} />
                   </button>
+                </div>
 
-                  <div className="max-h-72 overflow-y-auto">
-                    {environmentsWithServices.map((env) => (
+                <div className="grid grid-cols-2 gap-2">
+                  {categories.map((category) => {
+                    const isSelected =
+                      (category.id === "all" && selectedCategory === "all") ||
+                      selectedCategory === category.label;
+
+                    return (
                       <button
-                        key={env.id}
+                        key={`sheet-${category.id}`}
                         type="button"
-                        onClick={() => {
-                          setSelectedEnvironmentId(env.id);
-                          setIsFilterOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-3 text-sm transition-colors ${
-                          selectedEnvironmentId === env.id
-                            ? "bg-primary/5 text-primary font-bold"
-                            : "hover:bg-surface-container-highest text-on-surface"
+                        onClick={() => handleSelectCategory(category)}
+                        className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-xs font-black transition-all ${
+                          isSelected
+                            ? "border-[#30cc36] bg-[#30cc36]/12 text-[#30cc36]"
+                            : "border-zinc-200/70 bg-white text-zinc-600 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/70"
                         }`}
                       >
-                        {env.name}
+                        <Icon icon={category.icon} size={16} weight={isSelected ? 700 : 400} />
+                        <span className="truncate">{category.label}</span>
                       </button>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-
-          <div className="flex flex-nowrap overflow-x-auto overflow-y-hidden pb-4 -mx-4 px-4 md:-mx-8 md:px-8 gap-3 no-scrollbar scroll-smooth">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() =>
-                  setSelectedCategory(cat.id === "all" ? "all" : cat.label)
-                }
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl whitespace-nowrap font-black text-xs transition-all border shrink-0 shadow-sm ${
-                  (cat.id === "all" && selectedCategory === "all") ||
-                  selectedCategory === cat.label
-                    ? "bg-[#30cc36] text-white border-[#30cc36] shadow-lg shadow-[#30cc36]/20 scale-105"
-                    : "bg-surface-container-lowest text-on-surface-variant border-outline-variant/10 hover:border-[#30cc36]/40 hover:text-[#30cc36] active:scale-95"
-                }`}
-              >
-                <Icon
-                  icon={cat.icon}
-                  size={16}
-                  weight={
-                    (cat.id === "all" && selectedCategory === "all") ||
-                    selectedCategory === cat.label
-                      ? 700
-                      : 400
-                  }
-                />
-                {cat.label}
-              </button>
-            ))}
-          </div>
+          )}
         </section>
 
         {showInitialLoading ? (
@@ -1613,7 +1931,7 @@ export default function HomePage() {
               {Array.from({ length: 8 }).map((_, index) => (
                 <div
                   key={index}
-                  className="overflow-hidden rounded-[2rem] border border-outline-variant/10 bg-surface-container-lowest shadow-sm"
+                  className="overflow-hidden rounded-[2rem] border border-white/20 bg-white/70 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]"
                   aria-busy="true"
                   aria-live="polite"
                 >
@@ -1645,19 +1963,19 @@ export default function HomePage() {
                       onClick={() =>
                         handleOpenServiceDetails(service, "home_list_card")
                       }
-                      className="bg-surface-container-lowest rounded-[2rem] flex flex-col cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
+                      className="group/card relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.04]"
                     >
-                      <div className="relative h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
+                      <div className="relative h-48 w-full overflow-hidden border-b border-white/20 dark:border-white/10">
                         {service.image ? (
                           <img
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-105"
                             src={service.image}
                             alt={service.title}
                             loading="lazy"
                             decoding="async"
                           />
                         ) : (
-                          <div className="w-full h-full bg-primary/5 flex items-center justify-center">
+                          <div className="flex h-full w-full items-center justify-center bg-[#30cc36]/5">
                             <Icon
                               icon="image"
                               size={24}
@@ -1666,16 +1984,16 @@ export default function HomePage() {
                           </div>
                         )}
                         {service.image && shouldShowResidentPin(service) && (
-                            <img
-                              src="/pin.png"
-                              alt="Morador"
-                              className="pointer-events-none absolute bottom-2 left-2 h-6 w-6 object-contain drop-shadow-md"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                          )}
+                          <img
+                            src="/pin.png"
+                            alt="Morador"
+                            className="pointer-events-none absolute bottom-2 left-2 h-6 w-6 object-contain drop-shadow-md"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        )}
                       </div>
-                      <div className="flex flex-1 min-w-0 flex-col justify-between p-4 h-full">
+                      <div className="flex min-w-0 flex-1 flex-col justify-between p-4">
                         <div>
                           <div className="mb-2 flex flex-wrap items-center gap-2">
                             <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">
@@ -1699,13 +2017,14 @@ export default function HomePage() {
                             {service.title}
                           </h4>
                           <p className="text-xs text-on-surface-variant font-semibold mt-1 truncate">
-                            {service.groupProviderName}
+                            {service.provider || "Usuario"}
                           </p>
                         </div>
 
                         <div className="mt-1 space-y-2">
                           <div className="flex items-center justify-between">
-                            {(userLocation || service.distanceEnvironmentName) && (
+                            {(userLocation ||
+                              service.distanceEnvironmentName) && (
                               <div className="flex items-center gap-2">
                                 {userLocation &&
                                   service.distance !== Infinity && (
@@ -1742,7 +2061,7 @@ export default function HomePage() {
                                 "home_list_button",
                               );
                             }}
-                            className="w-full rounded-full uppercase border border-[#30cc36]/30 text-[#30cc36] text-xs font-black py-2 hover:bg-[#30cc36]/10 transition-colors"
+                            className="w-full rounded-full bg-[#30cc36] py-2.5 text-xs font-black uppercase text-white shadow-lg shadow-[#30cc36]/20 transition-all hover:brightness-110 active:scale-95"
                           >
                             Ver anúncio
                           </button>
@@ -1751,7 +2070,7 @@ export default function HomePage() {
                     </div>
                   ))}
                   {displayedServices.length === 0 && (
-                    <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
+                    <div className="col-span-full rounded-[2rem] border border-dashed border-[#30cc36]/25 bg-white/70 py-12 text-center text-sm font-bold italic text-zinc-400 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
                       Nenhum prestador encontrado proximo a voce
                     </div>
                   )}
@@ -1780,19 +2099,19 @@ export default function HomePage() {
                       onClick={() =>
                         handleOpenServiceDetails(service, "home_search_card")
                       }
-                      className="bg-surface-container-lowest rounded-[2rem] flex flex-col cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
+                      className="group/card relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.04]"
                     >
-                      <div className="relative h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
+                      <div className="relative h-48 w-full overflow-hidden border-b border-white/20 dark:border-white/10">
                         {service.image ? (
                           <img
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-105"
                             src={service.image}
                             alt={service.title}
                             loading="lazy"
                             decoding="async"
                           />
                         ) : (
-                          <div className="w-full h-full bg-primary/5 flex items-center justify-center">
+                          <div className="flex h-full w-full items-center justify-center bg-[#30cc36]/5">
                             <Icon
                               icon="image"
                               size={24}
@@ -1801,16 +2120,16 @@ export default function HomePage() {
                           </div>
                         )}
                         {service.image && shouldShowResidentPin(service) && (
-                            <img
-                              src="/pin.png"
-                              alt="Morador"
-                              className="pointer-events-none absolute bottom-2 left-2 h-6 w-6 object-contain drop-shadow-md"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                          )}
+                          <img
+                            src="/pin.png"
+                            alt="Morador"
+                            className="pointer-events-none absolute bottom-2 left-2 h-6 w-6 object-contain drop-shadow-md"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        )}
                       </div>
-                      <div className="flex flex-1 min-w-0 flex-col justify-between p-4 h-full">
+                      <div className="flex min-w-0 flex-1 flex-col justify-between p-4">
                         <div>
                           <div className="mb-2 flex flex-wrap items-center gap-2">
                             <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
@@ -1834,7 +2153,7 @@ export default function HomePage() {
                             {service.title}
                           </h4>
                           <p className="text-xs text-on-surface-variant font-semibold mt-1 truncate">
-                            {service.groupProviderName}
+                            {service.provider || "Usuario"}
                           </p>
                           <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">
                             {service.description}
@@ -1843,7 +2162,8 @@ export default function HomePage() {
 
                         <div className="mt-3 space-y-2">
                           <div className="flex items-center justify-between">
-                            {(userLocation || service.distanceEnvironmentName) && (
+                            {(userLocation ||
+                              service.distanceEnvironmentName) && (
                               <div className="flex items-center gap-2">
                                 {userLocation &&
                                   service.distance !== Infinity && (
@@ -1884,7 +2204,7 @@ export default function HomePage() {
                                 "home_search_button",
                               );
                             }}
-                            className="w-full rounded-full border border-primary/30 text-primary text-xs font-black py-2 hover:bg-primary/10 transition-colors"
+                            className="w-full rounded-full bg-[#30cc36] py-2.5 text-xs font-black uppercase text-white shadow-lg shadow-[#30cc36]/20 transition-all hover:brightness-110 active:scale-95"
                           >
                             Ver anuncio
                           </button>
@@ -1893,7 +2213,7 @@ export default function HomePage() {
                     </div>
                   ))}
                   {displayedServices.length === 0 && (
-                    <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
+                    <div className="col-span-full rounded-[2rem] border border-dashed border-[#30cc36]/25 bg-white/70 py-12 text-center text-sm font-bold italic text-zinc-400 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
                       Nenhum prestador encontrado para "{search}"
                     </div>
                   )}
@@ -2096,7 +2416,7 @@ export default function HomePage() {
                         <img
                           src={service.image}
                           alt={service.title}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-105"
                           loading="lazy"
                           decoding="async"
                         />
@@ -2110,14 +2430,14 @@ export default function HomePage() {
                         </div>
                       )}
                       {service.image && shouldShowResidentPin(service) && (
-                          <img
-                            src="/pin.png"
-                            alt="Morador"
-                            className="pointer-events-none absolute bottom-1 left-1 h-4 w-4 object-contain drop-shadow-md"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        )}
+                        <img
+                          src="/pin.png"
+                          alt="Morador"
+                          className="pointer-events-none absolute bottom-1 left-1 h-4 w-4 object-contain drop-shadow-md"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[11px] font-black uppercase tracking-wide text-[#30cc36]">
@@ -2126,9 +2446,11 @@ export default function HomePage() {
                       <p className="text-sm font-bold text-on-surface truncate mt-0.5">
                         {service.title}
                       </p>
-                      {(service.distanceEnvironmentName || service.environmentName) && (
+                      {(service.distanceEnvironmentName ||
+                        service.environmentName) && (
                         <p className="text-xs text-on-surface-variant truncate mt-0.5">
-                          {service.distanceEnvironmentName || service.environmentName}
+                          {service.distanceEnvironmentName ||
+                            service.environmentName}
                         </p>
                       )}
                     </div>
@@ -2227,7 +2549,7 @@ export default function HomePage() {
                       {media.kind === "video" ? (
                         <video
                           src={media.previewUrl}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-105"
                           muted
                           loop
                           autoPlay
@@ -2237,7 +2559,7 @@ export default function HomePage() {
                         <img
                           src={media.previewUrl}
                           alt="Midia selecionada"
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-105"
                         />
                       )}
 

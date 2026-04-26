@@ -63,6 +63,12 @@ const getStatusBadge = (status: LinkedMembership["status"]) => {
   return "border-error/20 bg-error/10 text-error";
 };
 
+const getMembershipStatusLabel = (status: LinkedMembership["status"]) => {
+  if (status === "active") return "Ativo";
+  if (status === "pending") return "Pendente";
+  return "Bloqueado";
+};
+
 const isMissingRelationError = (error: any) => {
   const message = String(error?.message || "").toLowerCase();
   return error?.code === "42P01" || message.includes("service_environment_links");
@@ -71,6 +77,7 @@ const isMissingRelationError = (error: any) => {
 export default function MyAdsPage() {
   const router = useRouter();
   const { open } = usePublishModal();
+
   const {
     user,
     services,
@@ -82,12 +89,20 @@ export default function MyAdsPage() {
   } = useApp();
 
   const [mounted, setMounted] = useState(false);
-  const [expandedServiceId, setExpandedServiceId] = useState<string | null>(null);
+  const [expandedServiceId, setExpandedServiceId] = useState<string | null>(
+    null,
+  );
   const [linkedLoading, setLinkedLoading] = useState(false);
   const [linkedLoaded, setLinkedLoaded] = useState(false);
-  const [linkedEnvironments, setLinkedEnvironments] = useState<LinkedEnvironment[]>([]);
-  const [serviceLinkedEnvironmentIds, setServiceLinkedEnvironmentIds] = useState<Record<string, string[]>>({});
+  const [linkedEnvironments, setLinkedEnvironments] = useState<
+    LinkedEnvironment[]
+  >([]);
+  const [serviceLinkedEnvironmentIds, setServiceLinkedEnvironmentIds] =
+    useState<Record<string, string[]>>({});
   const [linkingKey, setLinkingKey] = useState<string | null>(null);
+  const [mobileLinkedServiceId, setMobileLinkedServiceId] = useState<
+    string | null
+  >(null);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
 
   useEffect(() => {
@@ -96,19 +111,23 @@ export default function MyAdsPage() {
 
   const selectedEnvironmentMap = useMemo(() => {
     const map: Record<string, Environment> = {};
+
     selectedEnvironments.forEach((env) => {
       map[env.id] = env;
     });
+
     return map;
   }, [selectedEnvironments]);
 
   const userServices = useMemo(() => {
     if (!user?.id) return [];
+
     return services
       .filter((service) => service.provider_id === user.id)
       .sort((a, b) => {
         const dateA = new Date((a as any).created_at || 0).getTime();
         const dateB = new Date((b as any).created_at || 0).getTime();
+
         return dateB - dateA;
       });
   }, [services, user?.id]);
@@ -123,6 +142,18 @@ export default function MyAdsPage() {
     [userServices],
   );
 
+  const mobileLinkedService = useMemo(() => {
+    if (!mobileLinkedServiceId) return null;
+    return userServices.find((service) => service.id === mobileLinkedServiceId) || null;
+  }, [mobileLinkedServiceId, userServices]);
+
+  useEffect(() => {
+    if (!mobileLinkedServiceId) return;
+    if (!userServices.some((service) => service.id === mobileLinkedServiceId)) {
+      setMobileLinkedServiceId(null);
+    }
+  }, [mobileLinkedServiceId, userServices]);
+
   const fetchLinkedEnvironments = useCallback(async () => {
     if (!user?.id) {
       setLinkedEnvironments([]);
@@ -136,7 +167,6 @@ export default function MyAdsPage() {
       .in("status", ["active", "pending"]);
 
     if (membersError) {
-      console.error("fetchLinkedEnvironments failed:", membersError);
       setLinkedEnvironments([]);
       return;
     }
@@ -144,6 +174,7 @@ export default function MyAdsPage() {
     const envCache: Record<string, Environment> = {
       ...selectedEnvironmentMap,
     };
+
     const missingEnvIds = new Set<string>();
     const memberships: LinkedMembership[] = [];
 
@@ -170,8 +201,8 @@ export default function MyAdsPage() {
         .in("id", Array.from(missingEnvIds));
 
       missingEnvRecords?.forEach((env) => {
-        const normalizedEnv = normalizeEnvironmentRecord(env);
-        envCache[env.id] = normalizedEnv;
+        const normalized = normalizeEnvironmentRecord(env);
+        envCache[env.id] = normalized;
       });
     }
 
@@ -179,6 +210,7 @@ export default function MyAdsPage() {
       .map((membership) => {
         const environment = envCache[membership.environmentId];
         if (!environment) return null;
+
         return {
           environment,
           membership,
@@ -205,124 +237,199 @@ export default function MyAdsPage() {
       .in("service_id", serviceIds);
 
     if (error) {
-      if (!isMissingRelationError(error)) {
-        console.error("fetchServiceEnvironmentLinks failed:", error);
-      }
       setServiceLinkedEnvironmentIds({});
       setLinkedLoaded(true);
       return;
     }
 
     const next: Record<string, string[]> = {};
+
     (data || []).forEach((row: any) => {
-      const serviceId = row?.service_id;
-      const environmentId = row?.environment_id;
-      if (typeof serviceId !== "string" || typeof environmentId !== "string") return;
-      if (!next[serviceId]) next[serviceId] = [];
-      if (!next[serviceId].includes(environmentId)) {
-        next[serviceId].push(environmentId);
-      }
+      if (!next[row.service_id]) next[row.service_id] = [];
+      next[row.service_id].push(row.environment_id);
     });
 
     setServiceLinkedEnvironmentIds(next);
     setLinkedLoaded(true);
   }, [userServices]);
 
+  const showStatusNotice = useCallback((message: string) => {
+    setStatusNotice(message);
+    setTimeout(() => setStatusNotice(null), 3200);
+  }, []);
+
+  const getLinkedIdsForService = useCallback(
+    (service: Service) => {
+      const fromMap = serviceLinkedEnvironmentIds[service.id];
+      if (Array.isArray(fromMap) && fromMap.length > 0) {
+        return Array.from(new Set(fromMap));
+      }
+
+      const fromServiceLinks = Array.isArray(service.linkedEnvironments)
+        ? service.linkedEnvironments
+            .map((env) => env?.id)
+            .filter((id): id is string => typeof id === "string" && id.length > 0)
+        : [];
+      if (fromServiceLinks.length > 0) {
+        return Array.from(new Set(fromServiceLinks));
+      }
+
+      if (
+        typeof service.environmentId === "string" &&
+        service.environmentId.trim().length > 0
+      ) {
+        return [service.environmentId.trim()];
+      }
+
+      return [];
+    },
+    [serviceLinkedEnvironmentIds],
+  );
+
+  const mobileLinkedIds = useMemo(() => {
+    if (!mobileLinkedService) return [];
+    return getLinkedIdsForService(mobileLinkedService);
+  }, [getLinkedIdsForService, mobileLinkedService]);
+
   const handleToggleLinkedForService = async (serviceId: string) => {
+    const isMobileViewport =
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 767px)").matches;
+
+    if (isMobileViewport) {
+      setMobileLinkedServiceId(serviceId);
+      setLinkedLoading(true);
+      try {
+        await Promise.all([
+          fetchLinkedEnvironments(),
+          fetchServiceEnvironmentLinks(),
+        ]);
+      } finally {
+        setLinkedLoading(false);
+      }
+      return;
+    }
+
     const nextServiceId = expandedServiceId === serviceId ? null : serviceId;
+
     setExpandedServiceId(nextServiceId);
 
     if (!nextServiceId) return;
 
     setLinkedLoading(true);
+
     try {
-      await Promise.all([fetchLinkedEnvironments(), fetchServiceEnvironmentLinks()]);
+      await Promise.all([
+        fetchLinkedEnvironments(),
+        fetchServiceEnvironmentLinks(),
+      ]);
     } finally {
       setLinkedLoading(false);
     }
   };
 
-  const handleToggleServiceEnvironment = async (
-    service: Service,
-    targetEnvironmentId: string,
-    isCurrentlyLinked: boolean,
-  ) => {
-    if (!user?.id) return;
+  const closeMobileLinkedModal = useCallback(() => {
+    setMobileLinkedServiceId(null);
+  }, []);
 
-    const actionKey = `${service.id}:${targetEnvironmentId}`;
-    setLinkingKey(actionKey);
-    let didChangeLinks = false;
+  const handleToggleServiceEnvironmentLink = async (
+    service: Service,
+    linkedEnvironment: LinkedEnvironment,
+  ) => {
+    if (!user?.id) {
+      showStatusNotice("Faça login para vincular ambientes.");
+      return;
+    }
+
+    const environmentId = linkedEnvironment.environment.id;
+    const membershipStatus = linkedEnvironment.membership.status;
+
+    if (membershipStatus !== "active") {
+      showStatusNotice("Este ambiente ainda está pendente e não pode ser vinculado.");
+      return;
+    }
+
+    const currentLinkedIds = getLinkedIdsForService(service);
+    const isCurrentlyLinked = currentLinkedIds.includes(environmentId);
+
+    if (isCurrentlyLinked && currentLinkedIds.length <= 1) {
+      showStatusNotice("Mantenha pelo menos 1 ambiente vinculado ao anúncio.");
+      return;
+    }
+
+    const nextLinkingKey = `${service.id}:${environmentId}`;
+    setLinkingKey(nextLinkingKey);
 
     try {
       if (isCurrentlyLinked) {
-        const { error: deleteError } = await supabase
+        const { error: unlinkError } = await supabase
           .from("service_environment_links")
           .delete()
           .eq("service_id", service.id)
-          .eq("environment_id", targetEnvironmentId);
+          .eq("environment_id", environmentId);
 
-        if (deleteError && !isMissingRelationError(deleteError)) {
-          throw deleteError;
+        if (unlinkError) {
+          throw unlinkError;
         }
-
-        setServiceLinkedEnvironmentIds((prev) => {
-          const next = { ...prev };
-          next[service.id] = (next[service.id] || []).filter((id) => id !== targetEnvironmentId);
-          return next;
-        });
-
-        setStatusNotice("Ambiente desvinculado do anuncio.");
-        didChangeLinks = true;
       } else {
-        let usedLegacyFallback = false;
-        const { error: upsertError } = await supabase
+        const { error: linkError } = await supabase
           .from("service_environment_links")
-          .upsert(
-            {
-              service_id: service.id,
-              environment_id: targetEnvironmentId,
-              created_by: user.id,
-            },
-            { onConflict: "service_id,environment_id" },
-          );
-
-        if (upsertError) {
-          if (isMissingRelationError(upsertError)) {
-            await updateService(service.id, { environmentId: targetEnvironmentId });
-            setServiceLinkedEnvironmentIds((prev) => ({
-              ...prev,
-              [service.id]: [targetEnvironmentId],
-            }));
-            setStatusNotice("Seu banco ainda esta em modo antigo de 1 ambiente.");
-            didChangeLinks = true;
-            usedLegacyFallback = true;
-          } else {
-            throw upsertError;
-          }
-        }
-
-        if (!usedLegacyFallback) {
-          setServiceLinkedEnvironmentIds((prev) => {
-            const next = { ...prev };
-            const current = next[service.id] || [];
-            next[service.id] = Array.from(new Set([...current, targetEnvironmentId]));
-            return next;
+          .insert({
+            service_id: service.id,
+            environment_id: environmentId,
+            created_by: user.id,
           });
 
-          setStatusNotice("Ambiente vinculado ao anuncio.");
-          didChangeLinks = true;
+        if (linkError && linkError.code !== "23505") {
+          throw linkError;
         }
       }
 
-      if (didChangeLinks) {
-        await refreshServices();
+      const nextLinkedIds = isCurrentlyLinked
+        ? currentLinkedIds.filter((id) => id !== environmentId)
+        : Array.from(new Set([...currentLinkedIds, environmentId]));
+
+      setServiceLinkedEnvironmentIds((prev) => ({
+        ...prev,
+        [service.id]: nextLinkedIds,
+      }));
+
+      const currentPrimaryEnvironmentId =
+        typeof service.environmentId === "string" ? service.environmentId : null;
+      const nextPrimaryEnvironmentId =
+        nextLinkedIds[0] ||
+        (typeof linkedEnvironment.environment.id === "string"
+          ? linkedEnvironment.environment.id
+          : null);
+
+      if (
+        (isCurrentlyLinked &&
+          currentPrimaryEnvironmentId &&
+          currentPrimaryEnvironmentId === environmentId &&
+          nextPrimaryEnvironmentId &&
+          nextPrimaryEnvironmentId !== currentPrimaryEnvironmentId) ||
+        (!currentPrimaryEnvironmentId && nextPrimaryEnvironmentId)
+      ) {
+        await updateService(service.id, {
+          environmentId: nextPrimaryEnvironmentId,
+        });
       }
-    } catch (error) {
-      console.error("Error toggling service environment link:", error);
-      setStatusNotice("Nao foi possivel atualizar os ambientes do anuncio.");
+
+      await refreshServices();
+
+      showStatusNotice(
+        isCurrentlyLinked
+          ? `Anúncio desvinculado de ${linkedEnvironment.environment.name}.`
+          : `Anúncio vinculado em ${linkedEnvironment.environment.name}.`,
+      );
+    } catch (error: any) {
+      if (isMissingRelationError(error)) {
+        showStatusNotice("Tabela de vínculos não encontrada no banco.");
+      } else {
+        showStatusNotice("Não foi possível atualizar os vínculos deste anúncio.");
+      }
     } finally {
       setLinkingKey(null);
-      setTimeout(() => setStatusNotice(null), 3000);
     }
   };
 
@@ -332,47 +439,161 @@ export default function MyAdsPage() {
 
     try {
       await removeService(serviceId);
-      setStatusNotice("Anuncio removido com sucesso.");
-    } catch (error) {
-      console.error("Error removing service:", error);
-      setStatusNotice("Nao foi possivel remover este anuncio.");
-    } finally {
-      setTimeout(() => setStatusNotice(null), 3000);
+      showStatusNotice("Anuncio removido com sucesso.");
+    } catch {
+      showStatusNotice("Nao foi possivel remover este anuncio.");
     }
+  };
+
+  const renderLinkPanel = (
+    service: Service,
+    linkedIds: string[],
+    canUnlink: boolean,
+  ) => {
+    return (
+      <div className="mt-3 space-y-2 rounded-xl border border-white/20 bg-white/65 p-3 backdrop-blur dark:border-white/10 dark:bg-white/[0.03]">
+        {linkedLoading ? (
+          <div className="flex items-center justify-center gap-2 py-2 text-xs font-bold text-zinc-500 dark:text-white/60">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#30cc36] border-t-transparent" />
+            Carregando ambientes...
+          </div>
+        ) : !linkedLoaded ? (
+          <p className="py-1 text-center text-xs font-semibold text-zinc-500 dark:text-white/60">
+            Abra novamente para carregar os vínculos.
+          </p>
+        ) : linkedEnvironments.length === 0 ? (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-zinc-500 dark:text-white/60">
+              Você ainda não possui ambientes disponíveis para vínculo.
+            </p>
+            <button
+              type="button"
+              onClick={() => open("link")}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#30cc36] px-3 py-2 text-[11px] font-black uppercase text-white"
+            >
+              <Icon icon="add" size={14} />
+              Adicionar ambiente
+            </button>
+          </div>
+        ) : (
+          <>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-500 dark:text-white/55">
+              Ambientes do anúncio
+            </p>
+            <div className="space-y-2">
+              {linkedEnvironments.map((linkedEnv) => {
+                const envId = linkedEnv.environment.id;
+                const membershipIsActive =
+                  linkedEnv.membership.status === "active";
+                const isLinked = linkedIds.includes(envId);
+                const isBusy = linkingKey === `${service.id}:${envId}`;
+                const unlinkDisabled = isLinked && !canUnlink;
+
+                return (
+                  <div
+                    key={`${service.id}:${envId}`}
+                    className="rounded-xl border border-white/30 bg-white/70 p-2 dark:border-white/10 dark:bg-white/[0.02]"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-xs font-black text-zinc-800 dark:text-white">
+                          {linkedEnv.environment.name}
+                        </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                          <span className="rounded-md border border-white/30 bg-white/80 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-zinc-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/50">
+                            {TYPE_LABELS[linkedEnv.environment.type] || "Ambiente"}
+                          </span>
+                          <span
+                            className={`rounded-md border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${getStatusBadge(
+                              linkedEnv.membership.status,
+                            )}`}
+                          >
+                            {getMembershipStatusLabel(linkedEnv.membership.status)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={isBusy || !membershipIsActive || unlinkDisabled}
+                        onClick={() =>
+                          handleToggleServiceEnvironmentLink(service, linkedEnv)
+                        }
+                        className={`rounded-lg px-2.5 py-1.5 text-[10px] font-black uppercase transition ${
+                          isLinked
+                            ? "border border-red-500/20 bg-red-500/10 text-red-600 hover:bg-red-500/20 disabled:opacity-40"
+                            : "border border-[#30cc36]/20 bg-[#30cc36]/10 text-[#30cc36] hover:bg-[#30cc36]/20 disabled:opacity-40"
+                        }`}
+                      >
+                        {isBusy
+                          ? "Salvando..."
+                          : !membershipIsActive
+                            ? "Pendente"
+                            : unlinkDisabled
+                              ? "Obrigatório"
+                              : isLinked
+                                ? "Desvincular"
+                                : "Vincular"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => open("link")}
+              className="inline-flex items-center gap-2 rounded-lg border border-[#30cc36]/20 bg-[#30cc36]/10 px-3 py-1.5 text-[10px] font-black uppercase text-[#30cc36]"
+            >
+              <Icon icon="add" size={14} />
+              Novo ambiente
+            </button>
+          </>
+        )}
+      </div>
+    );
   };
 
   if (!mounted) return null;
 
   return (
-    <div className="relative min-h-screen bg-background overflow-x-hidden pb-24">
+    <div className="min-h-screen overflow-hidden bg-background md:pb-10">
       <TopAppBar />
 
-      <main className="pt-24 px-4 md:px-8 max-w-6xl mx-auto space-y-8 pb-32">
-        <section className="relative overflow-hidden rounded-[2.5rem] border border-primary/10 bg-gradient-to-br from-surface-container-lowest via-surface-container-lowest to-[#30cc36]/[0.08] p-6 shadow-sm md:p-8">
-          <div className="pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 left-24 h-32 w-32 rounded-full bg-primary/5 blur-3xl" />
+      <main className="mx-auto max-w-6xl space-y-8 px-4 pb-32 pt-24 md:px-8">
+        {/* HERO */}
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/70 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04] md:p-8">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#30cc36]/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 left-12 h-52 w-52 rounded-full bg-[#30cc36]/10 blur-3xl" />
 
           <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-primary">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#30cc36]/20 bg-[#30cc36]/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-[#1eb34b]">
+                <Icon icon="storefront" size={14} weight={700} />
                 Painel de anúncios
               </span>
-              <h2 className="mt-4 text-3xl font-black tracking-tight text-on-surface md:text-5xl">
-                Meus anúncios
-              </h2>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-on-surface-variant md:text-base">
-                Agora cada anúncio pode ser vinculado a varios ambientes.
+
+              <h1 className="mt-5 text-4xl font-black tracking-tight text-zinc-950 dark:text-white md:text-6xl">
+                Gerencie seus anúncios com estilo.
+              </h1>
+
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-zinc-500 dark:text-white/55 md:text-base">
+                Controle publicações, edite seus serviços e vincule em múltiplas
+                comunidades.
               </p>
 
               <div className="mt-5 flex flex-wrap gap-2">
-                <span className="inline-flex items-center rounded-full border border-outline-variant/10 bg-background/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant shadow-sm">
+                <span className="rounded-full border border-white/20 bg-white/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500 shadow-sm dark:bg-white/[0.05] dark:text-white/55">
                   {userServices.length} anúncios
                 </span>
-                <span className="inline-flex items-center rounded-full border border-outline-variant/10 bg-background/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant shadow-sm">
+
+                <span className="rounded-full border border-white/20 bg-white/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500 shadow-sm dark:bg-white/[0.05] dark:text-white/55">
                   {activeServices} ativos
                 </span>
+
                 {pendingServices > 0 && (
-                  <span className="inline-flex items-center rounded-full border border-outline-variant/10 bg-background/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant shadow-sm">
+                  <span className="rounded-full border border-white/20 bg-white/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500 shadow-sm dark:bg-white/[0.05] dark:text-white/55">
                     {pendingServices} pendentes
                   </span>
                 )}
@@ -382,232 +603,164 @@ export default function MyAdsPage() {
             <button
               type="button"
               onClick={() => router.push("/register-service")}
-              className="w-full gap-2 flex md:w-auto rounded-full px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-primary/25 transition-transform hover:scale-[1.02] active:scale-95 primary-gradient"
+              className="mx-auto flex w-auto items-center justify-center gap-2 rounded-full bg-[#30cc36] px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-[#30cc36]/25 transition-transform hover:scale-[1.02] active:scale-95 md:mx-0"
             >
-              <Icon icon="add" size={20} />
-             Novo anúncio
+              <Icon icon="add" size={18} />
+              Novo anúncio
             </button>
           </div>
         </section>
 
+        {/* SEM LOGIN */}
         {!user ? (
-          <section className="rounded-[2rem] border border-outline-variant/15 bg-surface-container-lowest p-8 text-center space-y-4">
-            <Icon icon="lock" size={40} className="mx-auto text-on-surface-variant/50" />
-            <h3 className="text-xl font-black text-on-surface">Entre para ver seus anuncios</h3>
-            <p className="text-sm text-on-surface-variant">
-              Faca login para gerenciar seus anúncios e vincular ambientes.
+          <section className="rounded-[2rem] border border-white/20 bg-white/70 p-8 text-center shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04]">
+            <Icon
+              icon="lock"
+              size={42}
+              className="mx-auto text-zinc-400 dark:text-white/40"
+            />
+
+            <h3 className="mt-4 text-xl font-black text-zinc-950 dark:text-white">
+              Entre para ver seus anúncios
+            </h3>
+
+            <p className="mt-2 text-sm text-zinc-500 dark:text-white/55">
+              Faça login para gerenciar seus serviços.
             </p>
+
             <button
               type="button"
               onClick={() => router.push("/login")}
-              className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 bg-[#30cc36] text-white text-sm font-black"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#30cc36] px-6 py-3 text-sm font-black text-white"
             >
               <Icon icon="login" size={18} />
               Entrar
             </button>
           </section>
         ) : (
-          <section className="space-y-4">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-xs font-black uppercase tracking-[0.25em] text-primary/70">Meus anuncios</h3>
-              <span className="text-[9px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest border border-primary/10">
-                {userServices.length} total
-              </span>
-            </div>
-
+          <section className="space-y-5">
+            {/* LOADING */}
             {servicesLoading ? (
-              <div className="py-20 flex justify-center flex-col items-center gap-4">
-                <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#30cc36] border-t-transparent"></div>
-                <p className="text-xs font-black uppercase tracking-widest text-primary/40">
-                  Carregando seus anuncios...
+              <div className="py-20 text-center">
+                <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-[#30cc36] border-t-transparent" />
+                <p className="mt-4 text-xs font-black uppercase tracking-widest text-[#30cc36]/60">
+                  Carregando anúncios...
                 </p>
               </div>
             ) : userServices.length === 0 ? (
-              <div className="rounded-[2rem] border-2 border-dashed border-outline-variant/10 py-16 text-center bg-surface-container-low/20">
-                <Icon icon="post_add" size={56} className="mx-auto mb-4 opacity-10 text-primary" />
-                <h4 className="text-xl font-black text-on-surface/50">Voce ainda nao tem anuncios</h4>
-                <p className="text-sm text-on-surface-variant/70 font-medium max-w-md mx-auto mt-2">
-                  Clique em "Novo anuncio" para publicar seu primeiro servico.
+              <div className="rounded-[2rem] border-2 border-dashed border-white/20 bg-white/70 py-16 text-center backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04]">
+                <Icon
+                  icon="post_add"
+                  size={56}
+                  className="mx-auto text-[#30cc36]/25"
+                />
+
+                <h4 className="mt-4 text-xl font-black text-zinc-950 dark:text-white">
+                  Você ainda não tem anúncios
+                </h4>
+
+                <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500 dark:text-white/55">
+                  Clique em novo anúncio para publicar seu primeiro serviço.
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {userServices.map((service) => {
-                  const linkedIds = serviceLinkedEnvironmentIds[service.id] ?? [];
-                  const linkedSet = new Set(linkedIds);
+                  const isExpanded = expandedServiceId === service.id;
+                  const linkedIds = getLinkedIdsForService(service);
+                  const canUnlink = linkedIds.length > 1;
 
                   return (
                     <article
                       key={service.id}
-                      className="bg-surface-container-lowest rounded-[2rem] border border-outline-variant/10 shadow-sm overflow-hidden flex flex-col"
+                      className="group overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] dark:border-white/10 dark:bg-white/[0.04]"
                     >
-                      <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface-container">
-                        {service.image ? (
-                          <img
-                            src={service.image}
-                            alt={service.title}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                            decoding="async"
+                    <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-white/5">
+                      {service.image ? (
+                        <img
+                          src={service.image}
+                          alt={service.title}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center">
+                          <Icon
+                            icon="image"
+                            size={30}
+                            className="text-zinc-400"
                           />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
-                            <Icon icon="image" size={28} />
-                          </div>
-                        )}
-
-                        <div className="absolute top-3 left-3">
-                          <span
-                            className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
-                              service.status === "active"
-                                ? "bg-[#30CC36] text-white shadow-lg shadow-[#30CC36]/20"
-                                : "bg-amber-500 text-white shadow-lg shadow-amber-500/20"
-                            }`}
-                          >
-                            {service.status === "active" ? "ATIVO" : "PENDENTE"}
-                          </span>
                         </div>
-                      </div>
+                      )}
 
-                      <div className="p-4 flex-1 flex flex-col">
-                        <span className="text-[10px] font-bold text-primary tracking-widest uppercase">
-                          {service.category || "Sem categoria"}
+                      <div className="absolute left-3 top-3">
+                        <span
+                          className={`rounded-xl px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white ${
+                            service.status === "active"
+                              ? "bg-[#30CC36]"
+                              : "bg-amber-500"
+                          }`}
+                        >
+                          {service.status === "active"
+                            ? "ATIVO"
+                            : "PENDENTE"}
                         </span>
-                        <h4 className="font-bold text-on-surface mt-1 line-clamp-2">{service.title}</h4>
-
-                        {/* <p className="text-xs text-on-surface-variant/80 mt-1">
-                          Ambientes vinculados: {linkedIds.length}
-                        </p> */}
-
-                        <div className="mt-4 space-y-2 border-t border-outline-variant/10 pt-4">
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => router.push(`/register-service?id=${service.id}`)}
-                              className="flex-1 flex items-center justify-center gap-1 py-2 px-3 rounded-xl bg-surface-container-high text-on-surface text-xs font-bold hover:bg-surface-container-highest transition-colors"
-                            >
-                              <Icon icon="edit" size={16} />
-                              Editar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteService(service.id)}
-                              className="p-2 rounded-xl bg-surface-container-high text-error hover:bg-error/10 transition-colors"
-                            >
-                              <Icon icon="delete" size={18} />
-                            </button>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => handleToggleLinkedForService(service.id)}
-                            className="w-full rounded-xl py-2 px-3 text-xs font-black uppercase tracking-wide border border-[#30cc36]/30 text-[#30cc36] hover:bg-[#30cc36]/10 transition-colors flex items-center justify-center gap-2"
-                          >
-                            <Icon icon="add_location_alt" size={16} />
-                            VINCULAR A AMBIENTES
-                          </button>
-
-                          {expandedServiceId === service.id && (
-                            <div className="rounded-xl border border-outline-variant/20 bg-surface-container-low p-3 space-y-2">
-                              <p className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant/70">
-                                Ambientes vinculados a voce
-                              </p>
-
-                              {linkedLoading && !linkedLoaded ? (
-                                <div className="py-4 flex justify-center">
-                                  <div className="animate-spin rounded-full h-6 w-6 border-4 border-[#30cc36] border-t-transparent"></div>
-                                </div>
-                              ) : linkedEnvironments.length === 0 ? (
-                                <div className="space-y-2">
-                                  <p className="text-xs text-on-surface-variant">
-                                    Voce nao esta vinculado a nenhum ambiente.
-                                  </p>
-                                  <button
-                                    type="button"
-                                    onClick={() => open("link")}
-                                    className="w-full inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 bg-[#30cc36] text-white text-[11px] font-black uppercase tracking-wide"
-                                  >
-                                    <Icon icon="search" size={14} />
-                                    PROCURAR AMBIENTE
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="space-y-2">
-                                  {linkedEnvironments.map(({ environment, membership }) => {
-                                    const isActiveMembership = membership.status === "active";
-                                    const isLinked = linkedSet.has(environment.id);
-                                    const actionKey = `${service.id}:${environment.id}`;
-                                    const isLinking = linkingKey === actionKey;
-
-                                    return (
-                                      <div
-                                        key={`${service.id}-${environment.id}`}
-                                        className="rounded-lg border border-outline-variant/15 bg-surface-container-high/50 p-2"
-                                      >
-                                        <div className="flex items-center justify-between gap-2">
-                                          <div className="min-w-0">
-                                            <p className="text-xs font-bold text-on-surface truncate">
-                                              {environment.name}
-                                            </p>
-                                            <p className="text-[10px] text-on-surface-variant truncate">
-                                              {TYPE_LABELS[environment.type] || environment.type || "Ambiente"}
-                                            </p>
-                                          </div>
-                                          <span
-                                            className={`rounded-md border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-widest ${getStatusBadge(
-                                              membership.status,
-                                            )}`}
-                                          >
-                                            {membership.status === "active" ? "ATIVO" : "PENDENTE"}
-                                          </span>
-                                        </div>
-
-                                        <div className="mt-2 flex items-center justify-between gap-2">
-                                          <span className="text-[10px] font-bold text-on-surface-variant">
-                                            {isLinked ? "Vinculado" : "Nao vinculado"}
-                                          </span>
-
-                                          <button
-                                            type="button"
-                                            onClick={() =>
-                                              handleToggleServiceEnvironment(
-                                                service,
-                                                environment.id,
-                                                isLinked,
-                                              )
-                                            }
-                                            disabled={!isActiveMembership || isLinking}
-                                            className={`rounded-md px-2 py-1 text-[10px] font-black uppercase tracking-wide transition-colors ${
-                                              !isActiveMembership
-                                                ? "bg-surface-container text-on-surface-variant/60 cursor-not-allowed"
-                                              : isLinking
-                                                  ? "bg-[#30cc36]/15 text-[#30cc36]"
-                                                  : isLinked
-                                                    ? "bg-orange-500/15 text-orange-700 hover:bg-orange-500/20"
-                                                    : "bg-[#30cc36] text-white hover:brightness-110"
-                                            }`}
-                                          >
-                                            {!isActiveMembership
-                                              ? "Aguardando aprovacao"
-                                              : isLinking
-                                                ? isLinked
-                                                  ? "Desvinculando..."
-                                                  : "Vinculando..."
-                                                : isLinked
-                                                  ? "Desvincular"
-                                                  : "Vincular"}
-                                          </button>
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
                       </div>
-                    </article>
+                    </div>
+
+                    <div className="p-4">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#30cc36]">
+                        {service.category || "Sem categoria"}
+                      </span>
+
+                      <h4 className="mt-1 line-clamp-2 text-lg font-black tracking-tight text-zinc-950 dark:text-white">
+                        {service.title}
+                      </h4>
+
+                      <div className="mt-4 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            router.push(
+                              `/register-service?id=${service.id}`,
+                            )
+                          }
+                          className="flex-1 rounded-xl bg-zinc-100 px-3 py-2 text-xs font-black text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-white/10 dark:text-white"
+                        >
+                          Editar
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDeleteService(service.id)
+                          }
+                          className="rounded-xl bg-red-500/10 px-3 py-2 text-red-600 transition-colors hover:bg-red-500/20"
+                        >
+                          <Icon icon="delete" size={18} />
+                        </button>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleToggleLinkedForService(service.id)
+                        }
+                        className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-[#30cc36]/20 bg-[#30cc36]/10 px-3 py-2 text-xs font-black uppercase text-[#30cc36]"
+                      >
+                        <Icon
+                          icon={isExpanded ? "expand_less" : "add_location_alt"}
+                          size={16}
+                        />
+                        {isExpanded ? "Fechar vínculos" : "Vincular ambientes"}
+                      </button>
+
+                      {isExpanded && (
+                        <div className="hidden md:block">
+                          {renderLinkPanel(service, linkedIds, canUnlink)}
+                        </div>
+                      )}
+                    </div>
+                  </article>
                   );
                 })}
               </div>
@@ -615,10 +768,56 @@ export default function MyAdsPage() {
           </section>
         )}
 
+        {mobileLinkedService && (
+          <div className="fixed inset-0 z-[70] md:hidden">
+            <button
+              type="button"
+              aria-label="Fechar vínculos"
+              onClick={closeMobileLinkedModal}
+              className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
+            />
+
+            <div className="absolute inset-x-0 bottom-0 max-h-[84vh] overflow-y-auto rounded-t-[1.6rem] border border-white/20 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-zinc-950">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#30cc36]">
+                    Vincular ambientes
+                  </p>
+                  <h3 className="truncate text-base font-black text-zinc-900 dark:text-white">
+                    {mobileLinkedService.title}
+                  </h3>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={closeMobileLinkedModal}
+                  className="rounded-full border border-zinc-200 p-1.5 text-zinc-500 dark:border-white/10 dark:text-white/70"
+                >
+                  <Icon icon="close" size={18} />
+                </button>
+              </div>
+
+              {renderLinkPanel(
+                mobileLinkedService,
+                mobileLinkedIds,
+                mobileLinkedIds.length > 1,
+              )}
+            </div>
+          </div>
+        )}
+
         {statusNotice && (
-          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-surface-container-lowest px-6 py-3 rounded-full shadow-2xl border border-outline-variant/10 flex items-center gap-2 animate-fade-in z-50">
-            <Icon icon="check_circle" size={18} className="text-[#30cc36]" />
-            <span className="text-sm font-bold text-on-surface">{statusNotice}</span>
+          <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-full border border-white/20 bg-white/80 px-6 py-3 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/80">
+            <div className="flex items-center gap-2">
+              <Icon
+                icon="check_circle"
+                size={18}
+                className="text-[#30cc36]"
+              />
+              <span className="text-sm font-bold text-zinc-800 dark:text-white">
+                {statusNotice}
+              </span>
+            </div>
           </div>
         )}
       </main>

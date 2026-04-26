@@ -1151,7 +1151,60 @@ export function AppProvider({ children }: { children: ReactNode }) {
     console.log('addService called', { service, user: !!user });
     if (!user) throw new Error("User not found");
 
-    const { error } = await supabase
+    let resolvedEnvironmentId =
+      typeof service.environmentId === 'string' && service.environmentId.length > 0
+        ? service.environmentId
+        : null;
+
+    if (!resolvedEnvironmentId) {
+      const { data: membershipsData, error: membershipsError } = await supabase
+        .from('environment_members')
+        .select('environment_id, created_at')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: true });
+
+      if (membershipsError) {
+        throw membershipsError;
+      }
+
+      const membershipEnvironmentIds = Array.from(
+        new Set(
+          (membershipsData || [])
+            .map((membership: any) => membership?.environment_id)
+            .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0),
+        ),
+      );
+
+      if (membershipEnvironmentIds.length === 0) {
+        throw new Error('Voce precisa ter pelo menos 1 ambiente ativo em "Meus Ambientes" para publicar.');
+      }
+
+      const { data: activeEnvironments, error: activeEnvironmentsError } = await supabase
+        .from('environments')
+        .select('id')
+        .in('id', membershipEnvironmentIds)
+        .eq('status', 'active');
+
+      if (activeEnvironmentsError) {
+        throw activeEnvironmentsError;
+      }
+
+      const activeEnvironmentIds = new Set(
+        (activeEnvironments || [])
+          .map((env: any) => env?.id)
+          .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0),
+      );
+
+      resolvedEnvironmentId =
+        membershipEnvironmentIds.find((id) => activeEnvironmentIds.has(id)) ?? null;
+
+      if (!resolvedEnvironmentId) {
+        throw new Error('Nenhum dos seus ambientes esta ativo para publicacao. Verifique "Meus Ambientes".');
+      }
+    }
+
+    const { data: insertedService, error } = await supabase
       .from('services')
       .insert([{
         title: service.title,
@@ -1168,17 +1221,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
         frequency: service.frequency,
         status: service.status || 'active',
         is_active: true,
-        environment_id:
-          typeof service.environmentId === 'string' && service.environmentId.length > 0
-            ? service.environmentId
-            : null,
+        environment_id: resolvedEnvironmentId,
         provider_id: user.id,
         provider: user.name || 'Prestador',
         publisher_type: service.publisherType || 'service_provider',
-      }]);
+      }])
+      .select('id, environment_id')
+      .single();
 
     console.log('Service insert result:', { error });
     if (error) throw error;
+
+    if (insertedService?.id && insertedService.environment_id) {
+      const { error: linkError } = await supabase
+        .from('service_environment_links')
+        .insert({
+          service_id: insertedService.id,
+          environment_id: insertedService.environment_id,
+          created_by: user.id,
+        });
+
+      if (
+        linkError &&
+        linkError?.code !== '23505' &&
+        !isMissingServiceEnvironmentLinksError(linkError)
+      ) {
+        console.warn('addService default service_environment_links insert failed:', linkError);
+      }
+    }
+
     fetchCacheRef.current.services = null;
     if (user?.id) {
       fetchCacheRef.current.userServices.delete(user.id);
@@ -1695,3 +1766,5 @@ export function useApp() {
   }
   return context;
 }
+
+

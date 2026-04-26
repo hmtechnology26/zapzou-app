@@ -6,23 +6,13 @@ import { Icon } from '@/components/Icon';
 import { Avatar } from '@/components/Avatar';
 import { useApp } from '@/hooks/useApp';
 import { supabase } from '@/lib/supabase';
-import {
-  calculateDistanceKm,
-  getEnvironmentAvailabilityState,
-  isWithinAutoApprovalRadius,
-  isForcedPendingApprovalEnvironment,
-} from '@/lib/environment-rules';
 import { SERVICE_CATEGORIES } from '@/lib/service-categories';
 import { normalizeWebsiteUrl } from '@/lib/website';
-import {
-  countCountableEnvironmentMemberships,
-  getPlanLimits,
-  isPlanAtServiceLimit,
-  type PublicationMode,
-} from '@/lib/plan-rules';
+import { isPlanAtServiceLimit } from '@/lib/plan-rules';
 import { formatCnpj, normalizeCnpj } from '@/lib/cnpj';
 
-const categories = SERVICE_CATEGORIES.map((category) => category.label);
+type CategoryLabel = (typeof SERVICE_CATEGORIES)[number]['label'];
+const categories = SERVICE_CATEGORIES.map((category) => category.label) as CategoryLabel[];
 
 function RegisterServiceContent() {
   const router = useRouter();
@@ -37,20 +27,22 @@ function RegisterServiceContent() {
     selectedEnvironment, 
     selectedEnvironments,
     setSelectedEnvironment,
-    requestAffiliation,
     setSelectedEnvironments
   } = useApp();
-  const [specificMembershipStatus, setSpecificMembershipStatus] = useState<'active' | 'pending' | 'banned' | null>(null);
-  const [specificMembershipRole, setSpecificMembershipRole] = useState<'member' | 'moderator' | null>(null);
-  const [specificMembershipAccessType, setSpecificMembershipAccessType] = useState<PublicationMode | null>(null);
-  const [publicationMode, setPublicationMode] = useState<PublicationMode | null>(null);
-  const [loadingMembership, setLoadingMembership] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'uploading' | 'locating' | 'saving'>('idle');
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'uploading' | 'saving'>('idle');
   
   const envIdFromQuery = searchParams?.get('envId');
   const existingService = serviceId ? services.find(s => s.id === serviceId) : null;
   
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    title: string;
+    description: string;
+    category: CategoryLabel;
+    cnpj: string;
+    WhatsApp: string;
+    instagram: string;
+    website: string;
+  }>({
     title: '',
     description: '',
     category: categories[0],
@@ -97,7 +89,9 @@ function RegisterServiceContent() {
     setForm({
       title: existingService.title || '',
       description: existingService.description || '',
-      category: existingService.category || categories[0],
+      category: categories.includes(existingService.category as CategoryLabel)
+        ? (existingService.category as CategoryLabel)
+        : categories[0],
       cnpj: formatCnpj(existingService.cnpj || ''),
       WhatsApp: existingService.WhatsApp || '',
       instagram: existingService.instagram || '',
@@ -182,45 +176,6 @@ function RegisterServiceContent() {
   }, [mounted, user, envIdFromQuery, existingService, selectedEnvironments, setSelectedEnvironment, setSelectedEnvironments]);
 
   // Fetch membership status for THE SELECTED environment specifically
-  useEffect(() => {
-    if (!mounted || !user || !selectedEnvironment?.id) {
-       setSpecificMembershipStatus(null);
-       setSpecificMembershipRole(null);
-       setSpecificMembershipAccessType(null);
-       setPublicationMode(null);
-       return;
-    }
-    
-    const fetchSpecificMembership = async () => {
-      setLoadingMembership(true);
-      const { data, error } = await supabase
-        .from('environment_members')
-        .select('status, role, access_type')
-        .eq('user_id', user.id)
-        .eq('environment_id', selectedEnvironment.id)
-        .maybeSingle();
-
-      if (data && !error) {
-        setSpecificMembershipStatus(data.status);
-        const normalizedRole = data.role === 'moderator' ? 'moderator' : 'member';
-        const normalizedAccessType =
-          data.access_type === 'service_provider' || data.access_type === 'resident'
-            ? data.access_type
-            : null;
-        setSpecificMembershipRole(normalizedRole);
-        setSpecificMembershipAccessType(normalizedAccessType);
-        setPublicationMode(normalizedAccessType);
-      } else {
-        setSpecificMembershipStatus(null);
-        setSpecificMembershipRole(null);
-        setSpecificMembershipAccessType(null);
-        setPublicationMode(null);
-      }
-      setLoadingMembership(false);
-    };
-
-    fetchSpecificMembership();
-  }, [mounted, user, selectedEnvironment?.id]);
 
   // Verificações de Acesso / Moderação
   useEffect(() => {
@@ -243,7 +198,7 @@ function RegisterServiceContent() {
       setAlertAction({ label: 'Ver Planos', onClick: () => router.push('/plans') });
       setShowAlert(true);
     }
-  }, [user, selectedEnvironment, mounted, envIdFromQuery, services.length, serviceId, router]);
+  }, [user, selectedEnvironment, mounted, envIdFromQuery, services, serviceId, router]);
 
   if (!mounted) return null;
 
@@ -354,36 +309,17 @@ function RegisterServiceContent() {
     }
   };
 
-  const ensureCurrentLocation = async (): Promise<{ latitude: number; longitude: number }> => {
-    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
-      throw new Error('Geolocalização indisponível neste dispositivo/navegador.');
-    }
-
-    return new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        },
-        (error) => reject(new Error(error.message || 'Falha ao obter localização.')),
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
-      );
-    });
-  };
-
   const handleSubmit = async () => {
     console.log('handleSubmit called', { existingService: !!existingService, images, isActive });
     
     if (!form.title || !form.WhatsApp) {
       console.log('Validation failed: missing title or WhatsApp');
-      setErrorMsg('Preencha o nome do serviço e WhatsApp');
+      setErrorMsg('Preencha o nome do servico e WhatsApp');
       return;
     }
 
-    if (user?.plan === 'plus' && selectedEnvironment?.id && !publicationMode) {
-      setErrorMsg('Escolha se você reside neste ambiente ou apenas presta serviço nele.');
+    if (!user) {
+      setErrorMsg('Usuario nao autenticado. Faca login para continuar.');
       return;
     }
 
@@ -425,63 +361,7 @@ function RegisterServiceContent() {
         return item;
       }));
 
-      let effectiveMembershipStatus = user?.membershipStatus ?? null;
-      let effectiveMembershipRole = user?.membershipRole ?? null;
-      let effectiveMembershipAccessType = user?.membershipAccessType ?? null;
-      let currentEnvironmentMemberships: Array<{ environment_id?: string; status?: string }> = [];
-
-      if (selectedEnvironment?.id && user?.id) {
-        const { data: membershipsData, error: membershipsError } = await supabase
-          .from('environment_members')
-          .select('environment_id, status, role, access_type')
-          .eq('user_id', user.id);
-
-        if (membershipsError) {
-          throw membershipsError;
-        }
-
-        currentEnvironmentMemberships = (membershipsData || []) as Array<{
-          environment_id?: string;
-          status?: string;
-        }>;
-
-        const currentMembership = currentEnvironmentMemberships.find(
-          (membership) => membership.environment_id === selectedEnvironment.id,
-        ) as (typeof currentEnvironmentMemberships[number] & { role?: string; access_type?: string | null }) | undefined;
-
-        if (currentMembership?.status) {
-          effectiveMembershipStatus = currentMembership.status as any;
-        }
-
-        if (currentMembership?.role) {
-          effectiveMembershipRole = currentMembership.role === 'moderator' ? 'moderator' : 'member';
-        }
-
-        if (currentMembership?.access_type === 'resident' || currentMembership?.access_type === 'service_provider') {
-          effectiveMembershipAccessType = currentMembership.access_type as any;
-        }
-      }
-
       setSubmitStatus('saving');
-      const normalizedPublicationMode =
-        publicationMode ||
-        effectiveMembershipAccessType;
-
-      const environmentAvailability = getEnvironmentAvailabilityState(selectedEnvironment ?? undefined, {
-        membershipStatus: effectiveMembershipStatus,
-        membershipRole: effectiveMembershipRole as any,
-        membershipAccessType: effectiveMembershipAccessType,
-        userPlan: user?.plan,
-        publicationMode: normalizedPublicationMode,
-      });
-
-      const isForcedApprovalEnvironment = isForcedPendingApprovalEnvironment(selectedEnvironment?.id);
-      const canChoosePublicationMode =
-        effectiveMembershipAccessType === 'resident' || effectiveMembershipAccessType === 'service_provider';
-
-      if (isForcedApprovalEnvironment && !canChoosePublicationMode) {
-        throw new Error('Aguarde a aprovação do moderador e escolha Morador ou Prestador em Meus Serviços antes de publicar.');
-      }
 
       if (user?.plan !== 'plus' && !existingService && isPlanAtServiceLimit(user.plan, services.filter((service) => service.provider_id === user.id).length)) {
         throw new Error(
@@ -491,98 +371,13 @@ function RegisterServiceContent() {
         );
       }
 
-      if (user?.plan !== 'plus' && selectedEnvironment?.id) {
-        const alreadyLinked = currentEnvironmentMemberships.some(
-          (membership) =>
-            membership.environment_id === selectedEnvironment.id &&
-            membership.status !== 'banned',
-        );
-        const environmentLimit = getPlanLimits(user.plan).environments;
+      const nextPublicationStatus = existingService?.status || 'active';
+      const nextIsActive = existingService ? Boolean(existingService.isActive) : true;
 
-        if (!alreadyLinked && typeof environmentLimit === 'number' && countCountableEnvironmentMemberships(currentEnvironmentMemberships) >= environmentLimit) {
-          throw new Error(
-            user.plan === 'free'
-              ? 'Seu plano permite apenas 1 ambiente. Atualize para o Plano Pró ou Plus para adicionar mais.'
-              : 'Seu plano já atingiu o limite de 2 ambientes. Atualize para o Plano Plus para continuar.',
-          );
-        }
-      }
-
-      let nextPublicationStatus = existingService?.status || (environmentAvailability.status === 'pending' ? 'pending' : 'active');
-      let nextIsActive = existingService ? Boolean(existingService.isActive) : nextPublicationStatus === 'active';
-
-      if (user?.plan === 'plus' && selectedEnvironment?.id) {
-        const publicationRole = normalizedPublicationMode;
-
-        if (!publicationRole) {
-          throw new Error('Escolha se você reside neste ambiente ou apenas presta serviço nele.');
-        }
-
-        if (publicationRole === 'resident' && effectiveMembershipStatus !== 'active') {
-          const currentLocation = await ensureCurrentLocation();
-
-          if (
-            typeof selectedEnvironment?.latitude !== 'number' ||
-            typeof selectedEnvironment?.longitude !== 'number'
-          ) {
-            throw new Error('Este ambiente não possui coordenadas para validação.');
-          }
-
-          const distance = calculateDistanceKm(
-            currentLocation.latitude,
-            currentLocation.longitude,
-            selectedEnvironment.latitude,
-            selectedEnvironment.longitude,
-          );
-
-          if (!isWithinAutoApprovalRadius(distance)) {
-            throw new Error(`Você precisa estar dentro de 500m para publicar como residente neste ambiente.`);
-          }
-        }
-
-        const alreadyLinked = currentEnvironmentMemberships.some(
-          (membership) =>
-            membership.environment_id === selectedEnvironment?.id &&
-            membership.status !== 'banned',
-        );
-        const envLimit = getPlanLimits(user.plan).environments;
-
-        if (!alreadyLinked && typeof envLimit === 'number' && countCountableEnvironmentMemberships(currentEnvironmentMemberships) >= envLimit) {
-          throw new Error(
-            user.plan === 'free'
-              ? 'Seu plano permite apenas 1 ambiente.'
-              : 'Seu plano já atingiu o limite de ambientes. Faça upgrade para continuar.',
-          );
-        }
-
-        if (!isForcedApprovalEnvironment) {
-          const { error: membershipUpsertError } = await supabase
-            .from('environment_members')
-            .upsert(
-              {
-                environment_id: selectedEnvironment.id,
-                user_id: user.id,
-                status: 'active',
-                role: effectiveMembershipRole === 'moderator' ? 'moderator' : 'member',
-                access_type: publicationMode,
-              },
-              { onConflict: 'environment_id,user_id' },
-            );
-
-          if (membershipUpsertError) {
-            throw membershipUpsertError;
-          }
-
-          effectiveMembershipStatus = 'active';
-          effectiveMembershipAccessType = publicationMode;
-          nextPublicationStatus = existingService?.status || 'active';
-          nextIsActive = existingService ? Boolean(existingService.isActive) : true;
-          setSpecificMembershipStatus('active');
-          setSpecificMembershipRole(effectiveMembershipRole === 'moderator' ? 'moderator' : 'member');
-          setSpecificMembershipAccessType(publicationMode);
-          setPublicationMode(publicationMode);
-        }
-      }
+      const persistedEnvironmentId =
+        typeof existingService?.environmentId === 'string' && existingService.environmentId.length > 0
+          ? existingService.environmentId
+          : null;
 
       const serviceData = {
         ...form,
@@ -593,13 +388,13 @@ function RegisterServiceContent() {
         website: normalizeWebsiteUrl(form.website),
         isActive: nextIsActive,
         status: nextPublicationStatus,
-        environmentId: selectedEnvironment?.id || null,
+        environmentId: persistedEnvironmentId,
         menu: menuItemsWithImages.map((item, idx) => ({ ...item, id: item.id || `menu-${Date.now()}-${idx}` })),
       };
 
       console.log('Service data:', serviceData);
       
-      setSubmitStatus('locating');
+      setSubmitStatus('saving');
       if (existingService) {
         console.log('Updating existing service...');
         await updateService(existingService.id, serviceData);
@@ -611,7 +406,7 @@ function RegisterServiceContent() {
       router.refresh();
     } catch (err: any) {
       console.error('Submit error:', err);
-      setErrorMsg(err.message || 'Erro ao publicar serviço. Verifique seus limites de plano ou distância do local.');
+      setErrorMsg(err.message || 'Erro ao publicar serviço. Tente novamente em instantes.');
     } finally {
       setUploading(false);
       setSubmitStatus('idle');
@@ -696,15 +491,6 @@ function RegisterServiceContent() {
     }
   };
 
-  const handleRequestAffiliation = async () => {
-    if (!selectedEnvironment?.id) return;
-    try {
-      await requestAffiliation(selectedEnvironment.id);
-    } catch(err: any) {
-      setErrorMsg(err.message || 'Erro ao solicitar afiliação');
-    }
-  };
-
   const closeMenuItemModal = () => {
     const targetIndex = editingMenuItemIndex ?? menuItems.length;
     const nextFiles = new Map(menuItemFiles);
@@ -718,19 +504,6 @@ function RegisterServiceContent() {
     setShowMenuItemModal(false);
   };
 
-  const environmentAvailability = getEnvironmentAvailabilityState(selectedEnvironment ?? undefined, {
-    membershipStatus: specificMembershipStatus,
-    membershipRole: specificMembershipRole,
-    membershipAccessType: specificMembershipAccessType,
-    userPlan: user?.plan,
-    publicationMode,
-  });
-  const isForcedApprovalEnvironment = isForcedPendingApprovalEnvironment(selectedEnvironment?.id);
-  const canChoosePublicationMode =
-    !isForcedApprovalEnvironment ||
-    (specificMembershipStatus === 'active' &&
-      (specificMembershipAccessType === 'resident' || specificMembershipAccessType === 'service_provider'));
-
   return (
     <div className="min-h-screen pb-24 md:pb-8 bg-background">
       <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl flex items-center justify-between px-4 h-16 md:border-b md:border-outline-variant/20">
@@ -742,7 +515,7 @@ function RegisterServiceContent() {
             <Icon icon="arrow_back" size={24} />
           </button>
           <h1 className="text-lg font-semibold tracking-tight text-on-surface">
-            {existingService ? 'Editar Serviço' : 'Cadastrar Serviço'}
+            {existingService ? 'Editar anuncio' : 'Criar anuncio'}
           </h1>
         </div>
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -767,173 +540,113 @@ function RegisterServiceContent() {
         </div>
       </header>
 
-      <main className="pt-20 px-4 md:px-8 max-w-2xl mx-auto space-y-6">
-        {selectedEnvironment && (
-          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Icon icon="location_on" size={20} className="text-primary" weight={700} />
-              <span className="font-semibold text-on-surface text-sm">Ambiente</span>
+      <main className="pt-20 px-4 md:px-8 max-w-3xl mx-auto space-y-6">
+        <section className="rounded-[2rem] border border-[#30cc36]/30 bg-gradient-to-br from-[#30cc36]/10 via-surface-container-lowest to-surface-container p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#30cc36]">
+                Fluxo de publicação
+              </p>
+              <h2 className="mt-2 text-xl sm:text-2xl font-black text-on-surface">
+                {existingService ? 'Atualize seu anúncio' : 'Monte seu anúncio em minutos'}
+              </h2>
+              <p className="mt-2 text-sm text-on-surface-variant max-w-xl">
+                Preencha os dados do servico e publique. O vinculo de ambientes e feito depois em Meus Ambientes.
+              </p>
             </div>
-            <div className="flex items-center gap-2 bg-surface-container-lowest rounded-full px-3 py-1.5 shadow-sm inline-flex">
-              {selectedEnvironment.image ? (
-                <img src={selectedEnvironment.image} alt={selectedEnvironment.name} className="w-5 h-5 rounded-full object-cover" loading="lazy" decoding="async" />
-              ) : (
-                <div className="w-5 h-5 rounded-full bg-surface-container flex items-center justify-center">
-                  <Icon icon="domain" size={12} className="text-on-surface-variant" />
-                </div>
-              )}
-              <span className="text-xs font-medium text-on-surface">{selectedEnvironment.name}</span>
+            <div className="hidden sm:flex h-12 w-12 rounded-2xl bg-[#30cc36]/15 items-center justify-center">
+              <Icon icon="campaign" size={22} className="text-[#30cc36]" />
             </div>
-            
-            {/* Aviso de disponibilidade */}
-            {/* {environmentAvailability && (
-              <div className={`mt-4 p-3 rounded-xl border flex items-start gap-2 ${
-                environmentAvailability.status === 'pending' 
-                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-700' 
-                  : 'bg-[#30CC36]/10 border-[#30CC36]/30 text-[#30CC36]'
-              }`}>
-                <Icon 
-                  icon={environmentAvailability.status === 'pending' ? 'info' : 'check_circle'} 
-                  size={18} 
-                  className={environmentAvailability.status === 'pending' ? 'text-amber-600 mt-0.5' : 'text-[#30CC36] mt-0.5'} 
-                />
-                <div className="flex-1">
-                   <p className="text-xs font-bold mt-1">{environmentAvailability.label}</p>
-                   <p className="text-[11px] leading-tight mt-0.5">{environmentAvailability.reason}</p>
-                </div>
-              </div>
-            )} */}
-
-            {selectedEnvironment?.id === '__never__' && (
-              <div className="mt-4 rounded-2xl border border-outline-variant/10 bg-surface-container-lowest p-4">
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.2em] text-primary/70">Como você atua neste ambiente?</p>
-                    <p className="text-[11px] text-on-surface-variant mt-1">
-                      {isForcedApprovalEnvironment && canChoosePublicationMode
-                        ? 'A escolha já foi liberada após a aprovação.'
-                        : 'Escolha antes de publicar.'}
-                    </p>
-                  </div>
-                </div>
-                {isForcedApprovalEnvironment && !canChoosePublicationMode ? (
-                  <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-amber-800">
-                    <p className="text-sm font-bold">Aguardando aprovação do moderador</p>
-                    <p className="text-xs mt-1">
-                      Depois que o moderador liberar este ambiente, a escolha entre Morador e Prestador ficará disponível.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={() => setPublicationMode('resident')}
-                      className={`rounded-2xl border p-4 text-left transition-all ${
-                        publicationMode === 'resident'
-                          ? 'border-primary bg-primary/10 shadow-sm'
-                          : 'border-outline-variant/10 bg-surface-container-low hover:bg-surface-container'
-                      }`}
-                    >
-                      <p className="font-bold text-on-surface">Morador</p>
-                      {/* <p className="text-xs text-on-surface-variant mt-1">Usa a regra dos 500m para validar sua localização.</p> */}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPublicationMode('service_provider')}
-                      className={`rounded-2xl border p-4 text-left transition-all ${
-                        publicationMode === 'service_provider'
-                          ? 'border-primary bg-primary/10 shadow-sm'
-                          : 'border-outline-variant/10 bg-surface-container-low hover:bg-surface-container'
-                      }`}
-                    >
-                      <p className="font-bold text-on-surface">Prestador de Serviço</p>
-                      {/* <p className="text-xs text-on-surface-variant mt-1">Publica livremente neste ambiente, sem o raio de 500m.</p> */}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
-        )}
+        </section>
 
-        {!selectedEnvironment && (
-          <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4">
-            <p className="text-sm font-bold text-on-surface">Anuncio sem ambiente vinculado</p>
-            <p className="text-xs text-on-surface-variant mt-1">
-              Você pode criar o anúncio agora. Depois, vincule ambientes em "Meus Ambientes" para ele aparecer no feed.
-            </p>
+        <section className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4 sm:p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <Icon icon="apartment" size={16} />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-on-surface">Ambientes vinculados depois da criação</p>
+                <p className="text-xs text-on-surface-variant mt-1">
+                  Seu anuncio pode ser criado agora. Depois, vincule os ambientes em Meus Ambientes para aparecer conforme geolocalizacao.
+                </p>
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => router.push('/meus-ambientes')}
-              className="mt-3 inline-flex items-center gap-2 rounded-full bg-on-surface text-white px-4 py-2 text-xs font-black uppercase tracking-wide"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-on-surface text-white px-4 py-2 text-xs font-black uppercase tracking-wide"
             >
-              <Icon icon="apartment" size={14} />
-              Ir para Meus Ambientes
+              <Icon icon="arrow_outward" size={14} />
+              Meus Ambientes
             </button>
           </div>
-        )}
+        </section>
 
-        <div className="space-y-4 animate-in fade-in duration-500">
-            <div className="space-y-4">
-            {errorMsg && (
-              <div className="bg-error/10 border border-error/20 p-4 rounded-xl text-error text-sm font-medium">
-                <Icon icon="error" size={18} className="inline mr-2" />
-                {errorMsg}
-              </div>
-            )}
-            
-            <div>
-              <label className="text-sm font-medium text-on-surface">Fotos do Serviço (até 5)</label>
-              <div className="mt-2 flex flex-wrap items-center gap-3">
-                {images.map((img, index) => (
-                  <div key={index} className="relative w-20 h-20 rounded-2xl overflow-hidden">
-                    <img src={img} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                    <button 
-                      onClick={() => handleRemoveImage(index)}
-                      className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white"
-                    >
-                      <Icon icon="close" size={12} />
-                    </button>
-                  </div>
-                ))}
-                {images.length < 5 && (
-                  <label className="cursor-pointer">
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                    <div className="w-20 h-20 rounded-2xl bg-surface-container-lowest border-2 border-dashed border-outline-variant/30 flex items-center justify-center overflow-hidden hover:border-primary transition-colors">
-                      <div className="flex flex-col items-center gap-1 text-on-surface-variant">
-                        <Icon icon="add_photo_alternate" weight={400} size={20} />
-                        <span className="text-[8px]">Adicionar</span>
-                      </div>
-                    </div>
-                  </label>
-                )}
-                {uploading && (
-                  <div className="flex items-center gap-2 text-on-surface-variant">
-                    <Icon icon="cloud_upload" weight={400} size={20} className="animate-pulse" />
-                    <span className="text-sm">Enviando...</span>
-                  </div>
-                )}
-              </div>
-              <p className="text-xs text-on-surface-variant mt-2">{images.length}/5 fotos adicionadas</p>
+        <div className="space-y-6 animate-in fade-in duration-500">
+          {errorMsg && (
+            <div className="bg-error/10 border border-error/20 p-4 rounded-xl text-error text-sm font-medium">
+              <Icon icon="error" size={18} className="inline mr-2" />
+              {errorMsg}
             </div>
+          )}
 
+          <section className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4 sm:p-5">
+            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-on-surface">Mídia do anúncio</h3>
+            <p className="text-xs text-on-surface-variant mt-1">Adicione ate 5 fotos para destacar seu serviço.</p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              {images.map((img, index) => (
+                <div key={index} className="relative w-20 h-20 rounded-2xl overflow-hidden">
+                  <img src={img} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                  <button
+                    onClick={() => handleRemoveImage(index)}
+                    className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white"
+                  >
+                    <Icon icon="close" size={12} />
+                  </button>
+                </div>
+              ))}
+              {images.length < 5 && (
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <div className="w-20 h-20 rounded-2xl bg-surface-container-lowest border-2 border-dashed border-outline-variant/30 flex items-center justify-center overflow-hidden hover:border-primary transition-colors">
+                    <div className="flex flex-col items-center gap-1 text-on-surface-variant">
+                      <Icon icon="add_photo_alternate" weight={400} size={20} />
+                      <span className="text-[8px]">Adicionar</span>
+                    </div>
+                  </div>
+                </label>
+              )}
+              {uploading && (
+                <div className="flex items-center gap-2 text-on-surface-variant">
+                  <Icon icon="cloud_upload" weight={400} size={20} className="animate-pulse" />
+                  <span className="text-sm">Enviando...</span>
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-on-surface-variant mt-2">{images.length}/5 fotos adicionadas</p>
+          </section>
+
+          <section className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4 sm:p-5 space-y-4">
+            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-on-surface">Dados do anúncio</h3>
             <div>
-              <label className="text-sm font-medium text-on-surface">Nome do Serviço/Empresa</label>
-              <input 
-                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60" 
-                placeholder="Ex: Limpeza Residencial ou Clean Limpezas" 
-                value={form.title} 
-                onChange={e => setForm({...form, title: e.target.value})} 
+              <label className="text-sm font-medium text-on-surface">Nome do serviço/Empresa</label>
+              <input
+                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60"
+                placeholder="Ex: Limpeza Residencial ou Clean Limpezas"
+                value={form.title}
+                onChange={e => setForm({...form, title: e.target.value})}
               />
             </div>
 
             <div>
-              <label className='text-sm font-medium text-on-surface'>CNPJ</label>
+              <label className="text-sm font-medium text-on-surface">CNPJ (Preencha para PROFISSIONAL no seu anúncio)</label>
               <input
                 className="w-full bg-surface-container border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60"
                 type="text"
@@ -951,138 +664,143 @@ function RegisterServiceContent() {
 
             <div>
               <label className="text-sm font-medium text-on-surface">Categoria</label>
-              <select 
-                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface" 
-                value={form.category} 
-                onChange={e => setForm({...form, category: e.target.value})}
+              <select
+                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface"
+                value={form.category}
+                onChange={e => setForm({...form, category: e.target.value as CategoryLabel})}
               >
                 {categories.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-on-surface">Descrição</label>
-              <textarea 
-                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60" 
-                rows={4} 
-                placeholder="Descreva seu serviço..." 
-                value={form.description} 
-                onChange={e => setForm({...form, description: e.target.value})} 
+              <label className="text-sm font-medium text-on-surface">Descricao</label>
+              <textarea
+                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60"
+                rows={4}
+                placeholder="Descreva seu servico..."
+                value={form.description}
+                onChange={e => setForm({...form, description: e.target.value})}
               />
             </div>
+          </section>
 
+          <section className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4 sm:p-5 space-y-4">
+            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-on-surface">Contato</h3>
             <div>
-              <label className="text-sm font-medium text-on-surface">WhatsApp (obrigatório)</label>
-              <input 
-                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60" 
-                placeholder="51999999999" 
+              <label className="text-sm font-medium text-on-surface">WhatsApp (obrigatorio)</label>
+              <input
+                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60"
+                placeholder="51999999999"
                 value={form.WhatsApp.replace(/^55/, '')}
                 onChange={e => {
                   const value = e.target.value.replace(/\D/g, '');
                   setForm({...form, WhatsApp: value});
                 }}
               />
-              <p className="text-xs text-on-surface-variant mt-1">Digite apenas DDD + número</p>
+              <p className="text-xs text-on-surface-variant mt-1">Digite apenas DDD + numero</p>
             </div>
 
             <div>
               <label className="text-sm font-medium text-on-surface">Instagram (opcional)</label>
-              <input 
-                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60" 
-                placeholder="@seuinstagram" 
+              <input
+                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60"
+                placeholder="@seuinstagram"
                 value={form.instagram || ''}
                 onChange={e => {
-                  let value = e.target.value.trim();
+                  const value = e.target.value.trim();
                   setForm({...form, instagram: value});
                 }}
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium text-on-surface">Site da Empresa (opcional)</label>
-              <input 
-                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60" 
-                placeholder="https://seusite.com ou seusite.com" 
+              <label className="text-sm font-medium text-on-surface">Site da empresa (opcional)</label>
+              <input
+                className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60"
+                placeholder="https://seusite.com ou seusite.com"
                 value={form.website || ''}
                 onChange={e => setForm({...form, website: e.target.value.trim()})}
               />
             </div>
+          </section>
 
-            {existingService && (
-              <div className="bg-surface-container-lowest p-4 rounded-xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-on-surface">Serviço Ativo</p>
-                    <p className="text-xs text-on-surface-variant">Quando ativado, apareça no feed de serviços</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={isActive}
-                      onChange={handleToggleActive}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-background after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-background after:border-outline-variant after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
-                  </label>
+          {existingService && (
+            <section className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-on-surface">Anuncio ativo</p>
+                  <p className="text-xs text-on-surface-variant">Quando ativado, aparece no feed de servicos.</p>
                 </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isActive}
+                    onChange={handleToggleActive}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-background after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-background after:border-outline-variant after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+                </label>
+              </div>
+            </section>
+          )}
+
+          <section className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-on-surface">Opcoes / servicos</label>
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuItemForm({ name: '', description: '', price: '', image: '' });
+                  setEditingMenuItemIndex(null);
+                  setShowMenuItemModal(true);
+                }}
+                className="text-xs text-primary font-bold"
+              >
+                + Adicionar opcao
+              </button>
+            </div>
+            {menuItems.length > 0 && (
+              <div className="space-y-2">
+                {menuItems.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3 bg-surface-container-lowest p-3 rounded-xl">
+                    <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-high">
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
+                          <Icon icon="image" size={20} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-on-surface text-sm truncate">{item.name}</p>
+                      <p className="text-xs text-on-surface-variant truncate">{item.price || 'Sem valor'}</p>
+                    </div>
+                    <button onClick={() => handleEditMenuItem(idx)} className="p-2 text-primary">
+                      <Icon icon="edit" size={18} />
+                    </button>
+                    <button onClick={() => handleRemoveMenuItem(idx)} className="p-2 text-error">
+                      <Icon icon="delete" size={18} />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
+          </section>
 
-            <div className="col-span-2">
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-on-surface">Opções / Serviços</label>
-                <button 
-                  type="button"
-                  onClick={() => {
-                    setMenuItemForm({ name: '', description: '', price: '', image: '' });
-                    setEditingMenuItemIndex(null);
-                    setShowMenuItemModal(true);
-                  }}
-                  className="text-xs text-primary font-bold"
-                >
-                  + Adicionar opção
-                </button>
-              </div>
-              {menuItems.length > 0 && (
-                <div className="space-y-2">
-                  {menuItems.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-3 bg-surface-container-lowest p-3 rounded-xl">
-                      <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-high">
-                        {item.image ? (
-                          <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
-                            <Icon icon="image" size={20} />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-on-surface text-sm truncate">{item.name}</p>
-                     <p className="text-xs text-on-surface-variant truncate">{item.price || 'Sem valor'}</p>
-                      </div>
-                      <button onClick={() => handleEditMenuItem(idx)} className="p-2 text-primary">
-                        <Icon icon="edit" size={18} />
-                      </button>
-                      <button onClick={() => handleRemoveMenuItem(idx)} className="p-2 text-error">
-                        <Icon icon="delete" size={18} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <button 
-              onClick={handleSubmit} 
-              disabled={!form.title || !form.WhatsApp || uploading || (user?.plan === 'plus' && selectedEnvironment?.id && !publicationMode)}
-              className="w-full primary-gradient text-white font-bold py-4 rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {submitStatus === 'uploading' ? 'Enviando imagens...' : 
-               submitStatus === 'locating' ? 'Obtendo localização...' : 
-               submitStatus === 'saving' ? 'Salvando serviço...' : 
-               (existingService ? 'Salvar Alterações' : 'Cadastrar Serviço')}
-            </button>
-          </div>
+          <button
+            onClick={handleSubmit}
+            disabled={!form.title || !form.WhatsApp || uploading}
+            className="w-full primary-gradient text-white font-bold py-4 rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {submitStatus === 'uploading' ?
+              'Enviando imagens...' :
+              submitStatus === 'saving' ?
+                'Salvando anuncio...' :
+                (existingService ? 'Salvar alteracoes' : 'Publicar anuncio')
+            }
+          </button>
         </div>
 
         {/* Modal Options */}
@@ -1218,3 +936,4 @@ export default function RegisterServicePage() {
     </Suspense>
   );
 }
+
