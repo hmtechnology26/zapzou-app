@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sem conexão | ConectaE</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at top, rgba(48, 204, 54, 0.16), transparent 38%),
+          linear-gradient(180deg, #f7f9fc 0%, #eef2f6 100%);
+      }
+      .card {
+        width: min(92vw, 420px);
+        border-radius: 20px;
+        padding: 24px;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.65);
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 24px;
+      }
+      p {
+        margin: 0;
+        color: #4b5563;
+        line-height: 1.6;
+      }
+      .dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: #30cc36;
+        margin-right: 8px;
+      }
+      a {
+        display: inline-block;
+        margin-top: 16px;
+        color: #0d7a1f;
+        text-decoration: none;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1><span class="dot"></span>Sem conexão no momento</h1>
+      <p>Não foi possível carregar esta página agora. Assim que sua internet voltar, tente novamente.</p>
+      <a href="/">Tentar novamente</a>
+    </main>
+  </body>
+</html>

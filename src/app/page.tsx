@@ -20,7 +20,7 @@ import { SearchField } from "@/components/SearchField";
 import { supabase } from "@/lib/supabase";
 import { trackServiceInteraction } from "@/lib/service-interactions";
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 8;
 const DUPLICATE_COLLAPSE_DISTANCE_KM = 0.5;
 
 type MembershipAccessType = "resident" | "service_provider" | null;
