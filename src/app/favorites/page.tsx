@@ -45,10 +45,10 @@ export default function FavoritesPage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-background]">
+    <div className="min-h-screen overflow-x-hidden bg-background">
       <TopAppBar />
 
-      <main className="mx-auto max-w-5xl px-4 pt-24 md:px-8">
+      <main className="mx-auto max-w-5xl px-4 pb-[calc(8.5rem+env(safe-area-inset-bottom))] pt-24 md:px-8 md:pb-20">
         <section className="relative overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[#0f1115] sm:p-8 md:p-10">
 
           <div className="relative flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
