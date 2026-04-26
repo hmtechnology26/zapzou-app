@@ -52,7 +52,8 @@ export function BottomNav() {
   return (
     <nav
       className="
-        fixed bottom-4 left-4 right-4 z-[60]
+        fixed left-4 right-4 z-[60]
+        bottom-[calc(0.75rem+env(safe-area-inset-bottom))]
         md:hidden
         overflow-hidden
         rounded-[2rem]
@@ -65,7 +66,6 @@ export function BottomNav() {
         dark:border-white/10
         dark:bg-zinc-950/55
         dark:supports-[backdrop-filter]:bg-zinc-950/45
-        pb-[calc(0.5rem+env(safe-area-inset-bottom))]
       "
     >
       {/* brilho/reflexo de vidro */}

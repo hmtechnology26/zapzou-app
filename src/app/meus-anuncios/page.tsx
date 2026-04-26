@@ -148,6 +148,24 @@ export default function MyAdsPage() {
   }, [mobileLinkedServiceId, userServices]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    window.dispatchEvent(
+      new CustomEvent("support-fab-visibility", {
+        detail: { hidden: Boolean(mobileLinkedService) },
+      }),
+    );
+
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent("support-fab-visibility", {
+          detail: { hidden: false },
+        }),
+      );
+    };
+  }, [mobileLinkedService]);
+
+  useEffect(() => {
     if (!mobileLinkedServiceId) return;
     if (!userServices.some((service) => service.id === mobileLinkedServiceId)) {
       setMobileLinkedServiceId(null);
