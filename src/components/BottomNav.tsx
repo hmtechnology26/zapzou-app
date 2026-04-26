@@ -14,10 +14,10 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { path: '/', label: 'Anúncios', icon: 'home' },
-  { path: '/places', label: 'Ambientes', icon: 'explore' },
+  { path: '/', label: 'Feed', icon: 'home' },
+  { path: '/places', label: 'Comunidades', icon: 'explore' },
   { path: '/meus-anuncios', label: 'Meus Anúncios', icon: 'storefront' },
-  { path: '/meus-ambientes', label: 'Meus Ambientes', icon: 'apartment' },
+  { path: '/meus-ambientes', label: 'Minhas Comunidades', icon: 'apartment' },
   { path: '/favorites', label: 'Favoritos', icon: 'favorite' },
   { path: '/contact', label: 'Suporte', icon: 'support_agent' },
 ];

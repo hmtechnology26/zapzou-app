@@ -666,13 +666,28 @@ export default function HomePage() {
           (typeof linkedEnvironments[0]?.name === "string"
             ? linkedEnvironments[0].name
             : "");
+        const defaultEnvironmentId =
+          (typeof linkedEnvironments[0]?.id === "string" &&
+          linkedEnvironments[0].id.trim().length > 0
+            ? linkedEnvironments[0].id.trim()
+            : "") ||
+          (typeof s.environmentId === "string" && s.environmentId.trim().length > 0
+            ? s.environmentId.trim()
+            : "");
 
         let distance = Infinity;
         let distanceEnvironmentName = defaultEnvironmentName;
+        let distanceEnvironmentId = defaultEnvironmentId;
 
         if (userLocation) {
+          type DistanceCandidate = {
+            value: number;
+            id: string;
+            name: string;
+          };
+
           const distanceCandidates = linkedEnvironments
-            .map((env: any) => {
+            .map((env: any): DistanceCandidate | null => {
               if (
                 typeof env?.latitude !== "number" ||
                 typeof env?.longitude !== "number"
@@ -690,33 +705,44 @@ export default function HomePage() {
                   env.latitude,
                   env.longitude,
                 ),
+                id: typeof env?.id === "string" ? env.id : "",
                 name: envName,
               };
             })
             .filter(
-              (
-                candidate,
-              ): candidate is {
-                value: number;
-                name: string;
-              } =>
+              (candidate: DistanceCandidate | null): candidate is DistanceCandidate =>
                 Boolean(
                   candidate &&
                     typeof candidate.value === "number" &&
+                    typeof candidate.id === "string" &&
+                    candidate.id.length > 0 &&
                     Number.isFinite(candidate.value),
                 ),
             );
 
           if (distanceCandidates.length > 0) {
-            const nearest = distanceCandidates.reduce((closest, current) =>
-              current.value < closest.value ? current : closest,
+            const nearest = distanceCandidates.reduce(
+              (closest: DistanceCandidate, current: DistanceCandidate) =>
+                current.value < closest.value ? current : closest,
             );
             distance = nearest.value;
+            distanceEnvironmentId = nearest.id || defaultEnvironmentId;
             distanceEnvironmentName = nearest.name || defaultEnvironmentName;
+          }
+        } else if (
+          selectedEnvironmentId !== "all" &&
+          linkedEnvironments.some((env: any) => env?.id === selectedEnvironmentId)
+        ) {
+          const selectedEnvironment = linkedEnvironments.find(
+            (env: any) => env?.id === selectedEnvironmentId,
+          );
+          distanceEnvironmentId = selectedEnvironmentId;
+          if (typeof selectedEnvironment?.name === "string") {
+            distanceEnvironmentName = selectedEnvironment.name;
           }
         }
 
-        return { ...s, distance, distanceEnvironmentName };
+        return { ...s, distance, distanceEnvironmentName, distanceEnvironmentId };
       })
       .sort((a, b) => a.distance - b.distance);
   }, [
@@ -747,6 +773,34 @@ export default function HomePage() {
       );
     });
   }, [search, servicesWithDistance]);
+
+  const shouldShowResidentPin = useCallback(
+    (service: any) => {
+      const isOwnService =
+        typeof service?.provider_id === "string" &&
+        typeof user?.id === "string" &&
+        service.provider_id === user.id;
+
+      const contextEnvironmentId =
+        typeof service?.distanceEnvironmentId === "string" &&
+        service.distanceEnvironmentId.trim().length > 0
+          ? service.distanceEnvironmentId.trim()
+          : typeof service?.environmentId === "string" &&
+              service.environmentId.trim().length > 0
+            ? service.environmentId.trim()
+            : null;
+
+      if (isOwnService && membershipAccessLoaded && contextEnvironmentId) {
+        const contextAccessType =
+          membershipAccessByEnvironmentId[contextEnvironmentId] ?? null;
+        if (contextAccessType === "resident") return true;
+        if (contextAccessType === "service_provider") return false;
+      }
+
+      return service.publisherType === "resident";
+    },
+    [membershipAccessByEnvironmentId, membershipAccessLoaded, user?.id],
+  );
 
   const providerGroups = useMemo<ProviderGroup[]>(() => {
     const grouped = new Map<
@@ -1611,8 +1665,7 @@ export default function HomePage() {
                             />
                           </div>
                         )}
-                        {service.image &&
-                          service.publisherType === "resident" && (
+                        {service.image && shouldShowResidentPin(service) && (
                             <img
                               src="/pin.png"
                               alt="Morador"
@@ -1747,8 +1800,7 @@ export default function HomePage() {
                             />
                           </div>
                         )}
-                        {service.image &&
-                          service.publisherType === "resident" && (
+                        {service.image && shouldShowResidentPin(service) && (
                             <img
                               src="/pin.png"
                               alt="Morador"
@@ -2057,8 +2109,7 @@ export default function HomePage() {
                           />
                         </div>
                       )}
-                      {service.image &&
-                        service.publisherType === "resident" && (
+                      {service.image && shouldShowResidentPin(service) && (
                           <img
                             src="/pin.png"
                             alt="Morador"

@@ -31,9 +31,9 @@ interface NavItem {
 
 const baseNavItems: NavItem[] = [
   { path: '/', label: 'An\u00fancios', icon: 'home' },
-  { path: '/places', label: 'Ambientes', icon: 'explore' },
+  { path: '/places', label: 'Comunidades', icon: 'explore' },
   { path: '/meus-anuncios', label: 'Meus Anúncios', icon: 'storefront' },
-  { path: '/meus-ambientes', label: 'Meus Ambientes', icon: 'apartment' },
+  { path: '/meus-ambientes', label: 'Minhas Comunidades', icon: 'apartment' },
   { path: '/favorites', label: 'Favoritos', icon: 'favorite' },
   { path: '/contact', label: 'Suporte', icon: 'support_agent' },
 ];

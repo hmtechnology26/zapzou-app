@@ -382,9 +382,10 @@ export default function MyAdsPage() {
             <button
               type="button"
               onClick={() => router.push("/register-service")}
-              className="w-full md:w-auto rounded-full px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-primary/25 transition-transform hover:scale-[1.02] active:scale-95 primary-gradient"
+              className="w-full gap-2 flex md:w-auto rounded-full px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-primary/25 transition-transform hover:scale-[1.02] active:scale-95 primary-gradient"
             >
-              Novo anúncio
+              <Icon icon="add" size={20} />
+             Novo anúncio
             </button>
           </div>
         </section>
@@ -474,9 +475,9 @@ export default function MyAdsPage() {
                         </span>
                         <h4 className="font-bold text-on-surface mt-1 line-clamp-2">{service.title}</h4>
 
-                        <p className="text-xs text-on-surface-variant/80 mt-1">
+                        {/* <p className="text-xs text-on-surface-variant/80 mt-1">
                           Ambientes vinculados: {linkedIds.length}
-                        </p>
+                        </p> */}
 
                         <div className="mt-4 space-y-2 border-t border-outline-variant/10 pt-4">
                           <div className="flex gap-2">

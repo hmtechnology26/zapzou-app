@@ -229,25 +229,24 @@ export default function MyAdsPage() {
     }
 
     setTogglingRoleId(envId);
-      setTogglingRoleTarget((prev) => ({
-        ...prev,
-        [envId]: nextAccessType,
-      }));
+    setTogglingRoleTarget((prev) => ({
+      ...prev,
+      [envId]: nextAccessType,
+    }));
 
     try {
       const currentMembership = affiliations[envId];
-      const { error } = await supabase
-        .from("environment_members")
-        .upsert(
-          {
-            environment_id: envId,
-            user_id: user.id,
-            role: currentMembership?.role === "moderator" ? "moderator" : "member",
-            access_type: nextAccessType,
-            status: currentMembership?.status ?? "active",
-          },
-          { onConflict: "environment_id,user_id" },
-        );
+      const { error } = await supabase.from("environment_members").upsert(
+        {
+          environment_id: envId,
+          user_id: user.id,
+          role:
+            currentMembership?.role === "moderator" ? "moderator" : "member",
+          access_type: nextAccessType,
+          status: currentMembership?.status ?? "active",
+        },
+        { onConflict: "environment_id,user_id" },
+      );
 
       if (error) {
         console.error("Error toggling role:", error);
@@ -314,9 +313,9 @@ export default function MyAdsPage() {
 
     setStatusNotice("Ambiente removido com sucesso");
     setTimeout(() => setStatusNotice(null), 3000);
-    
+
     signalMembershipChange();
-    
+
     setDeletingId(null);
     setDeleteModalOpen(false);
     setEnvironmentToDelete(null);
@@ -343,22 +342,27 @@ export default function MyAdsPage() {
           <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-primary">
-                Painel de ambientes
+                Painel de comunidades
               </span>
+
               <h2 className="mt-4 text-3xl font-black tracking-tight text-on-surface md:text-5xl">
-                Meus ambientes
+                Minhas Comunidades
               </h2>
+
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-on-surface-variant md:text-base">
-                Gerencie seus ambientes vinculados, altere seu tipo de acesso e acompanhe aprovacoes.
+                Gerencie suas comunidades vinculados, altere seu tipo de acesso
+                e acompanhe aprovações.
               </p>
 
               <div className="mt-5 flex flex-wrap gap-2">
                 <span className="inline-flex items-center rounded-full border border-outline-variant/10 bg-background/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant shadow-sm">
-                  {myContexts.length} ambientes
+                  {myContexts.length} comunidades
                 </span>
+
                 <span className="inline-flex items-center rounded-full border border-outline-variant/10 bg-background/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant shadow-sm">
                   {activeContextsCount} ativos
                 </span>
+
                 {pendingContextsCount > 0 && (
                   <span className="inline-flex items-center rounded-full border border-outline-variant/10 bg-background/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant shadow-sm">
                     {pendingContextsCount} pendentes
@@ -368,14 +372,17 @@ export default function MyAdsPage() {
             </div>
 
             <div className="w-full md:max-w-sm">
-              <div className="flex items-center gap-3 rounded-[1.5rem] border border-outline-variant/10 bg-background/70 px-4 py-4 shadow-sm">
+              {/* CARD SOMENTE DESKTOP */}
+              <div className="hidden md:flex items-center gap-3 rounded-[1.5rem] border border-outline-variant/10 bg-background/70 px-4 py-4 shadow-sm">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   <Icon icon="add_location_alt" size={28} weight={700} />
                 </div>
+
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-black text-on-surface">
-                    Procurar um novo ambiente
+                  <p className="text-[11px] font-black text-on-surface">
+                    Procurar uma nova comunidade
                   </p>
+
                   <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">
                     Solicite vínculo quando quiser anunciar em outro local.
                   </p>
@@ -383,24 +390,28 @@ export default function MyAdsPage() {
               </div>
 
               <button
-                onClick={() => open('link')}
-                className="mt-3 w-full rounded-full px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-primary/25 transition-transform hover:scale-[1.02] active:scale-95 primary-gradient"
+                onClick={() => open("link")}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-primary/25 transition-transform hover:scale-[1.02] active:scale-95 primary-gradient"
               >
-                Procurar Ambiente
+                {/* ÍCONE SOMENTE MOBILE */}
+                <span className="md:hidden">
+                  <Icon icon="add_location_alt" size={20} weight={700} />
+                </span>
+                Procurar Comunidade
               </button>
             </div>
           </div>
         </section>
 
         <section className="space-y-6">
-          <div className="flex items-center justify-between px-2">
+          {/* <div className="flex items-center justify-between px-2">
             <h3 className="text-xs font-black uppercase tracking-[0.25em] text-primary/70">
-              Ambientes de Atuação
+              comunidades de Atuação
             </h3>
-            <span className="text-[9px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest border border-primary/10">
+            <span className="text-[8px] font-black text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest border border-primary/10">
               {myContexts.length} Vinculados
             </span>
-          </div>
+          </div> */}
 
           {loadingContexts || affiliationLoading ? (
             <div className="py-24 flex justify-center flex-col items-center gap-4">
@@ -438,7 +449,8 @@ export default function MyAdsPage() {
                 const displayedRole =
                   togglingRoleTarget[env.id] ?? membership?.accessType ?? null;
                 const isResidentRole = displayedRole === "resident";
-                const isServiceProviderRole = displayedRole === "service_provider";
+                const isServiceProviderRole =
+                  displayedRole === "service_provider";
 
                 return (
                   <article
@@ -476,17 +488,23 @@ export default function MyAdsPage() {
                     <div className="flex flex-1 flex-col gap-4 p-5">
                       <div className="min-w-0">
                         <div className="mb-2 flex flex-wrap items-center gap-2 pr-10">
-                          <h4 className="truncate font-bold text-on-surface">{env.name}</h4>
+                          <h4 className="truncate font-bold text-on-surface">
+                            {env.name}
+                          </h4>
                           <span
                             className={`rounded-lg border px-2 py-0.5 text-[8px] font-black uppercase tracking-widest ${
                               isActive
-                                ? 'border-[#30CC36]/20 bg-[#30CC36]/10 text-[#30CC36]'
+                                ? "border-[#30CC36]/20 bg-[#30CC36]/10 text-[#30CC36]"
                                 : isPending
-                                  ? 'border-amber-500/20 bg-amber-500/10 text-amber-700'
-                                  : 'border-error/20 bg-error/10 text-error'
+                                  ? "border-amber-500/20 bg-amber-500/10 text-amber-700"
+                                  : "border-error/20 bg-error/10 text-error"
                             }`}
                           >
-                            {isActive ? 'ATIVO' : isPending ? pendingLabel : 'BLOQUEADO'}
+                            {isActive
+                              ? "ATIVO"
+                              : isPending
+                                ? pendingLabel
+                                : "BLOQUEADO"}
                           </span>
                         </div>
 
@@ -532,7 +550,9 @@ export default function MyAdsPage() {
 
                               <button
                                 type="button"
-                                onClick={() => handleToggleRole(env.id, "resident")}
+                                onClick={() =>
+                                  handleToggleRole(env.id, "resident")
+                                }
                                 disabled={togglingRoleId === env.id}
                                 aria-pressed={isResidentRole}
                                 className={`relative z-10 flex h-11 w-full items-center justify-center gap-2 rounded-full text-[9px] font-black uppercase transition-colors ${
@@ -553,18 +573,22 @@ export default function MyAdsPage() {
 
                               <button
                                 type="button"
-                                onClick={() => handleToggleRole(env.id, "service_provider")}
+                                onClick={() =>
+                                  handleToggleRole(env.id, "service_provider")
+                                }
                                 disabled={togglingRoleId === env.id}
                                 aria-pressed={isServiceProviderRole}
                                 className={`relative z-10 flex h-11 w-full items-center justify-center gap-2 rounded-full text-[9px] font-black uppercase transition-colors ${
-                                  togglingRoleTarget[env.id] === "service_provider"
+                                  togglingRoleTarget[env.id] ===
+                                  "service_provider"
                                     ? "text-white"
                                     : isServiceProviderRole
                                       ? "text-white"
                                       : "text-on-surface-variant/80 hover:text-on-surface"
                                 }`}
                               >
-                                {togglingRoleTarget[env.id] === "service_provider" ? (
+                                {togglingRoleTarget[env.id] ===
+                                "service_provider" ? (
                                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                                 ) : (
                                   <Icon icon="work" size={14} />
@@ -577,7 +601,7 @@ export default function MyAdsPage() {
 
                         {/* {isActive && (
                           <button
-                            onClick={() => router.push(`/meus-ambientes/${env.id}`)}
+                            onClick={() => router.push(`/meus-comunidades/${env.id}`)}
                             className="flex h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-outline-variant/35 bg-surface-container-high/80 text-[10px] font-black uppercase text-on-surface shadow-[0_8px_20px_rgba(15,23,42,0.05)] transition-all duration-300 ease-out active:scale-95 hover:border-primary/25 hover:bg-surface-container-high hover:text-primary dark:border-[#30cc36]/28 dark:bg-[#223626] dark:text-[#e8f8ea] dark:shadow-[0_8px_20px_rgba(48,204,54,0.08)] dark:hover:border-[#30cc36]/45 dark:hover:bg-[#2b4a2f] dark:hover:text-white md:text-sm"
                           >
                             <Icon icon="store" size={18} />
@@ -588,10 +612,16 @@ export default function MyAdsPage() {
                         {!isActive && isPending && (
                           <div className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/10 text-[10px] font-black uppercase tracking-[0.1em] text-amber-700">
                             <Icon
-                              icon={needsModeratorApproval ? "admin_panel_settings" : "hourglass_empty"}
+                              icon={
+                                needsModeratorApproval
+                                  ? "admin_panel_settings"
+                                  : "hourglass_empty"
+                              }
                               size={16}
                             />
-                            {needsModeratorApproval ? "Aguardando AprovaÃ§Ã£o" : "Aguardando AprovaÃ§Ã£o"}
+                            {needsModeratorApproval
+                              ? "Aguardando AprovaÃ§Ã£o"
+                              : "Aguardando AprovaÃ§Ã£o"}
                           </div>
                         )}
                       </div>
@@ -648,5 +678,3 @@ export default function MyAdsPage() {
     </div>
   );
 }
-
-
