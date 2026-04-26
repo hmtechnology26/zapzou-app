@@ -122,7 +122,8 @@ export function TopAppBar({
   return (
   <header
     className="
-      fixed top-2 left-3 right-3 z-50
+      fixed left-3 right-3 z-50
+      top-[calc(env(safe-area-inset-top)+0.125rem)] md:top-2
       rounded-[2rem]
       border border-white/20
       bg-white/[0.08]
