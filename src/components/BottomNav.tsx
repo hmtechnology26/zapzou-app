@@ -52,7 +52,7 @@ export function BottomNav() {
   return (
     <nav
       className="
-        fixed left-4 right-4 z-[60]
+        fixed -mb-4 left-4 right-4 z-[60]
         bottom-[calc(0.75rem+env(safe-area-inset-bottom))]
         md:hidden
         overflow-hidden
