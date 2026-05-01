@@ -1,0 +1,31 @@
+
+> zapzou-app@0.0.1 dev
+> next dev -p 3001
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3001
+  - Environments: .env
+  - Experiments (use with caution):
+    · workerThreads
+
+ ✓ Starting...
+ ✓ Ready in 15.1s
+ ○ Compiling / ...
+ ✓ Compiled / in 6.7s (662 modules)
+ GET / 200 in 8024ms
+ ✓ Compiled in 1487ms (310 modules)
+ ✓ Compiled in 238ms (310 modules)
+ ✓ Compiled in 15.6s (674 modules)
+ GET / 200 in 633ms
+ GET / 200 in 243ms
+ ✓ Compiled in 11.3s (674 modules)
+ GET / 200 in 1332ms
+ ✓ Compiled in 30.7s (674 modules)
+ ✓ Compiled in 7.8s (674 modules)
+ ✓ Compiled in 2.5s (674 modules)
+ ✓ Compiled in 2.6s (674 modules)
+ ✓ Compiled in 2.7s (674 modules)
+ ✓ Compiled in 23.8s (674 modules)
+ ✓ Compiled in 4.6s (674 modules)
+ ✓ Compiled in 19.7s (674 modules)
+ ✓ Compiled in 13.6s (674 modules)

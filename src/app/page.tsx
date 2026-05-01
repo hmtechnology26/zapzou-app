@@ -20,9 +20,7 @@ import { SearchField } from "@/components/SearchField";
 import { supabase } from "@/lib/supabase";
 import { trackServiceInteraction } from "@/lib/service-interactions";
 
-const PAGE_SIZE = 8;
-const DUPLICATE_COLLAPSE_DISTANCE_KM = 0.5;
-
+const PAGE_SIZE = 16;
 type MembershipAccessType = "resident" | "service_provider" | null;
 type StoryMediaType = "image" | "video";
 
@@ -144,6 +142,7 @@ export default function HomePage() {
     selectedEnvironments,
     services,
     servicesLoading,
+    loading,
     membershipVersion,
   } = useApp();
 
@@ -796,25 +795,25 @@ export default function HomePage() {
     });
   }, [search, servicesWithDistance]);
 
-  const getDuplicateServiceKey = useCallback((service: any) => {
+  const getServiceProviderKey = useCallback((service: any) => {
     const normalize = (value: unknown) =>
       typeof value === "string" ? value.trim().toLowerCase() : "";
+    const normalizePhone = (value: unknown) =>
+      typeof value === "string" ? value.replace(/\D/g, "") : "";
 
-    const providerId =
-      typeof service?.provider_id === "string"
-        ? service.provider_id.trim().toLowerCase()
-        : "";
+    const providerId = normalize(service?.provider_id);
+    const whatsapp = normalizePhone(service?.WhatsApp || service?.whatsapp);
+    const instagram = normalize(service?.instagram).replace(/^@/, "");
+    const website = normalize(service?.website || service?.website_url);
     const providerName = normalize(service?.provider);
-    const title = normalize(service?.title);
-    const fallbackIdentity =
-      normalize(service?.slug) ||
-      normalize(service?.description).slice(0, 120) ||
-      normalize(service?.image || service?.image_url);
 
-    return [
-      providerId || `provider:${providerName}`,
-      title || fallbackIdentity,
-    ].join("::");
+    return (
+      providerId ||
+      (whatsapp ? `whatsapp:${whatsapp}` : "") ||
+      (instagram ? `instagram:${instagram}` : "") ||
+      (website ? `website:${website}` : "") ||
+      `provider:${providerName}`
+    );
   }, []);
 
   const shouldShowResidentPin = useCallback(
@@ -896,75 +895,39 @@ export default function HomePage() {
       return filteredServices;
     }
 
-    if (!user?.id || !userLocation) {
+    if (loading || !userLocation) {
       return filteredServices;
     }
 
-    const groups = new Map<string, Array<any>>();
+    const getServiceDistance = (service: any) =>
+      typeof service?.distance === "number" && Number.isFinite(service.distance)
+        ? service.distance
+        : Infinity;
+
+    const providerGroups = new Map<string, Array<any>>();
 
     filteredServices.forEach((service) => {
-      const key = getDuplicateServiceKey(service);
-      const bucket = groups.get(key);
+      const key = getServiceProviderKey(service);
+      const bucket = providerGroups.get(key);
       if (bucket) {
         bucket.push(service);
         return;
       }
-      groups.set(key, [service]);
+      providerGroups.set(key, [service]);
     });
 
-    const result: Array<any> = [];
-
-    groups.forEach((group) => {
-      if (group.length <= 1) {
-        result.push(group[0]);
-        return;
-      }
-
-      const sortedGroup = [...group].sort((a, b) => {
-        const distanceA =
-          typeof a?.distance === "number" && Number.isFinite(a.distance)
-            ? a.distance
-            : Infinity;
-        const distanceB =
-          typeof b?.distance === "number" && Number.isFinite(b.distance)
-            ? b.distance
-            : Infinity;
-        return distanceA - distanceB;
-      });
-
-      const nearestService = sortedGroup[0];
-      const nearbyServices = sortedGroup.filter((service) => {
-        return (
-          typeof service?.distance === "number" &&
-          Number.isFinite(service.distance) &&
-          service.distance <= DUPLICATE_COLLAPSE_DISTANCE_KM
-        );
-      });
-
-      if (nearbyServices.length > 0) {
-        result.push(...nearbyServices);
-        return;
-      }
-
-      result.push(nearestService);
-    });
-
-    return result.sort((a, b) => {
-      const distanceA =
-        typeof a?.distance === "number" && Number.isFinite(a.distance)
-          ? a.distance
-          : Infinity;
-      const distanceB =
-        typeof b?.distance === "number" && Number.isFinite(b.distance)
-          ? b.distance
-          : Infinity;
-      return distanceA - distanceB;
-    });
+    return Array.from(providerGroups.values())
+      .map((group) =>
+        [...group].sort(
+          (a, b) => getServiceDistance(a) - getServiceDistance(b),
+        )[0],
+      )
+      .sort((a, b) => getServiceDistance(a) - getServiceDistance(b));
   }, [
     filteredServices,
-    getDuplicateServiceKey,
+    getServiceProviderKey,
+    loading,
     selectedCategory,
-    user?.id,
     userLocation,
   ]);
 
