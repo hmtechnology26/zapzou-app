@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { useRouter } from "next/navigation";
-import { MaterialSymbol as Icon } from "react-material-symbols";
+import { Icon } from "@/components/Icon";
 import { Avatar } from "@/components/Avatar";
 import { TopAppBar } from "@/components/TopAppBar";
 import { useApp } from "@/hooks/useApp";
@@ -10,6 +16,14 @@ import { supabase } from "@/lib/supabase";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const [displayName, setDisplayName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [profileMessage, setProfileMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const {
     user,
@@ -26,6 +40,204 @@ export default function ProfilePage() {
       router.push("/login");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (!user) return;
+    setDisplayName(user.name || "");
+    setAvatarUrl(user.avatar || "");
+  }, [user]);
+
+  const normalizedDisplayName = displayName.trim();
+  const normalizedAvatarUrl = avatarUrl.trim();
+  const profileHasChanges = useMemo(() => {
+    if (!user) return false;
+    return (
+      normalizedDisplayName !== user.name.trim() ||
+      normalizedAvatarUrl !== (user.avatar || "").trim()
+    );
+  }, [normalizedAvatarUrl, normalizedDisplayName, user]);
+
+  const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!user || profileSaving) return;
+
+    if (normalizedDisplayName.length < 2) {
+      setProfileMessage({
+        type: "error",
+        text: "Informe um nome com pelo menos 2 caracteres.",
+      });
+      return;
+    }
+
+    setProfileSaving(true);
+    setProfileMessage(null);
+
+    try {
+      const nextAvatar = normalizedAvatarUrl || null;
+
+      const { error: profileError } = await supabase
+        .from("users")
+        .update({
+          name: normalizedDisplayName,
+          avatar: nextAvatar,
+        })
+        .eq("id", user.id);
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      const { error: authError } = await supabase.auth.updateUser({
+        data: {
+          name: normalizedDisplayName,
+          full_name: normalizedDisplayName,
+          avatar_url: nextAvatar,
+          picture: nextAvatar,
+        },
+      });
+
+      if (authError) {
+        throw authError;
+      }
+
+      setUser({
+        ...user,
+        name: normalizedDisplayName,
+        avatar: nextAvatar || "",
+      });
+      setAvatarUrl(nextAvatar || "");
+      setProfileMessage({
+        type: "success",
+        text: "Perfil atualizado com sucesso.",
+      });
+    } catch (err) {
+      console.error("Profile update failed:", err);
+      setProfileMessage({
+        type: "error",
+        text: "Nao foi possivel atualizar o perfil agora.",
+      });
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
+  const resolveAvatarUploadEndpoint = () => {
+    let edgeFunctionUrl = process.env.NEXT_PUBLIC_SUPABASE_EDGE_FUNCTION_URL;
+    if (!edgeFunctionUrl) {
+      throw new Error("Configuracao de upload nao encontrada.");
+    }
+
+    if (!edgeFunctionUrl.includes("r2-signed-upload")) {
+      edgeFunctionUrl = edgeFunctionUrl.endsWith("/")
+        ? `${edgeFunctionUrl}r2-signed-upload`
+        : `${edgeFunctionUrl}/r2-signed-upload`;
+    }
+
+    return edgeFunctionUrl;
+  };
+
+  const getFileExtension = (file: File) => {
+    const fromName = file.name.split(".").pop()?.toLowerCase();
+    if (fromName && /^[a-z0-9]+$/.test(fromName)) return fromName;
+    const fromMime = file.type.split("/").pop()?.toLowerCase();
+    return fromMime?.replace(/[^a-z0-9]/g, "") || "webp";
+  };
+
+  const uploadAvatarFileToR2 = async (file: File) => {
+    if (!user?.id) {
+      throw new Error("Voce precisa estar logado para alterar o avatar.");
+    }
+
+    const r2PublicUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const edgeFunctionUrl = resolveAvatarUploadEndpoint();
+
+    if (!r2PublicUrl || !supabaseAnonKey) {
+      throw new Error("Configuracao de storage incompleta.");
+    }
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      throw new Error("Sessao expirada. Faca login novamente.");
+    }
+
+    const extension = getFileExtension(file);
+    const filePath = `avatars/${user.id}-${Date.now()}.${extension}`;
+    const contentType = file.type || "image/webp";
+
+    const signResponse = await fetch(edgeFunctionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: supabaseAnonKey,
+      },
+      body: JSON.stringify({
+        path: filePath,
+        contentType,
+      }),
+    });
+
+    if (!signResponse.ok) {
+      const payload = await signResponse.json().catch(() => null);
+      throw new Error(payload?.error || "Nao foi possivel preparar o upload.");
+    }
+
+    const { uploadUrl } = await signResponse.json();
+    if (!uploadUrl || typeof uploadUrl !== "string") {
+      throw new Error("URL de upload invalida.");
+    }
+
+    const uploadResponse = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: { "Content-Type": contentType },
+      body: file,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error("Falha no envio da imagem.");
+    }
+
+    return `${r2PublicUrl.replace(/\/+$/, "")}/${filePath}`;
+  };
+
+  const handleAvatarFileChange = async (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setProfileMessage({
+        type: "error",
+        text: "Selecione um arquivo de imagem.",
+      });
+      return;
+    }
+
+    setAvatarUploading(true);
+    setProfileMessage(null);
+
+    try {
+      const uploadedUrl = await uploadAvatarFileToR2(file);
+      setAvatarUrl(uploadedUrl);
+      setProfileMessage({
+        type: "success",
+        text: "Imagem enviada. Clique em Salvar para aplicar no perfil.",
+      });
+    } catch (err) {
+      console.error("Avatar upload failed:", err);
+      setProfileMessage({
+        type: "error",
+        text: "Nao foi possivel enviar a imagem agora.",
+      });
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -134,9 +346,9 @@ export default function ProfilePage() {
               <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-start sm:text-left">
                 <div className="relative shrink-0">
                   <Avatar
-                    src={user.avatar}
-                    name={user.name}
-                    alt={user.name}
+                    src={normalizedAvatarUrl || user.avatar}
+                    name={normalizedDisplayName || user.name}
+                    alt={normalizedDisplayName || user.name}
                     className="h-24 w-24 rounded-[1.75rem] border border-white/80 shadow-[0_18px_44px_rgba(15,23,42,0.18)] sm:h-28 sm:w-28"
                     fallbackClassName="text-3xl"
                   />
@@ -144,6 +356,21 @@ export default function ProfilePage() {
                   <div className="absolute -bottom-2 -right-2 rounded-full bg-[#30cc36] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-[0_12px_28px_rgba(48,204,54,0.35)]">
                     {planLabel}
                   </div>
+
+                  <label className="absolute -left-2 -top-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border border-white/80 bg-white text-[#30cc36] shadow-[0_12px_28px_rgba(15,23,42,0.16)] transition hover:-translate-y-0.5 hover:bg-[#30cc36] hover:text-white dark:border-white/10 dark:bg-zinc-900">
+                    <Icon
+                      icon={avatarUploading ? "progress_activity" : "photo_camera"}
+                      size={20}
+                      className={avatarUploading ? "animate-spin" : ""}
+                    />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      disabled={avatarUploading || profileSaving}
+                      onChange={handleAvatarFileChange}
+                    />
+                  </label>
                 </div>
 
                 <div className="min-w-0 flex-1">
@@ -153,7 +380,7 @@ export default function ProfilePage() {
                   </div>
 
                   <h1 className="mt-4 truncate text-4xl font-black tracking-tight text-zinc-950 dark:text-white md:text-5xl">
-                    {user.name}
+                    {normalizedDisplayName || user.name}
                   </h1>
 
                   <div className="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start">
@@ -171,6 +398,62 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
+
+              <form
+                onSubmit={handleProfileSubmit}
+                className="mt-8 rounded-[1.75rem] border border-zinc-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04] sm:p-5"
+              >
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
+                  <label className="min-w-0 flex-1">
+                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-400">
+                      Nome publico
+                    </span>
+                    <input
+                      value={displayName}
+                      onChange={(event) => setDisplayName(event.target.value)}
+                      maxLength={150}
+                      className="mt-2 h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-bold text-zinc-900 outline-none transition focus:border-[#30cc36] focus:bg-white focus:ring-4 focus:ring-[#30cc36]/10 dark:border-white/10 dark:bg-black/20 dark:text-white dark:focus:bg-black/30"
+                    />
+                  </label>
+
+                  <label className="min-w-0 flex-[1.35]">
+                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-zinc-400">
+                      URL da imagem ou upload no avatar
+                    </span>
+                    <input
+                      value={avatarUrl}
+                      onChange={(event) => setAvatarUrl(event.target.value)}
+                      placeholder="https://..."
+                      className="mt-2 h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-bold text-zinc-900 outline-none transition focus:border-[#30cc36] focus:bg-white focus:ring-4 focus:ring-[#30cc36]/10 dark:border-white/10 dark:bg-black/20 dark:text-white dark:focus:bg-black/30"
+                    />
+                  </label>
+
+                  <button
+                    type="submit"
+                    disabled={!profileHasChanges || profileSaving || avatarUploading}
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#30cc36] px-5 text-sm font-black text-white shadow-[0_14px_30px_rgba(48,204,54,0.24)] transition hover:-translate-y-0.5 hover:bg-[#27b82e] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+                  >
+                    <Icon
+                      icon={profileSaving ? "progress_activity" : "save"}
+                      size={18}
+                      className={profileSaving ? "animate-spin" : ""}
+                    />
+                    {profileSaving ? "Salvando" : "Salvar"}
+                  </button>
+                </div>
+
+                {profileMessage && (
+                  <p
+                    className={`mt-3 rounded-2xl px-4 py-3 text-sm font-bold ${
+                      profileMessage.type === "success"
+                        ? "bg-[#30cc36]/10 text-[#1f9f25]"
+                        : "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-200"
+                    }`}
+                  >
+                    {profileMessage.text}
+                  </p>
+                )}
+              </form>
 
               <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {stats.map((item) => (

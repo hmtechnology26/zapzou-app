@@ -479,7 +479,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const authProfile = extractAuthProfile(authUser);
     const identityData = Array.isArray(authUser?.identities) ? authUser.identities[0]?.identity_data : null;
     const userMetadata: Record<string, any> | undefined = authUser
-      ? { ...(authUser.user_metadata || {}), ...(identityData || {}) }
+      ? { ...(identityData || {}), ...(authUser.user_metadata || {}) }
       : undefined;
     try {
       const { data: existingUser, error: fetchError } = await supabase
