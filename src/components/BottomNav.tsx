@@ -16,9 +16,9 @@ interface NavItem {
 const navItems: NavItem[] = [
   { path: '/', label: 'Início', icon: 'home' },
   { path: '/places', label: 'Comunidades', icon: 'explore' },
-  { path: '/meus-anuncios', label: 'Meus anúncios', icon: 'storefront', requiresAuth: true },
-  { path: '/meus-ambientes', label: 'Minhas comunidades', icon: 'apartment', requiresAuth: true },
-  { path: '/favorites', label: 'Favoritos', icon: 'favorite', requiresAuth: true },
+  { path: '/meus-anuncios', label: 'Meus anúncios', icon: 'storefront' },
+  { path: '/meus-ambientes', label: 'Minhas comunidades', icon: 'apartment' },
+  { path: '/favorites', label: 'Favoritos', icon: 'favorite' },
 ];
 
 export function BottomNav() {
@@ -39,12 +39,6 @@ export function BottomNav() {
     item: NavItem
   ) => {
     if (checkAndShowExitModal(item.path)) return;
-
-    if (item.requiresAuth && !user) {
-      e.preventDefault();
-      router.push('/login');
-      return;
-    }
 
     router.push(item.path);
   };
