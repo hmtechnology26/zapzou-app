@@ -43,9 +43,9 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   const [hasMounted, setHasMounted] = useState(false);
   const [isSupportFabHidden, setIsSupportFabHidden] = useState(false);
 
-  const publicExact = ["/", "/home", "/landing", "/login", "/search", "/places", "/contact", "/favorites"];
-  const publicPrefixes = ["/service/", "/places/", "/auth/"];
-  const hideBottomNavExact = ["/home", "/landing"];
+const publicExact = ["/", "/home", "/landing", "/login", "/search", "/places", "/contact", "/favorites", "/meus-anuncios", "/meus-ambientes", "/explore"];
+  const publicPrefixes = ["/service/", "/places/", "/auth/", "/login/"];
+  const hideBottomNavExact = ["/home", "/landing", "/login/create-ad", "/login/join-community", "/login/save-favorites"];
 
   const isPublicPage =
     publicExact.includes(pathname) ||
@@ -55,7 +55,7 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
     setHasMounted(true);
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     if (loading === false && !user && !isPublicPage) {
       router.push("/login");
     }

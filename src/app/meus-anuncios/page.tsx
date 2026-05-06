@@ -620,7 +620,7 @@ export default function MyAdsPage() {
 
             <button
               type="button"
-              onClick={() => router.push("/register-service")}
+              onClick={() => router.push("/login/create-ad")}
               className="mx-auto flex w-auto items-center justify-center gap-2 rounded-full bg-[#30cc36] px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-[#30cc36]/25 transition-transform hover:scale-[1.02] active:scale-95 md:mx-0"
             >
               <Icon icon="add" size={18} />
@@ -629,34 +629,7 @@ export default function MyAdsPage() {
           </div>
         </section>
 
-        {/* SEM LOGIN */}
-        {!user ? (
-          <section className="rounded-[2rem] border border-white/20 bg-white/70 p-8 text-center shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04]">
-            <Icon
-              icon="lock"
-              size={42}
-              className="mx-auto text-zinc-400 dark:text-white/40"
-            />
-
-            <h3 className="mt-4 text-xl font-black text-zinc-950 dark:text-white">
-              Entre para ver seus anúncios
-            </h3>
-
-            <p className="mt-2 text-sm text-zinc-500 dark:text-white/55">
-              Faça login para gerenciar seus serviços.
-            </p>
-
-            <button
-              type="button"
-              onClick={() => router.push("/login")}
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#30cc36] px-6 py-3 text-sm font-black text-white"
-            >
-              <Icon icon="login" size={18} />
-              Entrar
-            </button>
-          </section>
-        ) : (
-          <section className="space-y-5">
+        <section className="space-y-5">
             {/* LOADING */}
             {servicesLoading ? (
               <div className="py-20 text-center">
@@ -784,7 +757,6 @@ export default function MyAdsPage() {
               </div>
             )}
           </section>
-        )}
 
         {mobileLinkedService && (
           <div className="fixed inset-0 z-[70] md:hidden">

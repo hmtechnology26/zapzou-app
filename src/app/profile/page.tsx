@@ -271,7 +271,7 @@ export default function ProfilePage() {
       setUser(null);
       setSelectedEnvironments([]);
       setSelectedEnvironment(null);
-      router.replace("/login");
+      window.location.href = "/";
     }
   };
 
