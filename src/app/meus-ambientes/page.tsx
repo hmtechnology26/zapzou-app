@@ -626,8 +626,8 @@ export default function MyAdsPage() {
                               size={16}
                             />
                             {needsModeratorApproval
-                              ? "Aguardando AprovaÃ§Ã£o"
-                              : "Aguardando AprovaÃ§Ã£o"}
+                              ? "Aguardando Aprovação"
+                              : "Aguardando Aprovação"}
                           </div>
                         )}
                       </div>
