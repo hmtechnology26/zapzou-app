@@ -9,7 +9,7 @@ import type { PlaceSearchResult } from '@/lib/maps';
 
 export default function FavoritesPage() {
   const router = useRouter();
-  const { favoritePlaces, removeFavoritePlace } = useApp();
+  const { user, favoritePlaces, removeFavoritePlace } = useApp();
 
   const handleSelectEnvironment = (place: PlaceSearchResult) => {
     localStorage.setItem(`place_${place.id}`, JSON.stringify(place));
@@ -71,7 +71,11 @@ export default function FavoritesPage() {
 
               <button
                 type="button"
-                onClick={() => router.push('/login/save-favorites')}
+                onClick={() => {
+                  if (!user) {
+                    router.push('/login/save-favorites');
+                  }
+                }}
                 className="rounded-2xl bg-[#30cc36] p-4 text-left text-white shadow-[0_16px_34px_rgba(48,204,54,0.3)] transition hover:-translate-y-0.5 hover:brightness-110 active:scale-95"
               >
                 <Icon icon="explore" size={22} weight={700} />
@@ -100,7 +104,11 @@ export default function FavoritesPage() {
 
               <button
                 type="button"
-                onClick={() => router.push('/login/save-favorites')}
+                onClick={() => {
+                  if (!user) {
+                    router.push('/login/save-favorites');
+                  }
+                }}
                 className="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-[#30cc36] px-7 py-3 text-sm font-black text-white shadow-[0_18px_40px_rgba(48,204,54,0.35)] transition hover:-translate-y-0.5 hover:brightness-110 active:scale-95"
               >
                 Explorar ambientes

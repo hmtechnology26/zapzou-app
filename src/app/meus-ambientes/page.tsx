@@ -390,7 +390,13 @@ export default function MyAdsPage() {
               </div>
 
               <button
-                onClick={() => router.push("/login/join-community")}
+                onClick={() => {
+                  if (!user) {
+                    router.push("/login/join-community");
+                  } else {
+                    open("link");
+                  }
+                }}
                 className="mt-3 flex w-full items-center justify-center gap-2 rounded-full px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-primary/25 transition-transform hover:scale-[1.02] active:scale-95 primary-gradient"
               >
                 {/* ÍCONE SOMENTE MOBILE */}

@@ -620,7 +620,13 @@ export default function MyAdsPage() {
 
             <button
               type="button"
-              onClick={() => router.push("/login/create-ad")}
+              onClick={() => {
+                if (!user) {
+                  router.push("/login/create-ad");
+                } else {
+                  router.push("/register-service");
+                }
+              }}
               className="mx-auto flex w-auto items-center justify-center gap-2 rounded-full bg-[#30cc36] px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-[#30cc36]/25 transition-transform hover:scale-[1.02] active:scale-95 md:mx-0"
             >
               <Icon icon="add" size={18} />
