@@ -636,7 +636,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           ))}
         </div>
 
-        {requiresModeratorGate && !membershipLoading && (
+        {requiresModeratorGate && !membershipLoading && user && !membership && (
           <div className="bg-primary/5 border border-primary/10 rounded-[3rem] p-10 flex flex-col items-center text-center gap-4 max-w-2xl mx-auto md:ml-0">
              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/10">
                 <Icon icon="person_add" size={32} className="text-primary" weight={700} />
@@ -678,7 +678,6 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           </div>
         )}
 
-        {!requiresModeratorGate && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {servicesWithDistance.map((service) => (
             <div 
@@ -762,7 +761,6 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
             </div>
           )}
         </div>
-        )}
       </main>
 
       {/* Modal de boas-vindas para ambiente nÃƒÂ£o cadastrado */}
