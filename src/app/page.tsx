@@ -19,6 +19,7 @@ import { SERVICE_CATEGORIES } from "@/lib/service-categories";
 import { SearchField } from "@/components/SearchField";
 import { supabase } from "@/lib/supabase";
 import { trackServiceInteraction } from "@/lib/service-interactions";
+import { ImageModal } from "@/components/ImageModal";
 
 const PAGE_SIZE = 16;
 type MembershipAccessType = "resident" | "service_provider" | null;
@@ -181,6 +182,9 @@ export default function HomePage() {
   const [membershipAccessByEnvironmentId, setMembershipAccessByEnvironmentId] =
     useState<Record<string, MembershipAccessType>>({});
   const [membershipAccessLoaded, setMembershipAccessLoaded] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [imageModalImages, setImageModalImages] = useState<string[]>([]);
+  const [imageModalInitialIndex, setImageModalInitialIndex] = useState(0);
   const filterDropdownRef = useRef<HTMLDivElement | null>(null);
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
@@ -889,6 +893,18 @@ export default function HomePage() {
       };
     });
   }, [filteredServices, getLinkedEnvironmentIds]);
+
+  const serviceToProviderGroupMap = useMemo(() => {
+    const map = new Map<string, typeof providerGroups[0]>();
+    providerGroups.forEach((group) => {
+      group.services.forEach((service) => {
+        if (service.id) {
+          map.set(service.id, group);
+        }
+      });
+    });
+    return map;
+  }, [providerGroups]);
 
   const displayedServices = useMemo(() => {
     if (selectedCategory !== "all") {
@@ -1699,7 +1715,7 @@ export default function HomePage() {
                 <SearchField
                   value={search}
                   onChange={setSearch}
-                  placeholder="Encontre eletricista, manicure, pedreiro..."
+                  placeholder="Serviços perto de mim..."
                 />
               </div>
 
@@ -1928,7 +1944,22 @@ export default function HomePage() {
                       }
                       className="group/card relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.04]"
                     >
-                      <div className="relative h-48 w-full overflow-hidden border-b border-white/20 dark:border-white/10">
+                      <div 
+                        className="relative h-48 w-full overflow-hidden border-b border-white/20 dark:border-white/10 cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const images = Array.isArray(service.images) && service.images.length > 0 
+                            ? service.images 
+                            : service.image 
+                              ? [service.image] 
+                              : [];
+                          if (images.length > 0) {
+                            setImageModalImages(images);
+                            setImageModalInitialIndex(0);
+                            setImageModalOpen(true);
+                          }
+                        }}
+                      >
                         {service.image ? (
                           <img
                             className="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-105"
@@ -1979,9 +2010,29 @@ export default function HomePage() {
                           <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#30cc36] transition-colors">
                             {service.title}
                           </h4>
-                          <p className="text-xs text-on-surface-variant font-semibold mt-1 truncate">
-                            {service.provider || "Usuario"}
-                          </p>
+                          {(() => {
+                            const providerGroup = serviceToProviderGroupMap.get(service.id);
+                            const hasMultipleServices = providerGroup && providerGroup.totalServices > 1;
+                            return (
+                              <p className="text-xs text-on-surface-variant font-semibold mt-1 truncate flex items-center gap-1">
+                                {service.provider || "Usuario"}
+                                {hasMultipleServices && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenProviderServices(providerGroup.key);
+                                    }}
+                                    className="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#30cc36]/10 text-[#30cc36] hover:bg-[#30cc36]/20 transition-colors"
+                                    aria-label={`Ver todos os ${providerGroup.totalServices} serviços deste fornecedor`}
+                                  >
+                                    <Icon icon="apps" size={10} weight={700} />
+                                    <span className="text-[9px] font-bold">{providerGroup.totalServices}</span>
+                                  </button>
+                                )}
+                              </p>
+                            );
+                          })()}
                         </div>
 
                         <div className="mt-1 space-y-2">
@@ -2064,7 +2115,22 @@ export default function HomePage() {
                       }
                       className="group/card relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.04]"
                     >
-                      <div className="relative h-48 w-full overflow-hidden border-b border-white/20 dark:border-white/10">
+                      <div 
+                        className="relative h-48 w-full overflow-hidden border-b border-white/20 dark:border-white/10 cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const images = Array.isArray(service.images) && service.images.length > 0 
+                            ? service.images 
+                            : service.image 
+                              ? [service.image] 
+                              : [];
+                          if (images.length > 0) {
+                            setImageModalImages(images);
+                            setImageModalInitialIndex(0);
+                            setImageModalOpen(true);
+                          }
+                        }}
+                      >
                         {service.image ? (
                           <img
                             className="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-105"
@@ -2115,9 +2181,29 @@ export default function HomePage() {
                           <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">
                             {service.title}
                           </h4>
-                          <p className="text-xs text-on-surface-variant font-semibold mt-1 truncate">
-                            {service.provider || "Usuario"}
-                          </p>
+                          {(() => {
+                            const providerGroup = serviceToProviderGroupMap.get(service.id);
+                            const hasMultipleServices = providerGroup && providerGroup.totalServices > 1;
+                            return (
+                              <p className="text-xs text-on-surface-variant font-semibold mt-1 truncate flex items-center gap-1">
+                                {service.provider || "Usuario"}
+                                {hasMultipleServices && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenProviderServices(providerGroup.key);
+                                    }}
+                                    className="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#30cc36]/10 text-[#30cc36] hover:bg-[#30cc36]/20 transition-colors"
+                                    aria-label={`Ver todos os ${providerGroup.totalServices} serviços deste fornecedor`}
+                                  >
+                                    <Icon icon="apps" size={10} weight={700} />
+                                    <span className="text-[9px] font-bold">{providerGroup.totalServices}</span>
+                                  </button>
+                                )}
+                              </p>
+                            );
+                          })()}
                           <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">
                             {service.description}
                           </p>
@@ -2374,17 +2460,32 @@ export default function HomePage() {
                     }}
                     className="w-full rounded-2xl border border-outline-variant/10 bg-surface-container-highest/40 p-3 flex items-center gap-3 text-left hover:bg-surface-container-highest transition-colors"
                   >
-                    <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-surface-container-high shrink-0">
-                      {service.image ? (
-                        <img
-                          src={service.image}
-                          alt={service.title}
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-105"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
+                    <div 
+                        className="relative w-16 h-16 rounded-xl overflow-hidden bg-surface-container-high shrink-0 cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const images = Array.isArray(service.images) && service.images.length > 0 
+                            ? service.images 
+                            : service.image 
+                              ? [service.image] 
+                              : [];
+                          if (images.length > 0) {
+                            setImageModalImages(images);
+                            setImageModalInitialIndex(0);
+                            setImageModalOpen(true);
+                          }
+                        }}
+                      >
+                        {service.image ? (
+                          <img
+                            src={service.image}
+                            alt={service.title}
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover/card:scale-105"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
                           <Icon
                             icon="image"
                             size={18}
@@ -2552,8 +2653,15 @@ export default function HomePage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+</div>
+        )}
+
+      <ImageModal
+        isOpen={imageModalOpen}
+        images={imageModalImages}
+        initialIndex={imageModalInitialIndex}
+        onClose={() => setImageModalOpen(false)}
+      />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { usePublishModal } from "@/contexts/PublishModalContext";
 import { supabase } from "@/lib/supabase";
 import type { Environment, Service } from "@/types";
 import type { PublicationMode } from "@/lib/plan-rules";
+import { ImageModal } from "@/components/ImageModal";
 
 type LinkedMembership = {
   id: string;
@@ -104,6 +105,9 @@ export default function MyAdsPage() {
     string | null
   >(null);
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [imageModalImages, setImageModalImages] = useState<string[]>([]);
+  const [imageModalInitialIndex, setImageModalInitialIndex] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -672,7 +676,21 @@ export default function MyAdsPage() {
                       key={service.id}
                       className="group overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] dark:border-white/10 dark:bg-white/[0.04]"
                     >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-white/5">
+                    <div 
+                      className="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-white/5 cursor-pointer"
+                      onClick={() => {
+                        const images = Array.isArray(service.images) && service.images.length > 0 
+                          ? service.images 
+                          : service.image 
+                            ? [service.image] 
+                            : [];
+                        if (images.length > 0) {
+                          setImageModalImages(images);
+                          setImageModalInitialIndex(0);
+                          setImageModalOpen(true);
+                        }
+                      }}
+                    >
                       {service.image ? (
                         <img
                           src={service.image}
@@ -816,6 +834,13 @@ export default function MyAdsPage() {
             </div>
           </div>
         )}
+
+        <ImageModal
+          isOpen={imageModalOpen}
+          images={imageModalImages}
+          initialIndex={imageModalInitialIndex}
+          onClose={() => setImageModalOpen(false)}
+        />
       </main>
     </div>
   );

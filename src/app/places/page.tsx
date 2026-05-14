@@ -102,34 +102,56 @@ export default function PlacesPage() {
     const map = new Map<string, EnvironmentCard>();
 
     activeServices.forEach((service) => {
-      const label = service.environmentName?.trim() || "Ambiente";
-      const slug = service.environmentSlug?.trim() || generateSlug(label);
-      const id = service.environmentId?.trim() || slug;
-      const current = map.get(id);
+      const collectEnv = (
+        envId: string | null | undefined,
+        envName: string | null | undefined,
+        envSlug: string | null | undefined,
+        envType: string | null | undefined,
+        envAddress: string | null | undefined,
+      ) => {
+        if (!envId) return;
+        const label = (envName || "").trim() || "Ambiente";
+        const slug = (envSlug || "").trim() || generateSlug(label);
+        const id = envId.trim();
+        const current = map.get(id);
 
-      if (!current) {
-        map.set(id, {
-          id,
-          slug,
-          name: label,
-          type: service.environmentType?.trim() || "environment",
-          address: service.environmentAddress?.trim() || "",
-          serviceCount: 1,
-        });
-        return;
-      }
+        if (!current) {
+          map.set(id, {
+            id,
+            slug,
+            name: label,
+            type: (envType || "").trim() || "environment",
+            address: (envAddress || "").trim(),
+            serviceCount: 1,
+          });
+          return;
+        }
 
-      current.serviceCount += 1;
+        current.serviceCount += 1;
 
-      if (!current.slug) current.slug = slug;
+        if (!current.slug) current.slug = slug;
 
-      if (current.type === "environment" && service.environmentType?.trim()) {
-        current.type = service.environmentType.trim();
-      }
+        if (current.type === "environment" && envType?.trim()) {
+          current.type = envType.trim();
+        }
 
-      if (!current.address && service.environmentAddress?.trim()) {
-        current.address = service.environmentAddress.trim();
-      }
+        if (!current.address && envAddress?.trim()) {
+          current.address = envAddress.trim();
+        }
+      };
+
+      collectEnv(
+        service.environmentId || null,
+        service.environmentName || null,
+        service.environmentSlug || null,
+        service.environmentType || null,
+        service.environmentAddress || null,
+      );
+
+      const linkedEnvs = service.linkedEnvironments || [];
+      linkedEnvs.forEach((env: any) => {
+        collectEnv(env.id || null, env.name || null, env.slug || null, env.type || null, env.address || null);
+      });
     });
 
     return Array.from(map.values()).sort((a, b) =>
@@ -310,12 +332,12 @@ export default function PlacesPage() {
                         </p>
                       )}
 
-                      <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#30cc36]/15 bg-[#30cc36]/10 px-3 py-1.5 text-[11px] font-black text-[#1eb34b]">
+                      {/* <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#30cc36]/15 bg-[#30cc36]/10 px-3 py-1.5 text-[11px] font-black text-[#1eb34b]">
                         <Icon icon="storefront" size={14} weight={700} />
                         {environment.serviceCount} serviço
                         {environment.serviceCount === 1 ? "" : "s"} publicado
                         {environment.serviceCount === 1 ? "" : "s"}
-                      </div>
+                      </div> */}
                     </div>
 
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-400 transition-all duration-300 group-hover:bg-[#30cc36] group-hover:text-white dark:bg-white/10 dark:text-white/45">

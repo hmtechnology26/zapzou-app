@@ -13,6 +13,7 @@ import type { Review } from '@/types';
 import { hasCnpj } from '@/lib/cnpj';
 import { normalizeWebsiteUrl } from '@/lib/website';
 import { trackServiceInteraction } from '@/lib/service-interactions';
+import { ImageModal } from '@/components/ImageModal';
 
 interface ServiceDetailPageProps {
   seoContent?: ReactNode;
@@ -45,6 +46,9 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
   const [reviews, setReviews] = useState<Review[]>([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [imageModalImages, setImageModalImages] = useState<string[]>([]);
+  const [imageModalInitialIndex, setImageModalInitialIndex] = useState(0);
   const lastViewIncrementedServiceIdRef = useRef<string | null>(null);
   const minSwipeDistance = 50;
 
@@ -351,10 +355,15 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
           <section className="relative">
             {allImages.length > 1 ? (
               <div 
-                className="relative"
+                className="relative cursor-pointer"
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
+                onClick={() => {
+                  setImageModalImages(allImages);
+                  setImageModalInitialIndex(currentImageIndex);
+                  setImageModalOpen(true);
+                }}
               >
                 <div className="aspect-square w-full overflow-hidden max-h-[32rem] mx-auto">
                   <div
@@ -403,7 +412,16 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                 </div>
               </div>
             ) : (
-              <div className="aspect-square w-full overflow-hidden max-h-[32rem] mx-auto">
+              <div 
+                className="aspect-square w-full overflow-hidden max-h-[32rem] mx-auto cursor-pointer"
+                onClick={() => {
+                  if (service.image) {
+                    setImageModalImages([service.image]);
+                    setImageModalInitialIndex(0);
+                    setImageModalOpen(true);
+                  }
+                }}
+              >
                 <img alt={service.title} className="w-full h-full object-cover" src={service.image} loading="lazy" decoding="async" />
               </div>
             )}
@@ -628,6 +646,13 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
       {showOptionsMenu && (
         <div className="fixed inset-0 z-40" onClick={() => setShowOptionsMenu(false)} />
       )}
+
+      <ImageModal
+        isOpen={imageModalOpen}
+        images={imageModalImages}
+        initialIndex={imageModalInitialIndex}
+        onClose={() => setImageModalOpen(false)}
+      />
     </div>
   );
 }

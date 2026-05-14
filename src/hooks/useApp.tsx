@@ -737,70 +737,126 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return emptyMap;
     }
 
+    const buildLinkedMap = (linkRows: any[], environmentById?: Map<string, any>) => {
+      const linkedMap = new Map<string, Array<{
+        id: string;
+        slug: string;
+        name: string;
+        type: string;
+        latitude?: number;
+        longitude?: number;
+        address: string;
+        image: string;
+      }>>();
+
+      (linkRows || []).forEach((row: any) => {
+        const serviceId = row?.service_id;
+        if (typeof serviceId !== 'string' || serviceId.length === 0) return;
+
+        const relatedEnvironment = normalizeRelatedRecord<{
+          id?: string;
+          name?: string;
+          slug?: string;
+          latitude?: number;
+          longitude?: number;
+          address?: string;
+          type?: string;
+          image_url?: string;
+        }>(row?.environments);
+
+        const fallbackEnvironment =
+          environmentById?.get(row?.environment_id) ??
+          environmentById?.get(relatedEnvironment?.id);
+
+        const environment = relatedEnvironment || fallbackEnvironment || null;
+        const environmentId =
+          (typeof row?.environment_id === 'string' && row.environment_id.length > 0
+            ? row.environment_id
+            : environment?.id) || '';
+
+        if (!environmentId) return;
+
+        const linkedEnvironment = {
+          id: environmentId,
+          slug: environment?.slug || generateSlug(environment?.name || environmentId),
+          name: environment?.name || '',
+          type: environment?.type || '',
+          latitude: environment?.latitude,
+          longitude: environment?.longitude,
+          address: environment?.address || '',
+          image: environment?.image_url || '',
+        };
+
+        const current = linkedMap.get(serviceId) || [];
+        if (!current.some((env) => env.id === linkedEnvironment.id)) {
+          current.push(linkedEnvironment);
+        }
+        linkedMap.set(serviceId, current);
+      });
+
+      return linkedMap;
+    };
+
     const { data, error } = await supabase
       .from('service_environment_links')
       .select('service_id, environment_id, environments(id, name, slug, latitude, longitude, address, type, image_url)')
       .in('service_id', serviceIds);
 
-    if (error) {
+    if (!error) {
+      return buildLinkedMap(data || []);
+    }
+
+    const shouldTryFallback =
+      error &&
+      !isMissingServiceEnvironmentLinksError(error) &&
+      (
+        String(error?.message || '').toLowerCase().includes('environments') ||
+        String(error?.details || '').toLowerCase().includes('environments')
+      );
+
+    if (!shouldTryFallback) {
       if (!isMissingServiceEnvironmentLinksError(error)) {
         console.warn('fetchServiceLinkEnvironmentMap failed:', error);
       }
       return emptyMap;
     }
 
-    const linkedMap = new Map<string, Array<{
-      id: string;
-      slug: string;
-      name: string;
-      type: string;
-      latitude?: number;
-      longitude?: number;
-      address: string;
-      image: string;
-    }>>();
+    const { data: linkData, error: linkError } = await supabase
+      .from('service_environment_links')
+      .select('service_id, environment_id')
+      .in('service_id', serviceIds);
 
-    (data || []).forEach((row: any) => {
-      const serviceId = row?.service_id;
-      if (typeof serviceId !== 'string' || serviceId.length === 0) return;
+    if (linkError) {
+      console.warn('fetchServiceLinkEnvironmentMap fallback failed:', linkError);
+      return emptyMap;
+    }
 
-      const environment = normalizeRelatedRecord<{
-        id?: string;
-        name?: string;
-        slug?: string;
-        latitude?: number;
-        longitude?: number;
-        address?: string;
-        type?: string;
-        image_url?: string;
-      }>(row?.environments);
+    const environmentIds = Array.from(
+      new Set(
+        (linkData || [])
+          .map((row: any) => row?.environment_id)
+          .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0),
+      ),
+    );
 
-      const environmentId =
-        (typeof row?.environment_id === 'string' && row.environment_id.length > 0
-          ? row.environment_id
-          : environment?.id) || '';
+    const environmentById = new Map<string, any>();
 
-      if (!environmentId) return;
+    if (environmentIds.length > 0) {
+      const { data: environmentsData, error: environmentsError } = await supabase
+        .from('environments')
+        .select('id, name, slug, latitude, longitude, address, type, image_url')
+        .in('id', environmentIds);
 
-      const linkedEnvironment = {
-        id: environmentId,
-        slug: environment?.slug || generateSlug(environment?.name || environmentId),
-        name: environment?.name || '',
-        type: environment?.type || '',
-        latitude: environment?.latitude,
-        longitude: environment?.longitude,
-        address: environment?.address || '',
-        image: environment?.image_url || '',
-      };
-
-      const current = linkedMap.get(serviceId) || [];
-      if (!current.some((env) => env.id === linkedEnvironment.id)) {
-        current.push(linkedEnvironment);
+      if (environmentsError) {
+        console.warn('fetchServiceLinkEnvironmentMap fallback environments failed:', environmentsError);
+      } else {
+        (environmentsData || []).forEach((environment: any) => {
+          environmentById.set(environment.id, environment);
+        });
       }
-      linkedMap.set(serviceId, current);
-    });
+    }
 
-    return linkedMap;
+    return buildLinkedMap(linkData || [], environmentById);
   };
 
   const fetchServices = async () => {
@@ -1199,8 +1255,43 @@ export function AppProvider({ children }: { children: ReactNode }) {
       resolvedEnvironmentId =
         membershipEnvironmentIds.find((id) => activeEnvironmentIds.has(id)) ?? null;
 
-      if (!resolvedEnvironmentId) {
+if (!resolvedEnvironmentId) {
         throw new Error('Nenhum dos seus ambientes esta ativo para publicacao. Verifique "Meus Ambientes".');
+      }
+    }
+
+    const normalizedNewTitle = (service.title || '').trim().toLowerCase();
+    const normalizedNewDescription = (service.description || '').trim().toLowerCase();
+    const normalizedNewCategory = (service.category || '').trim().toLowerCase();
+
+    const { data: existingServices } = await supabase
+      .from('services')
+      .select('id, title, description, category, status')
+      .eq('provider_id', user.id)
+      .eq('is_active', true);
+
+    if (existingServices && existingServices.length > 0) {
+      const similarServices = existingServices.filter((s: any) => {
+        const existingTitle = (s.title || '').trim().toLowerCase();
+        const existingDescription = (s.description || '').trim().toLowerCase();
+        const existingCategory = (s.category || '').trim().toLowerCase();
+        
+        const titleMatch = existingTitle === normalizedNewTitle;
+        const descMatch = existingDescription === normalizedNewDescription;
+        const categoryMatch = existingCategory === normalizedNewCategory;
+        
+        return titleMatch && descMatch && categoryMatch;
+      });
+
+      if (similarServices.length > 0) {
+        console.warn('AVISO: Você já possui serviço(s) similar(es) criado(s):', 
+          similarServices.map((s: any) => ({
+            id: s.id,
+            title: s.title,
+            category: s.category,
+            status: s.status
+          }))
+        );
       }
     }
 

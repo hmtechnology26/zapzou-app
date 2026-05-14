@@ -22,6 +22,7 @@ import { hasCnpj } from '@/lib/cnpj';
 import { SearchField } from '@/components/SearchField';
 import { type PublicationMode } from '@/lib/plan-rules';
 import { trackServiceInteraction } from '@/lib/service-interactions';
+import { ImageModal } from '@/components/ImageModal';
 
 interface PlaceDetailPageProps {
   seoContent?: ReactNode;
@@ -44,6 +45,9 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [publicationMode, setPublicationMode] = useState<PublicationMode | null>(null);
   const [publishingModeLoading, setPublishingModeLoading] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [imageModalImages, setImageModalImages] = useState<string[]>([]);
+  const [imageModalInitialIndex, setImageModalInitialIndex] = useState(0);
 
   const generateSlug = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -369,16 +373,29 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   }));
 
   const servicesWithDistance = useMemo(() => {
+    const normalizedPlaceSlug = placeSlug?.toLowerCase().trim() || '';
+    
     return servicesWithSlug
       .filter((service) => {
         const isActive = service.isActive && service.status === 'active';
+        
         const serviceEnvSlug =
-          service.environmentSlug ||
+          (service.environmentSlug || '').toLowerCase().trim() ||
           (service.environmentId
-            ? environmentsWithSlug.find((env) => env.id === service.environmentId)?.slug
-            : undefined);
-        const matchesEnv =
-          serviceEnvSlug === placeSlug || service.environmentId === effectiveEnvironment?.id;
+            ? environmentsWithSlug.find((env) => env.id === service.environmentId)?.slug?.toLowerCase().trim()
+            : '');
+
+        const linkedEnvironments = service.linkedEnvironments || [];
+        const linkedEnvSlugs = linkedEnvironments
+          .map((e: any) => (e.slug || '').toLowerCase().trim())
+          .filter(Boolean);
+        const linkedEnvIds = linkedEnvironments.map((e: any) => e.id).filter(Boolean);
+        
+        const primaryEnvMatches = serviceEnvSlug === normalizedPlaceSlug;
+        const linkedEnvMatches = linkedEnvSlugs.includes(normalizedPlaceSlug) || linkedEnvIds.includes(effectiveEnvironment?.id);
+        
+        const matchesEnv = primaryEnvMatches || linkedEnvMatches;
+        
         const searchLower = search.toLowerCase().trim();
         const matchesSearch =
           !searchLower ||
@@ -386,6 +403,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           service.description.toLowerCase().includes(searchLower) ||
           (service.category || '').toLowerCase().includes(searchLower);
         const matchesCategory = selectedCategory === 'all' || service.category === selectedCategory;
+        
         return matchesEnv && matchesSearch && isActive && matchesCategory;
       })
       .map((service) => {
@@ -668,7 +686,22 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
               onClick={() => handleOpenServiceDetails(service)}
               className="bg-surface-container-lowest rounded-[2rem] flex flex-col cursor-pointer hover:bg-surface-container-lowest hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98] border border-outline-variant/10 group group/card relative overflow-hidden h-full"
             >
-              <div className="h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500">
+              <div 
+                className="h-44 w-full overflow-hidden border-b border-outline-variant/10 group-hover/card:scale-105 transition-transform duration-500"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const images = Array.isArray(service.images) && service.images.length > 0 
+                    ? service.images 
+                    : service.image 
+                      ? [service.image] 
+                      : [];
+                  if (images.length > 0) {
+                    setImageModalImages(images);
+                    setImageModalInitialIndex(0);
+                    setImageModalOpen(true);
+                  }
+                }}
+              >
                 <img 
                   className="w-full h-full object-cover" 
                   src={service.image} 
@@ -803,6 +836,13 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           </div>
         </div>
       )}
+      
+      <ImageModal
+        isOpen={imageModalOpen}
+        images={imageModalImages}
+        initialIndex={imageModalInitialIndex}
+        onClose={() => setImageModalOpen(false)}
+      />
     </div>
   );
 }
