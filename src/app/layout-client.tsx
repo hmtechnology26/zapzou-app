@@ -43,8 +43,8 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   const [hasMounted, setHasMounted] = useState(false);
   const [isSupportFabHidden, setIsSupportFabHidden] = useState(false);
 
-const publicExact = ["/", "/home", "/landing", "/login", "/search", "/places", "/contact", "/favorites", "/meus-anuncios", "/meus-ambientes", "/explore"];
-  const publicPrefixes = ["/service/", "/places/", "/auth/", "/login/"];
+const publicExact = ["/", "/home", "/landing", "/login", "/search", "/places", "/contact", "/favorites", "/meus-anuncios", "/meus-ambientes", "/explore", "/imports/roteiro"];
+  const publicPrefixes = ["/service/", "/places/", "/auth/", "/login/", "/imports/"];
   const hideBottomNavExact = ["/home", "/landing", "/login/create-ad", "/login/join-community", "/login/save-favorites"];
 
   const isPublicPage =

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
@@ -972,6 +972,11 @@ export default function HomePage() {
   }, [currentPage, totalPages]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]);
+
+  useEffect(() => {
     let shouldPrefetch = true;
 
     if (typeof window !== "undefined") {
@@ -1942,10 +1947,10 @@ export default function HomePage() {
                       onClick={() =>
                         handleOpenServiceDetails(service, "home_list_card")
                       }
-                      className="group/card relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.04]"
+                      className="group/card relative flex h-full cursor-pointer flex-row items-center gap-3 overflow-hidden rounded-[1.4rem] border border-white/20 bg-white/80 p-2.5 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] sm:flex-col sm:gap-0 sm:rounded-[2rem] sm:p-0 dark:border-white/10 dark:bg-white/[0.04]"
                     >
                       <div 
-                        className="relative h-48 w-full overflow-hidden border-b border-white/20 dark:border-white/10 cursor-pointer"
+                        className="relative h-28 w-28 shrink-0 overflow-hidden rounded-[1rem] bg-surface-container-low cursor-pointer sm:h-48 sm:w-full sm:rounded-none sm:border-b sm:border-r-0"
                         onClick={(e) => {
                           e.stopPropagation();
                           const images = Array.isArray(service.images) && service.images.length > 0 
@@ -1986,16 +1991,22 @@ export default function HomePage() {
                             decoding="async"
                           />
                         )}
+                        {Array.isArray(service.images) && service.images.length > 1 && (
+                          <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] font-black text-white backdrop-blur-sm">
+                            <Icon icon="photo_library" size={12} />
+                            <span>+{service.images.length - 1}</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex min-w-0 flex-1 flex-col justify-between p-4">
+                      <div className="flex min-w-0 flex-1 flex-col justify-center py-1 sm:p-4">
                         <div>
-                          <div className="mb-2 flex flex-wrap items-center gap-2">
-                            <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">
+                          <div className="mb-1.5 flex items-center gap-1.5 sm:mb-2 sm:flex-wrap sm:gap-2">
+                            <span className="rounded-full bg-[#30cc36]/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-[#30cc36]">
                               {service.category}
                             </span>
                             <div className="ml-auto flex flex-col items-end gap-1">
                               <span
-                                className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                                className={`rounded-full px-2 py-0.5 text-[8px] font-bold ${
                                   hasCnpj(service.cnpj)
                                     ? "text-white bg-[#30cc36] dark:text-black/80 dark:bg-[#30cc36]"
                                     : "text-white bg-orange-600 dark:text-white dark:bg-orange-700"
@@ -2007,14 +2018,21 @@ export default function HomePage() {
                               </span>
                             </div>
                           </div>
-                          <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#30cc36] transition-colors">
+                          <h4 className="font-black text-on-surface text-[13px] leading-tight line-clamp-2 group-hover/card:text-[#30cc36] transition-colors sm:text-[15px] sm:truncate">
                             {service.title}
                           </h4>
+                          <div className="mt-1 flex items-center gap-2 text-[9px] font-semibold text-on-surface-variant sm:text-[11px]">
+                            {service.distanceEnvironmentName && (
+                              <span className="line-clamp-1 rounded-full bg-surface-container-high px-1.5 py-0.5">
+                                {service.distanceEnvironmentName}
+                              </span>
+                            )}
+                          </div>
                           {(() => {
                             const providerGroup = serviceToProviderGroupMap.get(service.id);
                             const hasMultipleServices = providerGroup && providerGroup.totalServices > 1;
                             return (
-                              <p className="text-xs text-on-surface-variant font-semibold mt-1 truncate flex items-center gap-1">
+                              <p className="hidden mt-1 items-center gap-1 truncate text-[11px] font-semibold text-on-surface-variant sm:text-xs">
                                 {service.provider || "Usuario"}
                                 {hasMultipleServices && (
                                   <button
@@ -2035,8 +2053,8 @@ export default function HomePage() {
                           })()}
                         </div>
 
-                        <div className="mt-1 space-y-2">
-                          <div className="flex items-center justify-between">
+                        <div className="mt-2 sm:mt-2">
+                          <div className="flex items-end justify-between gap-2">
                             {(userLocation ||
                               service.distanceEnvironmentName) && (
                               <div className="flex items-center gap-2">
@@ -2055,30 +2073,25 @@ export default function HomePage() {
                                       </span>
                                     </div>
                                   )}
-                                {service.distanceEnvironmentName && (
-                                  <span className="text-[9px] text-on-surface-variant font-medium">
-                                    {service.distanceEnvironmentName}
-                                  </span>
-                                )}
                               </div>
                             )}
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleOpenServiceDetails(
+                                  service,
+                                  "home_list_button",
+                                );
+                              }}
+                              className="shrink-0 rounded-full bg-[#30cc36] px-3 py-1.5 text-[9px] font-black uppercase text-white shadow-lg shadow-[#30cc36]/20 transition-all hover:brightness-110 active:scale-95 sm:min-w-[140px] sm:px-5 sm:py-2.5 sm:text-xs"
+                            >
+                              Ver anúncio
+                            </button>
                             {/* <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#30cc36] group-hover/card:text-white transition-all duration-300">
                             <Icon icon="arrow_forward" size={14} weight={700} />
                           </div> */}
                           </div>
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              handleOpenServiceDetails(
-                                service,
-                                "home_list_button",
-                              );
-                            }}
-                            className="w-full rounded-full bg-[#30cc36] py-2.5 text-xs font-black uppercase text-white shadow-lg shadow-[#30cc36]/20 transition-all hover:brightness-110 active:scale-95"
-                          >
-                            Ver anúncio
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -2113,10 +2126,10 @@ export default function HomePage() {
                       onClick={() =>
                         handleOpenServiceDetails(service, "home_search_card")
                       }
-                      className="group/card relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.04]"
+                      className="group/card relative flex h-full cursor-pointer flex-row items-center gap-3 overflow-hidden rounded-[1.4rem] border border-white/20 bg-white/80 p-2.5 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] sm:flex-col sm:gap-0 sm:rounded-[2rem] sm:p-0 dark:border-white/10 dark:bg-white/[0.04]"
                     >
                       <div 
-                        className="relative h-48 w-full overflow-hidden border-b border-white/20 dark:border-white/10 cursor-pointer"
+                        className="relative h-28 w-28 shrink-0 overflow-hidden rounded-[1rem] bg-surface-container-low cursor-pointer sm:h-48 sm:w-full sm:rounded-none sm:border-b sm:border-r-0"
                         onClick={(e) => {
                           e.stopPropagation();
                           const images = Array.isArray(service.images) && service.images.length > 0 
@@ -2157,16 +2170,22 @@ export default function HomePage() {
                             decoding="async"
                           />
                         )}
+                        {Array.isArray(service.images) && service.images.length > 1 && (
+                          <div className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] font-black text-white backdrop-blur-sm">
+                            <Icon icon="photo_library" size={12} />
+                            <span>+{service.images.length - 1}</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex min-w-0 flex-1 flex-col justify-between p-4">
+                      <div className="flex min-w-0 flex-1 flex-col justify-center py-1 sm:p-4">
                         <div>
-                          <div className="mb-2 flex flex-wrap items-center gap-2">
-                            <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-full">
+                          <div className="mb-1.5 flex items-center gap-1.5 sm:mb-2 sm:flex-wrap sm:gap-2">
+                            <span className="rounded-full bg-primary/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-primary">
                               {service.category || "Sem categoria"}
                             </span>
                             <div className="ml-auto flex flex-col items-end gap-1">
                               <span
-                                className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                                className={`rounded-full px-2 py-0.5 text-[8px] font-bold ${
                                   hasCnpj(service.cnpj)
                                     ? "text-emerald-700 bg-emerald-500/10"
                                     : "text-slate-600 bg-slate-500/10"
@@ -2178,14 +2197,21 @@ export default function HomePage() {
                               </span>
                             </div>
                           </div>
-                          <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-primary transition-colors">
+                          <h4 className="font-black text-on-surface text-[13px] leading-tight line-clamp-2 group-hover/card:text-primary transition-colors sm:text-[15px] sm:truncate">
                             {service.title}
                           </h4>
+                          <div className="mt-1 flex items-center gap-2 text-[9px] font-semibold text-on-surface-variant sm:text-[11px]">
+                            {service.distanceEnvironmentName && (
+                              <span className="line-clamp-1 rounded-full bg-surface-container-high px-1.5 py-0.5">
+                                {service.distanceEnvironmentName}
+                              </span>
+                            )}
+                          </div>
                           {(() => {
                             const providerGroup = serviceToProviderGroupMap.get(service.id);
                             const hasMultipleServices = providerGroup && providerGroup.totalServices > 1;
                             return (
-                              <p className="text-xs text-on-surface-variant font-semibold mt-1 truncate flex items-center gap-1">
+                              <p className="hidden mt-1 items-center gap-1 truncate text-[11px] font-semibold text-on-surface-variant sm:text-xs">
                                 {service.provider || "Usuario"}
                                 {hasMultipleServices && (
                                   <button
@@ -2204,13 +2230,13 @@ export default function HomePage() {
                               </p>
                             );
                           })()}
-                          <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">
+                          <p className="mt-1 hidden text-[11px] font-medium text-on-surface-variant sm:line-clamp-1 sm:block sm:text-xs">
                             {service.description}
                           </p>
                         </div>
 
-                        <div className="mt-3 space-y-2">
-                          <div className="flex items-center justify-between">
+                        <div className="mt-2 sm:mt-3">
+                          <div className="flex items-end justify-between gap-2">
                             {(userLocation ||
                               service.distanceEnvironmentName) && (
                               <div className="flex items-center gap-2">
@@ -2229,34 +2255,22 @@ export default function HomePage() {
                                       </span>
                                     </div>
                                   )}
-                                {service.distanceEnvironmentName && (
-                                  <span className="text-[10px] text-on-surface-variant font-medium truncate">
-                                    {service.distanceEnvironmentName}
-                                  </span>
-                                )}
                               </div>
                             )}
-                            <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-primary group-hover/card:text-white transition-all duration-300">
-                              <Icon
-                                icon="arrow_forward"
-                                size={14}
-                                weight={700}
-                              />
-                            </div>
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleOpenServiceDetails(
+                                  service,
+                                  "home_search_button",
+                                );
+                              }}
+                              className="shrink-0 rounded-full bg-[#30cc36] px-3 py-1.5 text-[9px] font-black uppercase text-white shadow-lg shadow-[#30cc36]/20 transition-all hover:brightness-110 active:scale-95 sm:min-w-[140px] sm:px-5 sm:py-2.5 sm:text-xs"
+                            >
+                              Ver anúncio
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              handleOpenServiceDetails(
-                                service,
-                                "home_search_button",
-                              );
-                            }}
-                            className="w-full rounded-full bg-[#30cc36] py-2.5 text-xs font-black uppercase text-white shadow-lg shadow-[#30cc36]/20 transition-all hover:brightness-110 active:scale-95"
-                          >
-                            Ver anuncio
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -2435,7 +2449,7 @@ export default function HomePage() {
                     {activeProviderGroup.providerName}
                   </h3>
                   <p className="text-xs text-on-surface-variant mt-0.5">
-                    {activeProviderGroup.totalServices} anuncio
+                    {activeProviderGroup.totalServices} anúncio
                     {activeProviderGroup.totalServices === 1 ? "" : "s"}
                   </p>
                 </div>
@@ -2665,3 +2679,4 @@ export default function HomePage() {
     </div>
   );
 }
+

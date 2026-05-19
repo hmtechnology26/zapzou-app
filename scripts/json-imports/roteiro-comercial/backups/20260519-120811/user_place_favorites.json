@@ -1,0 +1,310 @@
+[
+  {
+    "id": "d1b3d5ff-a47d-4b02-b882-8048bb906302",
+    "user_id": "5ef16060-cdd0-483b-a700-2734c8495b8f",
+    "place_id": "ChIJS2JA5hpwGZUR14U9ZomAohI",
+    "place_payload": {
+      "id": "ChIJS2JA5hpwGZUR14U9ZomAohI",
+      "city": "Canoas",
+      "name": "Life Park Condomínio Clube",
+      "slug": "ChIJS2JA5hpwGZUR14U9ZomAohI",
+      "type": "residential",
+      "image": "",
+      "members": 0,
+      "location": {
+        "latitude": -29.909039799999995,
+        "longitude": -51.1659364
+      },
+      "displayName": {
+        "text": "Life Park Condomínio Clube",
+        "languageCode": "pt"
+      },
+      "primaryType": "condominium_complex",
+      "neighborhood": "Marechal Rondon",
+      "googleMapsUri": "https://maps.google.com/?cid=1342776966524011991&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+      "formattedAddress": "Av. Farroupilha, 5508 - Mal. Rondon, Canoas - RS, 92020-476"
+    },
+    "created_at": "2026-03-31T12:44:25.200071+00:00",
+    "updated_at": "2026-03-31T12:44:25.200071+00:00"
+  },
+  {
+    "id": "c5eb3968-0f41-4294-9b2f-3f6f937c7038",
+    "user_id": "5ef16060-cdd0-483b-a700-2734c8495b8f",
+    "place_id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+    "place_payload": {
+      "id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+      "city": "Canoas",
+      "name": "Igreja Ministério Farol",
+      "slug": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+      "type": "church",
+      "image": "",
+      "members": 0,
+      "location": {
+        "latitude": -29.944700299999997,
+        "longitude": -51.1864401
+      },
+      "displayName": {
+        "text": "Igreja Ministério Farol",
+        "languageCode": "pt"
+      },
+      "primaryType": "church",
+      "neighborhood": "Fátima",
+      "googleMapsUri": "https://maps.google.com/?cid=11070183942238349471&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+      "formattedAddress": "R. Diretor Augusto Pestana, 900 - Fátima, Canoas - RS, 92200-580"
+    },
+    "created_at": "2026-03-31T12:44:37.929286+00:00",
+    "updated_at": "2026-03-31T12:44:37.929286+00:00"
+  },
+  {
+    "id": "f0f76525-ab48-41f7-862f-39df1cf076be",
+    "user_id": "841a387c-7bf2-4d97-91a3-5d760cf541c7",
+    "place_id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+    "place_payload": {
+      "id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+      "city": "Canoas",
+      "name": "Igreja Ministério Farol",
+      "slug": "igreja-ministerio-farol",
+      "type": "church",
+      "image": "",
+      "members": 0,
+      "location": {
+        "latitude": -29.944700299999997,
+        "longitude": -51.1864401
+      },
+      "displayName": {
+        "text": "Igreja Ministério Farol",
+        "languageCode": "pt"
+      },
+      "primaryType": "church",
+      "neighborhood": "Fátima",
+      "googleMapsUri": "https://maps.google.com/?cid=11070183942238349471&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+      "formattedAddress": "R. Diretor Augusto Pestana, 900 - Fátima, Canoas - RS, 92200-580"
+    },
+    "created_at": "2026-04-01T16:23:20.167189+00:00",
+    "updated_at": "2026-04-01T16:23:20.167189+00:00"
+  },
+  {
+    "id": "f21450cf-391e-403c-8a9f-2502fa30b0ad",
+    "user_id": "841a387c-7bf2-4d97-91a3-5d760cf541c7",
+    "place_id": "ChIJS2JA5hpwGZUR14U9ZomAohI",
+    "place_payload": {
+      "id": "ChIJS2JA5hpwGZUR14U9ZomAohI",
+      "city": "Canoas",
+      "name": "Life Park Condomínio Clube",
+      "slug": "life-park-condominio-clube",
+      "type": "residential",
+      "image": "",
+      "members": 0,
+      "location": {
+        "latitude": -29.909039799999995,
+        "longitude": -51.1659364
+      },
+      "displayName": {
+        "text": "Life Park Condomínio Clube",
+        "languageCode": "pt"
+      },
+      "primaryType": "condominium_complex",
+      "neighborhood": "Marechal Rondon",
+      "googleMapsUri": "https://maps.google.com/?cid=1342776966524011991&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+      "formattedAddress": "Av. Farroupilha, 5508 - Mal. Rondon, Canoas - RS, 92020-476"
+    },
+    "created_at": "2026-04-01T18:16:15.771301+00:00",
+    "updated_at": "2026-04-01T18:16:15.771301+00:00"
+  },
+  {
+    "id": "abfd6676-2093-4acb-8ca9-493f661fc929",
+    "user_id": "e3034f48-3a2d-42a2-b377-55ed1023f6f0",
+    "place_id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+    "place_payload": {
+      "id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+      "city": "Canoas",
+      "name": "Igreja Ministério Farol",
+      "slug": "igreja-ministerio-farol",
+      "type": "church",
+      "image": "",
+      "members": 0,
+      "location": {
+        "latitude": -29.944700299999997,
+        "longitude": -51.1864401
+      },
+      "displayName": {
+        "text": "Igreja Ministério Farol",
+        "languageCode": "pt"
+      },
+      "primaryType": "church",
+      "neighborhood": "Fátima",
+      "googleMapsUri": "https://maps.google.com/?cid=11070183942238349471&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+      "formattedAddress": "R. Diretor Augusto Pestana, 900 - Fátima, Canoas - RS, 92200-580"
+    },
+    "created_at": "2026-04-02T21:54:03.948914+00:00",
+    "updated_at": "2026-04-02T21:54:03.948914+00:00"
+  },
+  {
+    "id": "ac467ff0-d0e5-4296-9e18-237e052236d3",
+    "user_id": "0f98aafa-cbd8-40c7-a4d6-325a7c429a5f",
+    "place_id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+    "place_payload": {
+      "id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+      "city": "Canoas",
+      "name": "Igreja Ministério Farol",
+      "slug": "igreja-ministerio-farol",
+      "type": "church",
+      "image": "",
+      "members": 0,
+      "location": {
+        "latitude": -29.944700299999997,
+        "longitude": -51.1864401
+      },
+      "displayName": {
+        "text": "Igreja Ministério Farol",
+        "languageCode": "pt"
+      },
+      "primaryType": "church",
+      "neighborhood": "Fátima",
+      "googleMapsUri": "https://maps.google.com/?cid=11070183942238349471&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+      "formattedAddress": "R. Diretor Augusto Pestana, 900 - Fátima, Canoas - RS, 92200-580"
+    },
+    "created_at": "2026-04-02T21:54:08.691361+00:00",
+    "updated_at": "2026-04-02T21:54:08.691361+00:00"
+  },
+  {
+    "id": "78db5356-0e1b-4cc3-ad8e-b635c18820f2",
+    "user_id": "1c3c02f7-825c-4d62-9024-3f2906f95ab7",
+    "place_id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+    "place_payload": {
+      "id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+      "city": "Canoas",
+      "name": "Igreja Ministério Farol",
+      "slug": "igreja-ministerio-farol",
+      "type": "church",
+      "image": "",
+      "members": 0,
+      "location": {
+        "latitude": -29.944700299999997,
+        "longitude": -51.1864401
+      },
+      "displayName": {
+        "text": "Igreja Ministério Farol",
+        "languageCode": "pt"
+      },
+      "primaryType": "church",
+      "neighborhood": "Fátima",
+      "googleMapsUri": "https://maps.google.com/?cid=11070183942238349471&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+      "formattedAddress": "R. Diretor Augusto Pestana, 900 - Fátima, Canoas - RS, 92200-580"
+    },
+    "created_at": "2026-04-02T21:54:15.055883+00:00",
+    "updated_at": "2026-04-02T21:54:15.055883+00:00"
+  },
+  {
+    "id": "a9f51d3f-b8c8-4bb3-b60d-18dcef8322f3",
+    "user_id": "2b857f7c-d4fc-4656-a2b6-8a3e8632e896",
+    "place_id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+    "place_payload": {
+      "id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+      "city": "Canoas",
+      "name": "Igreja Ministério Farol",
+      "slug": "igreja-ministerio-farol",
+      "type": "church",
+      "image": "",
+      "members": 0,
+      "location": {
+        "latitude": -29.944700299999997,
+        "longitude": -51.1864401
+      },
+      "displayName": {
+        "text": "Igreja Ministério Farol",
+        "languageCode": "pt"
+      },
+      "primaryType": "church",
+      "neighborhood": "Fátima",
+      "googleMapsUri": "https://maps.google.com/?cid=11070183942238349471&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+      "formattedAddress": "R. Diretor Augusto Pestana, 900 - Fátima, Canoas - RS, 92200-580"
+    },
+    "created_at": "2026-04-02T21:54:24.132472+00:00",
+    "updated_at": "2026-04-02T21:54:24.132472+00:00"
+  },
+  {
+    "id": "2316c90f-b864-4b4b-8ec9-f7a759cf508e",
+    "user_id": "4ddde218-b640-4912-8606-2976d84d19cb",
+    "place_id": "ChIJYx2cGwBxGZURpisYrTC13e0",
+    "place_payload": {
+      "id": "ChIJYx2cGwBxGZURpisYrTC13e0",
+      "city": "Canoas",
+      "name": "Igreja Farol",
+      "slug": "igreja-farol",
+      "type": "church",
+      "image": "",
+      "members": 0,
+      "location": {
+        "latitude": -29.952433299999996,
+        "longitude": -51.165667199999994
+      },
+      "displayName": {
+        "text": "Igreja Farol",
+        "languageCode": "pt"
+      },
+      "primaryType": "church",
+      "neighborhood": "Niterói",
+      "googleMapsUri": "https://maps.google.com/?cid=17140054977509075878&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+      "formattedAddress": "R. Mal. Rondon, 1036 - Niterói, Canoas - RS, 92120-210"
+    },
+    "created_at": "2026-04-02T21:54:35.079691+00:00",
+    "updated_at": "2026-04-02T21:54:35.079691+00:00"
+  },
+  {
+    "id": "79be9673-8848-429f-88c3-10b1331e9fa1",
+    "user_id": "89b047be-2dbe-49ef-9606-bf70abf51d61",
+    "place_id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+    "place_payload": {
+      "id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+      "city": "Canoas",
+      "name": "Igreja Ministério Farol",
+      "slug": "igreja-ministerio-farol",
+      "type": "church",
+      "image": "",
+      "members": 0,
+      "location": {
+        "latitude": -29.944700299999997,
+        "longitude": -51.1864401
+      },
+      "displayName": {
+        "text": "Igreja Ministério Farol",
+        "languageCode": "pt"
+      },
+      "primaryType": "church",
+      "neighborhood": "Fátima",
+      "googleMapsUri": "https://maps.google.com/?cid=11070183942238349471&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+      "formattedAddress": "R. Diretor Augusto Pestana, 900 - Fátima, Canoas - RS, 92200-580"
+    },
+    "created_at": "2026-04-02T21:54:44.798013+00:00",
+    "updated_at": "2026-04-02T21:54:44.798013+00:00"
+  },
+  {
+    "id": "0b7261c8-ffcc-4114-8ed9-06ccbc5deb14",
+    "user_id": "b141c54b-475e-40dd-86fb-75e991d687a0",
+    "place_id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+    "place_payload": {
+      "id": "ChIJMxc3c39wGZURn6hZo6QxoZk",
+      "city": "Canoas",
+      "name": "Igreja Ministério Farol",
+      "slug": "igreja-ministerio-farol",
+      "type": "church",
+      "image": "",
+      "members": 0,
+      "location": {
+        "latitude": -29.944700299999997,
+        "longitude": -51.1864401
+      },
+      "displayName": {
+        "text": "Igreja Ministério Farol",
+        "languageCode": "pt"
+      },
+      "primaryType": "church",
+      "neighborhood": "Fátima",
+      "googleMapsUri": "https://maps.google.com/?cid=11070183942238349471&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgBIAA",
+      "formattedAddress": "R. Diretor Augusto Pestana, 900 - Fátima, Canoas - RS, 92200-580"
+    },
+    "created_at": "2026-04-02T21:55:18.330904+00:00",
+    "updated_at": "2026-04-02T21:55:18.330904+00:00"
+  }
+]

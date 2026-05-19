@@ -1,0 +1,1192 @@
+[
+  {
+    "id": "c7ae64dd-a8bc-444e-9a78-d876f197f8c3",
+    "email": "mestredosreparos01@gmail.com",
+    "name": "Mestre Dos Reparos",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocK3PwiBoC5FGwWKi3qQxhEHJJkqJXvZWnWdYXwswKtHYKE_YFc=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-14T16:00:08.709726+00:00",
+    "updated_at": "2026-05-17T13:55:38.043677+00:00"
+  },
+  {
+    "id": "1c3c02f7-825c-4d62-9024-3f2906f95ab7",
+    "email": "hdwidmar@gmail.com",
+    "name": "Luiz Gaúcho",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIPu90lpYqM6Z7mjgjHVnZCWWfN-BYZOxFHLsAgs9qmitoI5Q=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-03-30T17:03:37.638762+00:00",
+    "updated_at": "2026-05-19T11:33:43.329195+00:00"
+  },
+  {
+    "id": "91b8ad77-b980-4576-af27-d31a2bd1db74",
+    "email": "valmirspuldaro@gmail.com",
+    "name": "Valmir Spuldaro",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKIAEpRUsuagjNJFBCFfGWbmYW3wiEf7TU1CkLDvcHpkg-Y6A=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-19T21:29:33.125755+00:00",
+    "updated_at": "2026-05-12T16:47:03.295144+00:00"
+  },
+  {
+    "id": "43bef086-0a03-40e5-b9dd-1ad8805bb9dc",
+    "email": "climatri26@gmail.com",
+    "name": "TRI Climatização",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJVRQQikSgwztklKS7Suy2LzdsHlKwIwaW77aqrdXGQBaxUbG8=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-24T01:28:03.52442+00:00",
+    "updated_at": "2026-05-18T13:59:47.783476+00:00"
+  },
+  {
+    "id": "2b857f7c-d4fc-4656-a2b6-8a3e8632e896",
+    "email": "rsturboscanoas@gmail.com",
+    "name": "RS Turbos",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJ08SJ6BE83HfYHTr-CoBq0ku5lHMg4jLtmvPo2sECZvpcoj8w=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-02T21:49:51.003839+00:00",
+    "updated_at": "2026-05-18T15:26:05.696982+00:00"
+  },
+  {
+    "id": "58941850-1deb-4701-afd5-cb75282fe61a",
+    "email": "rose.diarista1980@gmail.com",
+    "name": "Rosemari Almeida Oliveira",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLOpHjgQxcFQ78YqC3dON_1APFdbOOmDrsLpWJsx7WXPX3zFg=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-15T12:21:10.973401+00:00",
+    "updated_at": "2026-05-06T23:36:52.603034+00:00"
+  },
+  {
+    "id": "55f3c0e3-0701-4162-9b6c-045148aa7d79",
+    "email": "luislcassistenciatecnica1973@gmail.com",
+    "name": "Luis Antônio",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocI7VC3HDIWbrIO4NaUKUeUhOr1zwu99dGQ7TyZGzvN4MSRbUg=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-15T10:30:57.115047+00:00",
+    "updated_at": "2026-05-08T15:14:40.424819+00:00"
+  },
+  {
+    "id": "495927a7-a1a8-4a35-9cbe-f1bc455f5f05",
+    "email": "luanacardozo941@gmail.com",
+    "name": "Luana Cardozo",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKPlN_WENPVcLDmz2Up3ueAWWOyU59XT7NIB0KIID2Fe4Rtv4qeQA=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-23T19:42:40.103955+00:00",
+    "updated_at": "2026-04-30T14:35:19.670954+00:00"
+  },
+  {
+    "id": "73e38f19-837c-4c64-b0ab-137a6f25e504",
+    "email": "vitalbrs@gmail.com",
+    "name": "vital silva",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKxTkhIse0dMvpMF3pB_yoQDhSqwDtT9B2Rk2RAiilg2zIYPnQJ=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-24T00:43:56.355254+00:00",
+    "updated_at": "2026-05-17T16:07:52.246775+00:00"
+  },
+  {
+    "id": "5ef16060-cdd0-483b-a700-2734c8495b8f",
+    "email": "giramaeoficial@gmail.com",
+    "name": "GiraMãe",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIr3Ly8NGTASJdpUaAx0x-qf6hLXNapHXHD5Qv97HOMUWXOew=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-03-27T18:56:58.708999+00:00",
+    "updated_at": "2026-04-14T13:30:06.671994+00:00"
+  },
+  {
+    "id": "841a387c-7bf2-4d97-91a3-5d760cf541c7",
+    "email": "marcelo.lempek@gmail.com",
+    "name": "Marcelo de Freitas",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLKja9FchgXyM8mBQ8WXcC6a3K2yUOsca0iqXPU8C8M6-VOQ9JSCQ=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-03-25T19:44:38.560306+00:00",
+    "updated_at": "2026-05-19T14:48:59.629119+00:00"
+  },
+  {
+    "id": "527c1bdf-482d-402c-aa31-7965930a820e",
+    "email": "roteiro-comercial+b045026ca678d9ebd6bf50f6@imports.conectae.internal",
+    "name": "EVS Bela Vista - Herbalife",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:44:54.583355+00:00",
+    "updated_at": "2026-05-19T14:49:51.495449+00:00"
+  },
+  {
+    "id": "3ce5f7f5-027a-479a-80e4-ba3f92e7d7c0",
+    "email": "roteiro-comercial+8f56b61009af733713b694bc@imports.conectae.internal",
+    "name": "Tradição Colonial",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:45:04.565717+00:00",
+    "updated_at": "2026-05-19T14:49:53.080835+00:00"
+  },
+  {
+    "id": "4ddde218-b640-4912-8606-2976d84d19cb",
+    "email": "shirley.sbrodrigues@gmail.com",
+    "name": "Shirley Stumm boeno rodrigues",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKz9OEok3Vct5fCXZxLeKq3i0IVvV0RlJOKUI-Uqy-RtvZ9IA=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-02T21:50:02.894785+00:00",
+    "updated_at": "2026-04-21T22:56:00.515209+00:00"
+  },
+  {
+    "id": "f363f668-be28-43d1-a70c-c089ef1c823d",
+    "email": "roteiro-comercial+01efd3979506788227b3b5ae@imports.conectae.internal",
+    "name": "MundoBemOrgânico",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:45:15.420544+00:00",
+    "updated_at": "2026-05-19T14:49:54.724383+00:00"
+  },
+  {
+    "id": "249095a2-801e-4c45-b528-ce7f2b9bd987",
+    "email": "roteiro-comercial+ca45a75600547a4d3468ff3c@imports.conectae.internal",
+    "name": "Armazém da Erva-Mate",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:45:24.238578+00:00",
+    "updated_at": "2026-05-19T14:50:07.489781+00:00"
+  },
+  {
+    "id": "e3034f48-3a2d-42a2-b377-55ed1023f6f0",
+    "email": "boenomarlon@gmail.com",
+    "name": "Marlon Boeno",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLqbPIJMUjl1WH114pBVFjQSFR55TDuaF0zXyw1G4BVgH5y-Q=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-02T21:50:01.801459+00:00",
+    "updated_at": "2026-04-15T13:01:17.482391+00:00"
+  },
+  {
+    "id": "bf460d50-3a6b-46c6-add4-ee709e45af7d",
+    "email": "julianostumm5@gmail.com",
+    "name": "Juliano Stumm",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLnIYyx41msLEvA7f6I8dZaMWkHRfy6XzneQoDmktbWsih_vDBM=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-14T02:46:00.59046+00:00",
+    "updated_at": "2026-04-15T13:01:23.287511+00:00"
+  },
+  {
+    "id": "b310820c-dbbf-4fac-bc71-863731aae28b",
+    "email": "flmarmitascongeladas@gmail.com",
+    "name": "FL Marmitas",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocJ9F7agtDSftF_YVauChrBDElI3hXYLrg-Rl3PtE6YWgTBq90Q=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-14T21:54:00.618905+00:00",
+    "updated_at": "2026-04-15T13:01:25.296719+00:00"
+  },
+  {
+    "id": "f999e12d-3df4-4fde-bc6b-b3ffc6982568",
+    "email": "t3taist@gmail.com",
+    "name": "Tais Silva dos Santos",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLQK8Mfbq1dOEboG1vhckNgmQHWNw9LyEcVCzNDdckKC0_eqJQ=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-15T12:25:46.01734+00:00",
+    "updated_at": "2026-04-20T01:36:11.425817+00:00"
+  },
+  {
+    "id": "aadf7221-e379-433c-8820-d5bdb36fa1be",
+    "email": "ezequiasb94@gmail.com",
+    "name": "Ezequias Borges",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKwdDlAZD53VcawaAYDIURvQDO9wZqmzogZPWIOpXIPqXtMl4NO=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-13T21:03:06.050013+00:00",
+    "updated_at": "2026-04-15T13:01:26.894313+00:00"
+  },
+  {
+    "id": "399ca61e-3d2b-4240-87b8-f1f0b884a002",
+    "email": "leandro2000hop@gmail.com",
+    "name": "Leandro Mello",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIxyRpAiFIpsKOQ9CW-I8iHzjzuN6E8Vjc90KGizK89JezcWx6SUw=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-18T23:53:01.464474+00:00",
+    "updated_at": "2026-04-21T22:56:04.893538+00:00"
+  },
+  {
+    "id": "0422e52e-ff02-4394-9d50-9dea8d29d328",
+    "email": "hmtechnology26@gmail.com",
+    "name": "HM Technology",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLkFHOCxdEOcxcyaEE5Xayv9pAT5xmB8guPNdrcT1-qcWPXs98=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-03-30T17:21:43.899372+00:00",
+    "updated_at": "2026-04-01T13:57:14.34849+00:00"
+  },
+  {
+    "id": "581d55e3-5c95-4e27-bb26-58c5c751f615",
+    "email": "claudia.artesanatos.30@gmail.com",
+    "name": "claudia farias vieira",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocImPHahIMbmMrxUa_1Tc5J1qJzdDaPB052TuTH-s5RE7m4KTg=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-15T12:16:08.868052+00:00",
+    "updated_at": "2026-04-20T22:00:57.056961+00:00"
+  },
+  {
+    "id": "49aeb904-a163-4422-b298-3a692d29678d",
+    "email": "vanessavaldomiro69@gmail.com",
+    "name": "Vanessa Paz",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLm_xjUaJxFjuyAmJRXZnN40RLe6MPWxeR4z8sNWuY-bxCNmw=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-14T12:31:14.521563+00:00",
+    "updated_at": "2026-04-21T01:06:57.439127+00:00"
+  },
+  {
+    "id": "11315325-846d-4e9d-bc03-131cdf1cb783",
+    "email": "marcusduardescorretor@gmail.com",
+    "name": "Marcus Duardes",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocI20LGRZsEbPrfA3r6cmCtKL9LQYVBfi8yTf4KHVJE-4Y1jQiE=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-18T15:21:21.646817+00:00",
+    "updated_at": "2026-04-21T22:55:37.483533+00:00"
+  },
+  {
+    "id": "b141c54b-475e-40dd-86fb-75e991d687a0",
+    "email": "janicecsfreitas@gmail.com",
+    "name": "Janice C S Freitas",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocKSRRf-oLRdSF5xlSCbSsnOb_2HB0ZmvLkEyWM3wp_YX8fWFw=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-03-31T18:55:03.295073+00:00",
+    "updated_at": "2026-04-25T00:22:23.610074+00:00"
+  },
+  {
+    "id": "0f98aafa-cbd8-40c7-a4d6-325a7c429a5f",
+    "email": "leo.paz0894@gmail.com",
+    "name": "Leonardo Freitas",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLvovsJlqXTwAvvczj9NQ_5ClySB2BOkeELWkg3sdCERB0IwAa4=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-02T21:50:04.727601+00:00",
+    "updated_at": "2026-04-21T22:55:40.097053+00:00"
+  },
+  {
+    "id": "20ca0891-5129-4dc7-bec4-ce05a8c91446",
+    "email": "semearestudiors@gmail.com",
+    "name": "semear estudio",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLuGdvvpZDInjXzN7CdPCP_P5QpRnvMt582yQcQ8MaVPmEUcJU=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-13T20:56:52.054024+00:00",
+    "updated_at": "2026-04-21T22:56:10.72052+00:00"
+  },
+  {
+    "id": "89b047be-2dbe-49ef-9606-bf70abf51d61",
+    "email": "diegolacerda1987@hotmail.com",
+    "name": "Diego Lacerda",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocL5pixXdrEeM3Ls4JtU0eBUMOxzD3ipioBeD3ZX7AgsoTudYw=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-02T21:49:48.973249+00:00",
+    "updated_at": "2026-04-21T21:35:19.21176+00:00"
+  },
+  {
+    "id": "f8f00589-ef6f-413f-9d43-dc91aa8e732f",
+    "email": "camillemoraes69@gmail.com",
+    "name": "Camille Moraes",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIyqXH4ZAoS2ikyJyk4Lozs4BAEUWzUG20KEHl5tDIQ7BDN0IjE=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-16T21:11:39.797012+00:00",
+    "updated_at": "2026-04-21T22:56:21.593648+00:00"
+  },
+  {
+    "id": "bbe19eec-5f0a-4436-af24-e4c349e16a3c",
+    "email": "nanyboeno@hotmail.com",
+    "name": "Naianne Boeno",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLjc01IGVbvZmnvHtdygGpe6xCTJ-EYK78Wm_F6RK0fLO96bk7K=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-23T17:48:01.128904+00:00",
+    "updated_at": "2026-04-23T17:48:01.128904+00:00"
+  },
+  {
+    "id": "8336a21d-b248-421f-ae92-d82a1b6dbce9",
+    "email": "agropetfloripa@gmail.com",
+    "name": "Patrícia Alves",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocId4YMnKi9B-N-5K7PHpn_cgtmvHJbYn2BRhuRwgS56HIKBIQ=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-15T13:13:14.613224+00:00",
+    "updated_at": "2026-05-02T18:44:11.049835+00:00"
+  },
+  {
+    "id": "11bde6bc-ce9f-4a1d-addc-8487164ccbc3",
+    "email": "patricia.machado.alves.1983@gmail.com",
+    "name": "Patricia Machado alves",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLwKCfcwobEzQMPfMnNtSYKpjCFDJWAI_76g7OMBBXXNTC-roYoLg=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-21T00:11:33.126737+00:00",
+    "updated_at": "2026-05-03T20:52:34.088827+00:00"
+  },
+  {
+    "id": "f1fe451c-89a5-4c7d-b725-87a057f6e089",
+    "email": "roteiro-comercial+776b221e66e64c750cab9f26@imports.conectae.internal",
+    "name": "Uai Restobar Mineiro",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:16:04.735574+00:00",
+    "updated_at": "2026-05-19T13:16:05.506354+00:00"
+  },
+  {
+    "id": "c611e3de-bcb2-4374-be4c-eec081aa00fc",
+    "email": "roteiro-comercial+b80a1ff7ac18c69e58b9b541@imports.conectae.internal",
+    "name": "50% OFF no cadastro direto",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T12:50:57.901818+00:00",
+    "updated_at": "2026-05-19T12:50:58.944549+00:00"
+  },
+  {
+    "id": "ebc70dc2-ec08-4c79-9a73-7d0ce165ee8b",
+    "email": "bruno@matamata.com.br",
+    "name": "Bruno Prates",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocLHA0iTkK3fnDA7c51CryUiVAI1gGsemW7wndNHv5aV5V3hhA=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-04-27T22:08:33.95938+00:00",
+    "updated_at": "2026-04-28T11:34:49.287661+00:00"
+  },
+  {
+    "id": "9a6f2e95-a607-46b7-a830-f82c7476ccad",
+    "email": "roteiro-comercial+62cf755e0689616ccbaefc44@imports.conectae.internal",
+    "name": "Espaço Despertar",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:06:14.53829+00:00",
+    "updated_at": "2026-05-19T13:06:15.387334+00:00"
+  },
+  {
+    "id": "05988925-766e-4df7-a2ab-6f4924fe7690",
+    "email": "roteiro-comercial+565d7f77080cd3890e6314db@imports.conectae.internal",
+    "name": "Don Dog Canoas",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:01:16.765177+00:00",
+    "updated_at": "2026-05-19T13:01:17.947141+00:00"
+  },
+  {
+    "id": "bc939a39-3a09-41b5-8af3-94d71e6b4017",
+    "email": "roteiro-comercial+3518c80502571cbf0656c5f7@imports.conectae.internal",
+    "name": "Ah Café",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:36:23.157335+00:00",
+    "updated_at": "2026-05-19T14:49:07.277076+00:00"
+  },
+  {
+    "id": "77acc6f5-06cf-46a5-9308-c1075d6b86d5",
+    "email": "admlifeparkcolors@gmail.com",
+    "name": "LifePark Colors",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIzyjNVvfo7tQ6J8APKYPXcEcDyAE5FloFWhq1tG8c9dUeR_Wc=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-05-05T18:07:21.693906+00:00",
+    "updated_at": "2026-05-05T19:48:25.063247+00:00"
+  },
+  {
+    "id": "4f0a6875-c69b-42f0-a713-9b909808a542",
+    "email": "roteiro-comercial+f62e7d9264d3d4c0918381d4@imports.conectae.internal",
+    "name": "Ferragem e Utilidades Dona'Lu",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T12:52:30.627844+00:00",
+    "updated_at": "2026-05-19T12:52:31.52017+00:00"
+  },
+  {
+    "id": "c2497d73-186a-4fb6-b046-9d7ebde2bddf",
+    "email": "roteiro-comercial+1e2f951186a39f9176745d58@imports.conectae.internal",
+    "name": "Divina Terra Canoas",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:39:39.841184+00:00",
+    "updated_at": "2026-05-19T14:49:09.041188+00:00"
+  },
+  {
+    "id": "a57f482c-58b8-4335-8ea2-427cf0c8ad7f",
+    "email": "roteiro-comercial+be339ef8c393b7f564a2be00@imports.conectae.internal",
+    "name": "Marmitas Sabor Saudável",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:40:20.980219+00:00",
+    "updated_at": "2026-05-19T14:49:10.991697+00:00"
+  },
+  {
+    "id": "21f3b703-f82b-4be9-83e1-f6d4c311cf13",
+    "email": "roteiro-comercial+f4d4cb457eef6bc79265961d@imports.conectae.internal",
+    "name": "Óticas Dallu",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:25:40.162786+00:00",
+    "updated_at": "2026-05-19T13:25:41.223543+00:00"
+  },
+  {
+    "id": "4de5c126-8916-42c4-b6e9-5ef46389a984",
+    "email": "roteiro-comercial+4fa7fda8fd963e3f14ed1515@imports.conectae.internal",
+    "name": "Ribeiro cred",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:14:29.108055+00:00",
+    "updated_at": "2026-05-19T13:14:29.949152+00:00"
+  },
+  {
+    "id": "75ab077a-7552-4523-ad34-14b591744713",
+    "email": "roteiro-comercial+ab5634fb2a74b7c902a17a20@imports.conectae.internal",
+    "name": "Alli Tattoo Studio",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:11:51.391171+00:00",
+    "updated_at": "2026-05-19T13:11:52.379375+00:00"
+  },
+  {
+    "id": "9993fb5b-1c00-4a0d-8fa4-acc6c471c4b4",
+    "email": "roteiro-comercial+83591c0032939e9ada36bfab@imports.conectae.internal",
+    "name": "Fit Fish Bar e Restaurante",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:40:56.714106+00:00",
+    "updated_at": "2026-05-19T14:49:13.219083+00:00"
+  },
+  {
+    "id": "05f0d136-a94c-44ea-b7e0-4e921f33c4bf",
+    "email": "stummkatrini619@gmail.com",
+    "name": "Katrini Stumm",
+    "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIDrnfNHt-uTLXO_yHhZZr7RuWzze0ZJ5j2jaM7bSlCHvE8zg=s96-c",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-05-06T21:57:53.230437+00:00",
+    "updated_at": "2026-05-08T04:08:11.445071+00:00"
+  },
+  {
+    "id": "28083b97-a902-4f5e-bb19-9747da3353cf",
+    "email": "roteiro-comercial+61d9675f8b92a67b2c0321e2@imports.conectae.internal",
+    "name": "Vibe dos Bichos",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T12:54:46.384829+00:00",
+    "updated_at": "2026-05-19T12:54:47.214856+00:00"
+  },
+  {
+    "id": "05cdc83c-d424-4c32-9c45-32bf50aff6ec",
+    "email": "universeessence.studio@gmail.com",
+    "name": "Universe Essence",
+    "avatar": "https://pub-d4c2a7ecb4714fe4bebad50289cde896.r2.dev/avatars/05cdc83c-d424-4c32-9c45-32bf50aff6ec-1778780002067.jpg",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-05-14T17:32:55.550961+00:00",
+    "updated_at": "2026-05-14T17:33:34.772076+00:00"
+  },
+  {
+    "id": "00ea5d6d-c863-4cb6-bcde-f45dcf061efb",
+    "email": "elah.essence@gmail.com",
+    "name": "Janice Freitas",
+    "avatar": "https://pub-d4c2a7ecb4714fe4bebad50289cde896.r2.dev/avatars/00ea5d6d-c863-4cb6-bcde-f45dcf061efb-1778701663104.jpeg",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-05-13T19:29:08.161694+00:00",
+    "updated_at": "2026-05-14T23:42:25.084508+00:00"
+  },
+  {
+    "id": "ccb822ad-7e74-4f0f-bebe-fed0e0962290",
+    "email": "roteiro-comercial+d6017aec2cb01d3c5e3c5a07@imports.conectae.internal",
+    "name": "Florybal Campo Bom",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:47:46.19855+00:00",
+    "updated_at": "2026-05-19T14:47:46.806175+00:00"
+  },
+  {
+    "id": "cbd50aec-0212-4674-a0ca-f4b86285d576",
+    "email": "roteiro-comercial+915b060c18121111709c8186@imports.conectae.internal",
+    "name": "Opa, Cresci!",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:02:35.322412+00:00",
+    "updated_at": "2026-05-19T13:02:36.17773+00:00"
+  },
+  {
+    "id": "0d479ac1-44ab-47e8-bfc2-a703f97a1d27",
+    "email": "roteiro-comercial+9a7bdf9d4dbc18e5cf850817@imports.conectae.internal",
+    "name": "Divina Terra - São Leopoldo",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:45:34.288228+00:00",
+    "updated_at": "2026-05-19T14:50:09.063956+00:00"
+  },
+  {
+    "id": "3bda26a9-e832-4c0b-835a-95a2ff747858",
+    "email": "roteiro-comercial+efc9d21ab26d1082a917e43b@imports.conectae.internal",
+    "name": "Cato Cell",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:08:23.640522+00:00",
+    "updated_at": "2026-05-19T13:08:24.436658+00:00"
+  },
+  {
+    "id": "a8fbb2c0-f8d5-4ca4-9443-cf99a8a4a79b",
+    "email": "roteiro-comercial+47206c86ee1ac8d30e1b90e8@imports.conectae.internal",
+    "name": "Competence Centro Educacional",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T01:10:49.695246+00:00",
+    "updated_at": "2026-05-19T01:10:50.432931+00:00"
+  },
+  {
+    "id": "9b614fc2-2b33-499e-a258-7849794409d9",
+    "email": "stummkatrini10@gmail.com",
+    "name": "Katrini Stumm",
+    "avatar": "https://pub-d4c2a7ecb4714fe4bebad50289cde896.r2.dev/avatars/9b614fc2-2b33-499e-a258-7849794409d9-1778274701776.jpeg",
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-05-08T04:06:41.066237+00:00",
+    "updated_at": "2026-05-08T21:11:51.696922+00:00"
+  },
+  {
+    "id": "7e46e82e-44a5-49d6-bcae-5657d6baee9d",
+    "email": "roteiro-comercial+584f7e037567a829d97ada70@imports.conectae.internal",
+    "name": "Infinityfilm's - Película de controle solar",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:03:54.183758+00:00",
+    "updated_at": "2026-05-19T13:03:55.0352+00:00"
+  },
+  {
+    "id": "61fda161-1664-45d4-ad65-6cceee8ee3e8",
+    "email": "roteiro-comercial+a1de3a67038e31937ad1706e@imports.conectae.internal",
+    "name": "Punta Arenas",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T12:56:01.794285+00:00",
+    "updated_at": "2026-05-19T12:56:02.594334+00:00"
+  },
+  {
+    "id": "e2fe3046-50fd-42da-9149-7944a01f6b28",
+    "email": "roteiro-comercial+eb0f4b5db3c2bf695427b08a@imports.conectae.internal",
+    "name": "Giori Ótica e Joalheria",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:20:36.932818+00:00",
+    "updated_at": "2026-05-19T13:20:37.599986+00:00"
+  },
+  {
+    "id": "ccf26f1a-9777-4feb-ad77-7f380f228d18",
+    "email": "roteiro-comercial+59c89b1fadf5ef460d9350c8@imports.conectae.internal",
+    "name": "Alex Ray Atelier",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:18:25.554183+00:00",
+    "updated_at": "2026-05-19T13:18:26.669646+00:00"
+  },
+  {
+    "id": "9fb3e057-5d3e-4e13-b0e7-638debd9c87c",
+    "email": "roteiro-comercial+e91ea5f1b75628e78ab3894e@imports.conectae.internal",
+    "name": "AL Tintas - Canoas",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:09:49.702349+00:00",
+    "updated_at": "2026-05-19T13:09:50.49287+00:00"
+  },
+  {
+    "id": "04702227-26dd-4cc8-b83f-afac2e47c4c3",
+    "email": "roteiro-comercial+4f272a46115a0ef5d7a01dbd@imports.conectae.internal",
+    "name": "Bicho do Mato Clínica Veterinária",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T12:57:29.609193+00:00",
+    "updated_at": "2026-05-19T12:57:30.439974+00:00"
+  },
+  {
+    "id": "2d767dd1-0e38-4634-a113-b3d9203c9a8a",
+    "email": "roteiro-comercial+fdee0349157e36b161713cc1@imports.conectae.internal",
+    "name": "Oral Unic Gravataí",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:12:29.409359+00:00",
+    "updated_at": "2026-05-19T13:12:34.45357+00:00"
+  },
+  {
+    "id": "0d9476e6-61fc-40eb-adde-33ccec11d6f2",
+    "email": "roteiro-comercial+15d1e7c57e569b03e1837b64@imports.conectae.internal",
+    "name": "Kavanha Prime Barbearia",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:05:39.573479+00:00",
+    "updated_at": "2026-05-19T13:05:40.440543+00:00"
+  },
+  {
+    "id": "13749c92-fcd6-43a5-bf52-2c1450ea7cb1",
+    "email": "roteiro-comercial+1ffc68f2b1e9e02cc6ddac74@imports.conectae.internal",
+    "name": "Studio B Barber Club",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:15:28.042717+00:00",
+    "updated_at": "2026-05-19T13:15:28.910633+00:00"
+  },
+  {
+    "id": "3521c344-316f-4a15-8413-903f78d7a27b",
+    "email": "roteiro-comercial+71642fcb56e0d46e51863a3e@imports.conectae.internal",
+    "name": "AgroPet Igara",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:10:20.186613+00:00",
+    "updated_at": "2026-05-19T13:10:21.00348+00:00"
+  },
+  {
+    "id": "315a02d0-b194-4a75-a6b5-4faea5b86ca2",
+    "email": "roteiro-comercial+a7f3c598d9281bbc3b8b057f@imports.conectae.internal",
+    "name": "Laboratório Platta",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:13:06.561686+00:00",
+    "updated_at": "2026-05-19T13:13:07.310693+00:00"
+  },
+  {
+    "id": "9ce97d39-7dd0-4259-8afc-4f8c087629af",
+    "email": "roteiro-comercial+e03788433606a6d7f0038c07@imports.conectae.internal",
+    "name": "Restaurante Pouso Novo",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:27:12.922907+00:00",
+    "updated_at": "2026-05-19T13:27:18.570894+00:00"
+  },
+  {
+    "id": "33d53e84-e08e-474c-aa37-f8fcd2d94d8c",
+    "email": "roteiro-comercial+d1b573536557cb90c99f66bf@imports.conectae.internal",
+    "name": "Argentino Conexões Profissionais",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:20:08.218457+00:00",
+    "updated_at": "2026-05-19T13:20:09.025852+00:00"
+  },
+  {
+    "id": "8b008d84-199a-463c-a7bf-af1330177d17",
+    "email": "roteiro-comercial+1880bb81c3611dbdcd9b7a7e@imports.conectae.internal",
+    "name": "Fio Prime | Transplante Capilar - Canoas",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:24:37.422876+00:00",
+    "updated_at": "2026-05-19T13:24:38.315877+00:00"
+  },
+  {
+    "id": "800525cf-7b7c-462d-a71a-79ab9614eea9",
+    "email": "roteiro-comercial+71e7c0313a689af9ba5e191b@imports.conectae.internal",
+    "name": "Instac LED",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:26:10.661651+00:00",
+    "updated_at": "2026-05-19T13:26:11.601993+00:00"
+  },
+  {
+    "id": "ddd8ce5e-f703-4520-b070-7fe406e64b17",
+    "email": "roteiro-comercial+f3a21d69771eddda1125bbcc@imports.conectae.internal",
+    "name": "Barbados Barbearia",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:29:44.045055+00:00",
+    "updated_at": "2026-05-19T13:29:44.820817+00:00"
+  },
+  {
+    "id": "f6b386be-cb6a-4a1e-b95e-2d97e73121b9",
+    "email": "roteiro-comercial+2ca3f91644f149fcabf65681@imports.conectae.internal",
+    "name": "Garra Pneus",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:30:16.619269+00:00",
+    "updated_at": "2026-05-19T13:30:19.925034+00:00"
+  },
+  {
+    "id": "bbfd9a09-6dff-41cf-b836-1bbc848b8a60",
+    "email": "roteiro-comercial+7bf390d7563a305b335804bc@imports.conectae.internal",
+    "name": "Digital Center Tecnologia",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:35:50.404221+00:00",
+    "updated_at": "2026-05-19T13:35:51.276422+00:00"
+  },
+  {
+    "id": "dbd40c4f-afbc-46a4-80f1-fc846a2d489a",
+    "email": "roteiro-comercial+7ff1bf49a589b34279ea97a6@imports.conectae.internal",
+    "name": "Sushi Arte",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:43:44.847329+00:00",
+    "updated_at": "2026-05-19T14:49:43.238694+00:00"
+  },
+  {
+    "id": "f1ec38d9-ed25-4b00-9934-b69b3b7b3164",
+    "email": "roteiro-comercial+c9a420aaf3a2da5120ec6d05@imports.conectae.internal",
+    "name": "Leandro Ferreira ( Lê DJ)",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:25:08.057824+00:00",
+    "updated_at": "2026-05-19T14:49:05.650042+00:00"
+  },
+  {
+    "id": "e91309d2-99f0-4e1b-b722-b5486cc0fd93",
+    "email": "roteiro-comercial+383161ed724f30cffffe407a@imports.conectae.internal",
+    "name": "Sabor e Performance - Mercado Fitness | ⭐ Nota 4.9 no Google",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:47:28.252408+00:00",
+    "updated_at": "2026-05-19T14:47:28.874214+00:00"
+  },
+  {
+    "id": "52a4fccd-7646-41b0-a3b0-68c0ee657ebf",
+    "email": "roteiro-comercial+3f017402ee223272eaafb676@imports.conectae.internal",
+    "name": "Sparta Suplementos",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:43:15.489874+00:00",
+    "updated_at": "2026-05-19T14:49:20.746498+00:00"
+  },
+  {
+    "id": "735783b3-1d4e-4719-834e-168e8e395769",
+    "email": "roteiro-comercial+4fa6948c312dfee5398fa791@imports.conectae.internal",
+    "name": "Sorveteria Rei",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:49:05.52808+00:00",
+    "updated_at": "2026-05-19T14:49:06.144224+00:00"
+  },
+  {
+    "id": "4292d686-34d4-42a2-a007-b43709e86d00",
+    "email": "roteiro-comercial+d33033f39b81265ceab7f00b@imports.conectae.internal",
+    "name": "Armazém Colonial",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:49:23.255497+00:00",
+    "updated_at": "2026-05-19T14:49:23.903759+00:00"
+  },
+  {
+    "id": "1e2e78b9-c9c5-4fbb-84ed-cf95cbb23262",
+    "email": "roteiro-comercial+7de4be43a4f4aedc86c38bd8@imports.conectae.internal",
+    "name": "Cantinho da Nilda",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:47:37.031161+00:00",
+    "updated_at": "2026-05-19T14:47:37.617437+00:00"
+  },
+  {
+    "id": "3b642c3a-afa3-40cf-acae-7dfcebd4f64b",
+    "email": "roteiro-comercial+70fed1f2a7fc6feda3b790da@imports.conectae.internal",
+    "name": "Daniisushi",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:45:53.663321+00:00",
+    "updated_at": "2026-05-19T14:50:16.228145+00:00"
+  },
+  {
+    "id": "82d1b8cd-1d9f-4a63-9a97-2ddacc1347d6",
+    "email": "roteiro-comercial+5a8faae4e75cb849431dc711@imports.conectae.internal",
+    "name": "D'Gusta Lanches",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:47:55.043202+00:00",
+    "updated_at": "2026-05-19T14:47:55.631828+00:00"
+  },
+  {
+    "id": "a7809206-65d7-4d39-a1b3-3cb902a7dffd",
+    "email": "roteiro-comercial+c28267be8fbf480d89b733e5@imports.conectae.internal",
+    "name": "Faculdade da Bebida",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:50:09.614276+00:00",
+    "updated_at": "2026-05-19T14:50:10.188768+00:00"
+  },
+  {
+    "id": "a02e067c-843a-4aa1-8850-1649812e08ed",
+    "email": "roteiro-comercial+2e0926677b62e066a02efc7b@imports.conectae.internal",
+    "name": "Mask Sushi | ⭐ Nota 5.0 no Google",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:47:19.076056+00:00",
+    "updated_at": "2026-05-19T14:47:19.716361+00:00"
+  },
+  {
+    "id": "d2b564fa-ef17-471d-8f30-3ad0c41dbb13",
+    "email": "roteiro-comercial+6ceb66cfa11ff33f5e673ce8@imports.conectae.internal",
+    "name": "Casa Cervo | ⭐ Nota 4.8 no Google",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:47:09.848561+00:00",
+    "updated_at": "2026-05-19T14:47:10.447365+00:00"
+  },
+  {
+    "id": "63e4c526-9c73-4d29-9491-c23121309a5d",
+    "email": "roteiro-comercial+73cdc9a518ff1e09e1073c46@imports.conectae.internal",
+    "name": "Terraqui Orgânicos e Naturais | ⭐ Nota 5.0 no Google",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:47:01.028584+00:00",
+    "updated_at": "2026-05-19T14:47:01.655246+00:00"
+  },
+  {
+    "id": "4043280f-56ff-4965-b9bb-c9aa82e5cf0e",
+    "email": "roteiro-comercial+4c9047e8a7df484057330f59@imports.conectae.internal",
+    "name": "Rei das Alaminutas Delivery",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:48:38.248275+00:00",
+    "updated_at": "2026-05-19T14:48:38.919928+00:00"
+  },
+  {
+    "id": "bc6f50ab-2ad4-46cb-a09f-ae900509ba8f",
+    "email": "roteiro-comercial+6604d682dc3e6f57ccd07013@imports.conectae.internal",
+    "name": "Black White Pub Bar",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:48:16.822938+00:00",
+    "updated_at": "2026-05-19T14:48:17.464983+00:00"
+  },
+  {
+    "id": "f943264c-46be-4e26-bfea-ae41fcb9a7e7",
+    "email": "roteiro-comercial+9028c012bdd1607e7c4e83d6@imports.conectae.internal",
+    "name": "Casa do Escondidinho Bistrô",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:46:12.154888+00:00",
+    "updated_at": "2026-05-19T14:50:23.387134+00:00"
+  },
+  {
+    "id": "f1003e04-769e-43d3-b881-31a6db2b5754",
+    "email": "roteiro-comercial+7efde7f97ae199a171f512d4@imports.conectae.internal",
+    "name": "Usina de Massas Pocket - Canoas",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:48:56.122768+00:00",
+    "updated_at": "2026-05-19T14:48:56.762535+00:00"
+  },
+  {
+    "id": "fd044d49-54aa-4705-8c86-3d8f1441a16d",
+    "email": "roteiro-comercial+1312b7c0e04b127b1929a7cc@imports.conectae.internal",
+    "name": "Dom Raphaelli",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:48:05.068174+00:00",
+    "updated_at": "2026-05-19T14:48:05.637573+00:00"
+  },
+  {
+    "id": "2b4ee7c8-e33d-4ba8-aeee-0d61e6a0e60c",
+    "email": "roteiro-comercial+ae2fde0a3a1caeb299d4a48e@imports.conectae.internal",
+    "name": "Dona Rose",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:44:08.514406+00:00",
+    "updated_at": "2026-05-19T14:49:18.588977+00:00"
+  },
+  {
+    "id": "fd0bc328-9748-444d-add9-a8a3bfaec27f",
+    "email": "roteiro-comercial+4bbd6533d4e49629c4445363@imports.conectae.internal",
+    "name": "Restaurante Pouso Novo",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:48:27.759645+00:00",
+    "updated_at": "2026-05-19T14:48:28.503379+00:00"
+  },
+  {
+    "id": "ccd78e98-15ff-467e-8ee0-295dd95f6aa1",
+    "email": "roteiro-comercial+bd418051df486e8c884d9f16@imports.conectae.internal",
+    "name": "Armazém dos Sabores",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:44:10.542331+00:00",
+    "updated_at": "2026-05-19T14:49:48.25517+00:00"
+  },
+  {
+    "id": "6a22651c-a65f-4def-84ff-44fec1e0a463",
+    "email": "roteiro-comercial+af2691bf060b829f9e3b9b3f@imports.conectae.internal",
+    "name": "Restaurante Xororó",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:49:51.434231+00:00",
+    "updated_at": "2026-05-19T14:49:52.025222+00:00"
+  },
+  {
+    "id": "257b8830-2684-4192-bd89-38d32ad9597d",
+    "email": "roteiro-comercial+f3a373bd041d3f5f7a7e7234@imports.conectae.internal",
+    "name": "Rei dos Cortes",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:49:14.048901+00:00",
+    "updated_at": "2026-05-19T14:49:14.652149+00:00"
+  },
+  {
+    "id": "682fc701-35d8-4c5d-bef0-3d1bc19a2384",
+    "email": "roteiro-comercial+47a25315749fecf04bd75cc1@imports.conectae.internal",
+    "name": "Cia do Lanche",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:48:47.211515+00:00",
+    "updated_at": "2026-05-19T14:48:47.932474+00:00"
+  },
+  {
+    "id": "7bb3629a-98a2-444a-baa3-fd18b00730e2",
+    "email": "roteiro-comercial+14287f78a5a8666a65a02bcf@imports.conectae.internal",
+    "name": "Pizza Prime - Novo Hamburgo",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:41:38.995728+00:00",
+    "updated_at": "2026-05-19T14:49:15.00306+00:00"
+  },
+  {
+    "id": "77a594a9-331c-44eb-8f5a-318d5b6134a0",
+    "email": "roteiro-comercial+19bcc893f04392b00b8c5002@imports.conectae.internal",
+    "name": "S & A Produtos Naturais",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:44:43.989353+00:00",
+    "updated_at": "2026-05-19T14:49:49.901063+00:00"
+  },
+  {
+    "id": "6f0b5049-f40c-48aa-a68c-b1b6fc679a87",
+    "email": "roteiro-comercial+abaf09c71b7d87abb6ede6c4@imports.conectae.internal",
+    "name": "Bolaria Das Gurias",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:43:25.794593+00:00",
+    "updated_at": "2026-05-19T14:49:39.710755+00:00"
+  },
+  {
+    "id": "bbbf6b24-0930-4fba-b75f-c3c81c7aba14",
+    "email": "roteiro-comercial+6004c4e4bebb126030bd65b6@imports.conectae.internal",
+    "name": "Tudo em Grãos - Novo Hamburgo",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T13:42:32.760524+00:00",
+    "updated_at": "2026-05-19T14:49:16.756527+00:00"
+  },
+  {
+    "id": "86efe86f-781f-4cf3-a935-2240cdfd679f",
+    "email": "roteiro-comercial+1a4b7ec8d4da21faed150b2a@imports.conectae.internal",
+    "name": "Resenha Pub",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:49:33.383596+00:00",
+    "updated_at": "2026-05-19T14:49:33.999258+00:00"
+  },
+  {
+    "id": "7702cef7-5ded-45bf-82b3-520c5c4a5150",
+    "email": "roteiro-comercial+1edf42bb9ba05eac00763c8c@imports.conectae.internal",
+    "name": "Don Carlone Pizzaria",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:43:35.49899+00:00",
+    "updated_at": "2026-05-19T14:49:41.500954+00:00"
+  },
+  {
+    "id": "afff568f-aa94-41d8-957e-dcf557154a72",
+    "email": "roteiro-comercial+178c88b8726c5edfd8e09056@imports.conectae.internal",
+    "name": "Cacau Show",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:44:01.284065+00:00",
+    "updated_at": "2026-05-19T14:49:46.574001+00:00"
+  },
+  {
+    "id": "40790c73-f382-4ab1-9512-462cb4c3dc75",
+    "email": "roteiro-comercial+2d2642b32baa19a25d533e0f@imports.conectae.internal",
+    "name": "Mestre do Frango Canoas",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:45:44.00323+00:00",
+    "updated_at": "2026-05-19T14:50:10.664609+00:00"
+  },
+  {
+    "id": "c27a031d-4ccd-439e-8b41-1b09508962a7",
+    "email": "roteiro-comercial+40bd50296e0bd1b147d3cbe7@imports.conectae.internal",
+    "name": "Paladar Lanches",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:43:54.00395+00:00",
+    "updated_at": "2026-05-19T14:49:44.923846+00:00"
+  },
+  {
+    "id": "63e04b3c-7337-4b80-a0ab-41854d88b73b",
+    "email": "roteiro-comercial+47b29c760be1147e5d2d2366@imports.conectae.internal",
+    "name": "Alpe's",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:49:42.462221+00:00",
+    "updated_at": "2026-05-19T14:49:43.051515+00:00"
+  },
+  {
+    "id": "c7986b7e-642b-4999-a651-47d05ff2692f",
+    "email": "roteiro-comercial+10a5df17bee2f4859675ce68@imports.conectae.internal",
+    "name": "Cafeteria Toscana",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:50:00.490728+00:00",
+    "updated_at": "2026-05-19T14:50:01.086884+00:00"
+  },
+  {
+    "id": "679ea1c0-c04e-4bf0-99e7-cb653b2e716b",
+    "email": "roteiro-comercial+c55aa4cf18b51aed59f364fc@imports.conectae.internal",
+    "name": "Cia do Sushi Gravataí",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:46:02.763622+00:00",
+    "updated_at": "2026-05-19T14:50:21.435632+00:00"
+  },
+  {
+    "id": "6f78a92d-fd45-4bd3-8aaf-22438b274c0d",
+    "email": "roteiro-comercial+c9a3ca5f4d2433d1a9bbca77@imports.conectae.internal",
+    "name": "La Bella Donna Pizzeria",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:50:22.290404+00:00",
+    "updated_at": "2026-05-19T14:50:23.057747+00:00"
+  },
+  {
+    "id": "4731f501-3872-4a2d-a849-bbaf62caebdc",
+    "email": "roteiro-comercial+e678fe2b9992445c3402b688@imports.conectae.internal",
+    "name": "Cia do Sushi | Delivery",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:46:22.42651+00:00",
+    "updated_at": "2026-05-19T14:50:25.196772+00:00"
+  },
+  {
+    "id": "fd5b05d5-a28e-4b4a-8b5b-213f439a0ace",
+    "email": "roteiro-comercial+f31d96ba7341eb4c5a7e3d2d@imports.conectae.internal",
+    "name": "Vida Natural",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:46:32.058871+00:00",
+    "updated_at": "2026-05-19T14:50:26.838587+00:00"
+  },
+  {
+    "id": "d8925471-2e51-49ca-b36f-da5fa1234c40",
+    "email": "roteiro-comercial+e4eb0e7b93ef792593086545@imports.conectae.internal",
+    "name": "Pizzas Mega Delivery - Canoas",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:46:41.965924+00:00",
+    "updated_at": "2026-05-19T14:50:28.482625+00:00"
+  },
+  {
+    "id": "f02290f2-3cc1-45de-a0ab-a8a44858072e",
+    "email": "roteiro-comercial+2f8299b8a3d4a5c15f812239@imports.conectae.internal",
+    "name": "RIB 889 | ⭐ Nota 5.0 no Google",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:46:51.147268+00:00",
+    "updated_at": "2026-05-19T14:50:30.203306+00:00"
+  },
+  {
+    "id": "61a96ded-53c3-4ff1-9048-61157d7678a0",
+    "email": "roteiro-comercial+c6a13bcc4b10933b5c288c65@imports.conectae.internal",
+    "name": "Sabor da Vida - Marmitas e Alaminutas",
+    "avatar": null,
+    "role": "user",
+    "plan": "free",
+    "created_at": "2026-05-19T14:50:31.23912+00:00",
+    "updated_at": "2026-05-19T14:50:31.850968+00:00"
+  },
+  {
+    "id": "70a8078e-64b6-427a-a647-3da0d9539e5d",
+    "email": "roteiro-comercial+56ef25612dc46327251513a5@imports.conectae.internal",
+    "name": "Sul Flora - Produtos Naturais",
+    "avatar": null,
+    "role": "user",
+    "plan": "plus",
+    "created_at": "2026-05-19T14:50:40.881907+00:00",
+    "updated_at": "2026-05-19T14:50:40.881907+00:00"
+  }
+]
