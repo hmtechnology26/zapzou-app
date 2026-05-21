@@ -70,9 +70,9 @@ export function ImageModal({ isOpen, images, initialIndex = 0, onClose }: ImageM
               e.stopPropagation();
               goToPrevious();
             }}
-            className="absolute left-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-xl transition-all hover:bg-white/20"
+            className="absolute left-1 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-xl transition-all hover:bg-white/20 sm:left-4 sm:h-12 sm:w-12"
           >
-            <Icon icon="chevron_left" size={28} weight={700} />
+            <Icon icon="chevron_left" size={20} weight={700} />
           </button>
 
           <button
@@ -80,9 +80,9 @@ export function ImageModal({ isOpen, images, initialIndex = 0, onClose }: ImageM
               e.stopPropagation();
               goToNext();
             }}
-            className="absolute right-16 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-xl transition-all hover:bg-white/20"
+            className="absolute right-1 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-xl transition-all hover:bg-white/20 sm:right-16 sm:h-12 sm:w-12"
           >
-            <Icon icon="chevron_right" size={28} weight={700} />
+            <Icon icon="chevron_right" size={20} weight={700} />
           </button>
         </>
       )}

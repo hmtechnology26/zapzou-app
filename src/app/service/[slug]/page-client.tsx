@@ -355,15 +355,10 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
           <section className="relative">
             {allImages.length > 1 ? (
               <div 
-                className="relative cursor-pointer"
+                className="relative"
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
-                onClick={() => {
-                  setImageModalImages(allImages);
-                  setImageModalInitialIndex(currentImageIndex);
-                  setImageModalOpen(true);
-                }}
               >
                 <div className="aspect-square w-full overflow-hidden max-h-[32rem] mx-auto">
                   <div
@@ -388,17 +383,17 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
                 <button
                   type="button"
                   onClick={() => setCurrentImageIndex((prev) => prev > 0 ? prev - 1 : allImages.length - 1)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-surface-container-lowest/90 backdrop-blur-md rounded-full items-center justify-center shadow-lg active:scale-90 transition-transform"
+                  className="absolute left-1 top-1/2 -translate-y-1/2 h-7 w-7 bg-surface-container-lowest/90 backdrop-blur-md rounded-full items-center justify-center shadow-lg active:scale-90 transition-transform"
                 >
-                  <Icon icon="chevron_left" size={20} />
+                  <Icon icon="chevron_left" size={16} />
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setCurrentImageIndex((prev) => prev < allImages.length - 1 ? prev + 1 : 0)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-surface-container-lowest/90 backdrop-blur-md rounded-full items-center justify-center shadow-lg active:scale-90 transition-transform"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 bg-surface-container-lowest/90 backdrop-blur-md rounded-full items-center justify-center shadow-lg active:scale-90 transition-transform"
                 >
-                  <Icon icon="chevron_right" size={20} />
+                  <Icon icon="chevron_right" size={16} />
                 </button>
 
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full border border-white/10">
@@ -413,14 +408,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
               </div>
             ) : (
               <div 
-                className="aspect-square w-full overflow-hidden max-h-[32rem] mx-auto cursor-pointer"
-                onClick={() => {
-                  if (service.image) {
-                    setImageModalImages([service.image]);
-                    setImageModalInitialIndex(0);
-                    setImageModalOpen(true);
-                  }
-                }}
+                className="aspect-square w-full overflow-hidden max-h-[32rem] mx-auto"
               >
                 <img alt={service.title} className="w-full h-full object-cover" src={service.image} loading="lazy" decoding="async" />
               </div>

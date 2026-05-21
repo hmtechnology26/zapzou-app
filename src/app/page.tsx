@@ -1834,7 +1834,7 @@ export default function HomePage() {
             </button>
           </div>
 
-          <div className="hidden md:-mx-8 md:flex md:flex-wrap md:gap-2 md:px-8 md:pb-0">
+          <div className="hidden md:-mx-8 md:flex md:items-center md:gap-2 md:overflow-x-auto md:overflow-y-hidden md:px-8 md:pb-1 md:no-scrollbar md:scroll-smooth">
             {categories.map((cat) => {
               const isSelected =
                 (cat.id === "all" && selectedCategory === "all") ||
@@ -1947,10 +1947,10 @@ export default function HomePage() {
                       onClick={() =>
                         handleOpenServiceDetails(service, "home_list_card")
                       }
-                      className="group/card relative flex h-full cursor-pointer flex-row items-center gap-3 overflow-hidden rounded-[1.4rem] border border-white/20 bg-white/80 p-2.5 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] sm:flex-col sm:gap-0 sm:rounded-[2rem] sm:p-0 dark:border-white/10 dark:bg-white/[0.04]"
+                      className="group/card relative flex h-full cursor-pointer flex-row items-start gap-2.5 overflow-hidden rounded-[1.4rem] border border-white/20 bg-white/80 p-2 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] sm:flex-col sm:items-stretch sm:gap-0 sm:rounded-[2rem] sm:p-0 dark:border-white/10 dark:bg-white/[0.04]"
                     >
                       <div 
-                        className="relative h-28 w-28 shrink-0 overflow-hidden rounded-[1rem] bg-surface-container-low cursor-pointer sm:h-48 sm:w-full sm:rounded-none sm:border-b sm:border-r-0"
+                        className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[0.9rem] bg-surface-container-low cursor-pointer sm:h-48 sm:w-full sm:rounded-none sm:border-b sm:border-r-0"
                         onClick={(e) => {
                           e.stopPropagation();
                           const images = Array.isArray(service.images) && service.images.length > 0 
@@ -1998,15 +1998,15 @@ export default function HomePage() {
                           </div>
                         )}
                       </div>
-                      <div className="flex min-w-0 flex-1 flex-col justify-center py-1 sm:p-4">
-                        <div>
-                          <div className="mb-1.5 flex items-center gap-1.5 sm:mb-2 sm:flex-wrap sm:gap-2">
-                            <span className="rounded-full bg-[#30cc36]/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-[#30cc36]">
+                      <div className="flex min-w-0 min-h-[96px] flex-1 flex-col justify-between py-0.5 sm:min-h-[152px] sm:p-4">
+                        <div className="min-w-0 sm:min-h-[88px]">
+                          <div className="mb-1 flex items-center gap-1 sm:mb-2 sm:flex-wrap sm:gap-2">
+                            <span className="rounded-full bg-[#30cc36]/5 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-[#30cc36]">
                               {service.category}
                             </span>
                             <div className="ml-auto flex flex-col items-end gap-1">
                               <span
-                                className={`rounded-full px-2 py-0.5 text-[8px] font-bold ${
+                                className={`rounded-full px-1.5 py-0.5 text-[7px] font-bold ${
                                   hasCnpj(service.cnpj)
                                     ? "text-white bg-[#30cc36] dark:text-black/80 dark:bg-[#30cc36]"
                                     : "text-white bg-orange-600 dark:text-white dark:bg-orange-700"
@@ -2018,12 +2018,12 @@ export default function HomePage() {
                               </span>
                             </div>
                           </div>
-                          <h4 className="font-black text-on-surface text-[13px] leading-tight line-clamp-2 group-hover/card:text-[#30cc36] transition-colors sm:text-[15px] sm:truncate">
+                          <h4 className="font-black text-on-surface text-[12px] leading-tight line-clamp-2 group-hover/card:text-[#30cc36] transition-colors sm:text-[15px] sm:line-clamp-2">
                             {service.title}
                           </h4>
-                          <div className="mt-1 flex items-center gap-2 text-[9px] font-semibold text-on-surface-variant sm:text-[11px]">
+                          <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[8px] font-semibold text-on-surface-variant sm:text-[11px]">
                             {service.distanceEnvironmentName && (
-                              <span className="line-clamp-1 rounded-full bg-surface-container-high px-1.5 py-0.5">
+                              <span className="line-clamp-1 max-w-full rounded-full bg-surface-container-high px-1.5 py-0.5 sm:px-2.5 sm:py-1">
                                 {service.distanceEnvironmentName}
                               </span>
                             )}
@@ -2053,12 +2053,12 @@ export default function HomePage() {
                           })()}
                         </div>
 
-                        <div className="mt-2 sm:mt-2">
+                        <div className="mt-1.5 sm:mt-4">
                           <div className="flex items-end justify-between gap-2">
                             {(userLocation ||
                               service.distanceEnvironmentName) && (
                               <div className="flex items-center gap-2">
-                                {userLocation &&
+                                {Number.isFinite(service.distance) &&
                                   service.distance !== Infinity && (
                                     <div className="flex items-center gap-1 text-primary">
                                       <Icon
@@ -2066,7 +2066,7 @@ export default function HomePage() {
                                         size={12}
                                         weight={700}
                                       />
-                                      <span className="text-[10px] text-[#30cc36] font-bold">
+                                      <span className="text-[9px] text-[#30cc36] font-bold">
                                         {service.distance < 1
                                           ? `${Math.round(service.distance * 1000)}m`
                                           : `${service.distance.toFixed(1)}km`}
@@ -2084,7 +2084,7 @@ export default function HomePage() {
                                   "home_list_button",
                                 );
                               }}
-                              className="shrink-0 rounded-full bg-[#30cc36] px-3 py-1.5 text-[9px] font-black uppercase text-white shadow-lg shadow-[#30cc36]/20 transition-all hover:brightness-110 active:scale-95 sm:min-w-[140px] sm:px-5 sm:py-2.5 sm:text-xs"
+                              className="shrink-0 rounded-full bg-[#30cc36] px-2.5 py-1.5 text-[8px] font-black uppercase text-white shadow-lg shadow-[#30cc36]/20 transition-all hover:brightness-110 active:scale-95 sm:min-w-[132px] sm:px-4 sm:py-2.5 sm:text-xs"
                             >
                               Ver anúncio
                             </button>
@@ -2126,10 +2126,10 @@ export default function HomePage() {
                       onClick={() =>
                         handleOpenServiceDetails(service, "home_search_card")
                       }
-                      className="group/card relative flex h-full cursor-pointer flex-row items-center gap-3 overflow-hidden rounded-[1.4rem] border border-white/20 bg-white/80 p-2.5 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] sm:flex-col sm:gap-0 sm:rounded-[2rem] sm:p-0 dark:border-white/10 dark:bg-white/[0.04]"
+                      className="group/card relative flex h-full cursor-pointer flex-row items-start gap-2.5 overflow-hidden rounded-[1.4rem] border border-white/20 bg-white/80 p-2 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] sm:flex-col sm:items-stretch sm:gap-0 sm:rounded-[2rem] sm:p-0 dark:border-white/10 dark:bg-white/[0.04]"
                     >
                       <div 
-                        className="relative h-28 w-28 shrink-0 overflow-hidden rounded-[1rem] bg-surface-container-low cursor-pointer sm:h-48 sm:w-full sm:rounded-none sm:border-b sm:border-r-0"
+                        className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[0.9rem] bg-surface-container-low cursor-pointer sm:h-48 sm:w-full sm:rounded-none sm:border-b sm:border-r-0"
                         onClick={(e) => {
                           e.stopPropagation();
                           const images = Array.isArray(service.images) && service.images.length > 0 
@@ -2177,15 +2177,15 @@ export default function HomePage() {
                           </div>
                         )}
                       </div>
-                      <div className="flex min-w-0 flex-1 flex-col justify-center py-1 sm:p-4">
-                        <div>
-                          <div className="mb-1.5 flex items-center gap-1.5 sm:mb-2 sm:flex-wrap sm:gap-2">
-                            <span className="rounded-full bg-primary/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-primary">
+                      <div className="flex min-w-0 min-h-[96px] flex-1 flex-col justify-between py-0.5 sm:min-h-[152px] sm:p-4">
+                        <div className="min-w-0 sm:min-h-[88px]">
+                          <div className="mb-1 flex items-center gap-1 sm:mb-2 sm:flex-wrap sm:gap-2">
+                            <span className="rounded-full bg-primary/5 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-primary">
                               {service.category || "Sem categoria"}
                             </span>
                             <div className="ml-auto flex flex-col items-end gap-1">
                               <span
-                                className={`rounded-full px-2 py-0.5 text-[8px] font-bold ${
+                                className={`rounded-full px-1.5 py-0.5 text-[7px] font-bold ${
                                   hasCnpj(service.cnpj)
                                     ? "text-emerald-700 bg-emerald-500/10"
                                     : "text-slate-600 bg-slate-500/10"
@@ -2197,12 +2197,12 @@ export default function HomePage() {
                               </span>
                             </div>
                           </div>
-                          <h4 className="font-black text-on-surface text-[13px] leading-tight line-clamp-2 group-hover/card:text-primary transition-colors sm:text-[15px] sm:truncate">
+                          <h4 className="font-black text-on-surface text-[12px] leading-tight line-clamp-2 group-hover/card:text-primary transition-colors sm:text-[15px] sm:line-clamp-2">
                             {service.title}
                           </h4>
-                          <div className="mt-1 flex items-center gap-2 text-[9px] font-semibold text-on-surface-variant sm:text-[11px]">
+                          <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[8px] font-semibold text-on-surface-variant sm:text-[11px]">
                             {service.distanceEnvironmentName && (
-                              <span className="line-clamp-1 rounded-full bg-surface-container-high px-1.5 py-0.5">
+                              <span className="line-clamp-1 max-w-full rounded-full bg-surface-container-high px-1.5 py-0.5 sm:px-2.5 sm:py-1">
                                 {service.distanceEnvironmentName}
                               </span>
                             )}
@@ -2235,12 +2235,12 @@ export default function HomePage() {
                           </p>
                         </div>
 
-                        <div className="mt-2 sm:mt-3">
+                        <div className="mt-1.5 sm:mt-4">
                           <div className="flex items-end justify-between gap-2">
                             {(userLocation ||
                               service.distanceEnvironmentName) && (
                               <div className="flex items-center gap-2">
-                                {userLocation &&
+                                {Number.isFinite(service.distance) &&
                                   service.distance !== Infinity && (
                                     <div className="flex items-center gap-1 text-primary">
                                       <Icon
@@ -2248,7 +2248,7 @@ export default function HomePage() {
                                         size={12}
                                         weight={700}
                                       />
-                                      <span className="text-[10px] font-bold">
+                                      <span className="text-[9px] font-bold">
                                         {service.distance < 1
                                           ? `${Math.round(service.distance * 1000)}m`
                                           : `${service.distance.toFixed(1)}km`}
@@ -2266,7 +2266,7 @@ export default function HomePage() {
                                   "home_search_button",
                                 );
                               }}
-                              className="shrink-0 rounded-full bg-[#30cc36] px-3 py-1.5 text-[9px] font-black uppercase text-white shadow-lg shadow-[#30cc36]/20 transition-all hover:brightness-110 active:scale-95 sm:min-w-[140px] sm:px-5 sm:py-2.5 sm:text-xs"
+                              className="shrink-0 rounded-full bg-[#30cc36] px-2.5 py-1.5 text-[8px] font-black uppercase text-white shadow-lg shadow-[#30cc36]/20 transition-all hover:brightness-110 active:scale-95 sm:min-w-[132px] sm:px-4 sm:py-2.5 sm:text-xs"
                             >
                               Ver anúncio
                             </button>

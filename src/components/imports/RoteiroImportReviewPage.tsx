@@ -52,6 +52,7 @@ type PreviewResponse = {
 };
 
 export default function RoteiroImportReviewPage() {
+  const [viewFilter, setViewFilter] = useState<'all' | 'with_instagram' | 'without_instagram'>('all');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [mutating, setMutating] = useState(false);
@@ -62,10 +63,27 @@ export default function RoteiroImportReviewPage() {
   const [statusMessage, setStatusMessage] = useState('');
 
   const excludedSet = useMemo(() => new Set(excludedSourceIds), [excludedSourceIds]);
-  const records = useMemo(
+  const baseRecords = useMemo(
     () => (preview?.reviewRecords ?? []).filter((record) => !excludedSet.has(record.sourceId)),
     [preview?.reviewRecords, excludedSet],
   );
+  const withInstagramCount = useMemo(
+    () => baseRecords.filter((record) => hasInstagram(record.instagram)).length,
+    [baseRecords],
+  );
+  const withoutInstagramCount = useMemo(
+    () => baseRecords.filter((record) => !hasInstagram(record.instagram)).length,
+    [baseRecords],
+  );
+  const records = useMemo(() => {
+    if (viewFilter === 'with_instagram') {
+      return baseRecords.filter((record) => hasInstagram(record.instagram));
+    }
+    if (viewFilter === 'without_instagram') {
+      return baseRecords.filter((record) => !hasInstagram(record.instagram));
+    }
+    return baseRecords;
+  }, [baseRecords, viewFilter]);
   const approvedSet = useMemo(() => new Set(approvedSourceIds), [approvedSourceIds]);
   const insertedCount = records.filter((record) => approvedSet.has(record.sourceId) || record.existing.service).length;
   const previewEndpoint = '/api/admin/imports/roteiro/preview';
@@ -231,6 +249,46 @@ export default function RoteiroImportReviewPage() {
             <div className="rounded-full border border-outline-variant/20 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-on-surface-variant">
               Apply: `node scripts/json-imports/roteiro-comercial/import-roteiro-comercial.mjs --apply --approved-only`
             </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setViewFilter('all')}
+              className={`rounded-full px-4 py-2 text-xs font-black uppercase tracking-[0.16em] ${
+                viewFilter === 'all'
+                  ? 'bg-primary text-white'
+                  : 'border border-outline-variant/20 text-on-surface'
+              }`}
+            >
+              Todos ({baseRecords.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewFilter('with_instagram')}
+              className={`rounded-full px-4 py-2 text-xs font-black uppercase tracking-[0.16em] ${
+                viewFilter === 'with_instagram'
+                  ? 'bg-primary text-white'
+                  : 'border border-outline-variant/20 text-on-surface'
+              }`}
+            >
+              Com Instagram ({withInstagramCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewFilter('without_instagram')}
+              className={`rounded-full px-4 py-2 text-xs font-black uppercase tracking-[0.16em] ${
+                viewFilter === 'without_instagram'
+                  ? 'bg-primary text-white'
+                  : 'border border-outline-variant/20 text-on-surface'
+              }`}
+            >
+              Sem Instagram ({withoutInstagramCount})
+            </button>
+          </div>
+
+          <div className="mt-3 text-xs font-semibold text-on-surface-variant">
+            Filtro ativo: {formatViewFilter(viewFilter)}
           </div>
 
           {preview?.generatedAt && (
@@ -409,6 +467,16 @@ function formatPrimaryContact(whatsapp: string | null, instagram: string | null)
   if (whatsapp) return whatsapp;
   if (instagram) return formatInstagram(instagram);
   return 'Sem contato';
+}
+
+function hasInstagram(value: string | null) {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function formatViewFilter(value: 'all' | 'with_instagram' | 'without_instagram') {
+  if (value === 'with_instagram') return 'Com Instagram';
+  if (value === 'without_instagram') return 'Sem Instagram';
+  return 'Todos';
 }
 
 function dedupePreviewImages(images: string[]) {

@@ -1,0 +1,723 @@
+{
+  "totalImported": 1152,
+  "changes": 127,
+  "proposedSummary": {
+    "Alimentação": 203,
+    "Limpeza": 16,
+    "Manutenção": 75,
+    "Mecânica": 33,
+    "Revenda": 34,
+    "Agro & Pets": 56,
+    "Beleza": 176,
+    "Tecnologia": 69,
+    "Construção": 134,
+    "Saúde": 118,
+    "Eventos": 57,
+    "Religião": 4,
+    "Roupas": 43,
+    "Transporte": 8,
+    "Outros": 126
+  },
+  "sample": [
+    {
+      "id": "0037cc4a-bf7c-ccf0-b1c5-3928878672f0",
+      "title": "Cereja Store Moda Íntima",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 7
+    },
+    {
+      "id": "016d1e57-c6a9-2367-70e6-97c654cf8fc2",
+      "title": "A1 Multimarcas",
+      "current": "Outros",
+      "proposed": "Revenda",
+      "confidence": 6
+    },
+    {
+      "id": "05a0bc81-f761-3b7e-2783-150b72436192",
+      "title": "Lucas Auto Elétrica",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 6
+    },
+    {
+      "id": "05d72412-29c4-d07b-05dc-60fbb56d548f",
+      "title": "VF Imóveis",
+      "current": "Construção",
+      "proposed": "Revenda",
+      "confidence": 5
+    },
+    {
+      "id": "06a6ed57-eac5-d04a-30bd-a578eac0600b",
+      "title": "Trajado Store - Moda Masculina - Loja on-line",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 3
+    },
+    {
+      "id": "070e55f6-636e-a7f2-776f-3d79dec8409b",
+      "title": "Dubai Veículos",
+      "current": "Outros",
+      "proposed": "Revenda",
+      "confidence": 3
+    },
+    {
+      "id": "0928869c-5ef4-28d0-bb36-c783cc187894",
+      "title": "Alliar Clin - Odontologia e Biomedicina Estética",
+      "current": "Saúde",
+      "proposed": "Beleza",
+      "confidence": 3
+    },
+    {
+      "id": "0a3adc63-e1c7-ccd9-dc0e-d4b6fe3234e3",
+      "title": "Kowalski Modas",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 3
+    },
+    {
+      "id": "0d5d4d67-4b57-7a27-f350-dbce8fab9bf1",
+      "title": "Oliveira Comunicação Visual",
+      "current": "Outros",
+      "proposed": "Tecnologia",
+      "confidence": 3
+    },
+    {
+      "id": "0e184bbe-1a96-e791-273f-59a04d32b355",
+      "title": "Tudo Por Nada Calçados",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 3
+    },
+    {
+      "id": "0e4ad0bd-1ba8-a4b9-794c-9a85501d8076",
+      "title": "Fabinho Veículos",
+      "current": "Eventos",
+      "proposed": "Revenda",
+      "confidence": 4
+    },
+    {
+      "id": "1142d341-c009-feda-96f2-87b636ed0036",
+      "title": "Schneider Auto Center",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 5
+    },
+    {
+      "id": "15f51d6f-56f3-c18e-9070-8fc0b3621ca1",
+      "title": "Eduardo Auto Elétrica e Mecânica",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 6
+    },
+    {
+      "id": "1663eb46-8aa0-3841-d211-ea88e447b7f9",
+      "title": "Lorenzato Autocenter",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 3
+    },
+    {
+      "id": "1a643f15-a2dd-fc8d-463d-d65e3a016e61",
+      "title": "Ki Mania Modas Kids",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 5
+    },
+    {
+      "id": "1ade675e-d324-a18e-e57d-7bbcf34ca1e4",
+      "title": "Carangas Auto Estética by Ramirez",
+      "current": "Outros",
+      "proposed": "Beleza",
+      "confidence": 3
+    },
+    {
+      "id": "1aeb9008-9067-e207-7703-7d15168225ac",
+      "title": "CFC Barbosa",
+      "current": "Alimentação",
+      "proposed": "Transporte",
+      "confidence": 7
+    },
+    {
+      "id": "1eb5e337-75bf-08db-8a91-e59410eac6e3",
+      "title": "Podium - Rodas e Pneus",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 5
+    },
+    {
+      "id": "225538d0-439c-7616-20ce-ce04d1b2c534",
+      "title": "Tatian Store",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 5
+    },
+    {
+      "id": "246ae521-d9b8-d5ba-f042-6b5a79c31a49",
+      "title": "Corvo Tattoo",
+      "current": "Outros",
+      "proposed": "Beleza",
+      "confidence": 4
+    },
+    {
+      "id": "28bba9f5-85bb-2274-7997-e6ae47549884",
+      "title": "Espetinho da Claret",
+      "current": "Alimentação",
+      "proposed": "Agro & Pets",
+      "confidence": 3
+    },
+    {
+      "id": "29f23d78-f1e5-43ae-797d-f604116122ca",
+      "title": "MS Moda e Uniformes",
+      "current": "Eventos",
+      "proposed": "Roupas",
+      "confidence": 3
+    },
+    {
+      "id": "2a712869-3884-73f6-f169-d149e2cf6b13",
+      "title": "Save Car - Martelinho de Ouro",
+      "current": "Beleza",
+      "proposed": "Mecânica",
+      "confidence": 4
+    },
+    {
+      "id": "2df8ebd2-333f-6e9f-7ba9-0a224da5ee44",
+      "title": "PS Imóveis",
+      "current": "Construção",
+      "proposed": "Revenda",
+      "confidence": 3
+    },
+    {
+      "id": "2fa97103-0689-8116-46cf-5805a00c1b65",
+      "title": "Kloset - Moda Modesta",
+      "current": "Eventos",
+      "proposed": "Roupas",
+      "confidence": 4
+    },
+    {
+      "id": "2fcb89b0-c518-6eb7-a7ad-8848bc4746ba",
+      "title": "Sombrio Veiculos",
+      "current": "Eventos",
+      "proposed": "Revenda",
+      "confidence": 3
+    },
+    {
+      "id": "313cf1ab-cc72-9e65-cd78-65bc68b7df1a",
+      "title": "Auto Escola Líder",
+      "current": "Outros",
+      "proposed": "Transporte",
+      "confidence": 7
+    },
+    {
+      "id": "348a52c2-d6bc-22ae-5fa8-d5728fd6bbe4",
+      "title": "Vip Som",
+      "current": "Eventos",
+      "proposed": "Mecânica",
+      "confidence": 3
+    },
+    {
+      "id": "3583dce2-8c13-2920-c87d-db71dc7a705f",
+      "title": "JA Comunicação Visual e Sonora",
+      "current": "Outros",
+      "proposed": "Tecnologia",
+      "confidence": 3
+    },
+    {
+      "id": "35ee7e60-f992-0998-aa8f-d7e66167d8ee",
+      "title": "Transparence Imóveis",
+      "current": "Construção",
+      "proposed": "Revenda",
+      "confidence": 3
+    },
+    {
+      "id": "37e1e976-4fab-13c5-9f67-b4af6a82e0e8",
+      "title": "Alcides Maya | Faculdade e Escola Técnica",
+      "current": "Outros",
+      "proposed": "Tecnologia",
+      "confidence": 5
+    },
+    {
+      "id": "3a47b6c3-d556-5e91-5ee4-10392734afbb",
+      "title": "Margarinos - Mecânica Automotiva | Chapeação | Pintura | Funilaria e Guincho",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 5
+    },
+    {
+      "id": "3f692ae7-5440-6198-ceb3-6ce7150bbdec",
+      "title": "Pérola - Moda Cristã",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 3
+    },
+    {
+      "id": "3f9485bd-31a4-ef74-d508-1199f9cea743",
+      "title": "Auto Tri Reparação",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 3
+    },
+    {
+      "id": "40c4afc1-75b1-76fb-ce8e-e13d2e393876",
+      "title": "Cata Vento Brechó Infantil",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 2
+    },
+    {
+      "id": "40fb1b0c-1e4c-d5f8-fc95-d77253e4154a",
+      "title": "Edinho Tattoo",
+      "current": "Outros",
+      "proposed": "Beleza",
+      "confidence": 5
+    },
+    {
+      "id": "437b5a20-97aa-324f-aa87-9c5b0bf85e8d",
+      "title": "Morada Imóveis",
+      "current": "Construção",
+      "proposed": "Revenda",
+      "confidence": 3
+    },
+    {
+      "id": "461da318-5476-073d-4996-1a16cb2239e5",
+      "title": "Alucril Box",
+      "current": "Manutenção",
+      "proposed": "Construção",
+      "confidence": 4
+    },
+    {
+      "id": "49fafbb2-8a7c-4083-9a56-c6e49f295f8e",
+      "title": "Nova Tattoo Studio",
+      "current": "Outros",
+      "proposed": "Beleza",
+      "confidence": 4
+    },
+    {
+      "id": "4a761026-f4d9-159b-cd94-3a87355778e3",
+      "title": "Sara Zoe - Moda Gospel - ON LINE",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 4
+    },
+    {
+      "id": "4c469979-da12-c9f3-c7be-7e35493d8dd9",
+      "title": "Armazém dos Calçados",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 3
+    },
+    {
+      "id": "4dd2aa33-ab6e-c046-a9de-00bfeb4df991",
+      "title": "Huma - Odontologia e Estética Orofacial",
+      "current": "Saúde",
+      "proposed": "Beleza",
+      "confidence": 3
+    },
+    {
+      "id": "50dd8085-8af2-ca72-8475-f164ba8d91c2",
+      "title": "Ciclone",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 4
+    },
+    {
+      "id": "5405455f-871b-7d1c-55cd-2e6d942ecbda",
+      "title": "Marcos Nunes Vidros Temperados",
+      "current": "Manutenção",
+      "proposed": "Construção",
+      "confidence": 4
+    },
+    {
+      "id": "59f0c2e5-8d3a-86a7-6bbf-9c34a6fcfcba",
+      "title": "MCP Modas",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 3
+    },
+    {
+      "id": "5a0a5015-e67c-db2d-53e9-dab3773ca491",
+      "title": "Arte Impressa",
+      "current": "Outros",
+      "proposed": "Tecnologia",
+      "confidence": 2
+    },
+    {
+      "id": "5c21dd2a-64b4-71ca-0010-83339c189c98",
+      "title": "Akatistudio tattoo & piercing",
+      "current": "Outros",
+      "proposed": "Beleza",
+      "confidence": 5
+    },
+    {
+      "id": "5f5316ee-429f-b98f-5b10-de375e61c853",
+      "title": "Centeno Pneus",
+      "current": "Limpeza",
+      "proposed": "Mecânica",
+      "confidence": 5
+    },
+    {
+      "id": "62f9715a-5cd2-ce89-7620-bf61f420c50b",
+      "title": "Centro Automotivo Maxi Car",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 4
+    },
+    {
+      "id": "63199ec7-1d7b-8176-66b6-8a18472731ef",
+      "title": "Alli Tattoo Studio - 10% desconto na apresentação do app",
+      "current": "Outros",
+      "proposed": "Beleza",
+      "confidence": 3
+    },
+    {
+      "id": "6540cb50-6d34-4fb5-8fd6-bded45dbe140",
+      "title": "Linda G+ Plus Size",
+      "current": "Beleza",
+      "proposed": "Roupas",
+      "confidence": 4
+    },
+    {
+      "id": "679ba475-96d3-b504-e9bb-f3e0f42adbff",
+      "title": "Mecânica - Ar Condicionado Pampa",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 4
+    },
+    {
+      "id": "67d4d0a1-58a5-2258-f1db-f4a2f9141f71",
+      "title": "Shalom Veículos",
+      "current": "Beleza",
+      "proposed": "Revenda",
+      "confidence": 3
+    },
+    {
+      "id": "6a124ce4-939b-6177-3429-0a8272e893f9",
+      "title": "Roda Star",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 5
+    },
+    {
+      "id": "6e417de1-558c-d829-8634-2738724b57fa",
+      "title": "T7 Shoes",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 3
+    },
+    {
+      "id": "6f6e0f7f-c449-be83-5351-4aec8bb9f0f5",
+      "title": "1ª Aula Experimental Grátis - Adestramento",
+      "current": "Outros",
+      "proposed": "Agro & Pets",
+      "confidence": 4
+    },
+    {
+      "id": "6fe5a9a8-7bc8-7a30-5eab-6eacdce99430",
+      "title": "Ribeiro Veículos",
+      "current": "Outros",
+      "proposed": "Revenda",
+      "confidence": 5
+    },
+    {
+      "id": "73815b79-1762-7ab3-e72a-7814d14cc473",
+      "title": "D´casa Imóveis",
+      "current": "Construção",
+      "proposed": "Revenda",
+      "confidence": 4
+    },
+    {
+      "id": "77ed616b-736f-ec7b-01ac-2741f1027180",
+      "title": "Substrato da Pele Tattoo Studio",
+      "current": "Outros",
+      "proposed": "Beleza",
+      "confidence": 3
+    },
+    {
+      "id": "7a4e0205-73d7-c45d-26e8-258fbc580aa2",
+      "title": "Jasinski - Centro Automotivo",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 4
+    },
+    {
+      "id": "7b6d303e-ec21-b2a2-f0ff-b3e465664fc3",
+      "title": "Stillus Kids Brechó Infantil",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 3
+    },
+    {
+      "id": "7f17631d-8fb2-179d-60ff-248587fed2ff",
+      "title": "4 Rodas Films - Canoas",
+      "current": "Beleza",
+      "proposed": "Mecânica",
+      "confidence": 8
+    },
+    {
+      "id": "807afd4e-1e10-fc05-ee11-f5f0f0a70ae1",
+      "title": "Mecânica VLC",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 5
+    },
+    {
+      "id": "8182f9f2-63ea-8649-de62-8274743755e4",
+      "title": "Maicon Auto Center",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 6
+    },
+    {
+      "id": "863d36c5-73d0-8661-3522-66e4d64cc6ac",
+      "title": "FIRE ECO",
+      "current": "Outros",
+      "proposed": "Construção",
+      "confidence": 3
+    },
+    {
+      "id": "86f12f2e-a3ea-7f77-12c0-78eea9fa996f",
+      "title": "B&W Calçados",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 3
+    },
+    {
+      "id": "8dcd9e8b-e88c-9d03-fa78-6484aaac9c75",
+      "title": "Chimavel Veículos",
+      "current": "Eventos",
+      "proposed": "Revenda",
+      "confidence": 4
+    },
+    {
+      "id": "8ee249b2-b9c4-4f8e-1a67-6dd2205e7180",
+      "title": "Balloons Art",
+      "current": "Construção",
+      "proposed": "Eventos",
+      "confidence": 3
+    },
+    {
+      "id": "90c30c0f-5ac3-daa1-acac-806a7f018994",
+      "title": "Auto Escola Marijá",
+      "current": "Outros",
+      "proposed": "Transporte",
+      "confidence": 5
+    },
+    {
+      "id": "90cf23e2-0502-a271-dc69-b29798b98a39",
+      "title": "Ki Mania Modas",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 6
+    },
+    {
+      "id": "923baa1b-8c95-0a04-0081-515144d9cb19",
+      "title": "CFC Central",
+      "current": "Outros",
+      "proposed": "Transporte",
+      "confidence": 6
+    },
+    {
+      "id": "94e67756-203d-ac75-e64a-57bdaabb9e2b",
+      "title": "Wall Street Imóveis | ⭐ Nota 5.0 no Google",
+      "current": "Construção",
+      "proposed": "Revenda",
+      "confidence": 3
+    },
+    {
+      "id": "9632ea91-1598-b235-e951-41b28ffb611a",
+      "title": "Deslumbre Plus",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 2
+    },
+    {
+      "id": "9b46f99f-7eaf-1f2e-c700-2ffeff56f0c7",
+      "title": "Infinityfilm's - Película de controle solar - 5% de desconto nas películas para pagamento à vista.",
+      "current": "Outros",
+      "proposed": "Mecânica",
+      "confidence": 3
+    },
+    {
+      "id": "9cb8ca8b-2a81-8606-b953-7be1ab3e88b5",
+      "title": "Milene Krebs - Odontologia e Estética",
+      "current": "Saúde",
+      "proposed": "Beleza",
+      "confidence": 3
+    },
+    {
+      "id": "9e443eb6-e433-dca8-4141-f01e2e12120d",
+      "title": "Redin - Reparação Automotiva",
+      "current": "Beleza",
+      "proposed": "Mecânica",
+      "confidence": 3
+    },
+    {
+      "id": "a344333a-21cb-8dd8-f2b2-4d7072c89c5c",
+      "title": "Imperium Imóveis",
+      "current": "Construção",
+      "proposed": "Revenda",
+      "confidence": 3
+    },
+    {
+      "id": "a68edc6b-e965-83cc-4094-64231dc94873",
+      "title": "Silverstone - Suspensões e Surdinas",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 3
+    },
+    {
+      "id": "a7c6310b-22f5-f7f8-5e7d-d54c62b6d9f2",
+      "title": "CFC Novocentro",
+      "current": "Outros",
+      "proposed": "Transporte",
+      "confidence": 7
+    },
+    {
+      "id": "ac4ad195-1ebc-250c-bbe0-a5fd8cc417e5",
+      "title": "Mayã Briefs Tattoo Shop",
+      "current": "Construção",
+      "proposed": "Beleza",
+      "confidence": 4
+    },
+    {
+      "id": "ac6a1ed3-9b2e-99f8-fb2a-a9e220c24de4",
+      "title": "Imobiliária Projetar - Corretor Marlon",
+      "current": "Construção",
+      "proposed": "Revenda",
+      "confidence": 3
+    },
+    {
+      "id": "ada90a49-b18d-449d-4720-119cdf256fc7",
+      "title": "Auto Escola Rota",
+      "current": "Outros",
+      "proposed": "Transporte",
+      "confidence": 7
+    },
+    {
+      "id": "b497a80b-e8ce-815d-42bf-777d23024227",
+      "title": "VS Multimarcas",
+      "current": "Outros",
+      "proposed": "Revenda",
+      "confidence": 3
+    },
+    {
+      "id": "b4c6e4ab-4124-4b10-7255-925cb1c70eb6",
+      "title": "Confete Moda Kids & Teen",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 4
+    },
+    {
+      "id": "b7178273-07be-c982-8202-2333b2ecb010",
+      "title": "Lavagem The Doctor",
+      "current": "Outros",
+      "proposed": "Limpeza",
+      "confidence": 2
+    },
+    {
+      "id": "b76d8d90-ee45-141d-f802-99068a8d9657",
+      "title": "Car Fix Estética Automotiva e Martelinho de Ouro",
+      "current": "Outros",
+      "proposed": "Mecânica",
+      "confidence": 6
+    },
+    {
+      "id": "b95a26ef-5dea-7430-264e-9cc638425aa4",
+      "title": "Floratta Semijoias e Variedades",
+      "current": "Beleza",
+      "proposed": "Roupas",
+      "confidence": 4
+    },
+    {
+      "id": "bb4f6a5a-990b-d942-3bb3-c28115d7e654",
+      "title": "Imola Veículos",
+      "current": "Outros",
+      "proposed": "Revenda",
+      "confidence": 3
+    },
+    {
+      "id": "bc3f47a6-f33f-98fa-8de1-4427a872fafc",
+      "title": "S&B Clothes",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 2
+    },
+    {
+      "id": "c17b0ab4-18e1-b43b-8ec6-964b2a9fd69d",
+      "title": "Shopping do Óleo",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 3
+    },
+    {
+      "id": "c1c98fea-4e29-810a-93ff-48b3811294ca",
+      "title": "Custom Films",
+      "current": "Eventos",
+      "proposed": "Mecânica",
+      "confidence": 4
+    },
+    {
+      "id": "c3bfd15c-2d99-1c2a-a812-a5ccf36994c0",
+      "title": "Projectcar Multimarcas",
+      "current": "Outros",
+      "proposed": "Revenda",
+      "confidence": 3
+    },
+    {
+      "id": "c78d8d6c-7b3f-7d92-dd1e-cd0795c6732a",
+      "title": "Griffe do Film - Película",
+      "current": "Eventos",
+      "proposed": "Mecânica",
+      "confidence": 4
+    },
+    {
+      "id": "c90922a3-49b5-3769-2b02-97702b664e5b",
+      "title": "Fumbica Auto Center",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 6
+    },
+    {
+      "id": "ca145058-2b29-4651-5cdb-7bcd54a8cdbf",
+      "title": "Via 7 Veículos",
+      "current": "Outros",
+      "proposed": "Revenda",
+      "confidence": 4
+    },
+    {
+      "id": "cadfcccf-2e18-8733-d490-02f960f4d396",
+      "title": "Wagner Imóveis",
+      "current": "Construção",
+      "proposed": "Revenda",
+      "confidence": 4
+    },
+    {
+      "id": "cb7a57ae-e9cc-30dd-e28e-6bd976aee156",
+      "title": "Tiago Pneus Auto Center",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 7
+    },
+    {
+      "id": "cc70b916-53b1-ef6b-1342-a1a9cc2bf886",
+      "title": "Tá On Store",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 2
+    },
+    {
+      "id": "cf82d489-9028-9577-62fb-86712ef147c2",
+      "title": "Tecnisound Car Sound Solutions",
+      "current": "Manutenção",
+      "proposed": "Mecânica",
+      "confidence": 3
+    },
+    {
+      "id": "cfb6960a-ddff-75fb-44ef-adf03c0dd842",
+      "title": "Donadela Store",
+      "current": "Outros",
+      "proposed": "Roupas",
+      "confidence": 4
+    }
+  ]
+}
