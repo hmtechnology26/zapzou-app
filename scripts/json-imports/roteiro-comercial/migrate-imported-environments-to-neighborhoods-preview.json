@@ -1,310 +1,745 @@
 {
-  "mode": "dry-run",
+  "mode": "apply",
   "totalImportedServices": 1149,
-  "processed": 1149,
+  "uniqueImportedEnvironments": 410,
+  "processedEnvironments": 410,
+  "processedServices": 1149,
   "skipped": 0,
-  "createdEnvironments": 14,
+  "errors": 0,
+  "createdEnvironments": 0,
   "sample": [
     {
-      "serviceId": "8e14d433-8b91-89a7-1f1e-ad1991ebf3be",
-      "title": "Surdinas Alvorada",
-      "oldEnvironmentId": "a241a130-f44d-490f-beb5-d9578ae2a75b",
-      "newEnvironmentName": "Formoza - Alvorada",
-      "newEnvironmentSlug": "formoza-alvorada-alvorada-rio-grande-do-sul",
-      "newEnvironmentId": "91b66c4d-a0b1-44c1-8c4c-e56ce0196203",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "9b46f99f-7eaf-1f2e-c700-2ffeff56f0c7",
-      "title": "Infinityfilm's - Película de controle solar - 5% de desconto nas películas para pagamento à vista.",
-      "oldEnvironmentId": "4334dd2b-3771-4566-9cce-9ef068301e1c",
-      "newEnvironmentName": "Fátima - Canoas",
-      "newEnvironmentSlug": "fatima-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "7751a889-8cfc-4a25-832b-ca919b21dc24",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "577ed281-549a-7826-6f28-8ea8e7ab348c",
-      "title": "Compras em 10x sem juros",
-      "oldEnvironmentId": "f8227660-b579-4baa-bada-ea260b160f56",
-      "newEnvironmentName": "Igara - Canoas",
-      "newEnvironmentSlug": "igara-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "19518db1-52a9-4553-9e0f-af544561a07f",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "5a778649-eb68-c2ed-a818-f1a192f33261",
-      "title": "Vet Life Canine 300g por R$ 39,99",
-      "oldEnvironmentId": "681d6245-325f-40b8-93c3-c0996488c912",
-      "newEnvironmentName": "Olaria - Canoas",
-      "newEnvironmentSlug": "olaria-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "2caab6cc-ff13-4a87-afa8-d27ec780c076",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "6f6e0f7f-c449-be83-5351-4aec8bb9f0f5",
-      "title": "1ª Aula Experimental Grátis - Adestramento",
-      "oldEnvironmentId": "0dd07b28-8df8-4006-b601-23a2f33876b6",
-      "newEnvironmentName": "Igara - Canoas",
-      "newEnvironmentSlug": "igara-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "19518db1-52a9-4553-9e0f-af544561a07f",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "7d5c2093-055b-d8f8-7476-a10ed92a155e",
-      "title": "Arte em Joias",
-      "oldEnvironmentId": "d6fc38d7-3719-4df6-b21d-925b94e7ec74",
-      "newEnvironmentName": "Centro - São Leopoldo",
-      "newEnvironmentSlug": "centro-sao-leopoldo-sao-leopoldo-rio-grande-do-sul",
-      "newEnvironmentId": "c415a12a-caa5-4fc2-bbcd-377650802417",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "4a7a7d10-2b0b-e2e0-ec0a-9b8bc86ce0da",
-      "title": "Implantes dentários e tratamentos reabilitadores",
-      "oldEnvironmentId": "e8493bf6-19a4-441c-912a-d57c64121a3b",
+      "serviceId": "1bd43cdd-d2a3-cfab-adb1-6621f358efbb",
+      "title": "Imobiliária RE/MAX LK II",
+      "oldEnvironmentId": "80385588-aee5-454d-8b72-ca91a718b9db",
       "newEnvironmentName": "Centro - Gravataí",
       "newEnvironmentSlug": "centro-gravatai-gravatai-rio-grande-do-sul",
       "newEnvironmentId": "f488dda0-f317-4c57-862c-10d5677e5fd4",
       "environmentCreated": false
     },
     {
-      "serviceId": "4d07e22d-8df1-e97a-6b52-d682381ca07d",
-      "title": "EJA em 6 meses por R$ 1.170,00",
-      "oldEnvironmentId": "ea890d64-775c-46e0-99a4-ab74c73eef41",
-      "newEnvironmentName": "Centro - Sapucaia do Sul",
-      "newEnvironmentSlug": "centro-sapucaia-do-sul-sapucaia-do-sul-rio-grande-do-sul",
-      "newEnvironmentId": "3423a63e-3f96-45cd-8b23-12dfe705b99b",
+      "serviceId": "7fcf5483-d1df-d23f-4f7f-9d33e42089ec",
+      "title": "Luz Hotel Pato Branco",
+      "oldEnvironmentId": "1924a7b5-9d3c-4b45-a411-4c877f4c4c7a",
+      "newEnvironmentName": "Centro - Pato Branco",
+      "newEnvironmentSlug": "centro-pato-branco-pato-branco-parana",
+      "newEnvironmentId": "772f6964-cba4-40f1-9b10-23c806686c24",
       "environmentCreated": false
     },
     {
-      "serviceId": "4b136953-8666-fc26-55f4-9374dbb3a49a",
-      "title": "Ração Famil Premium por R$ 99,00",
-      "oldEnvironmentId": "cec0bc09-7305-43fb-a612-6bd0ed9972d7",
-      "newEnvironmentName": "Pátria Nova - Novo Hamburgo",
-      "newEnvironmentSlug": "patria-nova-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "006e0298-97b1-4c51-bb56-9702f10e904b",
+      "serviceId": "05d72412-29c4-d07b-05dc-60fbb56d548f",
+      "title": "VF Imóveis",
+      "oldEnvironmentId": "262a9897-df65-4ec7-a554-e27fdd2833d8",
+      "newEnvironmentName": "Centro - Lajeado",
+      "newEnvironmentSlug": "centro-lajeado-lajeado-rio-grande-do-sul",
+      "newEnvironmentId": "16d9fdd1-6080-4d3e-a890-f28c68687463",
       "environmentCreated": false
     },
     {
-      "serviceId": "a572c659-8be8-3530-34b8-05e3aef4f43b",
-      "title": "Cantinho da Nilda",
-      "oldEnvironmentId": "c667c2aa-6b65-4992-9a49-2e55b887c28e",
+      "serviceId": "a6ef413b-9151-94d2-523e-f33c945620a3",
+      "title": "Igreja Evangélica Assembleia de Deus de Canudos",
+      "oldEnvironmentId": "5815706c-55f0-4330-93f1-4a81f818da50",
+      "newEnvironmentName": "Hamburgo Velho - Novo Hamburgo",
+      "newEnvironmentSlug": "hamburgo-velho-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
+      "newEnvironmentId": "4c74c8f9-e4f1-4a3b-9108-7921467942af",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "0bcf74c9-fd58-adc1-0dc5-bb643619f1e5",
+      "title": "Casa dos Colchões",
+      "oldEnvironmentId": "062469cc-f2e0-4f7b-92a9-607c7e9cd7aa",
+      "newEnvironmentName": "Canudos - Novo Hamburgo",
+      "newEnvironmentSlug": "canudos-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
+      "newEnvironmentId": "d72e0836-4906-43d0-9fc2-acf370bc8847",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "6714aa29-d7b2-7d1e-14fc-9b927f684a1e",
+      "title": "Happy Clean Lounge + Lavanderia",
+      "oldEnvironmentId": "08f1db93-81fb-48e3-9e23-069bd00dc998",
+      "newEnvironmentName": "Trindade - Florianópolis",
+      "newEnvironmentSlug": "trindade-florianopolis-florianopolis-santa-catarina",
+      "newEnvironmentId": "f9f962a3-2a9a-4d54-8022-e27192601f48",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "a68b7130-657e-72b5-1fd6-64a6a6d8e210",
+      "title": "Lavanderia Lav10",
+      "oldEnvironmentId": "63af7b08-0baf-4ceb-bf4d-497b03cf83ad",
+      "newEnvironmentName": "São Luís - Canoas",
+      "newEnvironmentSlug": "sao-luis-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "52e0bb9d-106c-443c-913a-c6a1987bcf70",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "496c6fb1-c2f4-d611-f3de-e40fafee0d8b",
+      "title": "CEC Vertebral - Fisioterapia, Quiropraxia e Pilates.",
+      "oldEnvironmentId": "63af7b08-0baf-4ceb-bf4d-497b03cf83ad",
+      "newEnvironmentName": "São Luís - Canoas",
+      "newEnvironmentSlug": "sao-luis-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "52e0bb9d-106c-443c-913a-c6a1987bcf70",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "591e2993-6f57-df37-0892-6718c4b70833",
+      "title": "Loja Crescer Esperando Nenê",
+      "oldEnvironmentId": "7d4cfd6e-58de-406d-9005-1789a74ebcac",
+      "newEnvironmentName": "Centro - Montenegro",
+      "newEnvironmentSlug": "centro-montenegro-montenegro-rio-grande-do-sul",
+      "newEnvironmentId": "f5b3ea15-d21f-412c-9fc1-073764d7a049",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "1211e265-2cea-8ffc-c1e1-17afa607ff50",
+      "title": "Confort Colchões",
+      "oldEnvironmentId": "4523c9ea-3c7c-4c30-8596-a96d3590f39f",
+      "newEnvironmentName": "Centro - Parobé",
+      "newEnvironmentSlug": "centro-parobe-parobe-rio-grande-do-sul",
+      "newEnvironmentId": "cd6c095b-7d5b-4f2f-9a36-797e318c353b",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "d3bb1517-95b2-7331-809f-286c7c317c0e",
+      "title": "SERC Chimarrão",
+      "oldEnvironmentId": "f95f94f0-f5d9-48ce-bb62-57212c6a2dd6",
+      "newEnvironmentName": "Sol Nascente - Estância Velha",
+      "newEnvironmentSlug": "sol-nascente-estancia-velha-estancia-velha-rio-grande-do-sul",
+      "newEnvironmentId": "2777f2ad-f6ff-4ec2-9aff-916dbc41e8ec",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "27a9003f-c9ca-7535-ffc7-2457918ba2c1",
+      "title": "HIDROHOUSE",
+      "oldEnvironmentId": "af36b99c-5e4d-43e5-acd7-b2dcc438ef13",
+      "newEnvironmentName": "Rio Branco - Novo Hamburgo",
+      "newEnvironmentSlug": "rio-branco-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
+      "newEnvironmentId": "21c6b89a-31c9-4e1e-8e15-275ed7727970",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "c330a98a-f334-486b-c4a7-6adbf97c6e8f",
+      "title": "Stylus Móveis",
+      "oldEnvironmentId": "af36b99c-5e4d-43e5-acd7-b2dcc438ef13",
+      "newEnvironmentName": "Rio Branco - Novo Hamburgo",
+      "newEnvironmentSlug": "rio-branco-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
+      "newEnvironmentId": "21c6b89a-31c9-4e1e-8e15-275ed7727970",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "c52b6786-f6d6-9dee-f8ba-c5cda7ffbfa9",
+      "title": "Quality Colchões",
+      "oldEnvironmentId": "9f65fb0e-1254-41f1-9513-fe16c4637c1c",
       "newEnvironmentName": "Centro - Araranguá",
       "newEnvironmentSlug": "centro-ararangua-ararangua-santa-catarina",
       "newEnvironmentId": "2d0c408e-cfe6-4d6a-8dc3-138bb9fde6c4",
       "environmentCreated": false
     },
     {
-      "serviceId": "82adc944-137e-83c3-3866-4acbddaf3784",
-      "title": "Espaço Despertar",
-      "oldEnvironmentId": "650ed42b-bcbb-4b85-95fc-e0d5cdb23491",
-      "newEnvironmentName": "Passo dos Ferreiros - Gravataí",
-      "newEnvironmentSlug": "passo-dos-ferreiros-gravatai-gravatai-rio-grande-do-sul",
-      "newEnvironmentId": "419f8490-b971-48ba-94bc-899e5780e307",
+      "serviceId": "4cf4490e-0154-890d-1b98-24a9b05334a4",
+      "title": "Emagrecentro Araranguá",
+      "oldEnvironmentId": "9f65fb0e-1254-41f1-9513-fe16c4637c1c",
+      "newEnvironmentName": "Centro - Araranguá",
+      "newEnvironmentSlug": "centro-ararangua-ararangua-santa-catarina",
+      "newEnvironmentId": "2d0c408e-cfe6-4d6a-8dc3-138bb9fde6c4",
       "environmentCreated": false
     },
     {
-      "serviceId": "60d8491b-a364-f30a-7f2d-f636fda5c330",
-      "title": "Classic Uniformes",
-      "oldEnvironmentId": "1daff241-5cb4-4e07-b7b5-589194d21810",
+      "serviceId": "900a76c1-cc65-b6b6-92de-88f4da3c5e07",
+      "title": "Assembleia de Deus - Araranguá",
+      "oldEnvironmentId": "9f65fb0e-1254-41f1-9513-fe16c4637c1c",
+      "newEnvironmentName": "Centro - Araranguá",
+      "newEnvironmentSlug": "centro-ararangua-ararangua-santa-catarina",
+      "newEnvironmentId": "2d0c408e-cfe6-4d6a-8dc3-138bb9fde6c4",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "02f54f22-a4c8-4eb2-8c87-b24fc8718ca6",
+      "title": "Ortobom Conceito Gramado",
+      "oldEnvironmentId": "621f21fa-1c09-4298-bcb3-27efc9a15712",
+      "newEnvironmentName": "Vila Suica - Gramado",
+      "newEnvironmentSlug": "vila-suica-gramado-gramado-rio-grande-do-sul",
+      "newEnvironmentId": "ced89747-b596-4f1f-9b8d-3657aac34768",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "0a02af37-9cba-d58e-f714-46a65091596f",
+      "title": "Bem Me Quero Móveis e Eletros",
+      "oldEnvironmentId": "0d2ec714-6625-4c39-b46d-cf63d25cf0e0",
+      "newEnvironmentName": "Harmonia - Canoas",
+      "newEnvironmentSlug": "harmonia-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "0d2ec714-6625-4c39-b46d-cf63d25cf0e0",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "5a0a5015-e67c-db2d-53e9-dab3773ca491",
+      "title": "Arte Impressa",
+      "oldEnvironmentId": "0d2ec714-6625-4c39-b46d-cf63d25cf0e0",
+      "newEnvironmentName": "Harmonia - Canoas",
+      "newEnvironmentSlug": "harmonia-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "0d2ec714-6625-4c39-b46d-cf63d25cf0e0",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "be0fc442-400f-658b-d114-262846c299aa",
+      "title": "Concétto - Ambientes exclusivos",
+      "oldEnvironmentId": "0bd99a34-1bd5-4b64-9354-0be7858d8abc",
+      "newEnvironmentName": "Centro - Passo Fundo",
+      "newEnvironmentSlug": "centro-passo-fundo-passo-fundo-rio-grande-do-sul",
+      "newEnvironmentId": "3050ec4f-76bf-4a11-99e0-7d6fc59b8e6e",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "8edc3d7e-4e22-8be3-094e-511c3f82cf53",
+      "title": "Imperial Colchões - Herval",
+      "oldEnvironmentId": "2e2fae51-3eab-441b-8456-316bd7c416f4",
+      "newEnvironmentName": "Igara - Canoas",
+      "newEnvironmentSlug": "igara-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "19518db1-52a9-4553-9e0f-af544561a07f",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "24eaf229-31d1-e586-cf11-a0fea40825f0",
+      "title": "Tatiane Garcia Psicopedagoga e KidCoach",
+      "oldEnvironmentId": "2e2fae51-3eab-441b-8456-316bd7c416f4",
+      "newEnvironmentName": "Igara - Canoas",
+      "newEnvironmentSlug": "igara-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "19518db1-52a9-4553-9e0f-af544561a07f",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "df8afcdb-20a3-15a5-681c-1de3ff1d4b8c",
+      "title": "Clinica Unidas - Odontologia e Psicopedagogia \" Asun Center\"",
+      "oldEnvironmentId": "2e2fae51-3eab-441b-8456-316bd7c416f4",
+      "newEnvironmentName": "Igara - Canoas",
+      "newEnvironmentSlug": "igara-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "19518db1-52a9-4553-9e0f-af544561a07f",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "62f9715a-5cd2-ce89-7620-bf61f420c50b",
+      "title": "Centro Automotivo Maxi Car",
+      "oldEnvironmentId": "2e2fae51-3eab-441b-8456-316bd7c416f4",
+      "newEnvironmentName": "Igara - Canoas",
+      "newEnvironmentSlug": "igara-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "19518db1-52a9-4553-9e0f-af544561a07f",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "b7f48262-6b27-4181-603e-a981bb869a69",
+      "title": "Loja Exclusiva Castor Centro SCS",
+      "oldEnvironmentId": "e04a5b81-2b21-47a8-a59a-9668ae918d3a",
+      "newEnvironmentName": "Centro - Santa Cruz do Sul",
+      "newEnvironmentSlug": "centro-santa-cruz-do-sul-santa-cruz-do-sul-rio-grande-do-sul",
+      "newEnvironmentId": "21077ede-e131-4ed1-98a3-2384b1480006",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "2f1916cf-d535-07f2-1ede-5bd2a6abc51a",
+      "title": "Maria Helena | Móveis e decorações",
+      "oldEnvironmentId": "da5adf65-29f1-401c-b96d-bd4581998f4f",
+      "newEnvironmentName": "Centro - Igrejinha",
+      "newEnvironmentSlug": "centro-igrejinha-igrejinha-rio-grande-do-sul",
+      "newEnvironmentId": "2f585f73-b97b-4fa7-872c-21d63a699f13",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "c3663a20-299d-3565-7638-8938b5873ff8",
+      "title": "Relojoaria Central Quartz",
+      "oldEnvironmentId": "da5adf65-29f1-401c-b96d-bd4581998f4f",
+      "newEnvironmentName": "Centro - Igrejinha",
+      "newEnvironmentSlug": "centro-igrejinha-igrejinha-rio-grande-do-sul",
+      "newEnvironmentId": "2f585f73-b97b-4fa7-872c-21d63a699f13",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "0a592085-fa5b-0a7f-e9d7-688e35d33ee7",
+      "title": "Clínica Hausdent",
+      "oldEnvironmentId": "da5adf65-29f1-401c-b96d-bd4581998f4f",
+      "newEnvironmentName": "Centro - Igrejinha",
+      "newEnvironmentSlug": "centro-igrejinha-igrejinha-rio-grande-do-sul",
+      "newEnvironmentId": "2f585f73-b97b-4fa7-872c-21d63a699f13",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "88798666-e8a9-e5c4-3f59-e4c9f7a38bca",
+      "title": "Decore Móveis Planejados",
+      "oldEnvironmentId": "0e17ee3c-b7cc-448a-b7d5-59233850e1aa",
+      "newEnvironmentName": "Centro - Igrejinha",
+      "newEnvironmentSlug": "centro-igrejinha-igrejinha-rio-grande-do-sul",
+      "newEnvironmentId": "2f585f73-b97b-4fa7-872c-21d63a699f13",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "c3fe7a63-119b-11ab-62b6-ea96d82cc6db",
+      "title": "Central Motos",
+      "oldEnvironmentId": "0e17ee3c-b7cc-448a-b7d5-59233850e1aa",
+      "newEnvironmentName": "Centro - Igrejinha",
+      "newEnvironmentSlug": "centro-igrejinha-igrejinha-rio-grande-do-sul",
+      "newEnvironmentId": "2f585f73-b97b-4fa7-872c-21d63a699f13",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "440d9cba-7edc-8432-aea9-abbfc2e7a8cb",
+      "title": "New Life Moto Sport",
+      "oldEnvironmentId": "7b0347e8-6f1f-47cf-9afc-724965b17678",
+      "newEnvironmentName": "Marechal Rondon - Canoas",
+      "newEnvironmentSlug": "marechal-rondon-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "a093aa56-2dd3-43b5-985d-45e020877c2c",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "67d4d0a1-58a5-2258-f1db-f4a2f9141f71",
+      "title": "Shalom Veículos",
+      "oldEnvironmentId": "7b0347e8-6f1f-47cf-9afc-724965b17678",
+      "newEnvironmentName": "Marechal Rondon - Canoas",
+      "newEnvironmentSlug": "marechal-rondon-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "a093aa56-2dd3-43b5-985d-45e020877c2c",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "605399d7-f310-7c9b-dad5-25b8699a954b",
+      "title": "Agafarma",
+      "oldEnvironmentId": "3cba631e-c5a1-4321-b417-d1b68d56bef8",
+      "newEnvironmentName": "Olímpica - Esteio",
+      "newEnvironmentSlug": "olimpica-esteio-esteio-rio-grande-do-sul",
+      "newEnvironmentId": "792539b6-c34a-44e1-8b18-9023193949a7",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "d74c77e9-5d3e-b136-9956-e02503c2948d",
+      "title": "Vidraçaria & Esquadrias Rebelo",
+      "oldEnvironmentId": "3cba631e-c5a1-4321-b417-d1b68d56bef8",
+      "newEnvironmentName": "Olímpica - Esteio",
+      "newEnvironmentSlug": "olimpica-esteio-esteio-rio-grande-do-sul",
+      "newEnvironmentId": "792539b6-c34a-44e1-8b18-9023193949a7",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "e725dcc7-346d-6ec6-4359-5bca52fd0199",
+      "title": "Auto Center NL",
+      "oldEnvironmentId": "4a11eb11-f191-481e-9bd9-c0efe074c53a",
+      "newEnvironmentName": "Centro - Sapiranga",
+      "newEnvironmentSlug": "centro-sapiranga-sapiranga-rio-grande-do-sul",
+      "newEnvironmentId": "01bc5806-602b-4644-9630-7abb541f0971",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "c0ffac53-7cbd-5602-eb42-cb7eadfcdb18",
+      "title": "Guaíba Jet Motos",
+      "oldEnvironmentId": "a29b08b9-2b31-40be-8e7b-e89a1d89298c",
+      "newEnvironmentName": "Centro - Guaíba",
+      "newEnvironmentSlug": "centro-guaiba-guaiba-rio-grande-do-sul",
+      "newEnvironmentId": "50e29ce7-3dea-4591-bb8e-553400ca1e55",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "d78524b0-22a7-a6e9-b058-605a255e739a",
+      "title": "Lovato Bicicletas",
+      "oldEnvironmentId": "8d41c911-c4b2-4352-8e6a-691fea4accab",
+      "newEnvironmentName": "São Luís - Canoas",
+      "newEnvironmentSlug": "sao-luis-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "52e0bb9d-106c-443c-913a-c6a1987bcf70",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "3ee8ed0c-438e-a8cf-157d-1a4161d351fb",
+      "title": "Ótica Retina",
+      "oldEnvironmentId": "f32e444b-b792-4a35-8257-2752c04c3768",
+      "newEnvironmentName": "Centro - Torres",
+      "newEnvironmentSlug": "centro-torres-torres-rio-grande-do-sul",
+      "newEnvironmentId": "ecd843f6-fb79-4afc-8974-c54c2a2c26d7",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "190eb579-4bcc-a230-ceb2-7336aea62021",
+      "title": "Ver Mais Clínica de Optometria",
+      "oldEnvironmentId": "f32e444b-b792-4a35-8257-2752c04c3768",
+      "newEnvironmentName": "Centro - Torres",
+      "newEnvironmentSlug": "centro-torres-torres-rio-grande-do-sul",
+      "newEnvironmentId": "ecd843f6-fb79-4afc-8974-c54c2a2c26d7",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "2aaa111e-09d6-e2fe-4375-ed0d30b5b594",
+      "title": "Ótica Primus",
+      "oldEnvironmentId": "dc845b36-fe7b-4057-a25d-a96df0490509",
+      "newEnvironmentName": "Centro - Criciúma",
+      "newEnvironmentSlug": "centro-criciuma-criciuma-santa-catarina",
+      "newEnvironmentId": "0ef7157c-b916-4011-918e-be42bdfe6c67",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "756f2789-5f81-a589-734f-6179f2a4d590",
+      "title": "Ótica Visão Sul",
+      "oldEnvironmentId": "39ee50e6-28d3-48dd-9681-689fee8b1cb3",
+      "newEnvironmentName": "Centro Histórico - Porto Alegre",
+      "newEnvironmentSlug": "centro-historico-porto-alegre-porto-alegre-rio-grande-do-sul",
+      "newEnvironmentId": "173a7dd8-30b1-4339-88ac-c60f706e2e5b",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "b2d509ae-4d98-aae3-b86f-092bdf99148a",
+      "title": "Ótica Alleanza",
+      "oldEnvironmentId": "8b6083ba-7a75-40ed-b0b0-ce685c27ca4b",
+      "newEnvironmentName": "Rio Branco - Canoas",
+      "newEnvironmentSlug": "rio-branco-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "b98112b3-21cc-4ca7-9c23-c558e2662734",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "f5167d5b-3135-585e-3ecc-470c5f222740",
+      "title": "Myx Joias",
+      "oldEnvironmentId": "d92c6317-8501-443c-ba85-c96403050b6a",
+      "newEnvironmentName": "Feitoria - São Leopoldo",
+      "newEnvironmentSlug": "feitoria-sao-leopoldo-sao-leopoldo-rio-grande-do-sul",
+      "newEnvironmentId": "e44c57a2-b056-4b3f-9178-de940cb31b0e",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "fe362d6b-ff62-f93a-6148-8cbb96f0330c",
+      "title": "Casa da Solda",
+      "oldEnvironmentId": "1db89f03-d6b2-4712-8ae3-652da7e8ecd4",
+      "newEnvironmentName": "Capela Velha - Araucária",
+      "newEnvironmentSlug": "capela-velha-araucaria-araucaria-parana",
+      "newEnvironmentId": "8e124060-4aec-4379-96b6-2c6fb98dae46",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "8d116eff-5e59-7979-17b6-5c83fc1c224f",
+      "title": "Mix Acessórios e Presentes",
+      "oldEnvironmentId": "3c0d0f0f-b642-4c04-ae3a-27cad62cf9ca",
+      "newEnvironmentName": "Nossa Senhora de Lourdes - Caxias do Sul",
+      "newEnvironmentSlug": "nossa-senhora-de-lourdes-caxias-do-sul-caxias-do-sul-rio-grande-do-sul",
+      "newEnvironmentId": "48213965-60ef-44b0-8546-c693b748a7fa",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "77ed616b-736f-ec7b-01ac-2741f1027180",
+      "title": "Substrato da Pele Tattoo Studio",
+      "oldEnvironmentId": "618bca62-13ee-44b3-887f-eee68fca07b3",
+      "newEnvironmentName": "São José - Sapucaia do Sul",
+      "newEnvironmentSlug": "sao-jose-sapucaia-do-sul-sapucaia-do-sul-rio-grande-do-sul",
+      "newEnvironmentId": "54114cf3-f12b-41a1-8380-fb9d523c8848",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "0fbdbe5b-499c-b971-5c2a-5495cab5cf38",
+      "title": "Exclusive Piscinas",
+      "oldEnvironmentId": "685bb7bc-b969-42b1-8a88-b7f975bd9450",
+      "newEnvironmentName": "Gonçalves - Cachoeira do Sul",
+      "newEnvironmentSlug": "goncalves-cachoeira-do-sul-cachoeira-do-sul-rio-grande-do-sul",
+      "newEnvironmentId": "341e1b4f-3bf2-4f8b-9f77-6f0bc0266274",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "fea3f0b2-b2c6-1dbb-063f-0f70ef647bb5",
+      "title": "Nara Iazul Massoterapeuta",
+      "oldEnvironmentId": "659921a2-9de5-4dfc-a517-8a676a1d81ae",
+      "newEnvironmentName": "Azaléia - Nova Hartz",
+      "newEnvironmentSlug": "azaleia-nova-hartz-nova-hartz-rio-grande-do-sul",
+      "newEnvironmentId": "503c6e44-b320-4750-946a-f1440f25fa84",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "1bc2a133-11ab-9900-942c-73663f5ca10c",
+      "title": "Leães Serralheria",
+      "oldEnvironmentId": "510b6c4d-646e-4e6f-8e2f-aade490ccc0b",
+      "newEnvironmentName": "Centro - Alegrete",
+      "newEnvironmentSlug": "centro-alegrete-alegrete-rio-grande-do-sul",
+      "newEnvironmentId": "2ca4c6cd-0326-434d-bc09-4960f84108a3",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "b61a5d74-0250-425b-7782-31e806ccd609",
+      "title": "Decor Serralheria",
+      "oldEnvironmentId": "083691c4-4e88-4acf-bdb2-843a2296e235",
+      "newEnvironmentName": "Olaria - Canoas",
+      "newEnvironmentSlug": "olaria-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "2caab6cc-ff13-4a87-afa8-d27ec780c076",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "5405455f-871b-7d1c-55cd-2e6d942ecbda",
+      "title": "Marcos Nunes Vidros Temperados",
+      "oldEnvironmentId": "cd688264-99da-437f-83b5-5c98fe017192",
+      "newEnvironmentName": "COHAB - Cachoeirinha",
+      "newEnvironmentSlug": "cohab-cachoeirinha-cachoeirinha-rio-grande-do-sul",
+      "newEnvironmentId": "cd688264-99da-437f-83b5-5c98fe017192",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "4eb0497d-164a-5ab0-e4d4-d1c62c1f251f",
+      "title": "Tio Luci - Games e Informática",
+      "oldEnvironmentId": "b8efc71b-318e-4a90-8268-d3278bd3c71f",
+      "newEnvironmentName": "São Luiz - Sombrio",
+      "newEnvironmentSlug": "sao-luiz-sombrio-sombrio-santa-catarina",
+      "newEnvironmentId": "e3afa0ac-34ba-479c-b0ab-b2cf17709fc4",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "5c69be6e-8181-5bc3-4b77-f707d4509699",
+      "title": "Araufibra Telecom",
+      "oldEnvironmentId": "79be9be4-2063-4ae6-a91d-e63fc0d92b58",
+      "newEnvironmentName": "Capela Velha - Araucária",
+      "newEnvironmentSlug": "capela-velha-araucaria-araucaria-parana",
+      "newEnvironmentId": "8e124060-4aec-4379-96b6-2c6fb98dae46",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "c6d2c152-8e3c-1d2d-aa43-50951e1fb665",
+      "title": "Oficina Informática",
+      "oldEnvironmentId": "3ac0469a-c7d1-42a4-8707-d4a2a056f94f",
+      "newEnvironmentName": "Vargas - Sapucaia do Sul",
+      "newEnvironmentSlug": "vargas-sapucaia-do-sul-sapucaia-do-sul-rio-grande-do-sul",
+      "newEnvironmentId": "18100d36-f52a-4215-a3a4-67078355c987",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "6bbcaa7c-752a-fbed-2f78-e1240578ffff",
+      "title": "Deep Telecom",
+      "oldEnvironmentId": "fafc2b5e-ed6b-4de4-ad1e-e88225e30b2f",
+      "newEnvironmentName": "Vôo Livre - Sapiranga",
+      "newEnvironmentSlug": "voo-livre-sapiranga-sapiranga-rio-grande-do-sul",
+      "newEnvironmentId": "281c534c-0df4-42f9-9005-24b9c150561f",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "ad4cfb34-7e47-1a7e-429a-cd67592d935e",
+      "title": "Ar Celulares",
+      "oldEnvironmentId": "1ade1157-d2a2-4430-b510-ffef64a3a10b",
+      "newEnvironmentName": "Vila Branca - Gravataí",
+      "newEnvironmentSlug": "vila-branca-gravatai-gravatai-rio-grande-do-sul",
+      "newEnvironmentId": "3d75e110-0afa-4909-bbf4-813657895e25",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "0ec16be9-fd7a-dba4-9c82-f77e2fbb6862",
+      "title": "MT Informática",
+      "oldEnvironmentId": "d8b5baea-4968-46f5-b4f3-0e707b4d37f9",
+      "newEnvironmentName": "Cidade Alta - Santo Antônio da Patrulha",
+      "newEnvironmentSlug": "cidade-alta-santo-antonio-da-patrulha-santo-antonio-da-patrulha-rio-grande-do-sul",
+      "newEnvironmentId": "0933060a-e066-4682-8e0b-b0427e92e811",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "9ac820fd-ac80-7e47-2035-ec7b5c5176bd",
+      "title": "Intecel",
+      "oldEnvironmentId": "82afb14a-405a-4f58-88ab-1e5f7f51b265",
+      "newEnvironmentName": "Centro - Canela",
+      "newEnvironmentSlug": "centro-canela-canela-rio-grande-do-sul",
+      "newEnvironmentId": "d37cd2b4-8181-4b28-bc2f-d762e10e5164",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "7093e7da-1121-c755-a850-35587736c10d",
+      "title": "A Cia do Notebook",
+      "oldEnvironmentId": "4c1b3b2c-ff71-440d-870c-f4b51c54aa9e",
+      "newEnvironmentName": "Centro Histórico - Porto Alegre",
+      "newEnvironmentSlug": "centro-historico-porto-alegre-porto-alegre-rio-grande-do-sul",
+      "newEnvironmentId": "173a7dd8-30b1-4339-88ac-c60f706e2e5b",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "dd36cbfe-b1da-f20b-a241-12d38bf9fdf7",
+      "title": "Donna Kiki",
+      "oldEnvironmentId": "bf5345e0-9de1-4015-b729-fb9b0fb89061",
+      "newEnvironmentName": "Morada do Vale II - Gravataí",
+      "newEnvironmentSlug": "morada-do-vale-ii-gravatai-gravatai-rio-grande-do-sul",
+      "newEnvironmentId": "f22724d2-e499-4d2c-afcc-5bb737ada4f5",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "a3667252-3501-27e8-90fd-a7ccd0ced652",
+      "title": "Radiacel Celulares e Informática",
+      "oldEnvironmentId": "b524a792-7863-4f4e-9e23-d21675f2d3a1",
+      "newEnvironmentName": "Centro - São Leopoldo",
+      "newEnvironmentSlug": "centro-sao-leopoldo-sao-leopoldo-rio-grande-do-sul",
+      "newEnvironmentId": "c415a12a-caa5-4fc2-bbcd-377650802417",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "65321f52-7954-077b-cc19-e9e8cb5c801a",
+      "title": "Odonto Excellence",
+      "oldEnvironmentId": "b524a792-7863-4f4e-9e23-d21675f2d3a1",
+      "newEnvironmentName": "Centro - São Leopoldo",
+      "newEnvironmentSlug": "centro-sao-leopoldo-sao-leopoldo-rio-grande-do-sul",
+      "newEnvironmentId": "c415a12a-caa5-4fc2-bbcd-377650802417",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "92769bd9-88f2-0e09-49e9-e15c5cf36330",
+      "title": "RC Games e Cia",
+      "oldEnvironmentId": "250d6d72-c746-4b61-aa59-26c453e3129d",
+      "newEnvironmentName": "Passo das Pedras - Gravataí",
+      "newEnvironmentSlug": "passo-das-pedras-gravatai-gravatai-rio-grande-do-sul",
+      "newEnvironmentId": "8a9167ca-7873-4fbd-b90b-5d21ea3bcebb",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "f89d3a7a-46e1-75f2-9f23-a92c0a39764b",
+      "title": "NH Smart",
+      "oldEnvironmentId": "0c58f526-9fcf-4769-94f5-f52ec0cbac5a",
+      "newEnvironmentName": "Rio Branco - Novo Hamburgo",
+      "newEnvironmentSlug": "rio-branco-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
+      "newEnvironmentId": "21c6b89a-31c9-4e1e-8e15-275ed7727970",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "6e111aab-2201-4d63-ba41-f1af12e11335",
+      "title": "Unicell",
+      "oldEnvironmentId": "1567ca25-cb02-4384-8f8e-e593b0d65bf2",
+      "newEnvironmentName": "Rio Branco - Novo Hamburgo",
+      "newEnvironmentSlug": "rio-branco-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
+      "newEnvironmentId": "21c6b89a-31c9-4e1e-8e15-275ed7727970",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "608470bc-52e0-580e-b65c-d1dbd6ac5345",
+      "title": "Shalom - Atacado e Varejo",
+      "oldEnvironmentId": "1567ca25-cb02-4384-8f8e-e593b0d65bf2",
+      "newEnvironmentName": "Rio Branco - Novo Hamburgo",
+      "newEnvironmentSlug": "rio-branco-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
+      "newEnvironmentId": "21c6b89a-31c9-4e1e-8e15-275ed7727970",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "40c4afc1-75b1-76fb-ce8e-e13d2e393876",
+      "title": "Cata Vento Brechó Infantil",
+      "oldEnvironmentId": "da50ed56-ff1a-410e-a17c-8a11b48e3c2e",
+      "newEnvironmentName": "Próspera - Criciúma",
+      "newEnvironmentSlug": "prospera-criciuma-criciuma-santa-catarina",
+      "newEnvironmentId": "0f4360da-9454-4662-8bdc-48a1b947af86",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "465ddfdb-4c88-f7f7-cd4b-0d909cd2b7c8",
+      "title": "Spaço Baby",
+      "oldEnvironmentId": "73d51e73-eccb-4828-9a20-8fd6239c7b57",
+      "newEnvironmentName": "Centro - Farroupilha",
+      "newEnvironmentSlug": "centro-farroupilha-farroupilha-rio-grande-do-sul",
+      "newEnvironmentId": "07ddc744-6a7b-4511-ae63-d7f406c9f55e",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "aedb04c4-4e78-2f04-3bb2-20a7c3706ac4",
+      "title": "Tock Fatal Atacado",
+      "oldEnvironmentId": "1e926ef9-bf7a-44b2-bcc4-e8494b2774da",
+      "newEnvironmentName": "Mato Grande - Canoas",
+      "newEnvironmentSlug": "mato-grande-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "9f8529c1-95d0-4f77-a3d0-10b8197db758",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "48cd8965-fcf5-adc9-e0b9-4b98b4e8a14b",
+      "title": "AL Moto Parts",
+      "oldEnvironmentId": "5017e8c1-d921-40a4-a2d6-81e9f50ebe1e",
+      "newEnvironmentName": "Dos Imigrantes - Concórdia",
+      "newEnvironmentSlug": "dos-imigrantes-concordia-concordia-santa-catarina",
+      "newEnvironmentId": "33d6e8fd-4805-4253-b49c-9dafcfe4bf5c",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "f9dd450e-5835-b68b-3b9d-e9253260c55d",
+      "title": "Gramayer Imóveis",
+      "oldEnvironmentId": "fb52e5a7-b137-4baa-b163-69ff9a486b69",
+      "newEnvironmentName": "Centro - Arroio do Meio",
+      "newEnvironmentSlug": "centro-arroio-do-meio-arroio-do-meio-rio-grande-do-sul",
+      "newEnvironmentId": "e78e5646-e0c9-4028-8801-e9307f6ba735",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "a068e402-f222-d27b-7eae-6ea99ba2a343",
+      "title": "Blackside Araranguá",
+      "oldEnvironmentId": "57b2d3a6-64a5-4b4c-9173-e6a4b997ed75",
+      "newEnvironmentName": "Centro - Araranguá",
+      "newEnvironmentSlug": "centro-ararangua-ararangua-santa-catarina",
+      "newEnvironmentId": "2d0c408e-cfe6-4d6a-8dc3-138bb9fde6c4",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "db3f7a5f-eeab-ec68-5aef-2caf556e9de4",
+      "title": "Oral Unic Araranguá",
+      "oldEnvironmentId": "57b2d3a6-64a5-4b4c-9173-e6a4b997ed75",
+      "newEnvironmentName": "Centro - Araranguá",
+      "newEnvironmentSlug": "centro-ararangua-ararangua-santa-catarina",
+      "newEnvironmentId": "2d0c408e-cfe6-4d6a-8dc3-138bb9fde6c4",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "bccbdece-6748-ab8b-dbad-04e64fa460d5",
+      "title": "Perfetto Uomo",
+      "oldEnvironmentId": "830dc57b-341e-4f74-a969-3b5b1968e41c",
       "newEnvironmentName": "Centro - Chapecó",
       "newEnvironmentSlug": "centro-chapeco-chapeco-santa-catarina",
       "newEnvironmentId": "a06f3e89-9a18-43c4-a98d-66cc9b20c7db",
       "environmentCreated": false
     },
     {
-      "serviceId": "30daf6fc-f463-92f6-83d0-104fca50ec66",
-      "title": "Cato Cell - 20% OFF em conserto de celulares",
-      "oldEnvironmentId": "47dd271f-9205-44a7-9d82-cdd37e8413ac",
-      "newEnvironmentName": "Centro - Novo Hamburgo",
-      "newEnvironmentSlug": "centro-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "8f645f81-b837-4586-8281-db4ee8ecfad9",
+      "serviceId": "5c95f1c3-7809-7de0-0918-a9612ba235cf",
+      "title": "Las Manas",
+      "oldEnvironmentId": "5f4d3d9b-1ac1-4ae9-ab8a-f57409a86e55",
+      "newEnvironmentName": "Centro - Farroupilha",
+      "newEnvironmentSlug": "centro-farroupilha-farroupilha-rio-grande-do-sul",
+      "newEnvironmentId": "07ddc744-6a7b-4511-ae63-d7f406c9f55e",
       "environmentCreated": false
     },
     {
-      "serviceId": "a484168f-5fb5-1611-97cf-4f622ffed092",
-      "title": "AgroPet Igara - Rações com 10% de desconto nas segundas",
-      "oldEnvironmentId": "99abad7f-5fee-4a3f-bad4-6f61f966b93c",
-      "newEnvironmentName": "Estância Velha - Canoas",
-      "newEnvironmentSlug": "estancia-velha-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "ae7429a3-07b8-42bb-bf75-a1124e6f38df",
+      "serviceId": "49fafbb2-8a7c-4083-9a56-c6e49f295f8e",
+      "title": "Nova Tattoo Studio",
+      "oldEnvironmentId": "5f4d3d9b-1ac1-4ae9-ab8a-f57409a86e55",
+      "newEnvironmentName": "Centro - Farroupilha",
+      "newEnvironmentSlug": "centro-farroupilha-farroupilha-rio-grande-do-sul",
+      "newEnvironmentId": "07ddc744-6a7b-4511-ae63-d7f406c9f55e",
       "environmentCreated": false
     },
     {
-      "serviceId": "07f014b2-9b01-72d3-cba5-84b81424b7f8",
-      "title": "Emagrecentro Gravataí",
-      "oldEnvironmentId": "650ed42b-bcbb-4b85-95fc-e0d5cdb23491",
-      "newEnvironmentName": "Passo dos Ferreiros - Gravataí",
-      "newEnvironmentSlug": "passo-dos-ferreiros-gravatai-gravatai-rio-grande-do-sul",
-      "newEnvironmentId": "419f8490-b971-48ba-94bc-899e5780e307",
+      "serviceId": "4d0c79de-3113-a3db-1a58-da15a0f1782d",
+      "title": "Anjos Tur",
+      "oldEnvironmentId": "6efe2ce4-62ad-475a-9eb0-a0cc70bc9269",
+      "newEnvironmentName": "Centro - Canoas",
+      "newEnvironmentSlug": "centro-canoas-canoas-rio-grande-do-sul",
+      "newEnvironmentId": "6d806bc7-bbb1-4e41-8125-cf4b8c8aed72",
       "environmentCreated": false
     },
     {
-      "serviceId": "1a27ae41-cecb-f14d-8f00-cbcb0150fb39",
-      "title": "Usina de Massas Pocket - Canoas",
-      "oldEnvironmentId": "8b40753e-ef33-4ab0-8faa-48cb551e3720",
-      "newEnvironmentName": "Marechal Rondon - Canoas",
-      "newEnvironmentSlug": "marechal-rondon-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "a093aa56-2dd3-43b5-985d-45e020877c2c",
+      "serviceId": "4c469979-da12-c9f3-c7be-7e35493d8dd9",
+      "title": "Armazém dos Calçados",
+      "oldEnvironmentId": "2d065f8e-1114-424d-9035-333500075a07",
+      "newEnvironmentName": "Centro - Santa Cruz do Sul",
+      "newEnvironmentSlug": "centro-santa-cruz-do-sul-santa-cruz-do-sul-rio-grande-do-sul",
+      "newEnvironmentId": "21077ede-e131-4ed1-98a3-2384b1480006",
       "environmentCreated": false
     },
     {
-      "serviceId": "1cf06fcf-85ec-d6ff-3b26-201592b63026",
-      "title": "Rei dos Cortes",
-      "oldEnvironmentId": "cde3db83-a940-42dc-b3eb-a486e66c26cf",
-      "newEnvironmentName": "Centro - Campo Bom",
-      "newEnvironmentSlug": "centro-campo-bom-campo-bom-rio-grande-do-sul",
-      "newEnvironmentId": "6bcc2687-4ee6-4bb1-ba06-382920e21d8c",
+      "serviceId": "25cbdc2a-01e4-7771-134d-292836805747",
+      "title": "CVC Gravataí",
+      "oldEnvironmentId": "268a267a-4cf8-4cfd-833e-3b3163085917",
+      "newEnvironmentName": "Passo das Pedras - Gravataí",
+      "newEnvironmentSlug": "passo-das-pedras-gravatai-gravatai-rio-grande-do-sul",
+      "newEnvironmentId": "8a9167ca-7873-4fbd-b90b-5d21ea3bcebb",
       "environmentCreated": false
     },
     {
-      "serviceId": "138fb164-ba35-5623-62c7-7d9c99ecfc47",
-      "title": "Alpe's",
-      "oldEnvironmentId": "a0dcfe3e-f93f-4494-b1d2-b45ff170b5f3",
-      "newEnvironmentName": "Centro - Criciúma",
-      "newEnvironmentSlug": "centro-criciuma-criciuma-santa-catarina",
-      "newEnvironmentId": "0ef7157c-b916-4011-918e-be42bdfe6c67",
+      "serviceId": "c7f64427-0966-133a-fd76-8d7c989a6119",
+      "title": "SPerini Viagens e Turismo",
+      "oldEnvironmentId": "09c136f0-7c63-4e18-a693-5efef00d27cd",
+      "newEnvironmentName": "Centro - Santa Maria",
+      "newEnvironmentSlug": "centro-santa-maria-santa-maria-rio-grande-do-sul",
+      "newEnvironmentId": "6fd2f28f-6008-4aaf-bd15-f858ede03088",
       "environmentCreated": false
     },
     {
-      "serviceId": "b8c14ebc-4f4a-8162-da1f-d083abdc0e69",
-      "title": "Restaurante Xororó",
-      "oldEnvironmentId": "f941cd42-96b7-4a38-93cb-c18a4568b400",
-      "newEnvironmentName": "Centro - Criciúma",
-      "newEnvironmentSlug": "centro-criciuma-criciuma-santa-catarina",
-      "newEnvironmentId": "0ef7157c-b916-4011-918e-be42bdfe6c67",
+      "serviceId": "c8edc7ac-35da-57bd-3ad7-4eba628fbbe8",
+      "title": "Clinicale - Clínica Médica",
+      "oldEnvironmentId": "bc431d66-6560-4e52-a308-36ba1268c4f5",
+      "newEnvironmentName": "Centro - Ponta Grossa",
+      "newEnvironmentSlug": "centro-ponta-grossa-ponta-grossa-parana",
+      "newEnvironmentId": "0b1068e1-2c0a-4a8f-8e76-f8000bcacdda",
       "environmentCreated": false
     },
     {
-      "serviceId": "ab00f762-0f60-fd4d-9561-17409f9a3058",
-      "title": "Empréstimo com o aumento do INSS",
-      "oldEnvironmentId": "c9ccccb3-80b3-4112-9a4f-af8610a8e111",
-      "newEnvironmentName": "Centro - Sapucaia do Sul",
-      "newEnvironmentSlug": "centro-sapucaia-do-sul-sapucaia-do-sul-rio-grande-do-sul",
-      "newEnvironmentId": "3423a63e-3f96-45cd-8b23-12dfe705b99b",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "d25d797c-5925-f04d-984e-ba577f66bebb",
-      "title": "Quintas Feiras - Petiscos, Caipirinha(velho barreiro, limão) e Chopp Pilsen livre a noite toda - Por R$ 99,90",
-      "oldEnvironmentId": "830fd181-d18f-4f24-a6bf-04eba27dccd2",
-      "newEnvironmentName": "Igara - Canoas",
-      "newEnvironmentSlug": "igara-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "19518db1-52a9-4553-9e0f-af544561a07f",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "25e681d5-9f50-186c-adb0-a0573e84d347",
-      "title": "ASSISTEK",
-      "oldEnvironmentId": "e7772adb-e0d0-4ae0-a1f9-2d02eecc1d1c",
-      "newEnvironmentName": "Marechal Rondon - Canoas",
-      "newEnvironmentSlug": "marechal-rondon-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "a093aa56-2dd3-43b5-985d-45e020877c2c",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "e01e89e2-46bb-ba91-2220-275fc209fae2",
-      "title": "Vagas de Emprego 50+",
-      "oldEnvironmentId": "730d967c-6505-47ce-8bb9-a73c47b9bff3",
-      "newEnvironmentName": "Das Rosas - Estância Velha",
-      "newEnvironmentSlug": "das-rosas-estancia-velha-estancia-velha-rio-grande-do-sul",
-      "newEnvironmentId": "fb83e1a4-a3b4-4e56-9954-eb9469760781",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "f196a6b9-2d25-e394-ef1f-2f148415efd1",
-      "title": "Laboratório Platta - Toxicológico com desconto de R$ 15,00",
-      "oldEnvironmentId": "f6909a13-e761-4086-b681-68121a20e716",
-      "newEnvironmentName": "Igara - Canoas",
-      "newEnvironmentSlug": "igara-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "19518db1-52a9-4553-9e0f-af544561a07f",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "f7e4bd79-0e3c-90fa-cf80-3b05d0e090ba",
-      "title": "Studio B Barber Club - 50% de desconto para novos clientes.",
-      "oldEnvironmentId": "ce86ca7e-e8a4-4215-abc4-5c11b3af010b",
-      "newEnvironmentName": "O - Campo Bom",
-      "newEnvironmentSlug": "o-campo-bom-campo-bom-rio-grande-do-sul",
-      "newEnvironmentId": "02a705ac-06d9-402a-8416-d4bc518e1b2b",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "2144e01e-01a5-b155-0798-5dfc41eeb0cb",
-      "title": "Leandro Ferreira ( Lê DJ) - Desconto de 40% em Venâncio Aires",
-      "oldEnvironmentId": "a8b221a4-e8d9-4fe8-a976-6c00d495f9be",
-      "newEnvironmentName": "Centro - Venâncio Aires",
-      "newEnvironmentSlug": "centro-venancio-aires-venancio-aires-rio-grande-do-sul",
-      "newEnvironmentId": "bebed9b5-6fff-4490-b811-bc0ea86e01b0",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "63e7c4d3-8ba5-cb97-cf8b-3a4f8778d62b",
-      "title": "Fio Prime | Transplante Capilar - Canoas - 40% de desconto para Usuário do app",
-      "oldEnvironmentId": "851665a3-76b6-4ea3-b178-341c99b868f4",
-      "newEnvironmentName": "Marechal Rondon - Canoas",
-      "newEnvironmentSlug": "marechal-rondon-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "a093aa56-2dd3-43b5-985d-45e020877c2c",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "94823b85-e4ed-c914-0238-532e02a026da",
-      "title": "Equipe Marcelo Santos Academia",
-      "oldEnvironmentId": "8b40753e-ef33-4ab0-8faa-48cb551e3720",
-      "newEnvironmentName": "Marechal Rondon - Canoas",
-      "newEnvironmentSlug": "marechal-rondon-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "a093aa56-2dd3-43b5-985d-45e020877c2c",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "322e261e-242b-b453-2fc9-9ea6f4302c1d",
-      "title": "Instac LED - 10 % de desconto",
-      "oldEnvironmentId": "8d10158d-7805-400c-b838-6540ddad9027",
-      "newEnvironmentName": "São Sebastiao - Esteio",
-      "newEnvironmentSlug": "sao-sebastiao-esteio-esteio-rio-grande-do-sul",
-      "newEnvironmentId": "bb46b0d1-c687-4c67-a703-0b75a5509c35",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "0116f88b-6e6e-887f-3008-17fc9222adff",
-      "title": "Restaurante Pouso Novo - 20% de desconto",
-      "oldEnvironmentId": "5b94a107-3e89-4a45-9f24-20489cd9a2d5",
-      "newEnvironmentName": "15 De Novembro - Igrejinha",
-      "newEnvironmentSlug": "15-de-novembro-igrejinha-igrejinha-rio-grande-do-sul",
-      "newEnvironmentId": "f8e04d97-636a-4fcd-86b2-5943750c288d",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "b56dc0ab-a2f0-8a64-3e2b-44380e1f045d",
-      "title": "Óticas Dallu - Desconto de 40% para profissionais da saúde",
-      "oldEnvironmentId": "e4d2406c-c5a7-4eb3-8ed0-b99454b5bbdf",
-      "newEnvironmentName": "Marques Ribeiro - Cachoeira do Sul",
-      "newEnvironmentSlug": "marques-ribeiro-cachoeira-do-sul-cachoeira-do-sul-rio-grande-do-sul",
-      "newEnvironmentId": "464a4c18-4b8c-41ff-b5b9-031040f0a4ba",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "784d1309-7a10-f3d8-594f-670b4ae81689",
-      "title": "Maurício Bicicletas",
-      "oldEnvironmentId": "78b34e1f-768b-4978-84a0-33de306e18c4",
-      "newEnvironmentName": "São Sebastião do Caí",
-      "newEnvironmentSlug": "sao-sebastiao-do-cai-sao-sebastiao-do-cai-rio-grande-do-sul",
-      "newEnvironmentId": "9675de00-dda5-4ba5-b2e9-aa6d608d1e60",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "124b8b57-e0ff-6554-7c4f-9fc306730f2b",
-      "title": "Barbados Barbearia - Estudantes na Quarta tem 15% de desconto",
-      "oldEnvironmentId": "55496809-204c-4f4a-8684-707fd6ba7825",
-      "newEnvironmentName": "M Ribeiro - Cachoeira do Sul",
-      "newEnvironmentSlug": "m-ribeiro-cachoeira-do-sul-cachoeira-do-sul-rio-grande-do-sul",
-      "newEnvironmentId": "6730246a-562c-4c06-88b6-49ca50332154",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "e8f6cca8-6c82-f2b1-c6c6-11460743370e",
-      "title": "Digital Center Tecnologia - 20% de desconto c/ a película 3d inclusa",
+      "serviceId": "c4b64b8a-b080-0ada-42bb-ace27731123c",
+      "title": "Acertmed Sapucaia - Clinica Medica Popular",
       "oldEnvironmentId": "506aa4a9-cff9-493b-942f-28e5e7d34796",
       "newEnvironmentName": "Centro - Sapucaia do Sul",
       "newEnvironmentSlug": "centro-sapucaia-do-sul-sapucaia-do-sul-rio-grande-do-sul",
@@ -312,777 +747,345 @@
       "environmentCreated": false
     },
     {
-      "serviceId": "f32df96d-e09f-99b3-33a0-324f22ee60a2",
-      "title": "Pneu 265/70 R16 BF Goodrich por R$ 1.755,00",
-      "oldEnvironmentId": "e4d2406c-c5a7-4eb3-8ed0-b99454b5bbdf",
-      "newEnvironmentName": "Marques Ribeiro - Cachoeira do Sul",
-      "newEnvironmentSlug": "marques-ribeiro-cachoeira-do-sul-cachoeira-do-sul-rio-grande-do-sul",
-      "newEnvironmentId": "464a4c18-4b8c-41ff-b5b9-031040f0a4ba",
+      "serviceId": "98428b42-08c6-cb21-eeb8-a6128d6b53c8",
+      "title": "Multisaúde - São Leopoldo",
+      "oldEnvironmentId": "38e5432c-1483-448f-a88c-8c54ab448013",
+      "newEnvironmentName": "Centro - São Leopoldo",
+      "newEnvironmentSlug": "centro-sao-leopoldo-sao-leopoldo-rio-grande-do-sul",
+      "newEnvironmentId": "c415a12a-caa5-4fc2-bbcd-377650802417",
       "environmentCreated": false
     },
     {
-      "serviceId": "2fe10453-07a7-13b3-f16c-462d2fd1a311",
-      "title": "Divina Terra Canoas",
-      "oldEnvironmentId": "4bdcee54-4d28-46bd-b78f-0ea5c79d8c29",
+      "serviceId": "3983c757-3e1a-8c6b-ef42-d78a08f8bde6",
+      "title": "Magrass - Passo Fundo",
+      "oldEnvironmentId": "e1c7a0f3-a138-4c6e-991b-326cc556682d",
+      "newEnvironmentName": "Centro - Passo Fundo",
+      "newEnvironmentSlug": "centro-passo-fundo-passo-fundo-rio-grande-do-sul",
+      "newEnvironmentId": "3050ec4f-76bf-4a11-99e0-7d6fc59b8e6e",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "fae95f86-cc72-722b-399d-2847bb1d5051",
+      "title": "Espaço Integrar - Clínica em Desenvolvimento infantil e na Adolescência | ⭐ Nota 5.0 no Google",
+      "oldEnvironmentId": "156e5e51-67aa-48fe-81e0-38c3b8fbc1fd",
+      "newEnvironmentName": "Menino Jesus - Santa Maria",
+      "newEnvironmentSlug": "menino-jesus-santa-maria-santa-maria-rio-grande-do-sul",
+      "newEnvironmentId": "dd2d7312-551f-4e45-b093-295873d06d7f",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "eda10eff-2c4c-3f35-9468-7a8daecb0e57",
+      "title": "Osteocore - Ortopedia e Traumatologia",
+      "oldEnvironmentId": "297baa15-e17d-42e3-8ebf-fd76618a0b16",
       "newEnvironmentName": "Centro - Canoas",
       "newEnvironmentSlug": "centro-canoas-canoas-rio-grande-do-sul",
       "newEnvironmentId": "6d806bc7-bbb1-4e41-8125-cf4b8c8aed72",
       "environmentCreated": false
     },
     {
-      "serviceId": "7949324d-5b90-50a1-84d4-97df80c34bd6",
-      "title": "Marmitas Sabor Saudável",
-      "oldEnvironmentId": "cec0bc09-7305-43fb-a612-6bd0ed9972d7",
-      "newEnvironmentName": "Pátria Nova - Novo Hamburgo",
-      "newEnvironmentSlug": "patria-nova-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "006e0298-97b1-4c51-bb56-9702f10e904b",
+      "serviceId": "71459070-274f-bc62-a0cb-96e73ff64152",
+      "title": "Odonto Excellence - Santa Maria",
+      "oldEnvironmentId": "ebaef89c-e24f-49dc-9f5a-16de3e25da28",
+      "newEnvironmentName": "Nossa Senhora Medianeira - Santa Maria",
+      "newEnvironmentSlug": "nossa-senhora-medianeira-santa-maria-santa-maria-rio-grande-do-sul",
+      "newEnvironmentId": "53d496a4-6c36-4729-88cb-690d84b181fa",
       "environmentCreated": false
     },
     {
-      "serviceId": "f8d19080-5487-2152-e776-5f5ef3cbfc64",
-      "title": "Fit Fish Bar e Restaurante",
-      "oldEnvironmentId": "fd1cd938-efa2-4e44-8e3d-c3a13b93df7c",
-      "newEnvironmentName": "Hamburgo Velho - Novo Hamburgo",
-      "newEnvironmentSlug": "hamburgo-velho-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "4c74c8f9-e4f1-4a3b-9108-7921467942af",
+      "serviceId": "89883d00-7979-2651-8eb6-e044a6b10c14",
+      "title": "Nelci Werle - Novo Rumo Corretora",
+      "oldEnvironmentId": "9949c4b5-2528-42e5-aa5e-40a3f5f71838",
+      "newEnvironmentName": "Centro Histórico - Porto Alegre",
+      "newEnvironmentSlug": "centro-historico-porto-alegre-porto-alegre-rio-grande-do-sul",
+      "newEnvironmentId": "173a7dd8-30b1-4339-88ac-c60f706e2e5b",
       "environmentCreated": false
     },
     {
-      "serviceId": "fd35227f-5f2b-6ba4-a47a-cfebc1f5b2d6",
-      "title": "Pizza Prime - Novo Hamburgo",
-      "oldEnvironmentId": "fd1cd938-efa2-4e44-8e3d-c3a13b93df7c",
-      "newEnvironmentName": "Hamburgo Velho - Novo Hamburgo",
-      "newEnvironmentSlug": "hamburgo-velho-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "4c74c8f9-e4f1-4a3b-9108-7921467942af",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "5ac5eef5-2b40-bc16-bf08-473f9db80cb5",
-      "title": "Tudo em Grãos - Novo Hamburgo",
-      "oldEnvironmentId": "aea11e77-12e5-4689-ac27-ebe2f1060e38",
+      "serviceId": "3fc4f819-5ecc-41d8-a6dc-b5cbe8c75600",
+      "title": "Proderma - Farmácia Manipulação e Medicamentos",
+      "oldEnvironmentId": "9db1d743-ed0e-4e0e-bcb5-d44c9cb4bf04",
       "newEnvironmentName": "Centro - Novo Hamburgo",
       "newEnvironmentSlug": "centro-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
       "newEnvironmentId": "8f645f81-b837-4586-8281-db4ee8ecfad9",
       "environmentCreated": false
     },
     {
-      "serviceId": "58515725-3f67-807b-5fea-1a4f049706a6",
-      "title": "Óptica Polippo",
-      "oldEnvironmentId": "58f66f88-1bae-4eeb-bb70-bec13df6142e",
-      "newEnvironmentName": "Boqueirão - Passo Fundo",
-      "newEnvironmentSlug": "boqueirao-passo-fundo-passo-fundo-rio-grande-do-sul",
-      "newEnvironmentId": "959043db-5f64-4ec0-957c-f494d29bfbf4",
+      "serviceId": "e4fb3f63-d2c1-7b72-d9ee-34528766332a",
+      "title": "Farmácia Medicali",
+      "oldEnvironmentId": "940fb1c0-b68c-4515-95ec-3f89e2f42813",
+      "newEnvironmentName": "Centro - Farroupilha",
+      "newEnvironmentSlug": "centro-farroupilha-farroupilha-rio-grande-do-sul",
+      "newEnvironmentId": "07ddc744-6a7b-4511-ae63-d7f406c9f55e",
       "environmentCreated": false
     },
     {
-      "serviceId": "e51b27d0-77b9-86f1-1b5e-fff11bc492ad",
-      "title": "Sparta Suplementos",
-      "oldEnvironmentId": "a08302a3-05e8-41b6-91d2-d5bdd718b7d4",
-      "newEnvironmentName": "Centro - Novo Hamburgo",
-      "newEnvironmentSlug": "centro-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "8f645f81-b837-4586-8281-db4ee8ecfad9",
+      "serviceId": "c1b36caf-ffe0-6c55-9b1e-157c9a953d5c",
+      "title": "Dra. Neusa Fagundes | ⭐ Nota 5.0 no Google",
+      "oldEnvironmentId": "87d42d00-5dd9-4af3-ab98-410d12720e71",
+      "newEnvironmentName": "Centro - Canela",
+      "newEnvironmentSlug": "centro-canela-canela-rio-grande-do-sul",
+      "newEnvironmentId": "d37cd2b4-8181-4b28-bc2f-d762e10e5164",
       "environmentCreated": false
     },
     {
-      "serviceId": "1d7841ef-07e1-72e1-15c8-4514d6108828",
-      "title": "Bolaria Das Gurias",
-      "oldEnvironmentId": "c5cd6e97-3ab4-4e0e-b2e3-75310fd99f6c",
-      "newEnvironmentName": "Centro - Canoas",
-      "newEnvironmentSlug": "centro-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6d806bc7-bbb1-4e41-8125-cf4b8c8aed72",
+      "serviceId": "f3fd281b-ef57-04c6-b517-bd7fb35ac8bd",
+      "title": "Updente Odontologia Digital | ⭐ Nota 5.0 no Google",
+      "oldEnvironmentId": "3c1856f2-9de6-4c8f-8d78-c3aa9f92b1f3",
+      "newEnvironmentName": "Centro - Capão da Canoa",
+      "newEnvironmentSlug": "centro-capao-da-canoa-capao-da-canoa-rio-grande-do-sul",
+      "newEnvironmentId": "bfc26906-0551-4699-bf23-166a6b8a14aa",
       "environmentCreated": false
     },
     {
-      "serviceId": "b903e821-713b-289a-1433-b1288d65a26c",
-      "title": "Don Carlone Pizzaria",
-      "oldEnvironmentId": "28d572c7-63bf-442a-86ea-f29470055787",
-      "newEnvironmentName": "Marechal Rondon - Canoas",
-      "newEnvironmentSlug": "marechal-rondon-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "a093aa56-2dd3-43b5-985d-45e020877c2c",
+      "serviceId": "1767b7df-a613-d882-cb64-3f65754eaa57",
+      "title": "Cia do Sorriso - Ponta Grossa",
+      "oldEnvironmentId": "013ba918-8d8d-45f5-8b8c-b0e652ac4fec",
+      "newEnvironmentName": "Centro - Ponta Grossa",
+      "newEnvironmentSlug": "centro-ponta-grossa-ponta-grossa-parana",
+      "newEnvironmentId": "0b1068e1-2c0a-4a8f-8e76-f8000bcacdda",
       "environmentCreated": false
     },
     {
-      "serviceId": "9ea631a8-5c57-e7ab-14cf-bf6138f558e5",
-      "title": "Sushi Arte",
-      "oldEnvironmentId": "ec48a827-9740-4076-afbe-8a925b132f01",
-      "newEnvironmentName": "Centro - Canoas",
-      "newEnvironmentSlug": "centro-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6d806bc7-bbb1-4e41-8125-cf4b8c8aed72",
+      "serviceId": "6e958944-1e90-da08-2657-90fe20d478db",
+      "title": "Sorrifácil - Bento Gonçalves",
+      "oldEnvironmentId": "9cfa7654-d459-468c-9cd3-8ce3299355e6",
+      "newEnvironmentName": "Centro - Bento Gonçalves",
+      "newEnvironmentSlug": "centro-bento-goncalves-bento-goncalves-rio-grande-do-sul",
+      "newEnvironmentId": "1c3aa5d9-dcc6-4589-ac25-f38d0cef3d52",
       "environmentCreated": false
     },
     {
-      "serviceId": "002f5923-f4f3-98f0-f4a4-cf72457f8280",
-      "title": "Paladar Lanches",
-      "oldEnvironmentId": "4bdcee54-4d28-46bd-b78f-0ea5c79d8c29",
-      "newEnvironmentName": "Centro - Canoas",
-      "newEnvironmentSlug": "centro-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6d806bc7-bbb1-4e41-8125-cf4b8c8aed72",
+      "serviceId": "7fe24a2f-9256-2437-3131-b7175f489c23",
+      "title": "Debastiani & Nunes Odontologia",
+      "oldEnvironmentId": "f7850904-a4e3-4146-981a-01884ef66f5d",
+      "newEnvironmentName": "Capão da Canoa",
+      "newEnvironmentSlug": "capao-da-canoa-capao-da-canoa-rio-grande-do-sul",
+      "newEnvironmentId": "408505be-cf6a-4c89-be17-9179c762bb52",
       "environmentCreated": false
     },
     {
-      "serviceId": "07ff30eb-9480-b633-d04b-8601f81f5c11",
-      "title": "Cacau Show",
-      "oldEnvironmentId": "6ca699aa-2e82-47a6-b2a2-c180ce880ff6",
-      "newEnvironmentName": "Centro - Canoas",
-      "newEnvironmentSlug": "centro-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6d806bc7-bbb1-4e41-8125-cf4b8c8aed72",
+      "serviceId": "92391fa4-d88e-cebc-623f-480ecd58b569",
+      "title": "Dra. Nicole Freitas - Harmonização Facial",
+      "oldEnvironmentId": "ec05421b-7f62-40d4-ab11-924e26f89f4f",
+      "newEnvironmentName": "Cristo Rei - São Leopoldo",
+      "newEnvironmentSlug": "cristo-rei-sao-leopoldo-sao-leopoldo-rio-grande-do-sul",
+      "newEnvironmentId": "811b449e-6fe7-4ca0-a0c5-706195c23ec3",
       "environmentCreated": false
     },
     {
-      "serviceId": "9120a9c0-df3f-9455-fc87-ae1df146abd5",
-      "title": "S & A Produtos Naturais",
-      "oldEnvironmentId": "34b9d058-5116-432a-8b22-8ae379e4c128",
-      "newEnvironmentName": "Estância Velha - Canoas",
-      "newEnvironmentSlug": "estancia-velha-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "ae7429a3-07b8-42bb-bf75-a1124e6f38df",
+      "serviceId": "e76f89e8-a395-951d-8cfd-8ec020f4877e",
+      "title": "Centro Odontológico Cachoeirinha",
+      "oldEnvironmentId": "2f237b12-9f27-40dd-b1f7-e73d3af065dc",
+      "newEnvironmentName": "Vila Imbuhy - Cachoeirinha",
+      "newEnvironmentSlug": "vila-imbuhy-cachoeirinha-cachoeirinha-rio-grande-do-sul",
+      "newEnvironmentId": "80a9cff0-d512-4686-9ba6-7b8f4500c86a",
       "environmentCreated": false
     },
     {
-      "serviceId": "68467fb2-f05f-f24d-4e49-00d4cc3c539f",
-      "title": "EVS Bela Vista - Herbalife",
-      "oldEnvironmentId": "65d3c8b0-dade-4098-abc5-9289b5f8fdc2",
-      "newEnvironmentName": "Estância Velha - Canoas",
-      "newEnvironmentSlug": "estancia-velha-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "ae7429a3-07b8-42bb-bf75-a1124e6f38df",
+      "serviceId": "37e740ae-01ce-1221-43c0-1a0c20a28c6b",
+      "title": "Odontoclinica Farroupilha",
+      "oldEnvironmentId": "d05258db-dea2-401f-aa9f-f040365d390c",
+      "newEnvironmentName": "Centro - Farroupilha",
+      "newEnvironmentSlug": "centro-farroupilha-farroupilha-rio-grande-do-sul",
+      "newEnvironmentId": "07ddc744-6a7b-4511-ae63-d7f406c9f55e",
       "environmentCreated": false
     },
     {
-      "serviceId": "87edac99-b3c2-e2db-bcd1-dab0ee2b1d97",
-      "title": "Tradição Colonial",
-      "oldEnvironmentId": "2be5f3f2-c7dd-4601-8be7-24130c9a3a4e",
-      "newEnvironmentName": "Niterói - Canoas",
-      "newEnvironmentSlug": "niteroi-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6905fe50-41bc-411a-9d72-72a7df3bc47f",
+      "serviceId": "36bfa7af-56b4-2aa7-789b-af569bf74ed9",
+      "title": "Up Dente Clínica Dentária",
+      "oldEnvironmentId": "b3634570-6fce-4bf9-8fc1-f518a44758c8",
+      "newEnvironmentName": "XANGRI-LÁ",
+      "newEnvironmentSlug": "xangri-la-xangri-la-rio-grande-do-sul",
+      "newEnvironmentId": "820741d2-69bf-4c3e-92b6-da24b88ac50f",
       "environmentCreated": false
     },
     {
-      "serviceId": "40263d74-c2c2-b0ad-7d01-52298695f7b7",
-      "title": "MundoBemOrgânico",
-      "oldEnvironmentId": "e3001903-60fe-4969-8638-cfa515b5df34",
-      "newEnvironmentName": "Centro - Canoas",
-      "newEnvironmentSlug": "centro-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6d806bc7-bbb1-4e41-8125-cf4b8c8aed72",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "edf47903-7c5f-5528-cb4c-8d7c7f2613f4",
-      "title": "Armazém da Erva-Mate",
-      "oldEnvironmentId": "8d10158d-7805-400c-b838-6540ddad9027",
-      "newEnvironmentName": "São Sebastiao - Esteio",
-      "newEnvironmentSlug": "sao-sebastiao-esteio-esteio-rio-grande-do-sul",
-      "newEnvironmentId": "bb46b0d1-c687-4c67-a703-0b75a5509c35",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "190f9fe4-28d5-c3cd-5872-17bccbad81ad",
-      "title": "Divina Terra - São Leopoldo",
-      "oldEnvironmentId": "6cd1d4b6-5a28-482d-b3cc-3fd00923b8c3",
-      "newEnvironmentName": "Centro - São Leopoldo",
-      "newEnvironmentSlug": "centro-sao-leopoldo-sao-leopoldo-rio-grande-do-sul",
-      "newEnvironmentId": "c415a12a-caa5-4fc2-bbcd-377650802417",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "533932ba-ee49-5361-ae5e-d50d87d99db7",
-      "title": "Óticas Pisquey",
-      "oldEnvironmentId": "ecd4c54a-e6e7-42d0-bf5b-8fe5f15d9135",
-      "newEnvironmentName": "Centro - Novo Hamburgo",
-      "newEnvironmentSlug": "centro-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "8f645f81-b837-4586-8281-db4ee8ecfad9",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "f017b994-426e-021b-dd47-b12c42f03bf5",
-      "title": "Mestre do Frango Canoas",
-      "oldEnvironmentId": "9feada28-8842-48cc-a4f8-8a02f8fb7ff6",
-      "newEnvironmentName": "Mathias Velho - Canoas",
-      "newEnvironmentSlug": "mathias-velho-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "c9f37d61-c9fb-49ad-b58b-d6b95401fdb4",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "5c88236d-eef0-2090-44e2-917bcbf74f67",
-      "title": "Daniisushi",
-      "oldEnvironmentId": "a2c09e3a-f3b6-4dc9-9247-37ab8d8a1c12",
-      "newEnvironmentName": "Mato Grande - Canoas",
-      "newEnvironmentSlug": "mato-grande-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "9f8529c1-95d0-4f77-a3d0-10b8197db758",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "db4b3efd-f716-fac4-a6f7-1d8f8ad80697",
-      "title": "Cia do Sushi Gravataí",
-      "oldEnvironmentId": "650ed42b-bcbb-4b85-95fc-e0d5cdb23491",
-      "newEnvironmentName": "Passo dos Ferreiros - Gravataí",
-      "newEnvironmentSlug": "passo-dos-ferreiros-gravatai-gravatai-rio-grande-do-sul",
-      "newEnvironmentId": "419f8490-b971-48ba-94bc-899e5780e307",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "e23cd881-cc7a-4721-52b3-1d76839465a9",
-      "title": "Casa do Escondidinho Bistrô",
-      "oldEnvironmentId": "650ed42b-bcbb-4b85-95fc-e0d5cdb23491",
-      "newEnvironmentName": "Passo dos Ferreiros - Gravataí",
-      "newEnvironmentSlug": "passo-dos-ferreiros-gravatai-gravatai-rio-grande-do-sul",
-      "newEnvironmentId": "419f8490-b971-48ba-94bc-899e5780e307",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "9271330d-f4ca-b2a4-95e4-f1501decb07b",
-      "title": "Cia do Sushi | Delivery",
-      "oldEnvironmentId": "e3001903-60fe-4969-8638-cfa515b5df34",
-      "newEnvironmentName": "Centro - Canoas",
-      "newEnvironmentSlug": "centro-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6d806bc7-bbb1-4e41-8125-cf4b8c8aed72",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "0de21334-659d-ec4c-9700-384bbed1e469",
-      "title": "Ah Café",
-      "oldEnvironmentId": "aea11e77-12e5-4689-ac27-ebe2f1060e38",
-      "newEnvironmentName": "Centro - Novo Hamburgo",
-      "newEnvironmentSlug": "centro-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "8f645f81-b837-4586-8281-db4ee8ecfad9",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "72161820-4469-f4ea-7a39-ad6ffd5c8a55",
-      "title": "Vida Natural",
-      "oldEnvironmentId": "c0963f49-540a-46dc-bc56-6adde6a3cb8d",
-      "newEnvironmentName": "Centro - Gravataí",
-      "newEnvironmentSlug": "centro-gravatai-gravatai-rio-grande-do-sul",
-      "newEnvironmentId": "f488dda0-f317-4c57-862c-10d5677e5fd4",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "b622e8a3-3acc-cd24-c8a0-9ba00ea89de1",
-      "title": "Pizzas Mega Delivery - Canoas",
-      "oldEnvironmentId": "ce3100c2-dfc6-45bf-b6e1-7a4e381aea7a",
-      "newEnvironmentName": "Igara - Canoas",
-      "newEnvironmentSlug": "igara-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "19518db1-52a9-4553-9e0f-af544561a07f",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "13d15176-850f-8256-5439-5356e5edddeb",
-      "title": "Terraqui Orgânicos e Naturais | ⭐ Nota 5.0 no Google",
-      "oldEnvironmentId": "28d572c7-63bf-442a-86ea-f29470055787",
-      "newEnvironmentName": "Marechal Rondon - Canoas",
-      "newEnvironmentSlug": "marechal-rondon-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "a093aa56-2dd3-43b5-985d-45e020877c2c",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "3ee83943-2905-9ddb-1d1c-597846b1a42d",
-      "title": "Faculdade da Bebida",
-      "oldEnvironmentId": "1aa31665-3ae4-4b83-8377-60457b23931b",
-      "newEnvironmentName": "Centro - São Leopoldo",
-      "newEnvironmentSlug": "centro-sao-leopoldo-sao-leopoldo-rio-grande-do-sul",
-      "newEnvironmentId": "c415a12a-caa5-4fc2-bbcd-377650802417",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "f0074228-3852-2b85-0fd0-9dfc9dc3438b",
-      "title": "Outlet das Óticas",
-      "oldEnvironmentId": "e39a5938-6a1a-4792-b476-817f54247d28",
-      "newEnvironmentName": "Centro - Esteio",
-      "newEnvironmentSlug": "centro-esteio-esteio-rio-grande-do-sul",
-      "newEnvironmentId": "2b11e096-337e-432d-acee-236a21e67a03",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "c42ae989-8389-f6ae-e226-305b3ee750ab",
-      "title": "Dona Rose",
-      "oldEnvironmentId": "e1f33d72-173b-4f4f-8877-52336554a572",
-      "newEnvironmentName": "Pátria Nova - Novo Hamburgo",
-      "newEnvironmentSlug": "patria-nova-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "006e0298-97b1-4c51-bb56-9702f10e904b",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "49421bee-77a6-ad1d-9ae7-73fd535f926e",
-      "title": "Florybal Campo Bom",
-      "oldEnvironmentId": "72fa50cd-d4b5-40e2-8dd9-d96507fd9fa6",
-      "newEnvironmentName": "A - Campo Bom",
-      "newEnvironmentSlug": "a-campo-bom-campo-bom-rio-grande-do-sul",
-      "newEnvironmentId": "27b37175-e09e-45f2-91ab-746f63d91f4d",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "51f794f3-b230-b70c-d81c-7f2a7275ad4e",
-      "title": "D'Gusta Lanches",
-      "oldEnvironmentId": "726bb78a-2c60-4bfa-9007-c45ccd96fbb5",
-      "newEnvironmentName": "Boqueirão - Passo Fundo",
-      "newEnvironmentSlug": "boqueirao-passo-fundo-passo-fundo-rio-grande-do-sul",
-      "newEnvironmentId": "959043db-5f64-4ec0-957c-f494d29bfbf4",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "a5c4a3ca-45b9-09dd-f502-b8bf77531b9a",
-      "title": "Casa Cervo",
-      "oldEnvironmentId": "003a6d3a-ad67-4586-917a-23734c3251c3",
-      "newEnvironmentName": "São José - Santa Maria",
-      "newEnvironmentSlug": "sao-jose-santa-maria-santa-maria-rio-grande-do-sul",
-      "newEnvironmentId": "260f5780-6d9b-434a-b2b7-f332ff15ada6",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "90948277-4027-223a-b254-bbb8cb62a38c",
-      "title": "Show Doce´s",
-      "oldEnvironmentId": "6cafe911-4d16-4073-9aee-f526dea8bc37",
-      "newEnvironmentName": "Centro - Canoas",
-      "newEnvironmentSlug": "centro-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6d806bc7-bbb1-4e41-8125-cf4b8c8aed72",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "e303ae0b-f410-7dd2-ed3a-7b24cd581e9b",
-      "title": "Armazém dos Sabores",
-      "oldEnvironmentId": "34b9d058-5116-432a-8b22-8ae379e4c128",
-      "newEnvironmentName": "Estância Velha - Canoas",
-      "newEnvironmentSlug": "estancia-velha-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "ae7429a3-07b8-42bb-bf75-a1124e6f38df",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "50ee4e74-860e-9151-81e6-f7d9fb0b792d",
-      "title": "Mask Sushi | ⭐ Nota 5.0 no Google",
-      "oldEnvironmentId": "cd601ba4-25ce-446e-9f1e-38f8656604a9",
-      "newEnvironmentName": "Centro - São Leopoldo",
-      "newEnvironmentSlug": "centro-sao-leopoldo-sao-leopoldo-rio-grande-do-sul",
-      "newEnvironmentId": "c415a12a-caa5-4fc2-bbcd-377650802417",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "b3aedce0-3de8-c5d3-7481-42037b19d459",
-      "title": "Black White Pub Bar",
-      "oldEnvironmentId": "54d41fd8-3885-4362-987c-1dd9df0e50bc",
-      "newEnvironmentName": "Torres",
-      "newEnvironmentSlug": "torres-torres-rio-grande-do-sul",
-      "newEnvironmentId": "41c3150b-cd08-4573-8b77-39cc0e8dc440",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "7f89ee9a-b224-352f-56c0-3da44f1a7b59",
-      "title": "La Bella Donna Pizzeria",
-      "oldEnvironmentId": "7a804fc1-7b11-4406-8aad-e9c121cd9d5b",
-      "newEnvironmentName": "Vera Cruz - Gravataí",
-      "newEnvironmentSlug": "vera-cruz-gravatai-gravatai-rio-grande-do-sul",
-      "newEnvironmentId": "fce2db68-ab74-46cd-bd5b-8474df659da8",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "1dc9818f-1eae-d933-165d-7e14f4dfd697",
-      "title": "Sul Flora - Produtos Naturais",
-      "oldEnvironmentId": "e573f486-63ea-4cb0-95e1-066bc7e225ae",
-      "newEnvironmentName": "Centro - Concórdia",
-      "newEnvironmentSlug": "centro-concordia-concordia-santa-catarina",
-      "newEnvironmentId": "401da28f-ce6a-4f0e-bc44-6208692bed9d",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "67a6d716-0b00-7953-3519-17132be2e94d",
-      "title": "Sinos Motos",
-      "oldEnvironmentId": "269da2a0-e756-4e5f-9489-cf29a2fb8d87",
-      "newEnvironmentName": "Fião - São Leopoldo",
-      "newEnvironmentSlug": "fiao-sao-leopoldo-sao-leopoldo-rio-grande-do-sul",
-      "newEnvironmentId": "cf7753e0-a994-4018-8eb7-aa67b19f5c5e",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "7add327c-7f64-d64b-d0c4-0251ffc48186",
-      "title": "Sabor e Performance - Mercado Fitness | ⭐ Nota 4.9 no Google",
-      "oldEnvironmentId": "0b6fb5bf-ca10-4e15-9e7f-1c7c375ed681",
-      "newEnvironmentName": "Marechal Rondon - Canoas",
-      "newEnvironmentSlug": "marechal-rondon-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "a093aa56-2dd3-43b5-985d-45e020877c2c",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "cbd7913a-dc6f-8104-eb88-35adbffff4c3",
-      "title": "Dom Raphaelli",
-      "oldEnvironmentId": "4f929a38-45ea-4d02-bb01-c00d35f4c0d3",
-      "newEnvironmentName": "Vila Veranopolis - Cachoeirinha",
-      "newEnvironmentSlug": "vila-veranopolis-cachoeirinha-cachoeirinha-rio-grande-do-sul",
-      "newEnvironmentId": "5014739f-05ac-406b-9161-1915a5092ab7",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "a68be409-9546-2294-6e39-46a4ec6b2801",
-      "title": "Sabor da Vida - Marmitas e Alaminutas",
-      "oldEnvironmentId": "d6fc38d7-3719-4df6-b21d-925b94e7ec74",
-      "newEnvironmentName": "Centro - São Leopoldo",
-      "newEnvironmentSlug": "centro-sao-leopoldo-sao-leopoldo-rio-grande-do-sul",
-      "newEnvironmentId": "c415a12a-caa5-4fc2-bbcd-377650802417",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "ed6c2dcb-64ce-f1b4-e47d-55d9bdea37c8",
-      "title": "Gigantes da Areia",
-      "oldEnvironmentId": "c9d4e562-eb74-408e-ad2c-82fd0b0399b3",
-      "newEnvironmentName": "Fátima - Canoas",
-      "newEnvironmentSlug": "fatima-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "7751a889-8cfc-4a25-832b-ca919b21dc24",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "24db002b-c87f-a875-9d22-ef55042e74d2",
-      "title": "O CSSGAPA",
-      "oldEnvironmentId": "b97f623f-126b-4a69-a035-d25cc173139f",
-      "newEnvironmentName": "Niterói - Canoas",
-      "newEnvironmentSlug": "niteroi-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6905fe50-41bc-411a-9d72-72a7df3bc47f",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "b018172a-5fb6-f8ba-3e38-6f360b9b20c3",
-      "title": "Restaurante Pouso Novo",
-      "oldEnvironmentId": "e5dd0acf-3c34-4c62-ac53-085cb694e596",
-      "newEnvironmentName": "Vila Suica - Gramado",
-      "newEnvironmentSlug": "vila-suica-gramado-gramado-rio-grande-do-sul",
-      "newEnvironmentId": "ced89747-b596-4f1f-9b8d-3657aac34768",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "58bb1def-00e1-eb56-b6fb-f2c88f3906bc",
-      "title": "Rei das Alaminutas Delivery",
-      "oldEnvironmentId": "cde3db83-a940-42dc-b3eb-a486e66c26cf",
-      "newEnvironmentName": "Centro - Campo Bom",
-      "newEnvironmentSlug": "centro-campo-bom-campo-bom-rio-grande-do-sul",
-      "newEnvironmentId": "6bcc2687-4ee6-4bb1-ba06-382920e21d8c",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "e209baf1-0c80-7077-0838-28a92cc336d1",
-      "title": "Cia do Lanche",
-      "oldEnvironmentId": "ae3161e9-d732-4724-b7d7-68e1809bdf80",
-      "newEnvironmentName": "Centro - São Leopoldo",
-      "newEnvironmentSlug": "centro-sao-leopoldo-sao-leopoldo-rio-grande-do-sul",
-      "newEnvironmentId": "c415a12a-caa5-4fc2-bbcd-377650802417",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "019d567c-e36b-0b2f-bcaf-937a3ba62a46",
-      "title": "Na Brasa Hamburgueria - Canoas",
-      "oldEnvironmentId": "851665a3-76b6-4ea3-b178-341c99b868f4",
-      "newEnvironmentName": "Marechal Rondon - Canoas",
-      "newEnvironmentSlug": "marechal-rondon-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "a093aa56-2dd3-43b5-985d-45e020877c2c",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "301c9e0e-7f84-a037-d56c-2804f01d1f97",
-      "title": "Rafitec",
-      "oldEnvironmentId": "829bce1d-9cc6-4db6-a55f-db5da6bcffd3",
-      "newEnvironmentName": "Centro - Canoas",
-      "newEnvironmentSlug": "centro-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6d806bc7-bbb1-4e41-8125-cf4b8c8aed72",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "6bfcea0b-4117-295c-ba81-4edff07e727f",
-      "title": "Atacadão da Moda",
-      "oldEnvironmentId": "70afd355-9342-436d-b6d3-113992f77de5",
-      "newEnvironmentName": "Guajuviras - Canoas",
-      "newEnvironmentSlug": "guajuviras-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "f6f3dce1-e559-4bcf-9728-f95f835a7140",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "cc8a2b50-5927-082a-2fe1-6fb4dba1e67f",
-      "title": "Sorveteria Rei",
-      "oldEnvironmentId": "72fa50cd-d4b5-40e2-8dd9-d96507fd9fa6",
-      "newEnvironmentName": "A - Campo Bom",
-      "newEnvironmentSlug": "a-campo-bom-campo-bom-rio-grande-do-sul",
-      "newEnvironmentId": "27b37175-e09e-45f2-91ab-746f63d91f4d",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "642b4803-6ded-5150-0702-2d7c2e621f6d",
-      "title": "Armazém Colonial",
-      "oldEnvironmentId": "72fa50cd-d4b5-40e2-8dd9-d96507fd9fa6",
-      "newEnvironmentName": "A - Campo Bom",
-      "newEnvironmentSlug": "a-campo-bom-campo-bom-rio-grande-do-sul",
-      "newEnvironmentId": "27b37175-e09e-45f2-91ab-746f63d91f4d",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "cc38993c-bcba-5a5f-5fb4-4f8135d776c7",
-      "title": "Opa, Cresci! - Semana do frio!!! 10% OFF em roupas infantis",
-      "oldEnvironmentId": "15aa27d4-c368-4077-aaf7-8bc31172701e",
-      "newEnvironmentName": "Ideal - Novo Hamburgo",
-      "newEnvironmentSlug": "ideal-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "8c67ffc3-b982-4909-8234-4cb33d727036",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "2e89bdc8-668d-7479-3ca7-47d3a625f53a",
-      "title": "Boutique de Carnes Sal Grosso - Moinhos",
-      "oldEnvironmentId": "75d097bb-c652-49e9-ab6b-ba2a88b18b20",
-      "newEnvironmentName": "Estância Velha - Canoas",
-      "newEnvironmentSlug": "estancia-velha-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "ae7429a3-07b8-42bb-bf75-a1124e6f38df",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "1c158680-707c-d103-a745-13cbdb016a2f",
-      "title": "Jaca Food",
-      "oldEnvironmentId": "2be5f3f2-c7dd-4601-8be7-24130c9a3a4e",
-      "newEnvironmentName": "Niterói - Canoas",
-      "newEnvironmentSlug": "niteroi-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6905fe50-41bc-411a-9d72-72a7df3bc47f",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "277a1821-1e97-0fa6-c753-653d1bb0d8a7",
-      "title": "Resenha Pub",
-      "oldEnvironmentId": "168c9a20-b34d-45ae-a56b-aceabb3007f9",
-      "newEnvironmentName": "Centro - Criciúma",
-      "newEnvironmentSlug": "centro-criciuma-criciuma-santa-catarina",
-      "newEnvironmentId": "0ef7157c-b916-4011-918e-be42bdfe6c67",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "c96c697c-40f4-996a-e354-a7f0b5e2e86f",
-      "title": "Cafeteria Toscana",
-      "oldEnvironmentId": "225da49e-c202-4460-8e25-396940a45981",
-      "newEnvironmentName": "Centro - Criciúma",
-      "newEnvironmentSlug": "centro-criciuma-criciuma-santa-catarina",
-      "newEnvironmentId": "0ef7157c-b916-4011-918e-be42bdfe6c67",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "3cda7015-515e-d450-311b-705997f0fb5d",
-      "title": "Sorv Mania",
-      "oldEnvironmentId": "d3692fc3-7985-4bac-b376-71412cbd1cfc",
-      "newEnvironmentName": "Rio Branco - Canoas",
-      "newEnvironmentSlug": "rio-branco-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "b98112b3-21cc-4ca7-9c23-c558e2662734",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "03922559-dbe1-2233-3221-67299a884aa1",
-      "title": "Tudy Bom Restaurante e Lanchonete",
-      "oldEnvironmentId": "225da49e-c202-4460-8e25-396940a45981",
-      "newEnvironmentName": "Centro - Criciúma",
-      "newEnvironmentSlug": "centro-criciuma-criciuma-santa-catarina",
-      "newEnvironmentId": "0ef7157c-b916-4011-918e-be42bdfe6c67",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "d7547f14-ee54-a9f7-a547-156a7e07de0a",
-      "title": "Rheinlander Lanches",
-      "oldEnvironmentId": "4f6fb4a4-5dec-4d46-b1e0-28d5513e27ed",
-      "newEnvironmentName": "São José - Canoas",
-      "newEnvironmentSlug": "sao-jose-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6d6ee240-c84f-4683-9fab-841433cc6876",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "dc4ab799-c2f9-d4b1-7b85-c612b6671a4b",
-      "title": "Casa da Pizza",
-      "oldEnvironmentId": "b6ef7ed8-fe7c-4bab-90b5-67779f6cb83d",
-      "newEnvironmentName": "Centro - Criciúma",
-      "newEnvironmentSlug": "centro-criciuma-criciuma-santa-catarina",
-      "newEnvironmentId": "0ef7157c-b916-4011-918e-be42bdfe6c67",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "c291e22b-e6ca-bc82-d06b-bef7a46cbe42",
-      "title": "Vai e Vem",
-      "oldEnvironmentId": "c9cbbdbf-47df-4236-8a9b-a3a3a405a138",
-      "newEnvironmentName": "Centro - Osório",
-      "newEnvironmentSlug": "centro-osorio-osorio-rio-grande-do-sul",
-      "newEnvironmentId": "b76fa524-75b0-4dc1-8c62-677815dd8bad",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "ad09934b-df8b-74e0-ef9f-30b966301497",
-      "title": "Piu Mangiare Pastéis",
-      "oldEnvironmentId": "5e17e4ab-cebb-434c-9bad-57d60cba02b1",
-      "newEnvironmentName": "São José - Canoas",
-      "newEnvironmentSlug": "sao-jose-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6d6ee240-c84f-4683-9fab-841433cc6876",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "59eadd47-a70b-8b36-929f-e20d8328421a",
-      "title": "Deozimar Restaurante",
-      "oldEnvironmentId": "9575ac76-a6bc-4973-9ed7-1c7f74a111c4",
+      "serviceId": "43b57971-62fe-d7d3-03e7-1a262844d055",
+      "title": "Instituto da Face - Taquara",
+      "oldEnvironmentId": "90c625a7-c347-412a-9fa6-7878128da6d7",
       "newEnvironmentName": "Centro - Taquara",
       "newEnvironmentSlug": "centro-taquara-taquara-rio-grande-do-sul",
       "newEnvironmentId": "4c9e6ac6-77a2-464b-9ba0-480376b72427",
       "environmentCreated": false
     },
     {
-      "serviceId": "5d2fe6c3-a877-59b5-bba9-a3f7bf64c4b7",
-      "title": "Restaurante Pouso Novo",
-      "oldEnvironmentId": "5da81347-0231-41b7-8717-61a4346c253e",
-      "newEnvironmentName": "CENTRO - Tramandaí",
-      "newEnvironmentSlug": "centro-tramandai-tramandai-rio-grande-do-sul",
-      "newEnvironmentId": "f9bd2b85-2af4-4cc6-b9be-7ba52b925664",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "8a488ea3-480d-9a15-00ea-8149e3ddfc5f",
-      "title": "Vibe Street Shop",
-      "oldEnvironmentId": "7a0d7bfd-d4ef-49e2-971b-9c4ea81b0e4e",
-      "newEnvironmentName": "Centro - Novo Hamburgo",
-      "newEnvironmentSlug": "centro-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "8f645f81-b837-4586-8281-db4ee8ecfad9",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "3a8fe7ec-0bc8-0e03-137f-325c91ad2479",
-      "title": "Boutique Bruna Fagundes",
-      "oldEnvironmentId": "650ed42b-bcbb-4b85-95fc-e0d5cdb23491",
-      "newEnvironmentName": "Passo dos Ferreiros - Gravataí",
-      "newEnvironmentSlug": "passo-dos-ferreiros-gravatai-gravatai-rio-grande-do-sul",
-      "newEnvironmentId": "419f8490-b971-48ba-94bc-899e5780e307",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "405b3760-9a7d-6603-ecef-e3692cf9d3c6",
-      "title": "Las Comadres",
-      "oldEnvironmentId": "646560d7-1211-4661-85d7-19c05f5a3ee9",
-      "newEnvironmentName": "Marechal Rondon - Canoas",
-      "newEnvironmentSlug": "marechal-rondon-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "a093aa56-2dd3-43b5-985d-45e020877c2c",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "0befd32d-1987-9a1f-f889-f7e03bb96a9d",
-      "title": "Nabi's",
-      "oldEnvironmentId": "bc5ead31-71ce-42c1-8c01-34e01e13fca0",
-      "newEnvironmentName": "Pio Corrêa - Criciúma",
-      "newEnvironmentSlug": "pio-correa-criciuma-criciuma-santa-catarina",
-      "newEnvironmentId": "6d4f25ac-efcb-46ed-88d0-4969c96f6055",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "82dc1e20-32ff-ca32-21f8-20d11f703eb1",
-      "title": "Anselmo Lanches",
-      "oldEnvironmentId": "9fbd6078-6caf-4aa3-8c55-65e875f77072",
-      "newEnvironmentName": "Brasília - Criciúma",
-      "newEnvironmentSlug": "brasilia-criciuma-criciuma-santa-catarina",
-      "newEnvironmentId": "a31bd1e7-823c-4092-b6fd-046c7dbfa308",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "0bb2da42-f4f8-aa2f-aa09-4efc2d279015",
-      "title": "Winner Pastelaria",
-      "oldEnvironmentId": "b36f5616-7e1a-49bd-a79d-e4ff2a2c73c4",
-      "newEnvironmentName": "Centro - Igrejinha",
-      "newEnvironmentSlug": "centro-igrejinha-igrejinha-rio-grande-do-sul",
-      "newEnvironmentId": "2f585f73-b97b-4fa7-872c-21d63a699f13",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "10035ee9-65a4-7c26-cc57-6a038f635501",
-      "title": "Restaurante Moenda",
-      "oldEnvironmentId": "2770613f-86e9-4814-9c09-dce094d687e7",
-      "newEnvironmentName": "Centro - Lajeado",
-      "newEnvironmentSlug": "centro-lajeado-lajeado-rio-grande-do-sul",
-      "newEnvironmentId": "16d9fdd1-6080-4d3e-a890-f28c68687463",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "4e522a05-5ff0-1aac-b7f2-50eac94a9201",
-      "title": "Green House - Produtos Naturais e Suplementos",
-      "oldEnvironmentId": "d771a1a3-9859-440b-9796-e49dbec404aa",
-      "newEnvironmentName": "Centro - Canoas",
-      "newEnvironmentSlug": "centro-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "6d806bc7-bbb1-4e41-8125-cf4b8c8aed72",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "8f63eb39-c16e-dabd-6a44-31b3a396fe70",
-      "title": "Açai do Bidiee",
-      "oldEnvironmentId": "867fc176-261e-4351-bccd-c920f53e8caf",
-      "newEnvironmentName": "Rio Branco - Canoas",
-      "newEnvironmentSlug": "rio-branco-canoas-canoas-rio-grande-do-sul",
-      "newEnvironmentId": "b98112b3-21cc-4ca7-9c23-c558e2662734",
-      "environmentCreated": false
-    },
-    {
-      "serviceId": "d301ba52-4e04-0769-92cd-66cde4915152",
-      "title": "Sorveteria Venezia 311",
-      "oldEnvironmentId": "ebfd1ad2-caad-44a2-ba9b-1bc0a59c2627",
+      "serviceId": "83697b11-fe58-60f4-d699-ddc0e63d415d",
+      "title": "Homédic Material Médico e Ortopédico",
+      "oldEnvironmentId": "d95daa46-74c4-4d47-9c4a-dd178d588ec6",
       "newEnvironmentName": "Centro - Criciúma",
       "newEnvironmentSlug": "centro-criciuma-criciuma-santa-catarina",
       "newEnvironmentId": "0ef7157c-b916-4011-918e-be42bdfe6c67",
       "environmentCreated": false
     },
     {
-      "serviceId": "aff2133f-483d-2404-99c6-37bdf94cdcee",
-      "title": "Restaurante Pouso Novo",
-      "oldEnvironmentId": "5b94a107-3e89-4a45-9f24-20489cd9a2d5",
-      "newEnvironmentName": "15 De Novembro - Igrejinha",
-      "newEnvironmentSlug": "15-de-novembro-igrejinha-igrejinha-rio-grande-do-sul",
-      "newEnvironmentId": "f8e04d97-636a-4fcd-86b2-5943750c288d",
+      "serviceId": "a27ba948-646f-ead6-b98e-44fa50b07f87",
+      "title": "SOS Vida E Saúde",
+      "oldEnvironmentId": "db237942-8a9e-49dc-a6f6-2fa9b8b01764",
+      "newEnvironmentName": "Centro - Araucária",
+      "newEnvironmentSlug": "centro-araucaria-araucaria-parana",
+      "newEnvironmentId": "4aaae9ab-e085-4aff-bd92-b64b10a14837",
       "environmentCreated": false
     },
     {
-      "serviceId": "1a643f15-a2dd-fc8d-463d-d65e3a016e61",
-      "title": "Ki Mania Modas Kids",
-      "oldEnvironmentId": "f274aefa-c5a1-4c83-ae70-1ab14673f2b7",
-      "newEnvironmentName": "Passo D'areia - Santa Maria",
-      "newEnvironmentSlug": "passo-d-areia-santa-maria-santa-maria-rio-grande-do-sul",
-      "newEnvironmentId": "ae587bc3-3404-42f9-a7c7-08762e6cb466",
+      "serviceId": "cbbc318b-abb0-a78f-0e6d-7ac2a45a4784",
+      "title": "Academia Infinity Premium | ⭐ Nota 5.0 no Google",
+      "oldEnvironmentId": "c7d07c2b-ecce-4850-8675-4b2bc5d82c9e",
+      "newEnvironmentName": "Jardim Carvalho - Ponta Grossa",
+      "newEnvironmentSlug": "jardim-carvalho-ponta-grossa-ponta-grossa-parana",
+      "newEnvironmentId": "c980be2d-718d-4479-9955-57f5fc20cf60",
       "environmentCreated": false
     },
     {
-      "serviceId": "2fa97103-0689-8116-46cf-5805a00c1b65",
-      "title": "Kloset - Moda Modesta",
-      "oldEnvironmentId": "4d8a6af9-2270-43c1-8f99-bbc97c5a4be8",
-      "newEnvironmentName": "São José - Sombrio",
-      "newEnvironmentSlug": "sao-jose-sombrio-sombrio-santa-catarina",
-      "newEnvironmentId": "dee8ded4-da35-4bd5-b454-d2932b26d1e1",
+      "serviceId": "3aa07503-92fc-7ba0-e990-6e5c4755d50f",
+      "title": "Adri Malhas Confecções",
+      "oldEnvironmentId": "36ce230f-3362-4d1a-a70f-214161a2f498",
+      "newEnvironmentName": "Passo d'Areia - Cachoeira do Sul",
+      "newEnvironmentSlug": "passo-d-areia-cachoeira-do-sul-cachoeira-do-sul-rio-grande-do-sul",
+      "newEnvironmentId": "36ce230f-3362-4d1a-a70f-214161a2f498",
       "environmentCreated": false
     },
     {
-      "serviceId": "601186a9-d693-2575-98d1-cf098d22530f",
-      "title": "Mangia",
-      "oldEnvironmentId": "e405a9b3-c204-460d-a8e8-e39b40ead3a6",
-      "newEnvironmentName": "Boa Vista - Novo Hamburgo",
-      "newEnvironmentSlug": "boa-vista-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "d0a5841e-1f10-4d65-a7dd-6dcba3492fb9",
+      "serviceId": "886a1272-da19-5824-1d8f-df9b69bf6b7a",
+      "title": "Armazém dos Óculos",
+      "oldEnvironmentId": "72464f5d-36f4-48fb-8e00-9f6f2f164800",
+      "newEnvironmentName": "Universitário - Chapecó",
+      "newEnvironmentSlug": "universitario-chapeco-chapeco-santa-catarina",
+      "newEnvironmentId": "2a5e77c6-c856-49fe-b158-6a562343668c",
       "environmentCreated": false
     },
     {
-      "serviceId": "0037cc4a-bf7c-ccf0-b1c5-3928878672f0",
-      "title": "Cereja Store Moda Íntima",
-      "oldEnvironmentId": "f12fa05d-a89a-4a1a-8f38-e9b34f28636b",
-      "newEnvironmentName": "Centro - Novo Hamburgo",
-      "newEnvironmentSlug": "centro-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
-      "newEnvironmentId": "8f645f81-b837-4586-8281-db4ee8ecfad9",
+      "serviceId": "a3f827d4-0091-2f12-186f-ab3bcaf1be05",
+      "title": "Arte Manual",
+      "oldEnvironmentId": "c4a0474c-9823-451d-b1c2-2a153633af75",
+      "newEnvironmentName": "São Jorge - Xanxerê",
+      "newEnvironmentSlug": "sao-jorge-xanxere-xanxere-santa-catarina",
+      "newEnvironmentId": "13e9aade-8eb5-4ec7-9a82-1af11363d497",
       "environmentCreated": false
     },
     {
-      "serviceId": "e13250a2-8edd-6cbb-7266-ed23aa3795a7",
-      "title": "Di Fratelli Pizza Pub",
-      "oldEnvironmentId": "49ab41ba-27f4-459f-b8a2-f93369472e82",
-      "newEnvironmentName": "São Luís - Criciúma",
-      "newEnvironmentSlug": "sao-luis-criciuma-criciuma-santa-catarina",
-      "newEnvironmentId": "de55e7ed-a3fc-42fe-b6a5-431f82c26275",
+      "serviceId": "e8a7e5bb-c6af-2375-d5dc-4b7bcbc41165",
+      "title": "Atividade Pilates",
+      "oldEnvironmentId": "1ae389ba-5a69-44f6-98cf-c7f02c1f1fe8",
+      "newEnvironmentName": "Centro - Canela",
+      "newEnvironmentSlug": "centro-canela-canela-rio-grande-do-sul",
+      "newEnvironmentId": "d37cd2b4-8181-4b28-bc2f-d762e10e5164",
       "environmentCreated": false
     },
     {
-      "serviceId": "bbe6056f-065a-3ad3-3f3c-7b2ce3052577",
-      "title": "Lug´s Restaurante",
-      "oldEnvironmentId": "daa8180a-0335-494d-a1ef-7c7ee779d75e",
-      "newEnvironmentName": "Nossa Senhora da Salete - Criciúma",
-      "newEnvironmentSlug": "nossa-senhora-da-salete-criciuma-criciuma-santa-catarina",
-      "newEnvironmentId": "98a7971b-ccb8-4325-8d74-d27b0ae3921e",
+      "serviceId": "b037f6d2-ead2-5655-0476-c680756d7a21",
+      "title": "Avenida Veículos",
+      "oldEnvironmentId": "398cdd6c-4037-42e8-a123-38bb7bab409a",
+      "newEnvironmentName": "Drews - Cachoeira do Sul",
+      "newEnvironmentSlug": "drews-cachoeira-do-sul-cachoeira-do-sul-rio-grande-do-sul",
+      "newEnvironmentId": "2c4b6f09-a486-48df-8854-75eba49da2c2",
       "environmentCreated": false
     },
     {
-      "serviceId": "43d59362-a0de-0f5b-6c2d-c6095e49ca89",
-      "title": "Recanto das Batattas",
-      "oldEnvironmentId": "55c9c9f6-30ca-408b-b61a-dfa4e9967121",
-      "newEnvironmentName": "Centro - Alegrete",
-      "newEnvironmentSlug": "centro-alegrete-alegrete-rio-grande-do-sul",
-      "newEnvironmentId": "2ca4c6cd-0326-434d-bc09-4960f84108a3",
+      "serviceId": "e205c92f-0604-685e-debd-a79719fd0a34",
+      "title": "Zé Paulo Multimarcas",
+      "oldEnvironmentId": "39837e63-d8de-41d0-9f0c-52cd2d31944f",
+      "newEnvironmentName": "Urussanguinha - Araranguá",
+      "newEnvironmentSlug": "urussanguinha-ararangua-ararangua-santa-catarina",
+      "newEnvironmentId": "68b52d17-3cf9-4ee8-96a1-065efa7f4036",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "f55b502e-ac8d-ed87-e342-050426c101d2",
+      "title": "Henz Veículos",
+      "oldEnvironmentId": "e562c93c-f80a-48e1-8a02-61c472a8496e",
+      "newEnvironmentName": "Feliz",
+      "newEnvironmentSlug": "feliz-feliz-rio-grande-do-sul",
+      "newEnvironmentId": "c9f5e988-3cbb-47bb-b5d9-f0f342e8f074",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "2df8ebd2-333f-6e9f-7ba9-0a224da5ee44",
+      "title": "PS Imóveis",
+      "oldEnvironmentId": "eebd15ee-55d0-4b46-928f-0075ceaad892",
+      "newEnvironmentName": "Capão da Canoa",
+      "newEnvironmentSlug": "capao-da-canoa-capao-da-canoa-rio-grande-do-sul",
+      "newEnvironmentId": "408505be-cf6a-4c89-be17-9179c762bb52",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "1663eb46-8aa0-3841-d211-ea88e447b7f9",
+      "title": "Lorenzato Autocenter",
+      "oldEnvironmentId": "ce55e5ef-27a6-47ac-a0fa-0a2c7f617a91",
+      "newEnvironmentName": "Girassol - Gravataí",
+      "newEnvironmentSlug": "girassol-gravatai-gravatai-rio-grande-do-sul",
+      "newEnvironmentId": "53d8462a-ba1d-4e63-9e4a-530b6c48025d",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "1142d341-c009-feda-96f2-87b636ed0036",
+      "title": "Schneider Auto Center",
+      "oldEnvironmentId": "183e3361-7383-4ac3-8f3c-d1fa86af3bc9",
+      "newEnvironmentName": "Nossa Senhora de Fatima - Cachoeira do Sul",
+      "newEnvironmentSlug": "nossa-senhora-de-fatima-cachoeira-do-sul-cachoeira-do-sul-rio-grande-do-sul",
+      "newEnvironmentId": "1c04c149-1f3c-49a8-b199-938f476c73a7",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "679ba475-96d3-b504-e9bb-f3e0f42adbff",
+      "title": "Mecânica - Ar Condicionado Pampa",
+      "oldEnvironmentId": "2969abb1-8ba9-4316-bec8-e54ae2f0f678",
+      "newEnvironmentName": "Centenario - Sapiranga",
+      "newEnvironmentSlug": "centenario-sapiranga-sapiranga-rio-grande-do-sul",
+      "newEnvironmentId": "0bce4cf6-897f-49da-bbc4-a743754ad94d",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "ac4ad195-1ebc-250c-bbe0-a5fd8cc417e5",
+      "title": "Mayã Briefs Tattoo Shop",
+      "oldEnvironmentId": "73dfbf76-964f-4788-907a-e50f0ebb57dc",
+      "newEnvironmentName": "Centro - Canela",
+      "newEnvironmentSlug": "centro-canela-canela-rio-grande-do-sul",
+      "newEnvironmentId": "d37cd2b4-8181-4b28-bc2f-d762e10e5164",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "1ade675e-d324-a18e-e57d-7bbcf34ca1e4",
+      "title": "Carangas Auto Estética by Ramirez",
+      "oldEnvironmentId": "8dd1e00f-3736-4bf0-b7dd-f05f88352653",
+      "newEnvironmentName": "Rondônia - Novo Hamburgo",
+      "newEnvironmentSlug": "rondonia-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
+      "newEnvironmentId": "d8e062d3-b494-4818-bf95-a930da84b52a",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "37e1e976-4fab-13c5-9f67-b4af6a82e0e8",
+      "title": "Alcides Maya | Faculdade e Escola Técnica",
+      "oldEnvironmentId": "3a07e4f3-ba59-4dbb-a618-28472f784fd5",
+      "newEnvironmentName": "Centro Histórico - Porto Alegre",
+      "newEnvironmentSlug": "centro-historico-porto-alegre-porto-alegre-rio-grande-do-sul",
+      "newEnvironmentId": "173a7dd8-30b1-4339-88ac-c60f706e2e5b",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "28bba9f5-85bb-2274-7997-e6ae47549884",
+      "title": "Espetinho da Claret",
+      "oldEnvironmentId": "e5d5de9c-62ba-4e8f-949d-e015998f4937",
+      "newEnvironmentName": "Centro - Esteio",
+      "newEnvironmentSlug": "centro-esteio-esteio-rio-grande-do-sul",
+      "newEnvironmentId": "2b11e096-337e-432d-acee-236a21e67a03",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "a7c6310b-22f5-f7f8-5e7d-d54c62b6d9f2",
+      "title": "CFC Novocentro",
+      "oldEnvironmentId": "4b3fea77-3626-4b47-a9e3-ece07eaf5f19",
+      "newEnvironmentName": "Pátria Nova - Novo Hamburgo",
+      "newEnvironmentSlug": "patria-nova-novo-hamburgo-novo-hamburgo-rio-grande-do-sul",
+      "newEnvironmentId": "006e0298-97b1-4c51-bb56-9702f10e904b",
+      "environmentCreated": false
+    },
+    {
+      "serviceId": "ada90a49-b18d-449d-4720-119cdf256fc7",
+      "title": "Auto Escola Rota",
+      "oldEnvironmentId": "ecc4fed5-d69c-4c8b-b8f3-1498a7f4d61b",
+      "newEnvironmentName": "Centro - Chapecó",
+      "newEnvironmentSlug": "centro-chapeco-chapeco-santa-catarina",
+      "newEnvironmentId": "a06f3e89-9a18-43c4-a98d-66cc9b20c7db",
       "environmentCreated": false
     }
   ]
