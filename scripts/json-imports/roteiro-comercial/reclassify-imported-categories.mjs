@@ -32,7 +32,7 @@ const CATEGORY = {
   HEALTH: "Saúde",
   EVENTS: "Eventos",
   FAITH: "Religião",
-  CLOTHES: "Roupas",
+  CLOTHES: "Vestuário",
   TRANSPORT: "Transporte",
   OTHER: "Outros",
 };

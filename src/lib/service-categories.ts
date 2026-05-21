@@ -11,7 +11,7 @@ export const SERVICE_CATEGORIES = [
   { id: "saude", label: "Saúde", icon: "medical_services"},
   { id: "eventos", label: "Eventos", icon: "event" },
   { id: "religioso", label: "Religião", icon: "church" },
-  { id: "roupas", label: "Roupas", icon: "apparel" },
+  { id: "vestuário", label: "Vestuário", icon: "apparel" },
   { id: "transporte", label: "Transporte", icon: "commute"},
   { id: "outros", label: "Outros", icon: "category" },
 ] as const;

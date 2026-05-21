@@ -327,20 +327,6 @@ async function resolveEnvironmentForItem(item, existingState, cache, options = {
     return result;
   }
 
-  const nearby = await googleNearbyCondos(item.latitude, item.longitude);
-  if (nearby.length > 0) {
-    const place = nearby[0];
-    const existing = existingState.environmentByGooglePlaceId.get(place.id) || null;
-    const result = {
-      mode: existing ? 'reuse' : 'create',
-      source: 'condominium',
-      environment: existing || mapGooglePlaceToEnvironment(place),
-      distanceMeters: distanceMeters(item.latitude, item.longitude, place.location.latitude, place.location.longitude),
-    };
-    cache.set(key, result);
-    return result;
-  }
-
   const geocode = await googleReverseGeocode(item.latitude, item.longitude);
   const fallback = mapGeocodeToEnvironment(geocode);
   const existing = fallback.google_place_id
@@ -361,7 +347,7 @@ function mapLocalEnvironmentFallback(item) {
   const neighborhood = cleanupText(item.address?.neighborhood || '');
   const city = cleanupText(item.address?.city || '');
   const state = cleanupText(item.address?.state || '');
-  const baseName = truncate(neighborhood || city || 'Ambiente pendente de busca', 150);
+  const baseName = truncate(neighborhood || city || 'Bairro pendente de busca', 150);
   const name = buildEnvironmentName(baseName, city);
 
   return {
@@ -382,34 +368,6 @@ function mapLocalEnvironmentFallback(item) {
   };
 }
 
-async function googleNearbyCondos(latitude, longitude) {
-  const response = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Goog-Api-Key': process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-      'X-Goog-FieldMask': GOOGLE_FIELDS,
-    },
-    body: JSON.stringify({
-      includedTypes: CONDOMINIUM_TYPES,
-      maxResultCount: 10,
-      rankPreference: 'DISTANCE',
-      locationRestriction: {
-        circle: {
-          center: { latitude, longitude },
-          radius: 3000,
-        },
-      },
-    }),
-  });
-
-  const json = await response.json();
-  if (!response.ok) throw new Error(json?.error?.message || 'Falha ao consultar Google Places Nearby.');
-  return (Array.isArray(json.places) ? json.places : [])
-    .filter(isConfidentCondominiumPlace)
-    .sort((a, b) => scoreCondominiumPlace(b) - scoreCondominiumPlace(a));
-}
-
 async function googleReverseGeocode(latitude, longitude) {
   const url = new URL('https://maps.googleapis.com/maps/api/geocode/json');
   url.searchParams.set('latlng', `${latitude},${longitude}`);
@@ -423,44 +381,21 @@ async function googleReverseGeocode(latitude, longitude) {
   return json.results?.[0];
 }
 
-function mapGooglePlaceToEnvironment(place) {
-  const components = Array.isArray(place.addressComponents) ? place.addressComponents : [];
-  const city = pickGoogleComponent(components, ['locality', 'administrative_area_level_2']);
-  const baseName = truncate(place.displayName?.text || 'Ambiente importado', 150);
-  const name = buildEnvironmentName(baseName, city);
-  return {
-    id: stableUuid(`google-env:${place.id}`),
-    name,
-    slug: slugify(name),
-    type: inferCurrentEnvironmentType(place.primaryType),
-    status: 'active',
-    google_place_id: place.id,
-    address: place.formattedAddress || '',
-    latitude: Number(place.location?.latitude ?? 0),
-    longitude: Number(place.location?.longitude ?? 0),
-    requires_moderator_approval: false,
-    requires_radius_validation: true,
-    neighborhood: pickGoogleComponent(components, ['neighborhood', 'sublocality', 'sublocality_level_1']),
-    city,
-    state: pickGoogleComponent(components, ['administrative_area_level_1']),
-  };
-}
-
 function mapGeocodeToEnvironment(result) {
   const components = Array.isArray(result?.address_components) ? result.address_components : [];
   const neighborhood = pickGeocodeComponent(components, ['sublocality_level_1', 'sublocality', 'neighborhood']) || pickGeocodeComponent(components, ['locality']);
   const city = pickGeocodeComponent(components, ['locality', 'administrative_area_level_2']);
   const state = pickGeocodeComponent(components, ['administrative_area_level_1']);
-  const baseName = truncate(neighborhood || city || 'Regiao importada', 150);
+  const baseName = truncate(neighborhood || city || 'Bairro importado', 150);
   const name = buildEnvironmentName(baseName, city);
 
   return {
-    id: stableUuid(`google-geocode-env:${result?.place_id || name}`),
+    id: stableUuid(`google-geocode-env:${slugify([neighborhood || city || 'bairro', city, state].filter(Boolean).join(' '))}`),
     name,
     slug: slugify([name, city, state].filter(Boolean).join(' ')),
     type: 'residential',
     status: 'active',
-    google_place_id: result?.place_id || null,
+    google_place_id: null,
     address: result?.formatted_address || [name, city, state].filter(Boolean).join(', '),
     latitude: Number(result?.geometry?.location?.lat ?? 0),
     longitude: Number(result?.geometry?.location?.lng ?? 0),
@@ -470,34 +405,6 @@ function mapGeocodeToEnvironment(result) {
     city,
     state,
   };
-}
-
-function inferCurrentEnvironmentType(primaryType) {
-  const value = String(primaryType || '').toLowerCase();
-  if (['church', 'place_of_worship', 'cathedral', 'chapel', 'temple'].includes(value)) return 'church';
-  if (value === 'shopping_mall') return 'club';
-  return 'residential';
-}
-
-function isConfidentCondominiumPlace(place) {
-  const name = normalizeLooseText(place?.displayName?.text || '');
-  if (!name) return false;
-  if (!CONDOMINIUM_TYPES.includes(String(place?.primaryType || ''))) return false;
-  if (NEGATIVE_ENVIRONMENT_HINTS.some((hint) => name === hint || name.startsWith(`${hint} `) || name.endsWith(` ${hint}`))) return false;
-  if (name.length < 6) return false;
-  return CONDOMINIUM_NAME_HINTS.some((hint) => name.includes(hint));
-}
-
-function scoreCondominiumPlace(place) {
-  const name = normalizeLooseText(place?.displayName?.text || '');
-  let score = 0;
-  for (const hint of CONDOMINIUM_NAME_HINTS) {
-    if (name.includes(hint)) score += 10;
-  }
-  if (name.includes('condominio')) score += 20;
-  if (name.includes('residencial')) score += 15;
-  if (name.includes('edificio') || name.includes('predio')) score += 12;
-  return score;
 }
 
 function buildRecord(item, resolution, existingState, schema) {
