@@ -696,6 +696,21 @@ export default function HomePage() {
         let distanceEnvironmentId = defaultEnvironmentId;
 
         if (userLocation) {
+          const hasServiceCoordinates =
+            typeof s?.latitude === "number" &&
+            Number.isFinite(s.latitude) &&
+            typeof s?.longitude === "number" &&
+            Number.isFinite(s.longitude);
+
+          if (hasServiceCoordinates) {
+            distance = calculateDistance(
+              userLocation.lat,
+              userLocation.lng,
+              s.latitude,
+              s.longitude,
+            );
+          }
+
           type DistanceCandidate = {
             value: number;
             id: string;
@@ -743,9 +758,11 @@ export default function HomePage() {
               (closest: DistanceCandidate, current: DistanceCandidate) =>
                 current.value < closest.value ? current : closest,
             );
-            distance = nearest.value;
             distanceEnvironmentId = nearest.id || defaultEnvironmentId;
             distanceEnvironmentName = nearest.name || defaultEnvironmentName;
+            if (!hasServiceCoordinates) {
+              distance = nearest.value;
+            }
           }
         } else if (
           selectedEnvironmentId !== "all" &&

@@ -42,6 +42,8 @@ export interface Service {
   reviewList?: Review[];
   verified?: boolean;
   location?: string;
+  latitude?: number;
+  longitude?: number;
   tags?: string[];
   menu?: MenuItem[];
   views?: number;

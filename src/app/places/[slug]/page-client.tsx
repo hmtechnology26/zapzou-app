@@ -407,18 +407,23 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
         return matchesEnv && matchesSearch && isActive && matchesCategory;
       })
       .map((service) => {
+        const serviceLatitude =
+          typeof service.latitude === 'number' ? service.latitude : service.environmentLatitude;
+        const serviceLongitude =
+          typeof service.longitude === 'number' ? service.longitude : service.environmentLongitude;
+
         if (
           userLocation &&
-          typeof service.environmentLatitude === 'number' &&
-          typeof service.environmentLongitude === 'number'
+          typeof serviceLatitude === 'number' &&
+          typeof serviceLongitude === 'number'
         ) {
           return {
             ...service,
             distance: calculateDistanceKm(
               userLocation.latitude,
               userLocation.longitude,
-              service.environmentLatitude,
-              service.environmentLongitude,
+              serviceLatitude,
+              serviceLongitude,
             ),
           };
         }

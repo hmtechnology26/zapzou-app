@@ -943,6 +943,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           environmentLongitude: environment?.longitude,
           environmentAddress: environment?.address || '',
           environmentImage: environment?.image_url || '',
+          latitude: s.latitude,
+          longitude: s.longitude,
           id: s.id,
           slug: s.slug || generateSlug(s.title),
           title: s.title,
@@ -1152,6 +1154,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           environmentLongitude: environment?.longitude,
           environmentAddress: environment?.address || '',
           environmentImage: environment?.image_url || '',
+          latitude: s.latitude,
+          longitude: s.longitude,
           id: s.id,
           slug: s.slug || generateSlug(s.title),
           title: s.title,
@@ -1313,6 +1317,14 @@ if (!resolvedEnvironmentId) {
         status: service.status || 'active',
         is_active: true,
         environment_id: resolvedEnvironmentId,
+        latitude:
+          typeof service.latitude === 'number' && Number.isFinite(service.latitude)
+            ? service.latitude
+            : null,
+        longitude:
+          typeof service.longitude === 'number' && Number.isFinite(service.longitude)
+            ? service.longitude
+            : null,
         provider_id: user.id,
         provider: user.name || 'Prestador',
         publisher_type: service.publisherType || 'service_provider',
@@ -1366,6 +1378,8 @@ if (!resolvedEnvironmentId) {
     if (updatedFields.frequency !== undefined) payload.frequency = updatedFields.frequency;
     if (updatedFields.status !== undefined) payload.status = updatedFields.status;
     if (updatedFields.isActive !== undefined) payload.is_active = updatedFields.isActive;
+    if (updatedFields.latitude !== undefined) payload.latitude = updatedFields.latitude;
+    if (updatedFields.longitude !== undefined) payload.longitude = updatedFields.longitude;
     if (updatedFields.environmentId !== undefined) {
       payload.environment_id =
         typeof updatedFields.environmentId === 'string' && updatedFields.environmentId.length > 0
