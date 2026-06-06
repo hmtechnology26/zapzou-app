@@ -833,7 +833,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       !isMissingServiceEnvironmentLinksError(error) &&
       (
         String(error?.message || '').toLowerCase().includes('environments') ||
-        String(error?.details || '').toLowerCase().includes('environments')
+        String(error?.details || '').toLowerCase().includes('environments') ||
+        String(error?.message || '').toLowerCase().includes('bad request') ||
+        String(error?.code || '').toLowerCase() === 'pgrst201'
       );
 
     if (!shouldTryFallback) {
@@ -842,6 +844,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       return emptyMap;
     }
+
+    console.log('[fetchServiceLinkEnvironmentMap] Using fallback (no join)');
 
     const { data: linkData, error: linkError } = await supabase
       .from('service_environment_links')
@@ -852,6 +856,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       console.warn('fetchServiceLinkEnvironmentMap fallback failed:', linkError);
       return emptyMap;
     }
+
+    console.log('[fetchServiceLinkEnvironmentMap] Fallback rows:', linkData?.length);
 
     const environmentIds = Array.from(
       new Set(
@@ -875,10 +881,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         (environmentsData || []).forEach((environment: any) => {
           environmentById.set(environment.id, environment);
         });
+        console.log('[fetchServiceLinkEnvironmentMap] Fetched environments:', environmentById.size);
       }
     }
 
-    return buildLinkedMap(linkData || [], environmentById);
+    const result = buildLinkedMap(linkData || [], environmentById);
+    console.log('[fetchServiceLinkEnvironmentMap] Built map from fallback, entries:', result.size);
+    return result;
   };
 
   const fetchServices = async () => {
