@@ -799,22 +799,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     console.log('[fetchServiceLinkEnvironmentMap] Querying links for', serviceIds.length, 'services');
 
-    const { data, error } = await supabase
-      .from('service_environment_links')
-      .select('service_id, environment_id, environments(id, name, slug, latitude, longitude, address, type, image_url)')
-      .in('service_id', serviceIds);
+    const BATCH_SIZE = 50;
+    let mainQueryFailed = false;
+    const allLinkData: any[] = [];
 
-    if (!error) {
-      console.log('[fetchServiceLinkEnvironmentMap] Success, rows:', data?.length);
-      if (data && data.length > 0) {
-        console.log('[fetchServiceLinkEnvironmentMap] Sample:', data.slice(0, 3).map(r => ({
+    for (let i = 0; i < serviceIds.length; i += BATCH_SIZE) {
+      const batch = serviceIds.slice(i, i + BATCH_SIZE);
+      const { data, error } = await supabase
+        .from('service_environment_links')
+        .select('service_id, environment_id, environments(id, name, slug, latitude, longitude, address, type, image_url)')
+        .in('service_id', batch);
+
+      if (error) {
+        mainQueryFailed = true;
+        break;
+      }
+      if (data) {
+        allLinkData.push(...data);
+      }
+    }
+
+    if (!mainQueryFailed) {
+      console.log('[fetchServiceLinkEnvironmentMap] Success, rows:', allLinkData.length);
+      if (allLinkData.length > 0) {
+        console.log('[fetchServiceLinkEnvironmentMap] Sample:', allLinkData.slice(0, 3).map(r => ({
           service_id: r.service_id,
           environment_id: r.environment_id,
           env_slug: r.environments?.slug,
           env_name: r.environments?.name,
         })));
       }
-      const result = buildLinkedMap(data || []);
+      const result = buildLinkedMap(allLinkData);
       console.log('[fetchServiceLinkEnvironmentMap] Built map entries:', result.size);
       let sampleCount = 0;
       for (const [serviceId, envs] of result) {
@@ -826,42 +841,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return result;
     }
 
-    console.warn('[fetchServiceLinkEnvironmentMap] Query error:', error);
+    console.warn('[fetchServiceLinkEnvironmentMap] Batched query failed, will try fallback');
 
-    const shouldTryFallback =
-      error &&
-      !isMissingServiceEnvironmentLinksError(error) &&
-      (
-        String(error?.message || '').toLowerCase().includes('environments') ||
-        String(error?.details || '').toLowerCase().includes('environments') ||
-        String(error?.message || '').toLowerCase().includes('bad request') ||
-        String(error?.code || '').toLowerCase() === 'pgrst201'
-      );
+    console.log('[fetchServiceLinkEnvironmentMap] Using fallback (no join, batched)');
 
-    if (!shouldTryFallback) {
-      if (!isMissingServiceEnvironmentLinksError(error)) {
-        console.warn('fetchServiceLinkEnvironmentMap failed:', error);
+    let fallbackFailed = false;
+    const fallbackLinkData: any[] = [];
+
+    for (let i = 0; i < serviceIds.length; i += BATCH_SIZE) {
+      const batch = serviceIds.slice(i, i + BATCH_SIZE);
+      const { data, error } = await supabase
+        .from('service_environment_links')
+        .select('service_id, environment_id')
+        .in('service_id', batch);
+
+      if (error) {
+        console.warn('[fetchServiceLinkEnvironmentMap] Fallback batch failed:', error);
+        fallbackFailed = true;
+        break;
       }
+      if (data) {
+        fallbackLinkData.push(...data);
+      }
+    }
+
+    if (fallbackFailed) {
+      console.warn('fetchServiceLinkEnvironmentMap fallback failed');
       return emptyMap;
     }
 
-    console.log('[fetchServiceLinkEnvironmentMap] Using fallback (no join)');
-
-    const { data: linkData, error: linkError } = await supabase
-      .from('service_environment_links')
-      .select('service_id, environment_id')
-      .in('service_id', serviceIds);
-
-    if (linkError) {
-      console.warn('fetchServiceLinkEnvironmentMap fallback failed:', linkError);
-      return emptyMap;
-    }
-
-    console.log('[fetchServiceLinkEnvironmentMap] Fallback rows:', linkData?.length);
+    console.log('[fetchServiceLinkEnvironmentMap] Fallback rows:', fallbackLinkData.length);
 
     const environmentIds = Array.from(
       new Set(
-        (linkData || [])
+        (fallbackLinkData || [])
           .map((row: any) => row?.environment_id)
           .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0),
       ),
@@ -885,7 +898,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const result = buildLinkedMap(linkData || [], environmentById);
+    const result = buildLinkedMap(fallbackLinkData || [], environmentById);
     console.log('[fetchServiceLinkEnvironmentMap] Built map from fallback, entries:', result.size);
     return result;
   };
