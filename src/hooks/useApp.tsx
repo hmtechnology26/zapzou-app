@@ -797,14 +797,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return linkedMap;
     };
 
+    console.log('[fetchServiceLinkEnvironmentMap] Querying links for', serviceIds.length, 'services');
+
     const { data, error } = await supabase
       .from('service_environment_links')
       .select('service_id, environment_id, environments(id, name, slug, latitude, longitude, address, type, image_url)')
       .in('service_id', serviceIds);
 
     if (!error) {
-      return buildLinkedMap(data || []);
+      console.log('[fetchServiceLinkEnvironmentMap] Success, rows:', data?.length);
+      if (data && data.length > 0) {
+        console.log('[fetchServiceLinkEnvironmentMap] Sample:', data.slice(0, 3).map(r => ({
+          service_id: r.service_id,
+          environment_id: r.environment_id,
+          env_slug: r.environments?.slug,
+          env_name: r.environments?.name,
+        })));
+      }
+      const result = buildLinkedMap(data || []);
+      console.log('[fetchServiceLinkEnvironmentMap] Built map entries:', result.size);
+      let sampleCount = 0;
+      for (const [serviceId, envs] of result) {
+        if (sampleCount < 3) {
+          console.log('[fetchServiceLinkEnvironmentMap] Service linked envs:', { serviceId, envs: envs.map(e => ({ id: e.id, slug: e.slug, name: e.name })) });
+          sampleCount++;
+        }
+      }
+      return result;
     }
+
+    console.warn('[fetchServiceLinkEnvironmentMap] Query error:', error);
 
     const shouldTryFallback =
       error &&
