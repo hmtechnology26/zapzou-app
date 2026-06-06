@@ -869,6 +869,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     const MAX_RETRIES = 2;
+    let lastError: unknown;
+
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
         const query = supabase
@@ -888,6 +890,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             .order('created_at', { ascending: false });
 
           if (legacyError) {
+            lastError = legacyError;
             if (attempt < MAX_RETRIES) {
               const delay = Math.min(1000 * Math.pow(2, attempt), 4000);
               console.warn(`fetchServices legacy fallback also failed, retrying in ${delay}ms...`);
@@ -986,13 +989,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
           };
         });
 
+        console.log('[fetchServices] Success:', {
+          total: formatted.length,
+          active: formatted.filter(s => s.isActive && s.status === 'active').length,
+          sample: formatted.slice(0, 3).map(s => ({
+            id: s.id,
+            title: s.title,
+            status: s.status,
+            isActive: s.isActive,
+            environmentSlug: s.environmentSlug,
+            environmentId: s.environmentId,
+          })),
+        });
         setServices(formatted);
         fetchCacheRef.current.services = {
           data: formatted,
           fetchedAt: Date.now(),
         };
-        break;
+        setServicesLoading(false);
+        return;
       } catch (error) {
+        lastError = error;
         if (attempt < MAX_RETRIES) {
           const delay = Math.min(1000 * Math.pow(2, attempt), 4000);
           console.warn(`fetchServices attempt ${attempt + 1} failed, retrying in ${delay}ms:`, error);
@@ -1000,11 +1017,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           continue;
         }
         console.error('fetchServices failed after all retries:', error);
-      } finally {
-        if (attempt === MAX_RETRIES) {
-          setServicesLoading(false);
-        }
       }
+    }
+
+    setServicesLoading(false);
+    if (lastError) {
+      console.error('fetchServices final error:', lastError);
     }
   };
 
