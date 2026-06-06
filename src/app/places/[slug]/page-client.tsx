@@ -392,9 +392,10 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
         const linkedEnvIds = linkedEnvironments.map((e: any) => e.id).filter(Boolean);
         
         const primaryEnvMatches = serviceEnvSlug === normalizedPlaceSlug;
+        const directEnvIdMatch = !!(effectiveEnvironment?.id && service.environmentId === effectiveEnvironment.id);
         const linkedEnvMatches = linkedEnvSlugs.includes(normalizedPlaceSlug) || linkedEnvIds.includes(effectiveEnvironment?.id);
         
-        const matchesEnv = primaryEnvMatches || linkedEnvMatches;
+        const matchesEnv = primaryEnvMatches || directEnvIdMatch || linkedEnvMatches;
         
         const searchLower = search.toLowerCase().trim();
         const matchesSearch =
@@ -762,7 +763,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
           
           {servicesWithDistance.length === 0 && (
             <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
-              <p className="text-sm font-bold text-on-surface/40">Nenhum serviÃƒÂ§o encontrado neste ambiente</p>
+              <p className="text-sm font-bold text-on-surface/40">Nenhum serviço encontrado neste ambiente</p>
             </div>
           )}
         </div>

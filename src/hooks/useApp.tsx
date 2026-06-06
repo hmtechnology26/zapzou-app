@@ -868,125 +868,143 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    try {
-      const query = supabase
-        .from('services')
-        .select('*, environments(name, slug, latitude, longitude, address, type, image_url)')
-        .order('created_at', { ascending: false });
-
-      const { data, error } = await query;
-
-      let rows: any[] = data || [];
-      if (error) {
-        console.warn('fetchServices (relation query) failed:', error);
-
-        const { data: legacyData, error: legacyError } = await supabase
+    const MAX_RETRIES = 2;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const query = supabase
           .from('services')
-          .select('*')
+          .select('*, environments(name, slug, latitude, longitude, address, type, image_url)')
           .order('created_at', { ascending: false });
 
-        if (legacyError) {
-          throw legacyError;
-        }
+        const { data, error } = await query;
 
-        const envIds = Array.from(
-          new Set(
-            (legacyData || [])
-              .map((service: any) => service.environment_id)
-              .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0),
-          ),
-        );
+        let rows: any[] = data || [];
+        if (error) {
+          console.warn(`fetchServices (relation query) failed (attempt ${attempt + 1}):`, error);
 
-        const environmentById = new Map<string, any>();
-        if (envIds.length > 0) {
-          const { data: environmentsData, error: environmentsError } = await supabase
-            .from('environments')
-            .select('id, name, slug, latitude, longitude, address, type, image_url')
-            .in('id', envIds);
+          const { data: legacyData, error: legacyError } = await supabase
+            .from('services')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-          if (environmentsError) {
-            console.warn('fetchServices (legacy environments query) failed:', environmentsError);
-          } else {
-            (environmentsData || []).forEach((environment: any) => {
-              environmentById.set(environment.id, environment);
-            });
+          if (legacyError) {
+            if (attempt < MAX_RETRIES) {
+              const delay = Math.min(1000 * Math.pow(2, attempt), 4000);
+              console.warn(`fetchServices legacy fallback also failed, retrying in ${delay}ms...`);
+              await new Promise(r => setTimeout(r, delay));
+              continue;
+            }
+            throw legacyError;
           }
+
+          const envIds = Array.from(
+            new Set(
+              (legacyData || [])
+                .map((service: any) => service.environment_id)
+                .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0),
+            ),
+          );
+
+          const environmentById = new Map<string, any>();
+          if (envIds.length > 0) {
+            const { data: environmentsData, error: environmentsError } = await supabase
+              .from('environments')
+              .select('id, name, slug, latitude, longitude, address, type, image_url')
+              .in('id', envIds);
+
+            if (environmentsError) {
+              console.warn('fetchServices (legacy environments query) failed:', environmentsError);
+            } else {
+              (environmentsData || []).forEach((environment: any) => {
+                environmentById.set(environment.id, environment);
+              });
+            }
+          }
+
+          rows = (legacyData || []).map((service: any) => ({
+            ...service,
+            environments: environmentById.get(service.environment_id) ?? null,
+          }));
         }
 
-        rows = (legacyData || []).map((service: any) => ({
-          ...service,
-          environments: environmentById.get(service.environment_id) ?? null,
-        }));
-      }
+        const serviceLinkEnvironmentMap = await fetchServiceLinkEnvironmentMap(rows);
 
-      const serviceLinkEnvironmentMap = await fetchServiceLinkEnvironmentMap(rows);
+        const formatted = rows.map((s: any) => {
+          const environment = normalizeRelatedRecord<{
+            id?: string;
+            name?: string;
+            slug?: string;
+            latitude?: number;
+            longitude?: number;
+            address?: string;
+            type?: string;
+            image_url?: string;
+          }>(s.environments);
 
-      const formatted = rows.map((s: any) => {
-        const environment = normalizeRelatedRecord<{
-          id?: string;
-          name?: string;
-          slug?: string;
-          latitude?: number;
-          longitude?: number;
-          address?: string;
-          type?: string;
-          image_url?: string;
-        }>(s.environments);
+          const linkedEnvironments = serviceLinkEnvironmentMap.get(s.id) || [];
 
-        const linkedEnvironments = serviceLinkEnvironmentMap.get(s.id) || [];
+          return {
+            environmentName: environment?.name || '',
+            environmentSlug: environment?.slug || '',
+            environmentType: environment?.type || '',
+            environmentLatitude: environment?.latitude,
+            environmentLongitude: environment?.longitude,
+            environmentAddress: environment?.address || '',
+            environmentImage: environment?.image_url || '',
+            latitude: s.latitude,
+            longitude: s.longitude,
+            id: s.id,
+            slug: s.slug || generateSlug(s.title),
+            title: s.title,
+            description: s.description,
+            category: s.category,
+            image: s.image_url || '',
+            images: normalizeArrayValue<string>(s.images_urls),
+            provider: s.provider || 'Prestador',
+            provider_id: s.provider_id,
+            publisherType: s.publisher_type as 'resident' | 'service_provider' | null,
+            status: s.status as any,
+            isActive: s.is_active,
+            environmentId:
+              typeof s.environment_id === 'string' && s.environment_id.length > 0
+                ? s.environment_id
+                : null,
+            environments: linkedEnvironments.map((env) => ({
+              id: env.id,
+              slug: env.slug,
+            })),
+            linkedEnvironments,
+            WhatsApp: s.whatsapp,
+            instagram: s.instagram,
+            website: s.website_url,
+            cnpj: s.cnpj || '',
+            frequency: s.frequency,
+            menu: normalizeArrayValue<any>(s.menu),
+            rating: s.rating ?? 0,
+            reviews_count: s.reviews_count ?? 0,
+            views: s.views ?? 0,
+          };
+        });
 
-        return {
-          environmentName: environment?.name || '',
-          environmentSlug: environment?.slug || '',
-          environmentType: environment?.type || '',
-          environmentLatitude: environment?.latitude,
-          environmentLongitude: environment?.longitude,
-          environmentAddress: environment?.address || '',
-          environmentImage: environment?.image_url || '',
-          latitude: s.latitude,
-          longitude: s.longitude,
-          id: s.id,
-          slug: s.slug || generateSlug(s.title),
-          title: s.title,
-          description: s.description,
-          category: s.category,
-          image: s.image_url || '',
-          images: normalizeArrayValue<string>(s.images_urls),
-          provider: s.provider || 'Prestador',
-          provider_id: s.provider_id,
-          publisherType: s.publisher_type as 'resident' | 'service_provider' | null,
-          status: s.status as any,
-          isActive: s.is_active,
-          environmentId:
-            typeof s.environment_id === 'string' && s.environment_id.length > 0
-              ? s.environment_id
-              : null,
-          environments: linkedEnvironments.map((env) => ({
-            id: env.id,
-            slug: env.slug,
-          })),
-          linkedEnvironments,
-          WhatsApp: s.whatsapp,
-          instagram: s.instagram,
-          website: s.website_url,
-          cnpj: s.cnpj || '',
-          frequency: s.frequency,
-          menu: normalizeArrayValue<any>(s.menu),
-          rating: s.rating ?? 0,
-          reviews_count: s.reviews_count ?? 0,
-          views: s.views ?? 0,
+        setServices(formatted);
+        fetchCacheRef.current.services = {
+          data: formatted,
+          fetchedAt: Date.now(),
         };
-      });
-
-      setServices(formatted);
-      fetchCacheRef.current.services = {
-        data: formatted,
-        fetchedAt: Date.now(),
-      };
-    } catch (error) {
-      console.error('fetchServices failed:', error);
-    } finally {
-      setServicesLoading(false);
+        break;
+      } catch (error) {
+        if (attempt < MAX_RETRIES) {
+          const delay = Math.min(1000 * Math.pow(2, attempt), 4000);
+          console.warn(`fetchServices attempt ${attempt + 1} failed, retrying in ${delay}ms:`, error);
+          await new Promise(r => setTimeout(r, delay));
+          continue;
+        }
+        console.error('fetchServices failed after all retries:', error);
+      } finally {
+        if (attempt === MAX_RETRIES) {
+          setServicesLoading(false);
+        }
+      }
     }
   };
 
