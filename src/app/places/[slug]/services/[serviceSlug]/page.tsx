@@ -16,7 +16,7 @@ async function getServiceContext(placeSlug: string, serviceSlug: string) {
   try {
     const { data: bySlug } = await supabase
       .from('services')
-      .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments!service_environment_links(name, slug)')
+      .select('title, slug, description, image_url, website_url, status, is_active, environments!service_environment_links(name, slug)')
       .eq('slug', serviceSlug)
       .maybeSingle();
 
@@ -24,7 +24,7 @@ async function getServiceContext(placeSlug: string, serviceSlug: string) {
       ? bySlug
       : await supabase
         .from('services')
-          .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments!service_environment_links(name, slug)')
+          .select('title, slug, description, image_url, website_url, status, is_active, environments!service_environment_links(name, slug)')
           .eq('id', serviceSlug)
           .maybeSingle()
           .then(({ data }) => data ?? null);

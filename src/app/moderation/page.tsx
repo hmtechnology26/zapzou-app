@@ -109,17 +109,23 @@ export default function ModerationPage() {
     .join('|');
 
   const loadVisibleReviews = useCallback(async (environmentId: string) => {
+    const { data: linkData } = await supabase
+      .from('service_environment_links')
+      .select('service_id')
+      .eq('environment_id', environmentId);
+    const serviceIds = (linkData || []).map(l => l.service_id);
+    if (serviceIds.length === 0) return [];
+
     const { data: servicesData, error: servicesError } = await supabase
       .from('services')
       .select('id, title')
-      .eq('environment_id', environmentId);
+      .in('id', serviceIds);
 
     if (servicesError) {
       throw servicesError;
     }
 
     const serviceMap = new Map((servicesData || []).map((service: any) => [service.id, service.title]));
-    const serviceIds = Array.from(serviceMap.keys());
 
     if (serviceIds.length === 0) {
       return [];
@@ -156,15 +162,20 @@ export default function ModerationPage() {
     setLoadingStats(true);
 
     try {
+      const { data: linkData } = await supabase
+        .from('service_environment_links')
+        .select('service_id')
+        .eq('environment_id', selectedEnvironment.id);
+      const envServiceIds = (linkData || []).map(l => l.service_id);
+
       const [membersRes, servicesRes, reviewsRes] = await Promise.all([
         supabase
           .from('environment_members')
           .select('status')
           .eq('environment_id', selectedEnvironment.id),
-        supabase
-          .from('services')
-          .select('id, is_active, rating, reviews_count')
-          .eq('environment_id', selectedEnvironment.id),
+        envServiceIds.length > 0
+          ? supabase.from('services').select('id, is_active, rating, reviews_count').in('id', envServiceIds)
+          : Promise.resolve({ data: [] as any[], error: null }),
         loadVisibleReviews(selectedEnvironment.id),
       ]);
 
@@ -286,6 +297,12 @@ export default function ModerationPage() {
     setLoadingMembers(true);
 
     try {
+      const { data: linkData } = await supabase
+        .from('service_environment_links')
+        .select('service_id')
+        .eq('environment_id', selectedEnvironment.id);
+      const envServiceIds = (linkData || []).map(l => l.service_id);
+
       const { data: rpcData, error: rpcError } = await supabase.rpc(
         'get_moderation_environment_members',
         { p_environment_id: selectedEnvironment.id },
@@ -295,11 +312,10 @@ export default function ModerationPage() {
         const membersData = rpcData as ModerationMemberRecord[];
         const memberIds = membersData.map((m) => m.user_id);
 
-        const { data: servicesData } = await supabase
-          .from('services')
-          .select('provider_id, rating')
-          .eq('environment_id', selectedEnvironment.id)
-          .in('provider_id', memberIds);
+        const serviceQuery = envServiceIds.length > 0
+          ? supabase.from('services').select('provider_id, rating').in('id', envServiceIds).in('provider_id', memberIds)
+          : supabase.from('services').select('provider_id, rating').eq('id', '00000000-0000-0000-0000-000000000000');
+        const { data: servicesData } = await serviceQuery;
 
         const servicesByProvider = new Map<string, { count: number; totalRating: number }>();
         (servicesData || []).forEach((s: any) => {
@@ -349,11 +365,10 @@ export default function ModerationPage() {
         if (membersData && !membersError) {
           const memberIds = membersData.map((m: any) => m.user_id);
 
-          const { data: servicesData } = await supabase
-            .from('services')
-            .select('provider_id, rating')
-            .eq('environment_id', selectedEnvironment.id)
-            .in('provider_id', memberIds);
+          const serviceQuery = envServiceIds.length > 0
+            ? supabase.from('services').select('provider_id, rating').in('id', envServiceIds).in('provider_id', memberIds)
+            : supabase.from('services').select('provider_id, rating').eq('id', '00000000-0000-0000-0000-000000000000');
+          const { data: servicesData } = await serviceQuery;
 
           const servicesByProvider = new Map<string, { count: number; totalRating: number }>();
           (servicesData || []).forEach((s: any) => {
@@ -403,6 +418,18 @@ export default function ModerationPage() {
     setLoadingServices(true);
 
     try {
+      const { data: linkData } = await supabase
+        .from('service_environment_links')
+        .select('service_id')
+        .eq('environment_id', selectedEnvironment.id);
+      const serviceIds = (linkData || []).map(l => l.service_id);
+
+      if (serviceIds.length === 0) {
+        setServices([]);
+        setLoadingServices(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('services')
         .select(`
@@ -418,7 +445,7 @@ export default function ModerationPage() {
           views,
           user_public_profiles (avatar_url)
         `)
-        .eq('environment_id', selectedEnvironment.id)
+        .in('id', serviceIds)
         .order('created_at', { ascending: false });
 
       if (data && !error) {

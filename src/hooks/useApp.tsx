@@ -944,33 +944,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
             throw legacyError;
           }
 
-          const envIds = Array.from(
-            new Set(
-              (legacyData || [])
-                .map((service: any) => service.environment_id)
-                .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0),
-            ),
-          );
+          const { data: fallbackLinks } = await supabase
+            .from('service_environment_links')
+            .select('service_id, environment_id, environments!inner(id, name, slug, latitude, longitude, address, type, image_url)')
+            .in('service_id', (legacyData || []).map((s: any) => s.id));
 
-          const environmentById = new Map<string, any>();
-          if (envIds.length > 0) {
-            const { data: environmentsData, error: environmentsError } = await supabase
-              .from('environments')
-              .select('id, name, slug, latitude, longitude, address, type, image_url')
-              .in('id', envIds);
-
-            if (environmentsError) {
-              console.warn('fetchServices (legacy environments query) failed:', environmentsError);
-            } else {
-              (environmentsData || []).forEach((environment: any) => {
-                environmentById.set(environment.id, environment);
-              });
-            }
-          }
+          const envByServiceId = new Map<string, any[]>();
+          (fallbackLinks || []).forEach((link: any) => {
+            const list = envByServiceId.get(link.service_id) || [];
+            if (link.environments) list.push(link.environments);
+            envByServiceId.set(link.service_id, list);
+          });
 
           rows = (legacyData || []).map((service: any) => ({
             ...service,
-            environments: environmentById.get(service.environment_id) ?? null,
+            environments: envByServiceId.get(service.id) || [],
           }));
         }
 
@@ -1012,10 +1000,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             publisherType: s.publisher_type as 'resident' | 'service_provider' | null,
             status: s.status as any,
             isActive: s.is_active,
-            environmentId:
-              typeof s.environment_id === 'string' && s.environment_id.length > 0
-                ? s.environment_id
-                : null,
+            environmentId: environment?.id || null,
             environments: linkedEnvironments.map((env) => ({
               id: env.id,
               slug: env.slug,
@@ -1162,7 +1147,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('services')
-        .select('*, environments!services_environment_id_fkey(name, slug, latitude, longitude, address, type, image_url)')
+        .select('*, environments!service_environment_links(name, slug, latitude, longitude, address, type, image_url)')
         .eq('provider_id', userId)
         .order('created_at', { ascending: false });
 
@@ -1180,33 +1165,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
           throw legacyError;
         }
 
-        const envIds = Array.from(
-          new Set(
-            (legacyData || [])
-              .map((service: any) => service.environment_id)
-              .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0),
-          ),
-        );
+        const { data: fallbackLinks } = await supabase
+          .from('service_environment_links')
+          .select('service_id, environment_id, environments!inner(id, name, slug, latitude, longitude, address, type, image_url)')
+          .in('service_id', (legacyData || []).map((s: any) => s.id));
 
-        const environmentById = new Map<string, any>();
-        if (envIds.length > 0) {
-          const { data: environmentsData, error: environmentsError } = await supabase
-            .from('environments')
-            .select('id, name, slug, latitude, longitude, address, type, image_url')
-            .in('id', envIds);
-
-          if (environmentsError) {
-            console.warn('fetchUserServices (legacy environments query) failed:', environmentsError);
-          } else {
-            (environmentsData || []).forEach((environment: any) => {
-              environmentById.set(environment.id, environment);
-            });
-          }
-        }
+        const envByServiceId = new Map<string, any[]>();
+        (fallbackLinks || []).forEach((link: any) => {
+          const list = envByServiceId.get(link.service_id) || [];
+          if (link.environments) list.push(link.environments);
+          envByServiceId.set(link.service_id, list);
+        });
 
         rows = (legacyData || []).map((service: any) => ({
           ...service,
-          environments: environmentById.get(service.environment_id) ?? null,
+          environments: envByServiceId.get(service.id) || [],
         }));
       }
 
@@ -1247,10 +1220,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           provider_id: s.provider_id,
           status: s.status as any,
           isActive: s.is_active,
-          environmentId:
-            typeof s.environment_id === 'string' && s.environment_id.length > 0
-              ? s.environment_id
-              : null,
+          environmentId: environment?.id || null,
           environments: linkedEnvironments.map((env) => ({
             id: env.id,
             slug: env.slug,
@@ -1396,7 +1366,6 @@ if (!resolvedEnvironmentId) {
         frequency: service.frequency,
         status: service.status || 'active',
         is_active: true,
-        environment_id: resolvedEnvironmentId,
         latitude:
           typeof service.latitude === 'number' && Number.isFinite(service.latitude)
             ? service.latitude
@@ -1409,18 +1378,18 @@ if (!resolvedEnvironmentId) {
         provider: user.name || 'Prestador',
         publisher_type: service.publisherType || 'service_provider',
       }])
-      .select('id, environment_id')
+.select('id')
       .single();
 
     console.log('Service insert result:', { error });
     if (error) throw error;
 
-    if (insertedService?.id && insertedService.environment_id) {
+    if (insertedService?.id && resolvedEnvironmentId) {
       const { error: linkError } = await supabase
         .from('service_environment_links')
         .insert({
           service_id: insertedService.id,
-          environment_id: insertedService.environment_id,
+          environment_id: resolvedEnvironmentId,
           created_by: user.id,
         });
 
@@ -1460,19 +1429,28 @@ if (!resolvedEnvironmentId) {
     if (updatedFields.isActive !== undefined) payload.is_active = updatedFields.isActive;
     if (updatedFields.latitude !== undefined) payload.latitude = updatedFields.latitude;
     if (updatedFields.longitude !== undefined) payload.longitude = updatedFields.longitude;
-    if (updatedFields.environmentId !== undefined) {
-      payload.environment_id =
-        typeof updatedFields.environmentId === 'string' && updatedFields.environmentId.length > 0
-          ? updatedFields.environmentId
-          : null;
-    }
-
     const { error } = await supabase
       .from('services')
       .update(payload)
       .eq('id', id);
 
     if (error) throw error;
+
+    if (updatedFields.environmentId !== undefined) {
+      const newEnvId = typeof updatedFields.environmentId === 'string' && updatedFields.environmentId.length > 0
+        ? updatedFields.environmentId
+        : null;
+
+      if (newEnvId) {
+        const { error: linkError } = await supabase
+          .from('service_environment_links')
+          .upsert({ service_id: id, environment_id: newEnvId, created_by: user?.id },
+            { onConflict: 'service_id,environment_id', ignoreDuplicates: true });
+        if (linkError && linkError.code !== '23505') {
+          console.warn('updateService: link upsert failed:', linkError);
+        }
+      }
+    }
     fetchCacheRef.current.services = null;
     if (user?.id) {
       fetchCacheRef.current.userServices.delete(user.id);

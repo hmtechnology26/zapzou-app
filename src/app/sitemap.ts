@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq('status', 'active'),
       supabase
         .from('services')
-        .select('slug,title,status,is_active,updated_at,environment_id,environments!service_environment_links(slug)')
+        .select('slug,title,status,is_active,updated_at,environments!service_environment_links(slug)')
         .or('status.eq.active,is_active.eq.true'),
     ]);
 
