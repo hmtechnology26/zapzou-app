@@ -16,7 +16,7 @@ async function getServiceContext(placeSlug: string, serviceSlug: string) {
   try {
     const { data: bySlug } = await supabase
       .from('services')
-      .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments!services_environment_id_fkey(name, slug)')
+      .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments!service_environment_links(name, slug)')
       .eq('slug', serviceSlug)
       .maybeSingle();
 
@@ -24,14 +24,14 @@ async function getServiceContext(placeSlug: string, serviceSlug: string) {
       ? bySlug
       : await supabase
         .from('services')
-          .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments!services_environment_id_fkey(name, slug)')
+          .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments!service_environment_links(name, slug)')
           .eq('id', serviceSlug)
           .maybeSingle()
           .then(({ data }) => data ?? null);
 
     if (!service) return null;
 
-    const environmentSlug = service.environments?.slug || placeSlug;
+    const environmentSlug = service.environments?.find((e: any) => e.slug === placeSlug)?.slug || placeSlug;
     return {
       ...service,
       environmentSlug,
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ctx = await getServiceContext(params.slug, params.serviceSlug);
   const siteUrl = getSiteUrl();
   const serviceTitle = ctx?.title || humanizeSlug(params.serviceSlug) || 'Servico';
-  const placeTitle = ctx?.environments?.name || humanizeSlug(params.slug) || 'Ambiente';
+  const placeTitle = ctx?.environments?.find((e: any) => e.slug === params.slug)?.name || humanizeSlug(params.slug) || 'Ambiente';
   const description =
     ctx?.description?.slice(0, 160) ||
     `Veja o servico ${serviceTitle} dentro do ambiente ${placeTitle}.`;
@@ -77,7 +77,7 @@ export default async function Page({ params }: Props) {
   const ctx = await getServiceContext(params.slug, params.serviceSlug);
   const siteUrl = getSiteUrl();
   const serviceTitle = ctx?.title || humanizeSlug(params.serviceSlug) || 'Servico';
-  const placeTitle = ctx?.environments?.name || humanizeSlug(params.slug) || 'Ambiente';
+  const placeTitle = ctx?.environments?.find((e: any) => e.slug === params.slug)?.name || humanizeSlug(params.slug) || 'Ambiente';
   const description =
     ctx?.description ||
     'Veja os detalhes do servico dentro do ambiente e entre em contato com facilidade.';

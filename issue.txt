@@ -1,0 +1,75 @@
+essa rota https://conectaeapp.com.br/places/igreja-ministerio-farol esta em loop e nao carrega nenhum serviço para este ambiente
+
+8595-d56174cf9cc96475.js:1 [fetchServiceLinkEnvironmentMap] Success, rows: 1000
+8595-d56174cf9cc96475.js:1 [fetchServiceLinkEnvironmentMap] Sample: (3) [{…}, {…}, {…}]
+8595-d56174cf9cc96475.js:1 [fetchServiceLinkEnvironmentMap] Built map entries: 1000
+8595-d56174cf9cc96475.js:1 [fetchServiceLinkEnvironmentMap] Service linked envs: {serviceId: '041ab033-a4c6-e251-1a22-26c8c27ef0a0', envs: Array(1)}
+8595-d56174cf9cc96475.js:1 [fetchServiceLinkEnvironmentMap] Service linked envs: {serviceId: '0a592085-fa5b-0a7f-e9d7-688e35d33ee7', envs: Array(1)}
+8595-d56174cf9cc96475.js:1 [fetchServiceLinkEnvironmentMap] Service linked envs: {serviceId: '1767b7df-a613-d882-cb64-3f65754eaa57', envs: Array(1)}
+8595-d56174cf9cc96475.js:1 [fetchServices] Success: {total: 1000, active: 1000, sample: Array(3)}
+8595-d56174cf9cc96475.js:1 [fetchServiceLinkEnvironmentMap] Querying links for 1000 services
+installHook.js:1 fetchServices (relation query) failed (attempt 1): {code: 'PGRST201', details: Array(2), hint: "Try changing 'environments' to one of the followin…nd the desired relationship in the 'details' key.", message: "Could not embed because more than one relationship was found for 'services' and 'environments'"}
+overrideMethod @ installHook.js:1
+H @ 8595-d56174cf9cc96475.js:1
+await in H
+(anônimo) @ 8595-d56174cf9cc96475.js:1
+aW @ fd9d1056-a8359ecd3a9808db.js:1
+oe @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+or @ fd9d1056-a8359ecd3a9808db.js:1
+ol @ fd9d1056-a8359ecd3a9808db.js:1
+id @ fd9d1056-a8359ecd3a9808db.js:1
+o @ fd9d1056-a8359ecd3a9808db.js:1
+M @ 2117-900957806444e3fc.js:1Entenda o aviso
+8595-d56174cf9cc96475.js:1 [fetchServiceLinkEnvironmentMap] Success, rows: 1000
+8595-d56174cf9cc96475.js:1 [fetchServiceLinkEnvironmentMap] Sample: (3) [{…}, {…}, {…}]
+8595-d56174cf9cc96475.js:1 [fetchServiceLinkEnvironmentMap] Built map entries: 1000
+8595-d56174cf9cc96475.js:1 [fetchServiceLinkEnvironmentMap] Service linked envs: {serviceId: '041ab033-a4c6-e251-1a22-26c8c27ef0a0', envs: Array(1)}

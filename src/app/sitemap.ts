@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .eq('status', 'active'),
       supabase
         .from('services')
-        .select('slug,title,status,is_active,updated_at,environment_id,environments!services_environment_id_fkey(slug)')
+        .select('slug,title,status,is_active,updated_at,environment_id,environments!service_environment_links(slug)')
         .or('status.eq.active,is_active.eq.true'),
     ]);
 
@@ -57,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         const slug = service.slug || slugify(service.title || '');
         if (!slug) return null;
 
-        const envSlug = (service as any).environments?.slug;
+        const envSlug = (service as any).environments?.[0]?.slug;
         if (!envSlug) {
           return {
             url: `${siteUrl}/service/${slug}`,

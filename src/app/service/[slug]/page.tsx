@@ -16,7 +16,7 @@ async function getServiceBySlug(slug: string) {
   try {
     const { data: bySlug } = await supabase
       .from('services')
-.select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments!services_environment_id_fkey(name, slug)')
+.select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments!service_environment_links(name, slug)')
       .eq('slug', slug)
       .maybeSingle();
 
@@ -24,7 +24,7 @@ async function getServiceBySlug(slug: string) {
 
     const { data: byId } = await supabase
       .from('services')
-      .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments!services_environment_id_fkey(name, slug)')
+      .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments!service_environment_links(name, slug)')
       .eq('id', slug)
       .maybeSingle();
 
@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const service = await getServiceBySlug(params.slug);
   const siteUrl = getSiteUrl();
   const title = service?.title || humanizeSlug(params.slug) || 'Servico';
-  const environmentSlug = service?.environments?.slug;
+  const environmentSlug = service?.environments?.[0]?.slug;
   const description =
     service?.description?.slice(0, 160) ||
     `Veja detalhes do servico ${title}, fotos, avaliacao e contato direto na ConectaE.`;
@@ -75,8 +75,8 @@ export default async function Page({ params }: Props) {
   const description =
     service?.description ||
     'Confira o servico, veja detalhes importantes e entre em contato com facilidade.';
-  const environmentName = service?.environments?.name || '';
-  const environmentSlug = service?.environments?.slug;
+  const environmentName = service?.environments?.[0]?.name || '';
+  const environmentSlug = service?.environments?.[0]?.slug;
   const websiteHref = normalizeWebsiteUrl(service?.website_url);
   const canonical = environmentSlug
     ? `${siteUrl}/places/${environmentSlug}/services/${params.slug}`
