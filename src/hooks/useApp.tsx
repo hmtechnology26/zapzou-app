@@ -919,7 +919,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         const query = supabase
           .from('services')
-          .select('*, environments(name, slug, latitude, longitude, address, type, image_url)')
+          .select('*, environments!services_environment_id_fkey(name, slug, latitude, longitude, address, type, image_url)')
           .order('created_at', { ascending: false });
 
         const { data, error } = await query;
@@ -1162,7 +1162,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('services')
-        .select('*, environments(name, slug, latitude, longitude, address, type, image_url)')
+        .select('*, environments!services_environment_id_fkey(name, slug, latitude, longitude, address, type, image_url)')
         .eq('provider_id', userId)
         .order('created_at', { ascending: false });
 

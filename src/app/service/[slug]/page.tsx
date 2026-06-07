@@ -16,7 +16,7 @@ async function getServiceBySlug(slug: string) {
   try {
     const { data: bySlug } = await supabase
       .from('services')
-      .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments(name, slug)')
+.select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments!services_environment_id_fkey(name, slug)')
       .eq('slug', slug)
       .maybeSingle();
 
@@ -24,7 +24,7 @@ async function getServiceBySlug(slug: string) {
 
     const { data: byId } = await supabase
       .from('services')
-      .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments(name, slug)')
+      .select('title, slug, description, image_url, website_url, environment_id, status, is_active, environments!services_environment_id_fkey(name, slug)')
       .eq('id', slug)
       .maybeSingle();
 

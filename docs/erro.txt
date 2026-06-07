@@ -1,21 +1,17 @@
-991-8cdd691352800b9a.js:37  POST https://oquvsvroobikjqyultua.supabase.co/rest/v1/reviews?select=id%2Cservice_id%2Cuser_id%2Cuser_name%2Cuser_avatar%2Cstars%2Ccomment%2Ccreated_at%2Cis_anonymous 400 (Bad Request)
-(anonymous) @ 991-8cdd691352800b9a.js:37
-(anonymous) @ 991-8cdd691352800b9a.js:37
-await in (anonymous)
-then @ 991-8cdd691352800b9a.js:1
-595-9250b35e6b0564a6.js:1 addReview failed: {code: '23502', details: 'Failing row contains (60d78a5f-0128-4988-ab48-abf4…ontent.com/a/ACg8ocIr3Ly8NGTASJdpUaAx0x-q..., t).', hint: null, message: 'null value in column "user_name" of relation "reviews" violates not-null constraint'}code: "23502"details: "Failing row contains (60d78a5f-0128-4988-ab48-abf46ac0df98, c5f1b90e-2392-4f32-9d70-23008b86c11b, 5ef16060-cdd0-483b-a700-2734c8495b8f, null, 2, , 2026-04-03 21:00:32.894313+00, https://lh3.googleusercontent.com/a/ACg8ocIr3Ly8NGTASJdpUaAx0x-q..., t)."hint: nullmessage: "null value in column \"user_name\" of relation \"reviews\" violates not-null constraint"[[Prototype]]: Object
-et @ 595-9250b35e6b0564a6.js:1
-await in et
-B @ page-1d6714788ea68f1b.js:1
-v @ page-1d6714788ea68f1b.js:1
-a_ @ fd9d1056-3054852c68a3097a.js:1
-aR @ fd9d1056-3054852c68a3097a.js:1
-(anonymous) @ fd9d1056-3054852c68a3097a.js:1
-sF @ fd9d1056-3054852c68a3097a.js:1
-sM @ fd9d1056-3054852c68a3097a.js:1
-(anonymous) @ fd9d1056-3054852c68a3097a.js:1
-o4 @ fd9d1056-3054852c68a3097a.js:1
-iV @ fd9d1056-3054852c68a3097a.js:1
-sU @ fd9d1056-3054852c68a3097a.js:1
-uR @ fd9d1056-3054852c68a3097a.js:1
-uM @ fd9d1056-3054852c68a3097a.js:1
+{
+    "code": "PGRST201",
+    "details": [
+        {
+            "cardinality": "many-to-one",
+            "embedding": "services with environments",
+            "relationship": "services_environment_id_fkey using services(environment_id) and environments(id)"
+        },
+        {
+            "cardinality": "many-to-many",
+            "embedding": "services with environments",
+            "relationship": "service_environment_links using service_environment_links_service_id_fkey(service_id) and service_environment_links_environment_id_fkey(environment_id)"
+        }
+    ],
+    "hint": "Try changing 'environments' to one of the following: 'environments!services_environment_id_fkey', 'environments!service_environment_links'. Find the desired relationship in the 'details' key.",
+    "message": "Could not embed because more than one relationship was found for 'services' and 'environments'"
+}
