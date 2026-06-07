@@ -917,37 +917,72 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
-        const query = supabase
-          .from('services')
-.select('*, environments!service_environment_links(name, slug, latitude, longitude, address, type, image_url)')
-          .order('created_at', { ascending: false });
+        const PAGE_SIZE = 1000;
+        let allRows: any[] = [];
+        let paginationError: any = null;
 
-        const { data, error } = await query;
-
-        let rows: any[] = data || [];
-        if (error) {
-          console.warn(`fetchServices (relation query) failed (attempt ${attempt + 1}):`, error);
-
-          const { data: legacyData, error: legacyError } = await supabase
+        for (let offset = 0; ; offset += PAGE_SIZE) {
+          const { data, error } = await supabase
             .from('services')
-            .select('*')
-            .order('created_at', { ascending: false });
+.select('*, environments!service_environment_links(name, slug, latitude, longitude, address, type, image_url)')
+            .order('created_at', { ascending: false })
+            .range(offset, offset + PAGE_SIZE - 1);
 
-          if (legacyError) {
-            lastError = legacyError;
+          if (error) {
+            paginationError = error;
+            break;
+          }
+
+          if (data) {
+            allRows.push(...data);
+            if (data.length < PAGE_SIZE) break;
+          } else {
+            break;
+          }
+        }
+
+        let rows: any[] = allRows;
+        if (paginationError) {
+          console.warn(`fetchServices (relation query) failed (attempt ${attempt + 1}):`, paginationError);
+
+          let allLegacyRows: any[] = [];
+          let legacyPaginationError: any = null;
+
+          for (let offset = 0; ; offset += PAGE_SIZE) {
+            const { data, error } = await supabase
+              .from('services')
+              .select('*')
+              .order('created_at', { ascending: false })
+              .range(offset, offset + PAGE_SIZE - 1);
+
+            if (error) {
+              legacyPaginationError = error;
+              break;
+            }
+
+            if (data) {
+              allLegacyRows.push(...data);
+              if (data.length < PAGE_SIZE) break;
+            } else {
+              break;
+            }
+          }
+
+          if (legacyPaginationError) {
+            lastError = legacyPaginationError;
             if (attempt < MAX_RETRIES) {
               const delay = Math.min(1000 * Math.pow(2, attempt), 4000);
               console.warn(`fetchServices legacy fallback also failed, retrying in ${delay}ms...`);
               await new Promise(r => setTimeout(r, delay));
               continue;
             }
-            throw legacyError;
+            throw legacyPaginationError;
           }
 
           const { data: fallbackLinks } = await supabase
             .from('service_environment_links')
             .select('service_id, environment_id, environments!inner(id, name, slug, latitude, longitude, address, type, image_url)')
-            .in('service_id', (legacyData || []).map((s: any) => s.id));
+            .in('service_id', (allLegacyRows || []).map((s: any) => s.id));
 
           const envByServiceId = new Map<string, any[]>();
           (fallbackLinks || []).forEach((link: any) => {
@@ -956,7 +991,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             envByServiceId.set(link.service_id, list);
           });
 
-          rows = (legacyData || []).map((service: any) => ({
+          rows = (allLegacyRows || []).map((service: any) => ({
             ...service,
             environments: envByServiceId.get(service.id) || [],
           }));
@@ -1145,30 +1180,67 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('services')
-        .select('*, environments!service_environment_links(name, slug, latitude, longitude, address, type, image_url)')
-        .eq('provider_id', userId)
-        .order('created_at', { ascending: false });
+      const PAGE_SIZE = 1000;
+      let allRows: any[] = [];
+      let mainError: any = null;
 
-      let rows: any[] = data || [];
-      if (error) {
-        console.warn('fetchUserServices (relation query) failed:', error);
-
-        const { data: legacyData, error: legacyError } = await supabase
+      for (let offset = 0; ; offset += PAGE_SIZE) {
+        const { data, error } = await supabase
           .from('services')
-          .select('*')
+          .select('*, environments!service_environment_links(name, slug, latitude, longitude, address, type, image_url)')
           .eq('provider_id', userId)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .range(offset, offset + PAGE_SIZE - 1);
 
-        if (legacyError) {
-          throw legacyError;
+        if (error) {
+          mainError = error;
+          break;
+        }
+
+        if (data) {
+          allRows.push(...data);
+          if (data.length < PAGE_SIZE) break;
+        } else {
+          break;
+        }
+      }
+
+      let rows: any[] = allRows;
+      if (mainError) {
+        console.warn('fetchUserServices (relation query) failed:', mainError);
+
+        let allLegacyRows: any[] = [];
+        let legacyError_: any = null;
+
+        for (let offset = 0; ; offset += PAGE_SIZE) {
+          const { data, error } = await supabase
+            .from('services')
+            .select('*')
+            .eq('provider_id', userId)
+            .order('created_at', { ascending: false })
+            .range(offset, offset + PAGE_SIZE - 1);
+
+          if (error) {
+            legacyError_ = error;
+            break;
+          }
+
+          if (data) {
+            allLegacyRows.push(...data);
+            if (data.length < PAGE_SIZE) break;
+          } else {
+            break;
+          }
+        }
+
+        if (legacyError_) {
+          throw legacyError_;
         }
 
         const { data: fallbackLinks } = await supabase
           .from('service_environment_links')
           .select('service_id, environment_id, environments!inner(id, name, slug, latitude, longitude, address, type, image_url)')
-          .in('service_id', (legacyData || []).map((s: any) => s.id));
+          .in('service_id', (allLegacyRows || []).map((s: any) => s.id));
 
         const envByServiceId = new Map<string, any[]>();
         (fallbackLinks || []).forEach((link: any) => {
@@ -1177,7 +1249,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           envByServiceId.set(link.service_id, list);
         });
 
-        rows = (legacyData || []).map((service: any) => ({
+        rows = (allLegacyRows || []).map((service: any) => ({
           ...service,
           environments: envByServiceId.get(service.id) || [],
         }));
