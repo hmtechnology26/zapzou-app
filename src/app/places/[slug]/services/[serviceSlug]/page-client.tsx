@@ -24,6 +24,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
 
   const {
     services = [],
+    servicesLoading,
     user,
     selectedEnvironments = [],
     toggleServiceStatus,
@@ -35,7 +36,6 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
   } = useApp() || {};
 
   const [mounted, setMounted] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -53,6 +53,12 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
   const generateSlug = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   useEffect(() => {
+    if (!mounted) {
+      setMounted(true);
+    }
+  }, []);
+
+  useEffect(() => {
     if (services.length > 0) {
       const servicesWithSlug = services.map((s: any) => ({
         ...s,
@@ -61,12 +67,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
       const found = servicesWithSlug.find((s: any) => s.slug === serviceSlug || s.id === serviceSlug);
       setService(found);
     }
-    if (!mounted) {
-      setMounted(true);
-    }
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, [services, serviceSlug, mounted]);
+  }, [services, serviceSlug]);
 
   useEffect(() => {
     if (!serviceId) return;
@@ -115,7 +116,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
     }
   };
 
-  if (!mounted || loading) {
+  if (!mounted || servicesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
