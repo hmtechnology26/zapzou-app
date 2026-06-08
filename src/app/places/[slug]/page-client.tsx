@@ -32,7 +32,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const { selectedEnvironments, services, user, setSelectedEnvironment, setSelectedEnvironments, requestAffiliation } = useApp();
+  const { selectedEnvironments, services, user, setSelectedEnvironment, setSelectedEnvironments, requestAffiliation, servicesLoading } = useApp();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [placeFromSearch, setPlaceFromSearch] = useState<PlaceSearchResult | null>(null);
@@ -761,9 +761,15 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
             </div>
           ))}
           
-          {servicesWithDistance.length === 0 && (
+          {servicesWithDistance.length === 0 && !servicesLoading && (
             <div className="col-span-full py-12 text-center bg-surface-container-lowest rounded-[2rem] border-2 border-dashed border-outline-variant/20 italic text-on-surface-variant/60">
               <p className="text-sm font-bold text-on-surface/40">Nenhum serviço encontrado neste ambiente</p>
+            </div>
+          )}
+          {servicesWithDistance.length === 0 && servicesLoading && (
+            <div className="col-span-full py-16 text-center flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-sm font-medium text-on-surface-variant">Carregando serviços...</p>
             </div>
           )}
         </div>
