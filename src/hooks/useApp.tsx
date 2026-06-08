@@ -924,7 +924,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         for (let offset = 0; ; offset += PAGE_SIZE) {
           const { data, error } = await supabase
             .from('services')
-.select('*, environments!service_environment_links(name, slug, latitude, longitude, address, type, image_url)')
+.select('*, environments!service_environment_links(id, name, slug, latitude, longitude, address, type, image_url)')
             .order('created_at', { ascending: false })
             .range(offset, offset + PAGE_SIZE - 1);
 
@@ -997,21 +997,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }));
         }
 
-        const serviceLinkEnvironmentMap = await fetchServiceLinkEnvironmentMap(rows);
-
         const formatted = rows.map((s: any) => {
-          const environment = normalizeRelatedRecord<{
-            id?: string;
-            name?: string;
-            slug?: string;
-            latitude?: number;
-            longitude?: number;
-            address?: string;
-            type?: string;
-            image_url?: string;
-          }>(s.environments);
-
-          const linkedEnvironments = serviceLinkEnvironmentMap.get(s.id) || [];
+          const environmentsList: Array<{
+            id?: string; name?: string; slug?: string; latitude?: number;
+            longitude?: number; address?: string; type?: string; image_url?: string;
+          }> = Array.isArray(s.environments) ? s.environments : [];
+          const environment = environmentsList[0] || null;
+          const linkedEnvs = environmentsList.map((e: any) => ({
+            id: e.id || '',
+            slug: e.slug || '',
+            name: e.name || '',
+            type: e.type || '',
+            latitude: e.latitude,
+            longitude: e.longitude,
+            address: e.address || '',
+            image: e.image_url || '',
+          }));
 
           return {
             environmentName: environment?.name || '',
@@ -1036,11 +1037,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
             status: s.status as any,
             isActive: s.is_active,
             environmentId: environment?.id || null,
-            environments: linkedEnvironments.map((env) => ({
+            environments: linkedEnvs.map((env) => ({
               id: env.id,
               slug: env.slug,
             })),
-            linkedEnvironments,
+            linkedEnvironments: linkedEnvs,
             WhatsApp: s.whatsapp,
             instagram: s.instagram,
             website: s.website_url,
@@ -1187,7 +1188,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       for (let offset = 0; ; offset += PAGE_SIZE) {
         const { data, error } = await supabase
           .from('services')
-          .select('*, environments!service_environment_links(name, slug, latitude, longitude, address, type, image_url)')
+          .select('*, environments!service_environment_links(id, name, slug, latitude, longitude, address, type, image_url)')
           .eq('provider_id', userId)
           .order('created_at', { ascending: false })
           .range(offset, offset + PAGE_SIZE - 1);
@@ -1255,21 +1256,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }));
       }
 
-      const serviceLinkEnvironmentMap = await fetchServiceLinkEnvironmentMap(rows);
-
       const formatted = rows.map((s: any) => {
-        const environment = normalizeRelatedRecord<{
-          id?: string;
-          name?: string;
-          slug?: string;
-          latitude?: number;
-          longitude?: number;
-          address?: string;
-          type?: string;
-          image_url?: string;
-        }>(s.environments);
-
-        const linkedEnvironments = serviceLinkEnvironmentMap.get(s.id) || [];
+        const environmentsList: Array<{
+          id?: string; name?: string; slug?: string; latitude?: number;
+          longitude?: number; address?: string; type?: string; image_url?: string;
+        }> = Array.isArray(s.environments) ? s.environments : [];
+        const environment = environmentsList[0] || null;
+        const linkedEnvs = environmentsList.map((e: any) => ({
+          id: e.id || '',
+          slug: e.slug || '',
+          name: e.name || '',
+          type: e.type || '',
+          latitude: e.latitude,
+          longitude: e.longitude,
+          address: e.address || '',
+          image: e.image_url || '',
+        }));
 
         return {
           environmentName: environment?.name || '',
@@ -1293,11 +1295,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
           status: s.status as any,
           isActive: s.is_active,
           environmentId: environment?.id || null,
-          environments: linkedEnvironments.map((env) => ({
+          environments: linkedEnvs.map((env) => ({
             id: env.id,
             slug: env.slug,
           })),
-          linkedEnvironments,
+          linkedEnvironments: linkedEnvs,
           WhatsApp: s.whatsapp,
           instagram: s.instagram,
           cnpj: s.cnpj || '',
