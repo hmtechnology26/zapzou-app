@@ -20,6 +20,7 @@ import { SearchField } from "@/components/SearchField";
 import { supabase } from "@/lib/supabase";
 import { trackServiceInteraction } from "@/lib/service-interactions";
 import { ImageModal } from "@/components/ImageModal";
+import { StarRating } from "@/components/StarRating";
 
 const PAGE_SIZE = 16;
 type MembershipAccessType = "resident" | "service_provider" | null;
@@ -786,7 +787,11 @@ export default function HomePage() {
           distanceEnvironmentId,
         };
       })
-      .sort((a, b) => a.distance - b.distance);
+      .sort((a, b) =>
+        selectedCategory === "all"
+          ? a.distance - b.distance
+          : (b.rating ?? 0) - (a.rating ?? 0) || a.distance - b.distance,
+      );
   }, [
     activeServices,
     getLinkedEnvironmentIds,
@@ -2038,6 +2043,12 @@ export default function HomePage() {
                           <h4 className="font-black text-on-surface text-[12px] leading-tight line-clamp-2 group-hover/card:text-[#30cc36] transition-colors sm:text-[15px] sm:line-clamp-2">
                             {service.title}
                           </h4>
+                          {service.rating > 0 && (
+                            <div className="mt-0.5 flex items-center gap-1">
+                              <StarRating rating={service.rating} size={10} />
+                              <span className="text-[10px] font-semibold text-on-surface-variant leading-none">{service.rating.toFixed(1)}</span>
+                            </div>
+                          )}
                           <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[8px] font-semibold text-on-surface-variant sm:text-[11px]">
                             {service.distanceEnvironmentName && (
                               <span className="line-clamp-1 max-w-full rounded-full bg-surface-container-high px-1.5 py-0.5 sm:px-2.5 sm:py-1">
@@ -2217,6 +2228,12 @@ export default function HomePage() {
                           <h4 className="font-black text-on-surface text-[12px] leading-tight line-clamp-2 group-hover/card:text-primary transition-colors sm:text-[15px] sm:line-clamp-2">
                             {service.title}
                           </h4>
+                          {service.rating > 0 && (
+                            <div className="mt-0.5 flex items-center gap-1">
+                              <StarRating rating={service.rating} size={10} />
+                              <span className="text-[10px] font-semibold text-on-surface-variant leading-none">{service.rating.toFixed(1)}</span>
+                            </div>
+                          )}
                           <div className="mt-1 flex min-w-0 items-center gap-1.5 text-[8px] font-semibold text-on-surface-variant sm:text-[11px]">
                             {service.distanceEnvironmentName && (
                               <span className="line-clamp-1 max-w-full rounded-full bg-surface-container-high px-1.5 py-0.5 sm:px-2.5 sm:py-1">
@@ -2541,6 +2558,12 @@ export default function HomePage() {
                       <p className="text-sm font-bold text-on-surface truncate mt-0.5">
                         {service.title}
                       </p>
+                      {(service.rating ?? 0) > 0 && (
+                        <div className="mt-0.5 flex items-center gap-1">
+                          <StarRating rating={service.rating ?? 0} size={8} />
+                          <span className="text-[9px] font-semibold text-on-surface-variant leading-none">{(service.rating ?? 0).toFixed(1)}</span>
+                        </div>
+                      )}
                       {(service.distanceEnvironmentName ||
                         service.environmentName) && (
                         <p className="text-xs text-on-surface-variant truncate mt-0.5">

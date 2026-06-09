@@ -8,6 +8,7 @@ import { TopAppBar } from '@/components/TopAppBar';
 import { useApp } from '@/hooks/useApp';
 import { useState, useEffect, useMemo } from 'react';
 import { type PlaceSearchResult } from '@/lib/maps';
+import { StarRating } from '@/components/StarRating';
 import {
   AUTO_APPROVAL_RADIUS_KM,
   calculateDistanceKm,
@@ -730,6 +731,12 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                     </span>
                   </div>
                   <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#30cc36] transition-colors">{service.title}</h4>
+                  {(service.rating ?? 0) > 0 && (
+                    <div className="mt-0.5 flex items-center gap-1">
+                      <StarRating rating={service.rating ?? 0} size={10} />
+                      <span className="text-[10px] font-semibold text-on-surface-variant leading-none">{(service.rating ?? 0).toFixed(1)}</span>
+                    </div>
+                  )}
                   <p className="text-xs text-on-surface-variant line-clamp-1 mt-1 font-medium">{service.description}</p>
                 
                   <div className="mt-3 flex items-center justify-between">
