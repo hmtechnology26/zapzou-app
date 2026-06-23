@@ -13,6 +13,7 @@ import type { Review } from '@/types';
 import { hasCnpj } from '@/lib/cnpj';
 import { normalizeWebsiteUrl } from '@/lib/website';
 import { trackServiceInteraction } from '@/lib/service-interactions';
+import { supabase } from '@/lib/supabase';
 
 interface ServiceDetailPageProps {
   seoContent?: ReactNode;
@@ -36,6 +37,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
   } = useApp() || {};
 
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -53,21 +55,84 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
   const generateSlug = (text: string) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   useEffect(() => {
-    if (!mounted) {
-      setMounted(true);
-    }
+    setMounted(true);
   }, []);
 
+  // Fetch service directly by slug — independente do carregamento global de todos os serviços
   useEffect(() => {
-    if (services.length > 0) {
+    if (!serviceSlug) return;
+    let cancelled = false;
+
+    const fetchServiceDirect = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('services')
+          .select('*')
+          .eq('slug', serviceSlug)
+          .maybeSingle();
+
+        if (cancelled) return;
+
+        if (data && !error) {
+          setService({
+            ...data,
+            image: data.image_url || '',
+            images: Array.isArray(data.images_urls) ? data.images_urls : [],
+            WhatsApp: data.whatsapp,
+            instagram: data.instagram,
+            website: data.website_url,
+            isActive: data.is_active,
+            environmentId: data.environment_id,
+            slug: data.slug || serviceSlug,
+          });
+          setLoading(false);
+          return;
+        }
+
+        const { data: byId } = await supabase
+          .from('services')
+          .select('*')
+          .eq('id', serviceSlug)
+          .maybeSingle();
+
+        if (!cancelled && byId) {
+          setService({
+            ...byId,
+            image: byId.image_url || '',
+            images: Array.isArray(byId.images_urls) ? byId.images_urls : [],
+            WhatsApp: byId.whatsapp,
+            instagram: byId.instagram,
+            website: byId.website_url,
+            isActive: byId.is_active,
+            environmentId: byId.environment_id,
+            slug: byId.slug || serviceSlug,
+          });
+        }
+      } catch (e) {
+        console.warn('Direct service fetch failed:', e);
+      }
+      if (!cancelled) setLoading(false);
+    };
+
+    fetchServiceDirect();
+
+    return () => { cancelled = true; };
+  }, [serviceSlug]);
+
+  // Fallback: quando o array global de serviços carregar, atualiza se ainda não temos o serviço
+  useEffect(() => {
+    if (services.length > 0 && !service) {
       const servicesWithSlug = services.map((s: any) => ({
         ...s,
         slug: s.slug || generateSlug(s.title)
       }));
       const found = servicesWithSlug.find((s: any) => s.slug === serviceSlug || s.id === serviceSlug);
-      setService(found);
+      if (found) {
+        setService(found);
+        setLoading(false);
+      }
     }
-  }, [services, serviceSlug]);
+  }, [services, serviceSlug, service]);
 
   useEffect(() => {
     if (!serviceId) return;
@@ -116,7 +181,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
     }
   };
 
-  if (!mounted || servicesLoading) {
+  if (!mounted || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
