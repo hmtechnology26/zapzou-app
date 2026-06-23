@@ -1665,31 +1665,29 @@ if (!resolvedEnvironmentId) {
                   ? 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved, owner_reply, owner_reply_at, owner_reply_by'
                   : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved'
             )
-            .eq('service_id', serviceId)
-            .or('is_anonymous.is.null,is_anonymous.eq.false,approved.eq.true')
-            .order('created_at', { ascending: false })
-            .limit(50),
-          25000,
-          'Tempo esgotado ao carregar avaliações'
-        )) as any);
-      } catch (err) {
-        console.warn('fetchServiceReviews failed (exception/timeout):', err);
-        return serviceReviews[serviceId] || [];
-      }
+             .eq('service_id', serviceId)
+             .order('created_at', { ascending: false })
+             .limit(50),
+           25000,
+           'Tempo esgotado ao carregar avaliações'
+         )) as any);
+       } catch (err) {
+         console.warn('fetchServiceReviews failed (exception/timeout):', err);
+         return serviceReviews[serviceId] || [];
+       }
 
-      if (error && isMissingColumnError(error, 'user_avatar')) {
-        reviewsHasUserAvatarColumnRef.current = false;
-        try {
-          ({ data, error } = (await withTimeout(
-            supabase
-              .from('reviews')
-              .select(
-                reviewsHasOwnerReplyColumnRef.current === false
-                  ? 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved'
-                  : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved, owner_reply, owner_reply_at, owner_reply_by'
-              )
-              .eq('service_id', serviceId)
-              .or('is_anonymous.is.null,is_anonymous.eq.false,approved.eq.true')
+       if (error && isMissingColumnError(error, 'user_avatar')) {
+         reviewsHasUserAvatarColumnRef.current = false;
+         try {
+           ({ data, error } = (await withTimeout(
+             supabase
+               .from('reviews')
+               .select(
+                 reviewsHasOwnerReplyColumnRef.current === false
+                   ? 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved'
+                   : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved, owner_reply, owner_reply_at, owner_reply_by'
+               )
+               .eq('service_id', serviceId)
               .order('created_at', { ascending: false })
               .limit(50),
             25000,
@@ -1712,20 +1710,19 @@ if (!resolvedEnvironmentId) {
                   ? 'id, service_id, user_id, user_name, user_avatar, stars, comment, created_at, is_anonymous, approved'
                   : 'id, service_id, user_id, user_name, stars, comment, created_at, is_anonymous, approved'
               )
-              .eq('service_id', serviceId)
-              .or('is_anonymous.is.null,is_anonymous.eq.false,approved.eq.true')
-              .order('created_at', { ascending: false })
-              .limit(50),
-            25000,
-            'Tempo esgotado ao carregar avaliações'
-          )) as any);
-        } catch (err) {
-          console.warn('fetchServiceReviews failed (exception/timeout):', err);
-          return serviceReviews[serviceId] || [];
-        }
-      }
+               .eq('service_id', serviceId)
+               .order('created_at', { ascending: false })
+               .limit(50),
+             25000,
+             'Tempo esgotado ao carregar avaliações'
+           )) as any);
+         } catch (err) {
+           console.warn('fetchServiceReviews failed (exception/timeout):', err);
+           return serviceReviews[serviceId] || [];
+         }
+       }
 
-      if (!error && includeAvatarColumn) {
+       if (!error && includeAvatarColumn) {
         reviewsHasUserAvatarColumnRef.current = true;
       }
       if (!error && includeOwnerReplyColumns) {
