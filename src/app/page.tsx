@@ -1823,7 +1823,7 @@ export default function HomePage() {
                   key={category.id}
                   type="button"
                   onClick={() => handleSelectCategory(category)}
-                  className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-black whitespace-nowrap shadow-sm transition-all active:scale-95 ${
+                  className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] whitespace-nowrap shadow-sm transition-all active:scale-95 ${
                     isSelected
                       ? "border-[#04193d] bg-[#04193d] text-white shadow-lg shadow-[#04193D]/25"
                       : "border-white/20 bg-white/70 text-zinc-500 backdrop-blur-xl hover:border-[#04193D]/30 hover:text-[#04193D]"
@@ -1838,7 +1838,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setIsCategorySheetOpen(true)}
-              className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/75 px-3 py-2 text-[11px] font-black text-zinc-600 shadow-sm backdrop-blur-xl transition-all active:scale-95"
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/75 px-3 py-2 text-[11px] text-zinc-600 shadow-sm backdrop-blur-xl transition-all active:scale-95"
             >
               <Icon icon="tune" size={14} weight={700} />
               Mais
@@ -1856,7 +1856,7 @@ export default function HomePage() {
                   key={cat.id}
                   type="button"
                   onClick={() => handleSelectCategory(cat)}
-                  className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-black whitespace-nowrap shadow-sm transition-all active:scale-95 ${
+                  className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-semibold whitespace-nowrap shadow-sm transition-all active:scale-95 ${
                     isSelected
                       ? "border-[#04193D] bg-[#04193D] text-white shadow-lg shadow-[#04193D]/25"
                       : "border-white/20 bg-white/70 text-zinc-500 backdrop-blur-xl hover:border-[#04193D]/30 hover:text-[#04193D]"
@@ -1903,7 +1903,7 @@ export default function HomePage() {
                         key={`sheet-${category.id}`}
                         type="button"
                         onClick={() => handleSelectCategory(category)}
-                        className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-xs font-black transition-all ${
+                        className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-xs transition-all ${
                           isSelected
                             ? "border-[#04193D] bg-[#04193D]/12 text-[#04193D]"
                             : "border-zinc-200/70 bg-white text-zinc-600"
@@ -2012,7 +2012,7 @@ export default function HomePage() {
                       <div className="flex min-w-0 min-h-[96px] flex-1 flex-col justify-between py-0.5 sm:min-h-[152px] sm:p-4">
                         <div className="min-w-0 sm:min-h-[88px]">
                           <div className="mb-1 flex items-center gap-1 sm:mb-2 sm:flex-wrap sm:gap-2">
-                            <span className="rounded-full bg-[#04193D]/5 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-[#04193D]">
+                            <span className="rounded-full bg-[#04193D]/5 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-[#04193D]">
                               {service.category}
                             </span>
                             <div className="ml-auto flex flex-col items-end gap-1">
@@ -2197,7 +2197,7 @@ export default function HomePage() {
                       <div className="flex min-w-0 min-h-[96px] flex-1 flex-col justify-between py-0.5 sm:min-h-[152px] sm:p-4">
                         <div className="min-w-0 sm:min-h-[88px]">
                           <div className="mb-1 flex items-center gap-1 sm:mb-2 sm:flex-wrap sm:gap-2">
-                            <span className="rounded-full bg-primary/5 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-primary">
+                            <span className="rounded-full bg-primary/5 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-primary">
                               {service.category || "Sem categoria"}
                             </span>
                             <div className="ml-auto flex flex-col items-end gap-1">
@@ -2541,7 +2541,7 @@ export default function HomePage() {
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[11px] font-black uppercase tracking-wide text-[#04193D]">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-[#04193D]">
                         {service.category || "Sem categoria"}
                       </p>
                       <p className="text-sm font-bold text-on-surface truncate mt-0.5">

@@ -139,7 +139,7 @@ export default function EnvironmentCataloguePage() {
 
                     <div className="p-4 flex-1 flex flex-col">
                       <div className="flex items-center justify-between mb-1">
-                         <span className="text-[10px] font-bold text-primary tracking-widest uppercase">{service.category}</span>
+                         <span className="text-[10px] font-semibold text-primary tracking-widest uppercase">{service.category}</span>
                       </div>
                       <h4 className="font-bold text-on-surface mb-2">{service.title}</h4>
                       

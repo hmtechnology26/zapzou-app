@@ -515,7 +515,7 @@ export default function MyAdsPage() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3">
-                          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                          <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
                             <Icon icon="category" size={12} />
                             {TYPE_LABELS[env.type]}
                           </span>

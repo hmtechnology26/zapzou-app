@@ -631,7 +631,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
             <button 
               key={cat.id} 
               onClick={() => setSelectedCategory(cat.id === 'all' ? 'all' : cat.label)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl whitespace-nowrap font-black text-xs transition-all border shrink-0 shadow-sm ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl whitespace-nowrap text-xs transition-all border shrink-0 shadow-sm ${
                 selectedCategory === (cat.id === 'all' ? 'all' : cat.label)
                   ? 'bg-[#04193D] text-white border-[#04193D] shadow-lg shadow-[#04193D]/20 scale-105' 
                   : 'bg-surface-container-lowest text-on-surface-variant border-outline-variant/10 hover:border-[#04193D]/40 hover:text-[#04193D] active:scale-95'

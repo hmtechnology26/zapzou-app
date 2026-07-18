@@ -509,7 +509,7 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             )}
 
           <div className="absolute top-3 right-3 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm z-10">
-              <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{service.category}</span>
+              <span className="text-[10px] font-semibold text-primary uppercase tracking-widest">{service.category}</span>
             </div>
           </section>
 

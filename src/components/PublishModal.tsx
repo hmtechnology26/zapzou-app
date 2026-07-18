@@ -930,7 +930,7 @@ export function PublishModal() {
                       key={category.id}
                       type="button"
                       onClick={() => setSelectedCategory(category.id)}
-                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-bold text-sm transition-all border ${
+                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-semibold text-sm transition-all border ${
                         isSelected
                           ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
                           : 'bg-surface-container-lowest text-on-surface-variant border-outline-variant/10 hover:border-primary/30 hover:text-primary'
