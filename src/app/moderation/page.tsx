@@ -731,12 +731,12 @@ export default function ModerationPage() {
       <main className="mx-auto max-w-6xl space-y-5 px-4 pb-8 pt-16 md:space-y-6 md:px-8 md:pt-20">
         <section className="relative mt-4 overflow-hidden rounded-[2rem] border border-primary/10 bg-surface-container-lowest/90 shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
           <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
-          <div className="pointer-events-none absolute -left-8 bottom-0 h-28 w-28 rounded-full bg-[#30cc36]/10 blur-3xl" />
+          <div className="pointer-events-none absolute -left-8 bottom-0 h-28 w-28 rounded-full bg-[#04193D]/10 blur-3xl" />
 
           <div className="relative flex flex-col gap-6 p-5 md:p-8 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
             <div className="max-w-2xl space-y-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-sm">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#04193D]/10 text-[#04193d] shadow-sm">
                   <Icon icon="admin_panel_settings" size={24} />
                 </div>
                 <div>
@@ -747,7 +747,7 @@ export default function ModerationPage() {
 
               <div className="flex flex-wrap gap-2">
                 {stats && (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-[#30cc36]/20 bg-[#30cc36]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-[#1f8a2b]">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-[#04193D]/20 bg-[#04193D]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-[#04193d]">
                     <Icon icon="group" size={14} />
                     {stats.activeMembers} membros ativos
                   </span>
@@ -767,7 +767,7 @@ export default function ModerationPage() {
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-2 rounded-[1rem] px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === tab.key
-                    ? 'bg-[#30cc36] text-white shadow-lg shadow-[#30cc36]/25'
+                    ? 'bg-[#04193D] text-white shadow-lg shadow-[#04193D]/25'
                     : 'bg-transparent text-on-surface-variant hover:bg-surface-container-high'
                 }`}
               >
@@ -795,8 +795,8 @@ export default function ModerationPage() {
                 <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
                   <div className="h-[92px] bg-surface-container-lowest rounded-2xl p-2.5 border border-outline-variant/10 flex flex-col justify-between sm:h-auto sm:min-h-[132px] sm:p-4">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <div className="w-6 h-6 rounded-lg bg-[#30cc36]/10 flex items-center justify-center">
-                        <Icon icon="group" size={14} className="text-[#30cc36]" />
+                      <div className="w-6 h-6 rounded-lg bg-[#04193D]/10 flex items-center justify-center">
+                        <Icon icon="group" size={14} className="text-[#04193D]" />
                       </div>
                       <span className="text-on-surface-variant text-xs font-medium">Membros</span>
                     </div>
@@ -881,7 +881,7 @@ export default function ModerationPage() {
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-outline-variant/10">
                       <span className="text-on-surface-variant">Membros ativos</span>
-                      <span className="font-semibold text-[#30cc36]">{stats.activeMembers}</span>
+                      <span className="font-semibold text-[#04193D]">{stats.activeMembers}</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-outline-variant/10">
                       <span className="text-on-surface-variant">Total de serviços</span>
@@ -912,8 +912,8 @@ export default function ModerationPage() {
               </div>
             ) : pendingMembers.length === 0 ? (
               <div className="bg-surface-container-lowest border-2 border-dashed border-outline-variant/30 rounded-2xl p-10 flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 rounded-full bg-[#30cc36]/10 flex items-center justify-center mb-4">
-                  <Icon icon="check_circle" size={32} className="text-[#30cc36]" />
+                <div className="w-16 h-16 rounded-full bg-[#04193D]/10 flex items-center justify-center mb-4">
+                  <Icon icon="check_circle" size={32} className="text-[#04193D]" />
                 </div>
                 <h3 className="text-on-surface font-semibold text-lg mb-1">Tudo limpo!</h3>
                 <p className="text-on-surface-variant text-sm">Não há solicitações pendentes.</p>
@@ -928,7 +928,7 @@ export default function ModerationPage() {
             {pendingMembers.map((member) => (
               <div
                 key={member.id}
-                className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-outline-variant/10 hover:border-[#30cc36]/30 transition-colors"
+                className="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-outline-variant/10 hover:border-[#04193D]/30 transition-colors"
               >
                 <div className="flex items-start gap-4">
                   <div className="relative">
@@ -977,7 +977,7 @@ export default function ModerationPage() {
                   <button
                     onClick={() => handleApprove(member.id)}
                     disabled={actionLoading === member.id}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#30cc36] text-white font-medium text-sm hover:bg-[#259128] transition-all shadow-lg shadow-[#30cc36]/25 disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#04193D] text-white font-medium text-sm hover:bg-[#259128] transition-all shadow-lg shadow-[#04193D]/25 disabled:opacity-50"
                   >
                     <Icon icon="check" size={18} />
                     Aprovar
@@ -1028,7 +1028,7 @@ export default function ModerationPage() {
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <p className="font-bold text-on-surface capitalize truncate">{member.name}</p>
                         {member.role === 'moderator' && (
-                          <span className="bg-[#30cc36]/10 text-[#259128] text-[10px] font-bold uppercase px-2 py-0.5 rounded-md border border-[#30cc36]/20">
+                          <span className="bg-[#04193D]/10 text-[#259128] text-[10px] font-bold uppercase px-2 py-0.5 rounded-md border border-[#04193D]/20">
                             <Icon icon="verified" size={10} className="mr-1" />
                             Líder
                           </span>
@@ -1084,7 +1084,7 @@ export default function ModerationPage() {
                             disabled={actionLoading === member.id}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#30cc36] disabled:opacity-50">
+                          <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#04193D] disabled:opacity-50">
                           </div>
                         </label>
                       )}
@@ -1171,7 +1171,7 @@ export default function ModerationPage() {
                           disabled={actionLoading === service.id}
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#30cc36] disabled:opacity-50">
+                        <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#04193D] disabled:opacity-50">
                         </div>
                       </label>
                     </div>
@@ -1262,7 +1262,7 @@ export default function ModerationPage() {
                             <button
                               onClick={() => handleApproveReview(review.id)}
                               disabled={actionLoading === review.id}
-                              className="text-[#30cc36] hover:bg-[#30cc36]/10 p-2 rounded-full transition-all disabled:opacity-50"
+                              className="text-[#04193D] hover:bg-[#04193D]/10 p-2 rounded-full transition-all disabled:opacity-50"
                               title="Aprovar avaliação"
                             >
                               <Icon icon="check_circle" size={18} />

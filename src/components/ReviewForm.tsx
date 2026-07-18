@@ -73,7 +73,7 @@ export function ReviewForm({ onSubmit, onCancel, isSubmitting = false }: ReviewF
             type="checkbox"
             checked={isAnonymous}
             onChange={(e) => setIsAnonymous(e.target.checked)}
-            className="w-5 h-5 rounded-md border-2 border-outline-variant text-[#30cc36] focus:ring-[#30cc36]/20 focus:ring-offset-0"
+            className="w-5 h-5 rounded-md border-2 border-outline-variant text-[#04193D] focus:ring-[#04193D]/20 focus:ring-offset-0"
           />
           <div className="flex items-center gap-2">
             <Icon icon={isAnonymous ? 'visibility_off' : 'visibility'} size={18} className="text-on-surface-variant" />
@@ -103,7 +103,7 @@ export function ReviewForm({ onSubmit, onCancel, isSubmitting = false }: ReviewF
         <button
           type="submit"
           disabled={isSubmitting || rating === 0}
-          className="flex-1 py-3 rounded-full bg-[#30cc36] text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#259128] transition-colors"
+          className="flex-1 py-3 rounded-full bg-[#04193D] text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#259128] transition-colors"
         >
           {isSubmitting ? 'Enviando...' : 'Enviar Avaliação'}
         </button>

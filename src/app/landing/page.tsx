@@ -280,7 +280,7 @@ export default function LandingSalesPage() {
 
             <Link
               href="/"
-              className="inline-flex shrink-0 items-center rounded-full bg-[#30cc36] px-3 py-2 text-xs font-bold uppercase text-white transition hover:brightness-110 sm:px-4 sm:text-sm"
+              className="inline-flex shrink-0 items-center rounded-full bg-[#04193D] px-3 py-2 text-xs font-bold uppercase text-white transition hover:brightness-110 sm:px-4 sm:text-sm"
             >
               <span className="sm:hidden">Teste grátis</span>
               <span className="hidden sm:inline">Teste grátis agora</span>
@@ -298,13 +298,13 @@ export default function LandingSalesPage() {
       <section className="relative overflow-hidden bg-gradient-to-br from-[#f7fbf8] via-[#f0fbf4] to-[#ecf8ef]">
         <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-14 sm:py-16 md:px-6 lg:grid-cols-2 lg:gap-16 lg:py-28">
           <div className="flex flex-col justify-center">
-            <div className="mb-6 inline-flex w-fit uppercase items-center gap-2 rounded-full border border-[#30cc36]/30 bg-[#e8f9ed] px-4 py-1.5 text-[10px] font-medium text-[#30cc36]">
+            <div className="mb-6 inline-flex w-fit uppercase items-center gap-2 rounded-full border border-[#04193D]/30 bg-[#e8f9ed] px-4 py-1.5 text-[10px] font-medium text-[#04193D]">
               Nova forma de conectar serviços e comunidades
             </div>
 
             <h1 className="text-3xl font-bold leading-[1.1] text-[#122319] sm:text-5xl lg:text-6xl">
               Encontre clientes perto de você e divulgue seus serviços{" "}
-              <span className="text-[#30cc36]">em um só lugar.</span>
+              <span className="text-[#04193D]">em um só lugar.</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-base text-[#5f7066] sm:text-lg">
@@ -316,7 +316,7 @@ export default function LandingSalesPage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 href="/"
-                className="inline-flex w-full justify-center uppercase items-center gap-2 rounded-full bg-[#30cc36] px-6 py-3 text-sm font-bold text-white shadow-[0_10px_30px_rgba(39,201,88,0.3)] transition hover:brightness-110 sm:w-auto sm:px-8"
+                className="inline-flex w-full justify-center uppercase items-center gap-2 rounded-full bg-[#04193D] px-6 py-3 text-sm font-bold text-white shadow-[0_10px_30px_rgba(39,201,88,0.3)] transition hover:brightness-110 sm:w-auto sm:px-8"
               >
                 Teste grátis agora
                 <Icon icon="arrow_forward" size={16} weight={700} />
@@ -331,7 +331,7 @@ export default function LandingSalesPage() {
           </div>
 
           <div className="relative">
-            <div className="absolute -inset-4 rounded-[2rem] bg-[#30cc36]/20 blur-3xl" />
+            <div className="absolute -inset-4 rounded-[2rem] bg-[#04193D]/20 blur-3xl" />
             <img
               src="/hero-conectae.png"
               alt="Profissional usando o Conecta E para conseguir mais clientes"
@@ -362,7 +362,7 @@ export default function LandingSalesPage() {
       <section className="bg-[#f1f7f3] py-14 sm:py-16 lg:py-28">
         <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
           <div className="mx-auto max-w-2xl text-center">
-            <div className="mb-6 text-sm inline-flex w-fit items-center gap-2 rounded-full border border-[#30cc36]/30 bg-[#e8f9ed] px-4 py-1.5 font-medium text-[#30cc36]">
+            <div className="mb-6 text-sm inline-flex w-fit items-center gap-2 rounded-full border border-[#04193D]/30 bg-[#e8f9ed] px-4 py-1.5 font-medium text-[#04193D]">
               A REALIDADE HOJE
             </div>
             <h2 className="mt-3 text-3xl font-bold sm:text-4xl lg:text-5xl">
@@ -396,18 +396,18 @@ export default function LandingSalesPage() {
         id="beneficios"
         className="relative overflow-hidden bg-gradient-to-b from-white via-[#f7fff9] to-white py-16 sm:py-20 lg:py-32"
       >
-        <div className="pointer-events-none absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[#30cc36]/10 blur-3xl lg:left-[70%]" />
+        <div className="pointer-events-none absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[#04193D]/10 blur-3xl lg:left-[70%]" />
 
         <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-4 md:px-6 lg:grid-cols-2 lg:items-center lg:gap-16">
           <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#30cc36]/25 bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#1eb34b] shadow-sm backdrop-blur">
-              <span className="h-2 w-2 rounded-full bg-[#30cc36]" />
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#04193D]/25 bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#1eb34b] shadow-sm backdrop-blur">
+              <span className="h-2 w-2 rounded-full bg-[#04193D]" />
               Para quem presta serviços
             </div>
 
             <h2 className="mt-6 max-w-xl text-3xl font-extrabold leading-tight tracking-tight text-[#102418] sm:text-4xl lg:text-5xl">
               Conquiste mais clientes próximos e{" "}
-              <span className="text-[#30cc36]">aumente sua renda</span> com
+              <span className="text-[#04193D]">aumente sua renda</span> com
               consistência
             </h2>
 
@@ -421,9 +421,9 @@ export default function LandingSalesPage() {
               {beneficiosPrestador.map((item) => (
                 <div
                   key={item}
-                  className="group flex items-start gap-4 rounded-2xl border border-[#dce9df] bg-white/80 p-4 text-left shadow-[0_10px_30px_rgba(17,60,34,0.06)] transition-all duration-300 hover:border-[#30cc36]/25 hover:shadow-[0_12px_28px_rgba(17,60,34,0.08)]"
+                  className="group flex items-start gap-4 rounded-2xl border border-[#dce9df] bg-white/80 p-4 text-left shadow-[0_10px_30px_rgba(17,60,34,0.06)] transition-all duration-300 hover:border-[#04193D]/25 hover:shadow-[0_12px_28px_rgba(17,60,34,0.08)]"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#30cc36] text-white shadow-[0_8px_18px_rgba(48,204,54,0.25)]">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#04193D] text-white shadow-[0_8px_18px_rgba(48,204,54,0.25)]">
                     <Icon icon="check" size={16} weight={700} />
                   </div>
 
@@ -436,7 +436,7 @@ export default function LandingSalesPage() {
 
             <Link
               href="/"
-              className="mt-9 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#30cc36] px-7 py-4 text-sm font-extrabold uppercase tracking-wide text-white shadow-[0_14px_35px_rgba(48,204,54,0.35)] transition hover:-translate-y-0.5 hover:brightness-110 sm:w-auto sm:px-9"
+              className="mt-9 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#04193D] px-7 py-4 text-sm font-extrabold uppercase tracking-wide text-white shadow-[0_14px_35px_rgba(48,204,54,0.35)] transition hover:-translate-y-0.5 hover:brightness-110 sm:w-auto sm:px-9"
             >
               Teste grátis agora
               <Icon icon="arrow_forward" size={17} weight={700} />
@@ -444,7 +444,7 @@ export default function LandingSalesPage() {
           </div>
 
           <div className="relative">
-            <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-[#30cc36]/20 via-[#e8f9ed] to-transparent blur-2xl" />
+            <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-[#04193D]/20 via-[#e8f9ed] to-transparent blur-2xl" />
 
             <div className="relative rounded-[2rem] border border-[#dce9df] bg-white/70 p-4 shadow-[0_24px_70px_rgba(17,60,34,0.12)] backdrop-blur-xl sm:p-6">
               <div className="mb-5 flex items-center justify-between rounded-2xl bg-[#1eb34b] p-5 text-white">
@@ -493,13 +493,13 @@ export default function LandingSalesPage() {
       >
         <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
           <div className="mx-auto max-w-2xl text-center">
-            <div className="mb-6 text-sm inline-flex w-fit items-center gap-2 rounded-full border border-[#30cc36]/30 bg-[#e8f9ed] px-4 py-1.5 font-medium text-[#30cc36]">
+            <div className="mb-6 text-sm inline-flex w-fit items-center gap-2 rounded-full border border-[#04193D]/30 bg-[#e8f9ed] px-4 py-1.5 font-medium text-[#04193D]">
               COMO FUNCIONA NA PRÁTICA
             </div>
 
             <h2 className="mt-3 text-3xl font-bold sm:text-4xl lg:text-5xl">
               Consiga mais clientes da sua região em{" "}
-              <span className="text-[#30cc36]">poucos passos</span>
+              <span className="text-[#04193D]">poucos passos</span>
             </h2>
             <p className="mt-4 text-lg text-[#5f7066]">
               Divulgue seus serviços, aumente sua visibilidade e comece a
@@ -513,10 +513,10 @@ export default function LandingSalesPage() {
                 key={passo.title}
                 className="relative rounded-2xl border border-[#dce9df] bg-white p-6 shadow-[0_8px_24px_rgba(17,60,34,0.06)] transition-all hover:-translate-y-1"
               >
-                <div className="absolute -top-3 left-6 rounded-full bg-[#30cc36] px-3 py-1 text-xs font-bold text-white">
+                <div className="absolute -top-3 left-6 rounded-full bg-[#04193D] px-3 py-1 text-xs font-bold text-white">
                   {passo.title}
                 </div>
-                <div className="mb-4 mt-3 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#e9f9ee] text-xl text-[#30cc36]">
+                <div className="mb-4 mt-3 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#e9f9ee] text-xl text-[#04193D]">
                   <Icon icon={passo.icon} size={22} weight={600} />
                 </div>
                 <h3 className="text-base font-semibold leading-snug">
@@ -532,7 +532,7 @@ export default function LandingSalesPage() {
       <section id="planos" className="py-14 sm:py-16 lg:py-28">
         <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
           <div className="mx-auto max-w-2xl text-center">
-            <div className="mb-6 text-sm inline-flex w-fit items-center gap-2 rounded-full border border-[#30cc36]/30 bg-[#e8f9ed] px-4 py-1.5 font-medium text-[#30cc36]">
+            <div className="mb-6 text-sm inline-flex w-fit items-center gap-2 rounded-full border border-[#04193D]/30 bg-[#e8f9ed] px-4 py-1.5 font-medium text-[#04193D]">
               PLANOS
             </div>
             <h2 className="mt-3 text-3xl font-bold sm:text-4xl lg:text-5xl">
@@ -546,12 +546,12 @@ export default function LandingSalesPage() {
                 key={plano.name}
                 className={`rounded-2xl border p-6 shadow-[0_10px_26px_rgba(17,60,34,0.08)] ${
                   plano.featured
-                    ? "relative border-[#30CC36] bg-[#f0fff4]"
+                    ? "relative border-[#04193D] bg-[#f0fff4]"
                     : "border-[#dce9df] bg-white"
                 }`}
               >
                 {plano.badge ? (
-                  <span className="absolute -top-3 left-6 rounded-full bg-[#30cc36] px-3 py-1 text-xs font-bold text-white">
+                  <span className="absolute -top-3 left-6 rounded-full bg-[#04193D] px-3 py-1 text-xs font-bold text-white">
                     {plano.badge}
                   </span>
                 ) : null}
@@ -559,7 +559,7 @@ export default function LandingSalesPage() {
                 <h3 className="text-xl font-bold sm:text-2xl">{plano.name}</h3>
                 <p className="mt-2 text-[#5f7066]">{plano.description}</p>
                 <div className="mt-5 flex items-end gap-1">
-                  <span className="text-3xl font-bold text-[#30cc36] sm:text-4xl">
+                  <span className="text-3xl font-bold text-[#04193D] sm:text-4xl">
                     {plano.price}
                   </span>
                   <span className="pb-1 text-sm text-[#5f7066]">
@@ -579,7 +579,7 @@ export default function LandingSalesPage() {
                   href="/contact"
                   className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-6 py-3 text-sm font-bold ${
                     plano.featured
-                      ? "bg-[#30cc36] text-white hover:brightness-110"
+                      ? "bg-[#04193D] text-white hover:brightness-110"
                       : "bg-[#10271b] text-white hover:bg-[#0d1f15]"
                   } transition`}
                 >
@@ -605,7 +605,7 @@ export default function LandingSalesPage() {
                   key={item.text}
                   className="rounded-2xl border border-[#dce9df] bg-white p-6 shadow-[0_8px_22px_rgba(17,60,34,0.06)]"
                 >
-                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#e9f9ee] text-[#30cc36]">
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#e9f9ee] text-[#04193D]">
                     <Icon icon={item.icon} size={20} weight={600} />
                   </div>
                   <p className="text-sm font-medium">{item.text}</p>
@@ -615,13 +615,13 @@ export default function LandingSalesPage() {
           </div>
 
           <div className="order-1 lg:order-2">
-            <div className="mb-6 text-sm inline-flex w-fit items-center gap-2 rounded-full border border-[#30cc36]/30 bg-[#e8f9ed] px-4 py-1.5 font-medium text-[#30cc36]">
+            <div className="mb-6 text-sm inline-flex w-fit items-center gap-2 rounded-full border border-[#04193D]/30 bg-[#e8f9ed] px-4 py-1.5 font-medium text-[#04193D]">
               <Icon icon="arrow_forward" size={14} weight={700} />
               PARA QUEM BUSCA SERVIÇOS
             </div>
             <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-4xl">
               Encontre serviços com{" "}
-              <span className="text-[#30cc36]">
+              <span className="text-[#04193D]">
                 mais confiança e praticidade
               </span>
               , perto de você
@@ -630,7 +630,7 @@ export default function LandingSalesPage() {
             <ul className="mt-6 flex flex-col gap-3">
               {buscaLista.map((item) => (
                 <li key={item} className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#30cc36] text-xs text-white">
+                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#04193D] text-xs text-white">
                     <Icon icon="check" size={14} weight={700} />
                   </div>
                   <span className="text-[#2f4238]">{item}</span>
@@ -640,7 +640,7 @@ export default function LandingSalesPage() {
 
             <Link
               href="/"
-              className="mt-8 uppercase inline-flex w-full justify-center items-center gap-2 rounded-full bg-[#30cc36] px-6 py-3 text-[11px] text-white shadow-[0_10px_30px_rgba(39,201,88,0.3)] transition hover:brightness-110 sm:w-auto sm:px-8"
+              className="mt-8 uppercase inline-flex w-full justify-center items-center gap-2 rounded-full bg-[#04193D] px-6 py-3 text-[11px] text-white shadow-[0_10px_30px_rgba(39,201,88,0.3)] transition hover:brightness-110 sm:w-auto sm:px-8"
             >
               Buscar profissionais perto de mim
               <Icon icon="arrow_forward" size={14} weight={700} />
@@ -662,13 +662,13 @@ export default function LandingSalesPage() {
 
             <div className="relative grid gap-8 p-6 text-white sm:p-12 lg:grid-cols-5 lg:gap-10 lg:p-16">
               <div className="lg:col-span-3">
-                <div className="inline-flex items-center gap-2 rounded-full bg-[#30cc36]/30 px-3 py-1 text-xs uppercase font-semibold ring-1 ring-white/20">
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#04193D]/30 px-3 py-1 text-xs uppercase font-semibold ring-1 ring-white/20">
                   <Icon icon="arrow_forward" size={14} weight={700} />
                   Para quem gerencia comunidades
                 </div>
                 <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
                   Conecte, organize e gere valor.{" "}
-                  <span className="text-[#30cc36]">
+                  <span className="text-[#04193D]">
                     Crie uma comunidade onde todos ganham.
                   </span>
                 </h2>
@@ -680,7 +680,7 @@ export default function LandingSalesPage() {
                 </p>
                 <Link
                   href="/contact"
-                  className="mt-8 inline-flex w-full justify-center uppercase items-center rounded-full gap-2 bg-white px-6 py-3 text-sm font-bold text-[#122319] transition ease-in-all hover:bg-[#30cc36] sm:w-auto sm:px-8"
+                  className="mt-8 inline-flex w-full justify-center uppercase items-center rounded-full gap-2 bg-white px-6 py-3 text-sm font-bold text-[#122319] transition ease-in-all hover:bg-[#04193D] sm:w-auto sm:px-8"
                 >
                   Criar plataforma para minha comunidade
                   <Icon icon="arrow_forward" size={14} weight={700} />
@@ -710,7 +710,7 @@ export default function LandingSalesPage() {
       <section id="faq" className="bg-[#f1f7f3] py-14 sm:py-16 lg:py-28">
         <div className="mx-auto w-full max-w-6xl px-4 md:px-6">
           <div className="mx-auto max-w-2xl text-center">
-            <div className="mb-6 text-sm inline-flex w-fit items-center gap-2 rounded-full border border-[#30cc36]/30 bg-[#e8f9ed] px-4 py-1.5 font-medium text-[#30cc36]">
+            <div className="mb-6 text-sm inline-flex w-fit items-center gap-2 rounded-full border border-[#04193D]/30 bg-[#e8f9ed] px-4 py-1.5 font-medium text-[#04193D]">
               FAQ
             </div>
             <h2 className="mt-3 text-3xl font-bold sm:text-4xl lg:text-5xl">
@@ -746,7 +746,7 @@ export default function LandingSalesPage() {
             </div>
           </div>
 
-          <div className="mx-auto mt-12 max-w-3xl rounded-3xl border border-[#27c958]/30 bg-gradient-to-r from-[#27c958] to-[#30cc36] p-6 text-center text-white shadow-[0_12px_36px_rgba(39,201,88,0.35)] sm:mt-14 sm:p-12">
+          <div className="mx-auto mt-12 max-w-3xl rounded-3xl border border-[#27c958]/30 bg-gradient-to-r from-[#27c958] to-[#04193D] p-6 text-center text-white shadow-[0_12px_36px_rgba(39,201,88,0.35)] sm:mt-14 sm:p-12">
             <h3 className="text-2xl font-bold sm:text-3xl">
               Pronto para conquistar mais clientes na sua região?
             </h3>

@@ -510,7 +510,7 @@ function RegisterServiceContent() {
         <div className="flex items-center gap-3 max-w-7xl mx-auto w-full">
           <button 
             onClick={() => router.back()}
-            className="hover:bg-surface-container-high/70 rounded-full transition-colors p-2 active:scale-95 duration-200 text-primary"
+            className="hover:bg-surface-container-high/70 rounded-full transition-colors p-2 active:scale-95 duration-200 text-[#04193D]"
           >
             <Icon icon="arrow_back" size={24} />
           </button>
@@ -525,13 +525,13 @@ function RegisterServiceContent() {
                 src={user.avatar}
                 name={user.name}
                 alt="Avatar"
-                className="w-10 h-10 border-2 border-primary shadow-sm"
+                className="w-10 h-10 border-2 border-[#04193D] shadow-sm"
               />
             </button>
           ) : (
             <button 
               onClick={() => router.push('/login')}
-              className="flex items-center gap-2 px-4 py-2 rounded-full primary-gradient text-white text-xs font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-full primary-gradient text-white text-xs font-bold shadow-lg shadow-[#04193D]/20 active:scale-95 transition-all"
             >
               <Icon icon="login" size={20} />
               <span>Entrar</span>
@@ -541,46 +541,22 @@ function RegisterServiceContent() {
       </header>
 
       <main className="pt-20 px-4 md:px-8 max-w-3xl mx-auto space-y-6">
-        <section className="rounded-[2rem] border border-[#30cc36]/30 bg-gradient-to-br from-[#30cc36]/10 via-surface-container-lowest to-surface-container p-5 sm:p-6">
+        <section className="rounded-[2rem] border border-[#04193D]/30 bg-gradient-to-br from-[#04193D]/10 via-surface-container-lowest to-surface-container p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#30cc36]">
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#04193D]">
                 Fluxo de publicação
               </p>
               <h2 className="mt-2 text-xl sm:text-2xl font-black text-on-surface">
                 {existingService ? 'Atualize seu anúncio' : 'Monte seu anúncio em minutos'}
               </h2>
               <p className="mt-2 text-sm text-on-surface-variant max-w-xl">
-                Preencha os dados do servico e publique. O vinculo de ambientes e feito depois em Meus Ambientes.
+                Preencha os dados do serviço.
               </p>
             </div>
-            <div className="hidden sm:flex h-12 w-12 rounded-2xl bg-[#30cc36]/15 items-center justify-center">
-              <Icon icon="campaign" size={22} className="text-[#30cc36]" />
+            <div className="hidden sm:flex h-12 w-12 rounded-2xl bg-[#04193D]/15 items-center justify-center">
+              <Icon icon="campaign" size={22} className="text-[#04193D]" />
             </div>
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <Icon icon="apartment" size={16} />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-on-surface">Ambientes vinculados depois da criação</p>
-                <p className="text-xs text-on-surface-variant mt-1">
-                  Seu anuncio pode ser criado agora. Depois, vincule os ambientes em Meus Ambientes para aparecer conforme geolocalizacao.
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => router.push('/meus-ambientes')}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-on-surface text-white px-4 py-2 text-xs font-black uppercase tracking-wide"
-            >
-              <Icon icon="arrow_outward" size={14} />
-              Meus Ambientes
-            </button>
           </div>
         </section>
 
@@ -646,7 +622,7 @@ function RegisterServiceContent() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-on-surface">CNPJ (Preencha para PROFISSIONAL no seu anúncio)</label>
+              <label className="text-sm font-medium text-on-surface">CNPJ (Preencha para aparecer como PROFISSIONAL no seu anúncio)</label>
               <input
                 className="w-full bg-surface-container border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60"
                 type="text"
@@ -674,11 +650,11 @@ function RegisterServiceContent() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-on-surface">Descricao</label>
+              <label className="text-sm font-medium text-on-surface">Descrição</label>
               <textarea
                 className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface placeholder:text-on-surface-variant/60"
                 rows={4}
-                placeholder="Descreva seu servico..."
+                placeholder="Descreva seu serviço..."
                 value={form.description}
                 onChange={e => setForm({...form, description: e.target.value})}
               />
@@ -747,7 +723,7 @@ function RegisterServiceContent() {
 
           <section className="rounded-2xl border border-outline-variant/20 bg-surface-container-low p-4 sm:p-5">
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-on-surface">Opcoes / servicos</label>
+              <label className="text-sm font-medium text-on-surface">Opções / serviços</label>
               <button
                 type="button"
                 onClick={() => {
@@ -755,9 +731,9 @@ function RegisterServiceContent() {
                   setEditingMenuItemIndex(null);
                   setShowMenuItemModal(true);
                 }}
-                className="text-xs text-primary font-bold"
+                className="text-xs text-[#04193D] font-bold"
               >
-                + Adicionar opcao
+                + Adicionar opção
               </button>
             </div>
             {menuItems.length > 0 && (
@@ -792,13 +768,13 @@ function RegisterServiceContent() {
           <button
             onClick={handleSubmit}
             disabled={!form.title || !form.WhatsApp || uploading}
-            className="w-full primary-gradient text-white font-bold py-4 rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-[400px] m-auto flex items-center justify-center bg-[#04193D] text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitStatus === 'uploading' ?
               'Enviando imagens...' :
               submitStatus === 'saving' ?
                 'Salvando anuncio...' :
-                (existingService ? 'Salvar alteracoes' : 'Publicar anuncio')
+                (existingService ? 'Salvar alterações' : 'Publicar anúncio')
             }
           </button>
         </div>
@@ -806,7 +782,7 @@ function RegisterServiceContent() {
         {/* Modal Options */}
         {showMenuItemModal && (
           <div className="fixed inset-0 z-50 bg-black/50 flex items-end md:items-center justify-center">
-            <div className="bg-surface-container-lowest dark:bg-surface-container-lowest w-full md:w-96 md:rounded-2xl p-6 rounded-t-2xl animate-in slide-in-from-bottom duration-300">
+            <div className="bg-surface-container-lowest w-full md:w-96 md:rounded-2xl p-6 rounded-t-2xl animate-in slide-in-from-bottom duration-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-on-surface">
                   {editingMenuItemIndex !== null ? 'Editar Opção' : 'Nova Opção'}
@@ -821,7 +797,7 @@ function RegisterServiceContent() {
                   <label className="text-sm font-medium text-on-surface">Nome *</label>
                   <input 
                     className="w-full bg-surface-container-lowest border-none rounded-xl p-4 mt-2 text-on-surface" 
-                    placeholder="Ex: Marmita Pequena"
+                    placeholder="Ex: Produto 01"
                     value={menuItemForm.name}
                     onChange={(e) => setMenuItemForm({...menuItemForm, name: e.target.value})}
                   />
@@ -854,13 +830,13 @@ function RegisterServiceContent() {
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-on-surface">1 imagem por opção</p>
-                        <p className="text-xs text-on-surface-variant">A imagem é opcional e substitui a anterior ao selecionar outra.</p>
+                        <p className="text-sm font-medium text-on-surface">Imagem opcional</p>
+                        <p className="text-xs text-on-surface-variant">Adicione uma imagem para destacar seu produto.</p>
                       </div>
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      <label className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold cursor-pointer active:scale-95 transition-transform">
+                      <label className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#04193D] text-white text-xs font-bold cursor-pointer active:scale-95 transition-transform">
                         <input
                           type="file"
                           accept="image/*"
@@ -894,7 +870,7 @@ function RegisterServiceContent() {
                 <button 
                   onClick={handleAddMenuItem}
                   disabled={!menuItemForm.name.trim()}
-                  className="w-full primary-gradient text-white font-bold py-3 rounded-xl disabled:opacity-50"
+                  className="w-full bg-[#04193D] text-white font-bold py-3 rounded-xl disabled:opacity-50"
                 >
                   {editingMenuItemIndex !== null ? 'Salvar' : 'Adicionar'}
                 </button>

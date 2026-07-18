@@ -633,8 +633,8 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
               onClick={() => setSelectedCategory(cat.id === 'all' ? 'all' : cat.label)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl whitespace-nowrap font-black text-xs transition-all border shrink-0 shadow-sm ${
                 selectedCategory === (cat.id === 'all' ? 'all' : cat.label)
-                  ? 'bg-[#30cc36] text-white border-[#30cc36] shadow-lg shadow-[#30cc36]/20 scale-105' 
-                  : 'bg-surface-container-lowest text-on-surface-variant border-outline-variant/10 hover:border-[#30cc36]/40 hover:text-[#30cc36] active:scale-95'
+                  ? 'bg-[#04193D] text-white border-[#04193D] shadow-lg shadow-[#04193D]/20 scale-105' 
+                  : 'bg-surface-container-lowest text-on-surface-variant border-outline-variant/10 hover:border-[#04193D]/40 hover:text-[#04193D] active:scale-95'
               }`}
             >
               <Icon icon={cat.icon} size={16} weight={selectedCategory === (cat.id === 'all' ? 'all' : cat.label) ? 700 : 400} />
@@ -719,18 +719,18 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
               <div className="flex flex-1 min-w-0 flex-col justify-between p-4 h-full">
                 <div>
                   <div className="flex items-center justify-between mb-1.5 gap-2">
-                    <span className="text-[10px] font-black text-[#30cc36] uppercase tracking-widest bg-[#30cc36]/5 px-2 py-0.5 rounded-full">{service.category || 'Sem categoria'}</span>
+                    <span className="text-[10px] font-black text-[#04193D] uppercase tracking-widest bg-[#04193D]/5 px-2 py-0.5 rounded-full">{service.category || 'Sem categoria'}</span>
                     <span
                       className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                         hasCnpj(service.cnpj)
-                          ? 'text-white bg-[#30cc36] dark:text-black/80 dark:bg-[#30cc36]'
-                          : 'text-white bg-orange-600 dark:text-white dark:bg-orange-700'
+                          ? 'text-white bg-[#04193D]'
+                          : 'text-white bg-orange-600'
                       }`}
                     >
                       {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}
                     </span>
                   </div>
-                  <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#30cc36] transition-colors">{service.title}</h4>
+                  <h4 className="font-black text-on-surface text-[15px] leading-tight truncate group-hover/card:text-[#04193D] transition-colors">{service.title}</h4>
                   {(service.rating ?? 0) > 0 && (
                     <div className="mt-0.5 flex items-center gap-1">
                       <StarRating rating={service.rating ?? 0} size={10} />
@@ -745,7 +745,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                         {userLocation && service.distance !== Infinity && (
                           <div className="flex items-center gap-1 text-primary">
                             <Icon icon="location_on" size={12} weight={700} />
-                            <span className="text-[10px] text-[#30cc36] font-bold">
+                            <span className="text-[10px] text-[#04193D] font-bold">
                               {service.distance < 1
                                 ? `${Math.round(service.distance * 1000)}m`
                                 : `${service.distance.toFixed(1)}km`}
@@ -759,7 +759,7 @@ export default function PlaceDetailPage({ seoContent }: PlaceDetailPageProps) {
                         )}
                       </div>
                     )}
-                    <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#30cc36] group-hover/card:text-white transition-all duration-300">
+                    <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#04193D] group-hover/card:text-white transition-all duration-300">
                       <Icon icon="arrow_forward" size={14} weight={700} />
                     </div>
                   </div>

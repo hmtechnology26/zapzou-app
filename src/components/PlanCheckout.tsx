@@ -295,7 +295,7 @@ export function PlanCheckout({ plan }: { plan: PlanCheckoutConfig }) {
               <div className="mt-4 space-y-2">
                 {plan.highlights.map((h, idx) => (
                   <div key={idx} className="flex items-start gap-2">
-                    <Icon icon="check_circle" size={18} className="text-[#30CC36] flex-shrink-0 mt-0.5" weight={700} />
+                    <Icon icon="check_circle" size={18} className="text-[#04193D] flex-shrink-0 mt-0.5" weight={700} />
                     <span className="text-sm text-on-surface">{h}</span>
                   </div>
                 ))}
@@ -417,7 +417,7 @@ export function PlanCheckout({ plan }: { plan: PlanCheckoutConfig }) {
 
           {error && <p className="mt-4 text-error text-sm">{error}</p>}
           {success && (
-            <p className="mt-4 text-[#30CC36] text-sm font-semibold">
+            <p className="mt-4 text-[#04193D] text-sm font-semibold">
               Assinatura concluída (teste). Redirecionando...
             </p>
           )}

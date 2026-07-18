@@ -54,7 +54,7 @@ const normalizeEnvironmentRecord = (env: any): Environment => ({
 
 const getStatusBadge = (status: LinkedMembership["status"]) => {
   if (status === "active") {
-    return "border-[#30CC36]/20 bg-[#30CC36]/10 text-[#30CC36]";
+    return "border-[#04193D]/20 bg-[#04193D]/10 text-[#04193D]";
   }
 
   if (status === "pending") {
@@ -150,24 +150,6 @@ export default function MyAdsPage() {
     if (!mobileLinkedServiceId) return null;
     return userServices.find((service) => service.id === mobileLinkedServiceId) || null;
   }, [mobileLinkedServiceId, userServices]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    window.dispatchEvent(
-      new CustomEvent("support-fab-visibility", {
-        detail: { hidden: Boolean(mobileLinkedService) },
-      }),
-    );
-
-    return () => {
-      window.dispatchEvent(
-        new CustomEvent("support-fab-visibility", {
-          detail: { hidden: false },
-        }),
-      );
-    };
-  }, [mobileLinkedService]);
 
   useEffect(() => {
     if (!mobileLinkedServiceId) return;
@@ -473,25 +455,25 @@ export default function MyAdsPage() {
     canUnlink: boolean,
   ) => {
     return (
-      <div className="mt-3 space-y-2 rounded-xl border border-white/20 bg-white/65 p-3 backdrop-blur dark:border-white/10 dark:bg-white/[0.03]">
+      <div className="mt-3 space-y-2 rounded-xl border border-white/20 bg-white/65 p-3 backdrop-blur">
         {linkedLoading ? (
-          <div className="flex items-center justify-center gap-2 py-2 text-xs font-bold text-zinc-500 dark:text-white/60">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#30cc36] border-t-transparent" />
+          <div className="flex items-center justify-center gap-2 py-2 text-xs font-bold text-zinc-500">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#04193D] border-t-transparent" />
             Carregando ambientes...
           </div>
         ) : !linkedLoaded ? (
-          <p className="py-1 text-center text-xs font-semibold text-zinc-500 dark:text-white/60">
+          <p className="py-1 text-center text-xs font-semibold text-zinc-500">
             Abra novamente para carregar os vínculos.
           </p>
         ) : linkedEnvironments.length === 0 ? (
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-zinc-500 dark:text-white/60">
+            <p className="text-xs font-semibold text-zinc-500">
               Você ainda não possui ambientes disponíveis para vínculo.
             </p>
             <button
               type="button"
               onClick={() => open("link")}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#30cc36] px-3 py-2 text-[11px] font-black uppercase text-white"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#04193D] px-3 py-2 text-[11px] font-black uppercase text-white"
             >
               <Icon icon="add" size={14} />
               Adicionar ambiente
@@ -499,7 +481,7 @@ export default function MyAdsPage() {
           </div>
         ) : (
           <>
-            <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-500 dark:text-white/55">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-500">
               Ambientes do anúncio
             </p>
             <div className="space-y-2">
@@ -514,15 +496,15 @@ export default function MyAdsPage() {
                 return (
                   <div
                     key={`${service.id}:${envId}`}
-                    className="rounded-xl border border-white/30 bg-white/70 p-2 dark:border-white/10 dark:bg-white/[0.02]"
+                    className="rounded-xl border border-white/30 bg-white/70 p-2"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="truncate text-xs font-black text-zinc-800 dark:text-white">
+                        <p className="truncate text-xs font-black text-zinc-800">
                           {linkedEnv.environment.name}
                         </p>
                         <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                          <span className="rounded-md border border-white/30 bg-white/80 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-zinc-500 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/50">
+                          <span className="rounded-md border border-white/30 bg-white/80 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-zinc-500">
                             {TYPE_LABELS[linkedEnv.environment.type] || "Ambiente"}
                           </span>
                           <span
@@ -544,7 +526,7 @@ export default function MyAdsPage() {
                         className={`rounded-lg px-2.5 py-1.5 text-[10px] font-black uppercase transition ${
                           isLinked
                             ? "border border-red-500/20 bg-red-500/10 text-red-600 hover:bg-red-500/20 disabled:opacity-40"
-                            : "border border-[#30cc36]/20 bg-[#30cc36]/10 text-[#30cc36] hover:bg-[#30cc36]/20 disabled:opacity-40"
+                            : "border border-[#04193D]/20 bg-[#04193D]/10 text-[#04193D] hover:bg-[#04193D]/20 disabled:opacity-40"
                         }`}
                       >
                         {isBusy
@@ -566,7 +548,7 @@ export default function MyAdsPage() {
             <button
               type="button"
               onClick={() => open("link")}
-              className="inline-flex items-center gap-2 rounded-lg border border-[#30cc36]/20 bg-[#30cc36]/10 px-3 py-1.5 text-[10px] font-black uppercase text-[#30cc36]"
+              className="inline-flex items-center gap-2 rounded-lg border border-[#04193D]/20 bg-[#04193D]/10 px-3 py-1.5 text-[10px] font-black uppercase text-[#04193D]"
             >
               <Icon icon="add" size={14} />
               Novo ambiente
@@ -585,37 +567,37 @@ export default function MyAdsPage() {
 
       <main className="mx-auto max-w-6xl space-y-8 px-4 pb-32 pt-24 md:px-8">
         {/* HERO */}
-        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/70 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04] md:p-8">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#30cc36]/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 left-12 h-52 w-52 rounded-full bg-[#30cc36]/10 blur-3xl" />
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/70 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl md:p-8">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#04193D]/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 left-12 h-52 w-52 rounded-full bg-[#04193D]/10 blur-3xl" />
 
           <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[#30cc36]/20 bg-[#30cc36]/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-[#1eb34b]">
+              {/* <span className="inline-flex items-center gap-2 rounded-full border border-[#04193D]/20 bg-[#04193D]/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-[#1eb34b]">
                 <Icon icon="storefront" size={14} weight={700} />
                 Painel de anúncios
-              </span>
+              </span> */}
 
-              <h1 className="mt-5 text-4xl font-black tracking-tight text-zinc-950 dark:text-white md:text-6xl">
-                Gerencie seus anúncios com estilo.
+              <h1 className="mt-5 text-2xl font-black tracking-tight text-zinc-950 md:text-3xl">
+                Gerencie seus anúncios.
               </h1>
 
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-zinc-500 dark:text-white/55 md:text-base">
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-zinc-500 md:text-base">
                 Controle publicações, edite seus serviços e vincule em múltiplas
                 comunidades.
               </p>
 
               <div className="mt-5 flex flex-wrap gap-2">
-                <span className="rounded-full border border-white/20 bg-white/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500 shadow-sm dark:bg-white/[0.05] dark:text-white/55">
+                <span className="rounded-full border border-white/20 bg-white/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500 shadow-sm">
                   {userServices.length} anúncios
                 </span>
 
-                <span className="rounded-full border border-white/20 bg-white/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500 shadow-sm dark:bg-white/[0.05] dark:text-white/55">
+                <span className="rounded-full border border-white/20 bg-white/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500 shadow-sm">
                   {activeServices} ativos
                 </span>
 
                 {pendingServices > 0 && (
-                  <span className="rounded-full border border-white/20 bg-white/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500 shadow-sm dark:bg-white/[0.05] dark:text-white/55">
+                  <span className="rounded-full border border-white/20 bg-white/70 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-zinc-500 shadow-sm">
                     {pendingServices} pendentes
                   </span>
                 )}
@@ -631,7 +613,7 @@ export default function MyAdsPage() {
                   router.push("/register-service");
                 }
               }}
-              className="mx-auto flex w-auto items-center justify-center gap-2 rounded-full bg-[#30cc36] px-6 py-4 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-[#30cc36]/25 transition-transform hover:scale-[1.02] active:scale-95 md:mx-0"
+              className="mx-auto flex w-auto items-center justify-center gap-2 rounded-full bg-[#04193D] px-3 py-2 text-sm font-black uppercase tracking-wide text-white shadow-2xl shadow-[#04193D]/25 transition-transform hover:scale-[1.01]  md:mx-0"
             >
               <Icon icon="add" size={18} />
               Novo anúncio
@@ -643,24 +625,24 @@ export default function MyAdsPage() {
             {/* LOADING */}
             {servicesLoading ? (
               <div className="py-20 text-center">
-                <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-[#30cc36] border-t-transparent" />
-                <p className="mt-4 text-xs font-black uppercase tracking-widest text-[#30cc36]/60">
+                <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-[#04193D] border-t-transparent" />
+                <p className="mt-4 text-xs font-black uppercase tracking-widest text-[#04193D]/60">
                   Carregando anúncios...
                 </p>
               </div>
             ) : userServices.length === 0 ? (
-              <div className="rounded-[2rem] border-2 border-dashed border-white/20 bg-white/70 py-16 text-center backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04]">
+              <div className="rounded-[2rem] border-2 border-dashed border-white/20 bg-white/70 py-16 text-center backdrop-blur-2xl">
                 <Icon
                   icon="post_add"
                   size={56}
-                  className="mx-auto text-[#30cc36]/25"
+                  className="mx-auto text-[#04193D]/25"
                 />
 
-                <h4 className="mt-4 text-xl font-black text-zinc-950 dark:text-white">
+                <h4 className="mt-4 text-xl font-black text-zinc-950">
                   Você ainda não tem anúncios
                 </h4>
 
-                <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500 dark:text-white/55">
+                <p className="mx-auto mt-2 max-w-md text-sm text-zinc-500">
                   Clique em novo anúncio para publicar seu primeiro serviço.
                 </p>
               </div>
@@ -674,10 +656,10 @@ export default function MyAdsPage() {
                   return (
                     <article
                       key={service.id}
-                      className="group overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] dark:border-white/10 dark:bg-white/[0.04]"
+                      className="group overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)]"
                     >
                     <div 
-                      className="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-white/5 cursor-pointer"
+                      className="relative aspect-[4/3] overflow-hidden bg-zinc-100 cursor-pointer"
                       onClick={() => {
                         const images = Array.isArray(service.images) && service.images.length > 0 
                           ? service.images 
@@ -711,7 +693,7 @@ export default function MyAdsPage() {
                         <span
                           className={`rounded-xl px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white ${
                             service.status === "active"
-                              ? "bg-[#30CC36]"
+                              ? "bg-[#04193D]"
                               : "bg-amber-500"
                           }`}
                         >
@@ -723,11 +705,11 @@ export default function MyAdsPage() {
                     </div>
 
                     <div className="p-4">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-[#30cc36]">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#04193D]">
                         {service.category || "Sem categoria"}
                       </span>
 
-                      <h4 className="mt-1 line-clamp-2 text-lg font-black tracking-tight text-zinc-950 dark:text-white">
+                      <h4 className="mt-1 line-clamp-2 text-lg font-black tracking-tight text-zinc-950">
                         {service.title}
                       </h4>
 
@@ -739,7 +721,7 @@ export default function MyAdsPage() {
                               `/register-service?id=${service.id}`,
                             )
                           }
-                          className="flex-1 rounded-xl bg-zinc-100 px-3 py-2 text-xs font-black text-zinc-700 transition-colors hover:bg-zinc-200 dark:bg-white/10 dark:text-white"
+                          className="flex-1 rounded-xl bg-zinc-100 px-3 py-2 text-xs font-black text-zinc-700 transition-colors hover:bg-zinc-200"
                         >
                           Editar
                         </button>
@@ -760,7 +742,7 @@ export default function MyAdsPage() {
                         onClick={() =>
                           handleToggleLinkedForService(service.id)
                         }
-                        className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-[#30cc36]/20 bg-[#30cc36]/10 px-3 py-2 text-xs font-black uppercase text-[#30cc36]"
+                        className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-[#04193D]/20 bg-[#04193D]/10 px-3 py-2 text-xs font-black uppercase text-[#04193D]"
                       >
                         <Icon
                           icon={isExpanded ? "expand_less" : "add_location_alt"}
@@ -791,13 +773,13 @@ export default function MyAdsPage() {
               className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
             />
 
-            <div className="absolute inset-x-0 bottom-0 max-h-[84vh] overflow-y-auto rounded-t-[1.6rem] border border-white/20 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-zinc-950">
+            <div className="absolute inset-x-0 bottom-0 max-h-[84vh] overflow-y-auto rounded-t-[1.6rem] border border-white/20 bg-white p-4 shadow-2xl">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#30cc36]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#04193D]">
                     Vincular ambientes
                   </p>
-                  <h3 className="truncate text-base font-black text-zinc-900 dark:text-white">
+                  <h3 className="truncate text-base font-black text-zinc-900">
                     {mobileLinkedService.title}
                   </h3>
                 </div>
@@ -805,7 +787,7 @@ export default function MyAdsPage() {
                 <button
                   type="button"
                   onClick={closeMobileLinkedModal}
-                  className="rounded-full border border-zinc-200 p-1.5 text-zinc-500 dark:border-white/10 dark:text-white/70"
+                  className="rounded-full border border-zinc-200 p-1.5 text-zinc-500"
                 >
                   <Icon icon="close" size={18} />
                 </button>
@@ -821,14 +803,14 @@ export default function MyAdsPage() {
         )}
 
         {statusNotice && (
-          <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-full border border-white/20 bg-white/80 px-6 py-3 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/80">
+          <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-full border border-white/20 bg-white/80 px-6 py-3 shadow-2xl backdrop-blur-xl">
             <div className="flex items-center gap-2">
               <Icon
                 icon="check_circle"
                 size={18}
-                className="text-[#30cc36]"
+                className="text-[#04193D]"
               />
-              <span className="text-sm font-bold text-zinc-800 dark:text-white">
+              <span className="text-sm font-bold text-zinc-800">
                 {statusNotice}
               </span>
             </div>

@@ -45,7 +45,7 @@ export default function PrivacyPage() {
   return (
     <main className="min-h-screen bg-background pb-20 pt-20 text-on-surface">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 md:px-8">
-        <section className="rounded-[2.5rem] border border-outline-variant/10 bg-gradient-to-br from-surface-container-lowest via-surface-container-lowest to-[#30cc36]/[0.06] p-6 shadow-sm md:p-8">
+        <section className="rounded-[2.5rem] border border-outline-variant/10 bg-gradient-to-br from-surface-container-lowest via-surface-container-lowest to-[#04193D]/[0.06] p-6 shadow-sm md:p-8">
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center gap-3">
               <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-primary">

@@ -111,6 +111,35 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             environmentId: byId.environment_id,
             slug: byId.slug || serviceSlug,
           });
+          setLoading(false);
+          return;
+        }
+
+        // Fallback: busca por nome (case-insensitive)
+        const decodedName = serviceSlug.replace(/[-_]+/g, ' ').trim();
+        if (decodedName) {
+          const { data: byName } = await supabase
+            .from('services')
+            .select('*')
+            .ilike('title', decodedName)
+            .limit(1)
+            .maybeSingle();
+
+          if (!cancelled && byName) {
+            setService({
+              ...byName,
+              image: byName.image_url || '',
+              images: Array.isArray(byName.images_urls) ? byName.images_urls : [],
+              WhatsApp: byName.whatsapp,
+              instagram: byName.instagram,
+              website: byName.website_url,
+              isActive: byName.is_active,
+              environmentId: byName.environment_id,
+              slug: byName.slug || serviceSlug,
+            });
+            setLoading(false);
+            return;
+          }
         }
       } catch (e) {
         console.warn('Direct service fetch failed:', e);

@@ -262,11 +262,11 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(48,204,54,0.14),_transparent_34%),linear-gradient(180deg,_rgba(255,255,255,0)_0%,_rgba(15,23,42,0.03)_100%)] pb-24 dark:bg-[radial-gradient(circle_at_top,_rgba(48,204,54,0.16),_transparent_34%),linear-gradient(180deg,_#080a0c_0%,_#0f1115_100%)]">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(48,204,54,0.14),_transparent_34%),linear-gradient(180deg,_rgba(255,255,255,0)_0%,_rgba(15,23,42,0.03)_100%)] pb-24">
       <TopAppBar />
 
       <main className="mx-auto mt-4 max-w-6xl space-y-5 px-4 pb-6 pt-16 md:space-y-8 md:px-8 md:pt-20">
-        <section className="rounded-[1.8rem] border border-primary/10 bg-surface-container-lowest p-4 shadow-[0_24px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[#0f1115] dark:shadow-[0_24px_60px_rgba(0,0,0,0.35)] md:p-6">
+        <section className="rounded-[1.8rem] border border-primary/10 bg-surface-container-lowest p-4 shadow-[0_24px_60px_rgba(15,23,42,0.08)] md:p-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
               <h1 className="text-2xl font-black tracking-tight text-on-surface md:text-3xl">
@@ -281,7 +281,7 @@ export default function DashboardPage() {
             {/* <button
               type="button"
               onClick={() => void fetchUserServices(user.id)}
-              className="inline-flex items-center gap-2 rounded-full border border-outline-variant/20 bg-background px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-on-surface transition hover:border-[#30cc36]/30 hover:text-[#30cc36] dark:border-white/10 dark:bg-white/[0.03]"
+              className="inline-flex items-center gap-2 rounded-full border border-outline-variant/20 bg-background px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-on-surface transition hover:border-[#04193D]/30 hover:text-[#04193D]"
             >
               <Icon icon="refresh" size={16} />
               Atualizar serviços
@@ -298,7 +298,7 @@ export default function DashboardPage() {
                 type="date"
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
-                className="h-11 rounded-xl border border-outline-variant/20 bg-background px-3 text-sm text-on-surface outline-none transition focus:border-[#30cc36]/40 dark:border-white/10 dark:bg-white/[0.03]"
+                className="h-11 rounded-xl border border-outline-variant/20 bg-background px-3 text-sm text-on-surface outline-none transition focus:border-[#04193D]/40"
               />
             </label>
 
@@ -311,7 +311,7 @@ export default function DashboardPage() {
                 type="date"
                 value={endDate}
                 onChange={(event) => setEndDate(event.target.value)}
-                className="h-11 rounded-xl border border-outline-variant/20 bg-background px-3 text-sm text-on-surface outline-none transition focus:border-[#30cc36]/40 dark:border-white/10 dark:bg-white/[0.03]"
+                className="h-11 rounded-xl border border-outline-variant/20 bg-background px-3 text-sm text-on-surface outline-none transition focus:border-[#04193D]/40"
               />
             </label>
 
@@ -319,7 +319,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => applyQuickRange(7)}
-                className="h-11 rounded-xl border border-outline-variant/20 bg-background px-3 text-xs font-bold text-on-surface transition hover:border-[#30cc36]/30 hover:text-[#30cc36] dark:border-white/10 dark:bg-white/[0.03]"
+                className="h-11 rounded-xl border border-outline-variant/20 bg-background px-3 text-xs font-bold text-on-surface transition hover:border-[#04193D]/30 hover:text-[#04193D]"
               >
                 7 dias
               </button>
@@ -327,7 +327,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => applyQuickRange(30)}
-                className="h-11 rounded-xl border border-outline-variant/20 bg-background px-3 text-xs font-bold text-on-surface transition hover:border-[#30cc36]/30 hover:text-[#30cc36] dark:border-white/10 dark:bg-white/[0.03]"
+                className="h-11 rounded-xl border border-outline-variant/20 bg-background px-3 text-xs font-bold text-on-surface transition hover:border-[#04193D]/30 hover:text-[#04193D]"
               >
                 30 dias
               </button>
@@ -343,11 +343,11 @@ export default function DashboardPage() {
 
         <section className="space-y-4">
           {metricsLoading ? (
-            <div className="rounded-2xl border border-outline-variant/10 bg-surface-container-lowest p-5 text-sm text-on-surface-variant dark:border-white/10 dark:bg-[#0f1115]">
+            <div className="rounded-2xl border border-outline-variant/10 bg-surface-container-lowest p-5 text-sm text-on-surface-variant">
               Carregando métricas...
             </div>
           ) : servicesWithMetrics.length === 0 ? (
-            <div className="rounded-2xl border border-outline-variant/10 bg-surface-container-lowest p-5 text-sm text-on-surface-variant dark:border-white/10 dark:bg-[#0f1115]">
+            <div className="rounded-2xl border border-outline-variant/10 bg-surface-container-lowest p-5 text-sm text-on-surface-variant">
               Você ainda não tem serviços publicados para analisar.
             </div>
           ) : (
@@ -370,29 +370,29 @@ export default function DashboardPage() {
               return (
                 <article
                   key={service.id}
-                  className="overflow-hidden rounded-[1.6rem] border border-zinc-200/70 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)] transition-all duration-300 hover:shadow-[0_24px_70px_rgba(15,23,42,0.1)] dark:border-white/10 dark:bg-[#0f1115] dark:shadow-[0_18px_50px_rgba(0,0,0,0.35)] sm:rounded-[1.75rem] sm:hover:-translate-y-0.5"
+                  className="overflow-hidden rounded-[1.6rem] border border-zinc-200/70 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)] transition-all duration-300 hover:shadow-[0_24px_70px_rgba(15,23,42,0.1)] sm:rounded-[1.75rem] sm:hover:-translate-y-0.5"
                 >
-                  <div className="border-b border-zinc-100 bg-gradient-to-br from-white via-[#f8fff9] to-white px-4 py-4 dark:border-white/10 dark:from-[#111318] dark:via-[#132016] dark:to-[#111318] sm:px-5">
+                  <div className="border-b border-zinc-100 bg-gradient-to-br from-white via-[#f8fff9] to-white px-4 py-4 sm:px-5">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="h-2 w-2 shrink-0 rounded-full bg-[#30cc36]" />
+                          <span className="h-2 w-2 shrink-0 rounded-full bg-[#04193D]" />
 
-                          <p className="text-[9px] font-black uppercase tracking-[0.22em] text-zinc-400 dark:text-zinc-500 sm:text-[10px]">
+                          <p className="text-[9px] font-black uppercase tracking-[0.22em] text-zinc-400 sm:text-[10px]">
                             Serviço ativo
                           </p>
                         </div>
 
-                        <h2 className="mt-1 line-clamp-1 text-base font-black tracking-tight text-zinc-950 dark:text-white sm:text-lg">
+                        <h2 className="mt-1 line-clamp-1 text-base font-black tracking-tight text-zinc-950 sm:text-lg">
                           {service.title}
                         </h2>
 
-                        <p className="mt-0.5 line-clamp-1 text-xs font-medium text-zinc-500 dark:text-zinc-400 sm:text-sm">
+                        <p className="mt-0.5 line-clamp-1 text-xs font-medium text-zinc-500 sm:text-sm">
                           {service.category || "Sem categoria"}
                         </p>
                       </div>
 
-                      <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-[#30cc36]/20 bg-[#30cc36]/10 px-2.5 py-1 text-[10px] font-black text-[#1eb34b] dark:bg-[#30cc36]/15 sm:px-3 sm:py-1.5 sm:text-xs">
+                      <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-[#04193D]/20 bg-[#04193D]/10 px-2.5 py-1 text-[10px] font-black text-[#04193d] sm:px-3 sm:py-1.5 sm:text-xs">
                         <Icon icon="trending_up" size={13} />
                         {totalInteractions}
                       </div>
@@ -400,7 +400,7 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="p-3 sm:p-4">
-                    <div className="rounded-2xl border border-zinc-200/70 bg-gradient-to-br from-zinc-50 to-white p-4 dark:border-white/10 dark:from-white/[0.04] dark:to-white/[0.02]">
+                    <div className="rounded-2xl border border-zinc-200/70 bg-gradient-to-br from-zinc-50 to-white p-4">
                       <div className="flex items-center justify-between gap-4">
                         <div>
                           <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 sm:text-[10px]">
@@ -408,21 +408,21 @@ export default function DashboardPage() {
                           </p>
 
                           <div className="mt-2 flex items-end gap-2">
-                            <p className="text-4xl font-black leading-none tracking-tight text-zinc-950 dark:text-white sm:text-5xl">
+                            <p className="text-4xl font-black leading-none tracking-tight text-zinc-950 sm:text-5xl">
                               {conversionRate}%
                             </p>
 
-                            <span className="mb-1 rounded-full bg-[#30cc36]/10 px-2 py-0.5 text-[10px] font-black text-[#1eb34b]">
+                            <span className="mb-1 rounded-full bg-[#04193D]/10 px-2 py-0.5 text-[10px] font-black text-[#04193d]">
                               conversão
                             </span>
                           </div>
 
-                          <p className="mt-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                          <p className="mt-2 text-xs font-medium text-zinc-500">
                             contatos gerados a partir das visualizações
                           </p>
                         </div>
 
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#30cc36] text-white shadow-[0_14px_28px_rgba(48,204,54,0.3)] sm:h-12 sm:w-12">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#04193D] text-white shadow-[0_14px_28px_rgba(48,204,54,0.3)] sm:h-12 sm:w-12">
                           <Icon icon="bolt" size={22} weight={700} />
                         </div>
                       </div>
@@ -430,13 +430,13 @@ export default function DashboardPage() {
 
                     <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5">
                       {/* Views */}
-                      <div className="rounded-xl border border-zinc-200/70 bg-white px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]">
+                      <div className="rounded-xl border border-zinc-200/70 bg-white px-3 py-2.5">
                         <p className="flex items-center justify-center gap-1 text-[8px] font-black uppercase tracking-[0.12em] text-zinc-400 sm:text-[9px]">
                           <Icon icon="visibility" size={20} />
                           Views
                         </p>
 
-                        <p className="mt-1 flex text-xl flex justify-center font-black leading-none tracking-tight text-[#30cc36] sm:text-3xl">
+                        <p className="mt-1 flex text-xl flex justify-center font-black leading-none tracking-tight text-[#04193D] sm:text-3xl">
                           {metrics.views}
                         </p>
 
@@ -446,13 +446,13 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Cliques */}
-                      <div className="rounded-xl border border-zinc-200/70 bg-white px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]">
+                      <div className="rounded-xl border border-zinc-200/70 bg-white px-3 py-2.5">
                         <p className="flex items-center justify-center gap-1 text-[8px] font-black uppercase tracking-[0.12em] text-zinc-400 sm:text-[9px]">
                           <Icon icon="left_click" size={20} />
                           Cliques
                         </p>
 
-                        <p className="mt-1 text-xl font-black flex justify-center leading-none tracking-tight text-[#30cc36] sm:text-3xl">
+                        <p className="mt-1 text-xl font-black flex justify-center leading-none tracking-tight text-[#04193D] sm:text-3xl">
                           {metrics.serviceClicks}
                         </p>
 
@@ -462,7 +462,7 @@ export default function DashboardPage() {
                       </div>
 
                       {/* WhatsApp */}
-                      <div className="rounded-xl border border-zinc-200/70 bg-white px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]">
+                      <div className="rounded-xl border border-zinc-200/70 bg-white px-3 py-2.5">
                         <p className="flex items-center justify-center gap-1 text-[8px] font-black uppercase tracking-[0.12em] text-zinc-400 sm:text-[9px]">
                           <img
                             src="/whatsapp_logo_gray.png"
@@ -472,7 +472,7 @@ export default function DashboardPage() {
                           WhatsApp
                         </p>
 
-                        <p className="mt-1 text-xl flex justify-center font-black leading-none tracking-tight text-[#30cc36] sm:text-3xl">
+                        <p className="mt-1 text-xl flex justify-center font-black leading-none tracking-tight text-[#04193D] sm:text-3xl">
                           {metrics.whatsappClicks}
                         </p>
 
@@ -482,7 +482,7 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Instagram */}
-                      <div className="rounded-xl border border-zinc-200/70 bg-white px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.03]">
+                      <div className="rounded-xl border border-zinc-200/70 bg-white px-3 py-2.5">
                         <p className="flex items-center justify-center gap-1 text-[8px] font-black uppercase tracking-[0.12em] text-zinc-400 sm:text-[9px]">
                           <img
                             src="/instagram_logo_gray.png"
@@ -492,7 +492,7 @@ export default function DashboardPage() {
                           Instagram
                         </p>
 
-                        <p className="mt-1 text-xl font-black flex justify-center leading-none tracking-tight text-[#30cc36] sm:text-3xl">
+                        <p className="mt-1 text-xl font-black flex justify-center leading-none tracking-tight text-[#04193D] sm:text-3xl">
                           {metrics.instagramClicks}
                         </p>
 

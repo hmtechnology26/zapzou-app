@@ -55,54 +55,6 @@
     color-scheme: light;
   }
 
-  [data-theme="dark"] {
-    --color-primary: 72 208 80;
-    --color-primary-50: 41 62 44;
-    --color-primary-100: 49 73 53;
-    --color-primary-200: 59 87 64;
-    --color-primary-300: 68 101 75;
-    --color-primary-400: 75 116 82;
-    --color-primary-500: 72 208 80;
-    --color-primary-600: 103 219 110;
-    --color-primary-700: 132 228 138;
-    --color-primary-800: 165 238 169;
-    --color-primary-900: 205 247 208;
-    --color-primary-container: 48 204 54;
-    --color-on-primary: 0 37 8;
-    --color-on-primary-container: 206 247 209;
-    --color-secondary: 72 208 80;
-    --color-secondary-container: 34 49 37;
-    --color-on-secondary: 232 237 235;
-    --color-on-secondary-container: 196 226 201;
-    --color-tertiary: 245 177 149;
-    --color-tertiary-container: 58 44 38;
-    --color-on-tertiary: 255 230 218;
-    --color-on-tertiary-container: 255 220 208;
-    --color-error: 245 162 156;
-    --color-error-container: 73 34 34;
-    --color-on-error: 255 230 227;
-    --color-on-error-container: 255 219 216;
-    --color-background: 48 52 59;
-    --color-surface: 54 58 66;
-    --color-surface-dim: 42 46 53;
-    --color-surface-container-lowest: 58 62 70;
-    --color-surface-container-low: 62 66 75;
-    --color-surface-container: 68 73 82;
-    --color-surface-container-high: 74 79 89;
-    --color-surface-container-highest: 80 86 96;
-    --color-surface-variant: 86 92 103;
-    --color-surface-tint: 72 208 80;
-    --color-on-surface: 237 239 242;
-    --color-on-surface-variant: 194 200 207;
-    --color-on-background: 237 239 242;
-    --color-outline: 153 160 170;
-    --color-outline-variant: 116 125 136;
-    --color-inverse-surface: 237 239 242;
-    --color-inverse-on-surface: 28 31 36;
-    --color-inverse-primary: 72 208 80;
-    color-scheme: dark;
-  }
-
   html {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -159,7 +111,7 @@
   }
   
   .primary-gradient {
-    background: linear-gradient(135deg, #259128 0%, #30CC36 100%);
+    background: linear-gradient(135deg, #259128 0%, #04193D 100%);
   }
   
   .glass-effect {

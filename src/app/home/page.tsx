@@ -182,7 +182,7 @@ export default function LandingHomePage() {
             </Link>
             <Link
               href="/login"
-              className="rounded-full bg-[#30CC36] px-4 py-2 text-sm font-black text-[#052f14] shadow-lg shadow-[#30CC36]/25 transition hover:brightness-110"
+              className="rounded-full bg-[#04193D] px-4 py-2 text-sm font-black text-[#052f14] shadow-lg shadow-[#04193D]/25 transition hover:brightness-110"
             >
               Entrar Agora
             </Link>
@@ -207,7 +207,7 @@ export default function LandingHomePage() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/explore"
-                className="inline-flex w-full items-center justify-center rounded-full bg-[#30CC36] px-6 py-3 text-center text-sm font-black text-[#052f14] shadow-xl shadow-[#30CC36]/25 transition hover:brightness-110 sm:w-auto"
+                className="inline-flex w-full items-center justify-center rounded-full bg-[#04193D] px-6 py-3 text-center text-sm font-black text-[#052f14] shadow-xl shadow-[#04193D]/25 transition hover:brightness-110 sm:w-auto"
               >
                 Encontrar Serviços
               </Link>
@@ -377,7 +377,7 @@ export default function LandingHomePage() {
                   href={plan.href}
                   className={`mt-6 inline-flex rounded-full px-4 py-2 text-sm font-black transition ${
                     plan.featured
-                      ? "bg-[#30CC36] text-[#052f14] hover:brightness-110"
+                      ? "bg-[#04193D] text-[#052f14] hover:brightness-110"
                       : "bg-on-surface text-white hover:bg-on-surface/90"
                   }`}
                 >
@@ -417,7 +417,7 @@ export default function LandingHomePage() {
           <div className="mt-6 flex flex-wrap gap-3 md:mt-0">
             <Link
               href="/"
-              className="inline-flex w-full items-center justify-center rounded-full bg-[#30CC36] px-5 py-3 text-sm font-black text-[#052f14] hover:brightness-110 sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-full bg-[#04193D] px-5 py-3 text-sm font-black text-[#052f14] hover:brightness-110 sm:w-auto"
             >
               Abrir Aplicação
             </Link>

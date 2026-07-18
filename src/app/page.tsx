@@ -21,6 +21,7 @@ import { supabase } from "@/lib/supabase";
 import { trackServiceInteraction } from "@/lib/service-interactions";
 import { ImageModal } from "@/components/ImageModal";
 import { StarRating } from "@/components/StarRating";
+import { PageHeader } from "@/components/PageHeader";
 
 const PAGE_SIZE = 16;
 type MembershipAccessType = "resident" | "service_provider" | null;
@@ -114,7 +115,7 @@ function PaginationControls({
           type="button"
           onClick={onPrevious}
           disabled={currentPage <= 1}
-          className="rounded-full border border-white/20 bg-white/70 px-4 py-2 text-sm font-black text-zinc-700 shadow-sm backdrop-blur-xl transition-all hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/[0.04] dark:text-white"
+          className="rounded-full border border-white/20 bg-white/70 px-4 py-2 text-sm font-black text-zinc-700 shadow-sm backdrop-blur-xl transition-all hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
         >
           Anterior
         </button>
@@ -123,13 +124,13 @@ function PaginationControls({
           type="button"
           onClick={onNext}
           disabled={currentPage >= totalPages}
-          className="rounded-full border border-white/20 bg-white/70 px-4 py-2 text-sm font-black text-zinc-700 shadow-sm backdrop-blur-xl transition-all hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/[0.04] dark:text-white"
+          className="rounded-full border border-white/20 bg-white/70 px-4 py-2 text-sm font-black text-zinc-700 shadow-sm backdrop-blur-xl transition-all hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
         >
           Próximo
         </button>
       </div>
 
-      <p className="text-center text-sm font-bold text-zinc-400 dark:text-white/45">
+      <p className="text-center text-sm font-bold text-zinc-400">
         Página {currentPage} de {totalPages}
       </p>
     </div>
@@ -1530,40 +1531,40 @@ export default function HomePage() {
       <TopAppBar />
 
       <main className="mx-auto max-w-7xl space-y-8 px-4 pb-32 pt-24 md:px-8 md:pt-28">
-        {/* <section className="relative overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/70 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04] md:p-8">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#30cc36]/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 left-10 h-56 w-56 rounded-full bg-[#30cc36]/10 blur-3xl" />
+        {/* <section className="relative overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/70 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl md:p-8">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#04193D]/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 left-10 h-56 w-56 rounded-full bg-[#04193D]/10 blur-3xl" />
 
           <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[#30cc36]/20 bg-[#30cc36]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#1eb34b]">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#04193D]/20 bg-[#04193D]/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#1eb34b]">
                 <Icon icon="verified" size={14} weight={700} />
                 Rede de confiança
               </span>
 
-              <p className="mt-5 text-sm font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-white/35">
+              <p className="mt-5 text-sm font-black uppercase tracking-[0.18em] text-zinc-400">
                 {user?.name ? `Olá, ${user.name.split(" ")[0]}` : "Bem-vindo ao Conectaê"}
               </p>
 
-              <h1 className="mt-2 text-4xl font-black tracking-tight text-zinc-950 dark:text-white md:text-6xl">
+              <h1 className="mt-2 text-4xl font-black tracking-tight text-zinc-950 md:text-6xl">
                 Encontre serviços perto de você.
               </h1>
 
-              <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed text-zinc-500 dark:text-white/55 md:text-base">
+              <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed text-zinc-500 md:text-base">
                 Profissionais, autônomos e moradores anunciando dentro das suas comunidades.
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 rounded-[2rem] border border-white/20 bg-white/60 p-2 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
-              <div className="rounded-[1.5rem] bg-[#30cc36]/10 px-4 py-3 text-center">
-                <p className="text-xl font-black text-[#30cc36]">{activeServices.length}</p>
+            <div className="grid grid-cols-3 gap-2 rounded-[2rem] border border-white/20 bg-white/60 p-2 shadow-sm backdrop-blur-xl">
+              <div className="rounded-[1.5rem] bg-[#04193D]/10 px-4 py-3 text-center">
+                <p className="text-xl font-black text-[#04193D]">{activeServices.length}</p>
                 <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
                   Ativos
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-white/70 px-4 py-3 text-center dark:bg-white/[0.06]">
-                <p className="text-xl font-black text-zinc-950 dark:text-white">
+              <div className="rounded-[1.5rem] bg-white/70 px-4 py-3 text-center">
+                <p className="text-xl font-black text-zinc-950">
                   {environmentsWithServices.length}
                 </p>
                 <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
@@ -1571,8 +1572,8 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] bg-white/70 px-4 py-3 text-center dark:bg-white/[0.06]">
-                <p className="text-xl font-black text-zinc-950 dark:text-white">
+              <div className="rounded-[1.5rem] bg-white/70 px-4 py-3 text-center">
+                <p className="text-xl font-black text-zinc-950">
                   {categories.length - 1}
                 </p>
                 <p className="text-[9px] font-black uppercase tracking-[0.16em] text-zinc-400">
@@ -1582,15 +1583,15 @@ export default function HomePage() {
             </div>
           </div>
         </section> */}
-        <section className="relative overflow-visible rounded-[2rem] border border-white/20 bg-white/55 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.035]">
-          <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#30cc36]/10 blur-3xl" />
+        <section className="relative overflow-visible rounded-[2rem] border border-white/20 bg-white/55 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-2xl">
+          <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#04193D]/10 blur-3xl" />
           <div className="relative flex items-center justify-between px-1">
             <h2 className="text-sm font-black tracking-[0.2em] uppercase text-on-surface-variant"></h2>
             {/* {user && (
               <button
                 type="button"
                 onClick={handleOpenStoryComposer}
-                className="text-xs font-bold px-3 py-1.5 rounded-full bg-[#30cc36]/10 text-[#30cc36] hover:bg-[#30cc36]/20 transition-colors"
+                className="text-xs font-bold px-3 py-1.5 rounded-full bg-[#04193D]/10 text-[#04193D] hover:bg-[#04193D]/20 transition-colors"
               >
                 Adicionar
               </button>
@@ -1647,7 +1648,7 @@ export default function HomePage() {
                       event.stopPropagation();
                       handleOpenStoryComposer();
                     }}
-                    className="absolute -right-1 -bottom-1 w-6 h-6 rounded-full bg-[#30cc36] text-white border-2 border-background flex items-center justify-center shadow-md"
+                    className="absolute -right-1 -bottom-1 w-6 h-6 rounded-full bg-[#04193d] text-white border-2 border-background flex items-center justify-center shadow-md"
                     aria-label="Adicionar story"
                   >
                     <Icon icon="add" size={15} weight={700} />
@@ -1736,7 +1737,7 @@ export default function HomePage() {
         </section> */}
 
         <section className="space-y-5">
-          <div className="rounded-[2rem] border border-white/20 bg-white/70 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04]">
+          <div className="rounded-[2rem] border border-white/20 bg-white/70 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-2xl">
             <div className="flex items-center gap-2">
               <div className="min-w-0 flex-1">
                 <SearchField
@@ -1757,7 +1758,7 @@ export default function HomePage() {
                     setIsFilterOpen((prev) => !prev)
                   }
                   disabled={environmentsWithServices.length === 0}
-                  className="flex h-[46px] max-w-[126px] items-center gap-2 truncate rounded-full border border-white/20 bg-white/80 px-4 pr-9 text-xs font-black text-zinc-700 shadow-sm backdrop-blur-xl transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/[0.06] dark:text-white sm:max-w-[200px]"
+                  className="flex h-[46px] max-w-[126px] items-center gap-2 truncate rounded-full border border-white/20 bg-white/80 px-4 pr-9 text-xs font-black text-zinc-700 shadow-sm backdrop-blur-xl transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:max-w-[200px]"
                 >
                   <Icon icon="location_on" size={16} weight={700} />
                   <span className="truncate">{selectedEnvironmentName}</span>
@@ -1780,7 +1781,6 @@ export default function HomePage() {
     border border-white/20 bg-white/95
     shadow-[0_24px_80px_rgba(15,23,42,0.22)]
     backdrop-blur-2xl
-    dark:border-white/10 dark:bg-zinc-950/95
   "
                   >
                     {" "}
@@ -1792,8 +1792,8 @@ export default function HomePage() {
                       }}
                       className={`w-full px-4 py-3 text-left text-sm font-black transition-colors ${
                         selectedEnvironmentId === "all"
-                          ? "bg-[#30cc36]/10 text-[#30cc36]"
-                          : "text-zinc-700 hover:bg-[#30cc36]/5 dark:text-white"
+                          ? "bg-[#04193D]/10 text-[#04193D]"
+                          : "text-zinc-700 hover:bg-[#04193D]/5"
                       }`}
                     >
                       Todos os locais
@@ -1809,8 +1809,8 @@ export default function HomePage() {
                           }}
                           className={`w-full px-4 py-3 text-left text-sm transition-colors ${
                             selectedEnvironmentId === env.id
-                              ? "bg-[#30cc36]/10 font-black text-[#30cc36]"
-                              : "font-bold text-zinc-700 hover:bg-[#30cc36]/5 dark:text-white"
+                              ? "bg-[#04193D]/10 font-black text-[#04193D]"
+                              : "font-bold text-zinc-700 hover:bg-[#04193D]/5"
                           }`}
                         >
                           {env.name}
@@ -1836,8 +1836,8 @@ export default function HomePage() {
                   onClick={() => handleSelectCategory(category)}
                   className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-black whitespace-nowrap shadow-sm transition-all active:scale-95 ${
                     isSelected
-                      ? "border-[#30cc36] bg-[#30cc36] text-white shadow-lg shadow-[#30cc36]/25"
-                      : "border-white/20 bg-white/70 text-zinc-500 backdrop-blur-xl hover:border-[#30cc36]/30 hover:text-[#30cc36] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/60"
+                      ? "border-[#04193d] bg-[#04193d] text-white shadow-lg shadow-[#04193D]/25"
+                      : "border-white/20 bg-white/70 text-zinc-500 backdrop-blur-xl hover:border-[#04193D]/30 hover:text-[#04193D]"
                   }`}
                 >
                   <Icon icon={category.icon} size={14} weight={isSelected ? 700 : 400} />
@@ -1849,7 +1849,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setIsCategorySheetOpen(true)}
-              className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/75 px-3 py-2 text-[11px] font-black text-zinc-600 shadow-sm backdrop-blur-xl transition-all active:scale-95 dark:border-white/10 dark:bg-white/[0.04] dark:text-white/70"
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/20 bg-white/75 px-3 py-2 text-[11px] font-black text-zinc-600 shadow-sm backdrop-blur-xl transition-all active:scale-95"
             >
               <Icon icon="tune" size={14} weight={700} />
               Mais
@@ -1869,8 +1869,8 @@ export default function HomePage() {
                   onClick={() => handleSelectCategory(cat)}
                   className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-[11px] font-black whitespace-nowrap shadow-sm transition-all active:scale-95 ${
                     isSelected
-                      ? "border-[#30cc36] bg-[#30cc36] text-white shadow-lg shadow-[#30cc36]/25"
-                      : "border-white/20 bg-white/70 text-zinc-500 backdrop-blur-xl hover:border-[#30cc36]/30 hover:text-[#30cc36] dark:border-white/10 dark:bg-white/[0.04] dark:text-white/60"
+                      ? "border-[#04193D] bg-[#04193D] text-white shadow-lg shadow-[#04193D]/25"
+                      : "border-white/20 bg-white/70 text-zinc-500 backdrop-blur-xl hover:border-[#04193D]/30 hover:text-[#04193D]"
                   }`}
                 >
                   <Icon icon={cat.icon} size={14} weight={isSelected ? 700 : 400} />
@@ -1889,15 +1889,15 @@ export default function HomePage() {
                 className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
               />
 
-              <div className="absolute inset-x-0 bottom-0 max-h-[82vh] overflow-y-auto rounded-t-[1.6rem] border border-white/20 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-zinc-950">
+              <div className="absolute inset-x-0 bottom-0 max-h-[82vh] overflow-y-auto rounded-t-[1.6rem] border border-white/20 bg-white p-4 shadow-2xl">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-black uppercase tracking-[0.15em] text-zinc-700 dark:text-white/80">
+                  <h3 className="text-sm font-black uppercase tracking-[0.15em] text-zinc-700">
                     Categorias
                   </h3>
                   <button
                     type="button"
                     onClick={() => setIsCategorySheetOpen(false)}
-                    className="rounded-full border border-zinc-200 p-1.5 text-zinc-500 dark:border-white/10 dark:text-white/70"
+                    className="rounded-full border border-zinc-200 p-1.5 text-zinc-500"
                   >
                     <Icon icon="close" size={18} />
                   </button>
@@ -1916,8 +1916,8 @@ export default function HomePage() {
                         onClick={() => handleSelectCategory(category)}
                         className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-xs font-black transition-all ${
                           isSelected
-                            ? "border-[#30cc36] bg-[#30cc36]/12 text-[#30cc36]"
-                            : "border-zinc-200/70 bg-white text-zinc-600 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/70"
+                            ? "border-[#04193D] bg-[#04193D]/12 text-[#04193D]"
+                            : "border-zinc-200/70 bg-white text-zinc-600"
                         }`}
                       >
                         <Icon icon={category.icon} size={16} weight={isSelected ? 700 : 400} />
@@ -1937,7 +1937,7 @@ export default function HomePage() {
               {Array.from({ length: 8 }).map((_, index) => (
                 <div
                   key={index}
-                  className="overflow-hidden rounded-[2rem] border border-white/20 bg-white/70 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]"
+                  className="overflow-hidden rounded-[2rem] border border-white/20 bg-white/70 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl"
                   aria-busy="true"
                   aria-live="polite"
                 >
@@ -1969,7 +1969,7 @@ export default function HomePage() {
                       onClick={() =>
                         handleOpenServiceDetails(service, "home_list_card")
                       }
-                      className="group/card relative flex h-full cursor-pointer flex-row items-start gap-2.5 overflow-hidden rounded-[1.4rem] border border-white/20 bg-white/80 p-2 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] sm:flex-col sm:items-stretch sm:gap-0 sm:rounded-[2rem] sm:p-0 dark:border-white/10 dark:bg-white/[0.04]"
+                      className="group/card relative flex h-full cursor-pointer flex-row items-start gap-2.5 overflow-hidden rounded-[1.4rem] border border-white/20 bg-white/80 p-2 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] sm:flex-col sm:items-stretch sm:gap-0 sm:rounded-[2rem] sm:p-0"
                     >
                       <div 
                         className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[0.9rem] bg-surface-container-low cursor-pointer sm:h-48 sm:w-full sm:rounded-none sm:border-b sm:border-r-0"
@@ -1996,7 +1996,7 @@ export default function HomePage() {
                             decoding="async"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-[#30cc36]/5">
+                          <div className="flex h-full w-full items-center justify-center bg-[#04193D]/5">
                             <Icon
                               icon="image"
                               size={24}
@@ -2023,15 +2023,15 @@ export default function HomePage() {
                       <div className="flex min-w-0 min-h-[96px] flex-1 flex-col justify-between py-0.5 sm:min-h-[152px] sm:p-4">
                         <div className="min-w-0 sm:min-h-[88px]">
                           <div className="mb-1 flex items-center gap-1 sm:mb-2 sm:flex-wrap sm:gap-2">
-                            <span className="rounded-full bg-[#30cc36]/5 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-[#30cc36]">
+                            <span className="rounded-full bg-[#04193D]/5 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-[#04193D]">
                               {service.category}
                             </span>
                             <div className="ml-auto flex flex-col items-end gap-1">
                               <span
                                 className={`rounded-full px-1.5 py-0.5 text-[7px] font-bold ${
                                   hasCnpj(service.cnpj)
-                                    ? "text-white bg-[#30cc36] dark:text-black/80 dark:bg-[#30cc36]"
-                                    : "text-white bg-orange-600 dark:text-white dark:bg-orange-700"
+                                    ? "text-white bg-[#04193D]"
+                                    : "text-white bg-orange-600"
                                 }`}
                               >
                                 {hasCnpj(service.cnpj)
@@ -2040,7 +2040,7 @@ export default function HomePage() {
                               </span>
                             </div>
                           </div>
-                          <h4 className="font-black text-on-surface text-[12px] leading-tight line-clamp-2 group-hover/card:text-[#30cc36] transition-colors sm:text-[15px] sm:line-clamp-2">
+                          <h4 className="font-black text-on-surface text-[12px] leading-tight line-clamp-2 group-hover/card:text-[#04193D] transition-colors sm:text-[15px] sm:line-clamp-2">
                             {service.title}
                           </h4>
                           {service.rating > 0 && (
@@ -2069,7 +2069,7 @@ export default function HomePage() {
                                       e.stopPropagation();
                                       handleOpenProviderServices(providerGroup.key);
                                     }}
-                                    className="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#30cc36]/10 text-[#30cc36] hover:bg-[#30cc36]/20 transition-colors"
+                                    className="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#04193D]/10 text-[#04193D] hover:bg-[#04193D]/20 transition-colors"
                                     aria-label={`Ver todos os ${providerGroup.totalServices} serviços deste fornecedor`}
                                   >
                                     <Icon icon="apps" size={10} weight={700} />
@@ -2094,7 +2094,7 @@ export default function HomePage() {
                                         size={12}
                                         weight={700}
                                       />
-                                      <span className="text-[9px] text-[#30cc36] font-bold">
+                                      <span className="text-[9px] text-[#04193D] font-bold">
                                         {service.distance < 1
                                           ? `${Math.round(service.distance * 1000)}m`
                                           : `${service.distance.toFixed(1)}km`}
@@ -2112,11 +2112,11 @@ export default function HomePage() {
                                   "home_list_button",
                                 );
                               }}
-                              className="shrink-0 rounded-full bg-[#30cc36] px-2.5 py-1.5 text-[8px] font-black uppercase text-white shadow-lg shadow-[#30cc36]/20 transition-all hover:brightness-110 active:scale-95 sm:min-w-[132px] sm:px-4 sm:py-2.5 sm:text-xs"
+                              className="shrink-0 rounded-full bg-[#04193D] px-2.5 py-1.5 text-[8px] font-black uppercase text-white shadow-lg shadow-[#04193D]/20 transition-all hover:brightness-110 active:scale-95 sm:min-w-[132px] sm:px-4 sm:py-2.5 sm:text-xs"
                             >
                               Ver anúncio
                             </button>
-                            {/* <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#30cc36] group-hover/card:text-white transition-all duration-300">
+                            {/* <div className="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center group-hover/card:bg-[#04193D] group-hover/card:text-white transition-all duration-300">
                             <Icon icon="arrow_forward" size={14} weight={700} />
                           </div> */}
                           </div>
@@ -2125,7 +2125,7 @@ export default function HomePage() {
                     </div>
                   ))}
                   {displayedServices.length === 0 && (
-                    <div className="col-span-full rounded-[2rem] border border-dashed border-[#30cc36]/25 bg-white/70 py-12 text-center text-sm font-bold italic text-zinc-400 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
+                    <div className="col-span-full rounded-[2rem] border border-dashed border-[#04193D]/25 bg-white/70 py-12 text-center text-sm font-bold italic text-zinc-400 shadow-sm backdrop-blur-xl">
                       Nenhum prestador encontrado proximo a voce
                     </div>
                   )}
@@ -2154,7 +2154,7 @@ export default function HomePage() {
                       onClick={() =>
                         handleOpenServiceDetails(service, "home_search_card")
                       }
-                      className="group/card relative flex h-full cursor-pointer flex-row items-start gap-2.5 overflow-hidden rounded-[1.4rem] border border-white/20 bg-white/80 p-2 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] sm:flex-col sm:items-stretch sm:gap-0 sm:rounded-[2rem] sm:p-0 dark:border-white/10 dark:bg-white/[0.04]"
+                      className="group/card relative flex h-full cursor-pointer flex-row items-start gap-2.5 overflow-hidden rounded-[1.4rem] border border-white/20 bg-white/80 p-2 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] sm:flex-col sm:items-stretch sm:gap-0 sm:rounded-[2rem] sm:p-0"
                     >
                       <div 
                         className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[0.9rem] bg-surface-container-low cursor-pointer sm:h-48 sm:w-full sm:rounded-none sm:border-b sm:border-r-0"
@@ -2181,7 +2181,7 @@ export default function HomePage() {
                             decoding="async"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-[#30cc36]/5">
+                          <div className="flex h-full w-full items-center justify-center bg-[#04193D]/5">
                             <Icon
                               icon="image"
                               size={24}
@@ -2254,7 +2254,7 @@ export default function HomePage() {
                                       e.stopPropagation();
                                       handleOpenProviderServices(providerGroup.key);
                                     }}
-                                    className="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#30cc36]/10 text-[#30cc36] hover:bg-[#30cc36]/20 transition-colors"
+                                    className="ml-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#04193D]/10 text-[#04193D] hover:bg-[#04193D]/20 transition-colors"
                                     aria-label={`Ver todos os ${providerGroup.totalServices} serviços deste fornecedor`}
                                   >
                                     <Icon icon="apps" size={10} weight={700} />
@@ -2300,7 +2300,7 @@ export default function HomePage() {
                                   "home_search_button",
                                 );
                               }}
-                              className="shrink-0 rounded-full bg-[#30cc36] px-2.5 py-1.5 text-[8px] font-black uppercase text-white shadow-lg shadow-[#30cc36]/20 transition-all hover:brightness-110 active:scale-95 sm:min-w-[132px] sm:px-4 sm:py-2.5 sm:text-xs"
+                              className="shrink-0 rounded-full bg-[#04193D] px-2.5 py-1.5 text-[8px] font-black uppercase text-white shadow-lg shadow-[#04193D]/20 transition-all hover:brightness-110 active:scale-95 sm:min-w-[132px] sm:px-4 sm:py-2.5 sm:text-xs"
                             >
                               Ver anúncio
                             </button>
@@ -2310,7 +2310,7 @@ export default function HomePage() {
                     </div>
                   ))}
                   {displayedServices.length === 0 && (
-                    <div className="col-span-full rounded-[2rem] border border-dashed border-[#30cc36]/25 bg-white/70 py-12 text-center text-sm font-bold italic text-zinc-400 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
+                    <div className="col-span-full rounded-[2rem] border border-dashed border-[#04193D]/25 bg-white/70 py-12 text-center text-sm font-bold italic text-zinc-400 shadow-sm backdrop-blur-xl">
                       Nenhum prestador encontrado para "{search}"
                     </div>
                   )}
@@ -2552,7 +2552,7 @@ export default function HomePage() {
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[11px] font-black uppercase tracking-wide text-[#30cc36]">
+                      <p className="text-[11px] font-black uppercase tracking-wide text-[#04193D]">
                         {service.category || "Sem categoria"}
                       </p>
                       <p className="text-sm font-bold text-on-surface truncate mt-0.5">
@@ -2701,7 +2701,7 @@ export default function HomePage() {
                 type="button"
                 onClick={handlePublishStories}
                 disabled={isPublishingStory || selectedStoryMedia.length === 0}
-                className="w-full rounded-full bg-[#30cc36] text-white font-black text-sm py-3 transition-all hover:brightness-110 disabled:opacity-45 disabled:cursor-not-allowed"
+                className="w-full rounded-full bg-[#04193D] text-white font-black text-sm py-3 transition-all hover:brightness-110 disabled:opacity-45 disabled:cursor-not-allowed"
               >
                 {isPublishingStory ? "Publicando..." : "Publicar nos stories"}
               </button>

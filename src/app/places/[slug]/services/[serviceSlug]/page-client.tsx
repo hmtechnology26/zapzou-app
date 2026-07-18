@@ -107,6 +107,35 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
             environmentId: byId.environment_id,
             slug: byId.slug || serviceSlug,
           });
+          setLoading(false);
+          return;
+        }
+
+        // Fallback: busca por nome (case-insensitive)
+        const decodedName = serviceSlug.replace(/[-_]+/g, ' ').trim();
+        if (decodedName) {
+          const { data: byName } = await supabase
+            .from('services')
+            .select('*')
+            .ilike('title', decodedName)
+            .limit(1)
+            .maybeSingle();
+
+          if (!cancelled && byName) {
+            setService({
+              ...byName,
+              image: byName.image_url || '',
+              images: Array.isArray(byName.images_urls) ? byName.images_urls : [],
+              WhatsApp: byName.whatsapp,
+              instagram: byName.instagram,
+              website: byName.website_url,
+              isActive: byName.is_active,
+              environmentId: byName.environment_id,
+              slug: byName.slug || serviceSlug,
+            });
+            setLoading(false);
+            return;
+          }
         }
       } catch (e) {
         console.warn('Direct service fetch failed:', e);
@@ -472,8 +501,8 @@ export default function ServiceDetailPage({ seoContent }: ServiceDetailPageProps
               <span
                 className={`inline-flex text-[10px] font-bold px-2.5 py-1 rounded-full ${
                   hasCnpj(service.cnpj)
-                    ? 'text-white bg-[#30cc36] dark:text-black/80 dark:bg-[#30cc36]'
-                    : 'text-white bg-orange-600 dark:text-white dark:bg-orange-700'
+                    ? 'text-white bg-[#04193D]'
+                    : 'text-white bg-orange-600'
                 }`}
               >
                 {hasCnpj(service.cnpj) ? 'PROFISSIONAL' : 'AUTÔNOMO'}

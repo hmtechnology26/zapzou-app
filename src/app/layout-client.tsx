@@ -4,7 +4,6 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useApp } from "@/hooks/useApp";
 import { BottomNav } from "@/components/BottomNav";
-import { Icon } from "@/components/Icon";
 
 function ProtectedLayoutSkeleton() {
   const rows = Array.from({ length: 3 });
@@ -41,7 +40,6 @@ function ProtectedLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const [hasMounted, setHasMounted] = useState(false);
-  const [isSupportFabHidden, setIsSupportFabHidden] = useState(false);
 
 const publicExact = ["/", "/home", "/landing", "/login", "/search", "/places", "/contact", "/favorites", "/meus-anuncios", "/meus-ambientes", "/explore", "/imports/roteiro"];
   const publicPrefixes = ["/service/", "/places/", "/auth/", "/login/", "/imports/"];
@@ -61,57 +59,6 @@ useEffect(() => {
     }
   }, [user, loading, isPublicPage, router]);
 
-  useEffect(() => {
-    const handleSupportFabVisibility = (event: Event) => {
-      const customEvent = event as CustomEvent<{ hidden?: boolean }>;
-      setIsSupportFabHidden(Boolean(customEvent.detail?.hidden));
-    };
-
-    window.addEventListener(
-      "support-fab-visibility",
-      handleSupportFabVisibility as EventListener,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "support-fab-visibility",
-        handleSupportFabVisibility as EventListener,
-      );
-    };
-  }, []);
-
-  useEffect(() => {
-    setIsSupportFabHidden(false);
-  }, [pathname]);
-
-  const handleOpenSupportWhatsApp = () => {
-    const message = encodeURIComponent(
-      `Olá! Sou ${user?.name || "usuário"} e preciso de suporte com a plataforma Conectaê.`,
-    );
-    window.open(
-      `https://wa.me/5551981011805?text=${message}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
-  };
-
-  const shouldShowSupportFab =
-    hasMounted &&
-    pathname.length > 0 &&
-    !pathname.startsWith("/profile") &&
-    !isSupportFabHidden;
-
-  const supportFab = shouldShowSupportFab ? (
-    <button
-      type="button"
-      onClick={handleOpenSupportWhatsApp}
-      aria-label="Abrir suporte no WhatsApp"
-      className="fixed right-4 z-[70] inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#30cc36] text-white shadow-[0_18px_40px_rgba(48,204,54,0.40)] transition-all hover:brightness-110 active:scale-95 animate-bounce bottom-[calc(5.75rem+env(safe-area-inset-bottom))] md:bottom-8 md:right-6"
-    >
-      <Icon icon="support_agent" size={26} weight={700} />
-    </button>
-  ) : null;
-
   const shouldShowBottomNav = hasMounted && pathname && !hideBottomNavExact.includes(pathname);
 
   if (isPublicPage) {
@@ -119,7 +66,6 @@ useEffect(() => {
       <div className="min-h-screen">
         {children}
         {shouldShowBottomNav && <BottomNav />}
-        {supportFab}
       </div>
     );
   }
@@ -134,7 +80,6 @@ useEffect(() => {
     <div className="min-h-screen">
       {children}
       {showBottomNav && <BottomNav />}
-      {supportFab}
     </div>
   );
 }

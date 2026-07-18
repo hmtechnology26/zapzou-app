@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import ServiceDetailClient from './page-client';
-import { createPublicSupabaseClient, getSiteUrl, humanizeSlug } from '@/lib/seo';
+import { createPublicSupabaseClient, getSiteUrl, humanizeSlug, slugify } from '@/lib/seo';
 import { normalizeWebsiteUrl } from '@/lib/website';
 
 export const dynamic = 'force-dynamic';
@@ -13,11 +13,13 @@ async function getServiceBySlug(slug: string) {
   const supabase = createPublicSupabaseClient();
   if (!supabase) return null;
 
+  const normalizedSlug = slugify(slug);
+
   try {
     const { data: bySlug } = await supabase
       .from('services')
-.select('title, slug, description, image_url, website_url, status, is_active, environments!service_environment_links(name, slug)')
-      .eq('slug', slug)
+      .select('title, slug, description, image_url, website_url, status, is_active, environments!service_environment_links(name, slug)')
+      .eq('slug', normalizedSlug)
       .maybeSingle();
 
     if (bySlug) return bySlug;
@@ -28,7 +30,21 @@ async function getServiceBySlug(slug: string) {
       .eq('id', slug)
       .maybeSingle();
 
-    return byId ?? null;
+    if (byId) return byId;
+
+    const decodedName = slug.replace(/[-_]+/g, ' ').trim();
+    if (decodedName) {
+      const { data: byName } = await supabase
+        .from('services')
+        .select('title, slug, description, image_url, website_url, status, is_active, environments!service_environment_links(name, slug)')
+        .ilike('title', decodedName)
+        .limit(1)
+        .maybeSingle();
+
+      if (byName) return byName;
+    }
+
+    return null;
   } catch (error) {
     console.warn('getServiceBySlug failed:', error);
     return null;

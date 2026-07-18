@@ -73,7 +73,7 @@ function getAccessTypeBadge(
     return {
       label: "MORADOR",
       className:
-        "border-orange-500/20 bg-orange-500/10 text-orange-700 dark:text-orange-300",
+        "border-orange-500/20 bg-orange-500/10 text-orange-700",
     };
   }
 
@@ -81,7 +81,7 @@ function getAccessTypeBadge(
     return {
       label: "PRESTADOR",
       className:
-        "border-sky-500/20 bg-sky-500/10 text-sky-700 dark:text-sky-300",
+        "border-sky-500/20 bg-sky-500/10 text-sky-700",
     };
   }
 
@@ -204,29 +204,29 @@ export default function PlacesPage() {
       <TopAppBar />
 
       <main className="mx-auto max-w-7xl px-4 pb-24 pt-24 md:px-8 md:pt-28">
-        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/70 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04] md:p-8">
-          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#30cc36]/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 left-10 h-64 w-64 rounded-full bg-[#30cc36]/10 blur-3xl" />
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/70 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl md:p-8">
+          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#04193D]/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 left-10 h-64 w-64 rounded-full bg-[#04193D]/10 blur-3xl" />
 
           <div className="relative flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[#30cc36]/20 bg-[#30cc36]/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-[#1eb34b]">
+              {/* <span className="inline-flex items-center gap-2 rounded-full border border-[#04193D]/20 bg-[#04193D]/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-[#04193d]">
                 <Icon icon="explore" size={15} weight={700} />
                 Comunidades
-              </span>
+              </span> */}
 
-              <h1 className="mt-5 text-2xl font-black tracking-tight text-zinc-950 dark:text-white md:text-6xl">
-                Encontre comunidades com serviços publicados.
+              <h1 className="mt-5 text-2xl font-black tracking-tight text-zinc-950 md:text-3xl">
+                Comunidades com serviços publicados.
               </h1>
 
-              {/* <p className="mt-4 max-w-xl text-sm font-medium leading-7 text-zinc-500 dark:text-white/55 md:text-base">
+              {/* <p className="mt-4 max-w-xl text-sm font-medium leading-7 text-zinc-500 md:text-base">
                 Explore ambientes próximos, condomínios, igrejas, clubes e comunidades com profissionais disponíveis.
               </p> */}
             </div>
 
             {/* <div className="grid grid-cols-2 gap-3 sm:min-w-[280px]">
-              <div className="rounded-[1.5rem] border border-white/20 bg-white/70 p-4 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.05]">
-                <p className="text-3xl font-black text-[#30cc36]">
+              <div className="rounded-[1.5rem] border border-white/20 bg-white/70 p-4 shadow-sm backdrop-blur-xl">
+                <p className="text-3xl font-black text-[#04193D]">
                   {totalEnvironments}
                 </p>
                 <p className="mt-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-400">
@@ -234,8 +234,8 @@ export default function PlacesPage() {
                 </p>
               </div>
 
-              <div className="rounded-[1.5rem] border border-white/20 bg-white/70 p-4 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.05]">
-                <p className="text-3xl font-black text-zinc-950 dark:text-white">
+              <div className="rounded-[1.5rem] border border-white/20 bg-white/70 p-4 shadow-sm backdrop-blur-xl">
+                <p className="text-3xl font-black text-zinc-950">
                   {totalServices}
                 </p>
                 <p className="mt-1 text-[10px] font-black uppercase tracking-[0.16em] text-zinc-400">
@@ -246,7 +246,7 @@ export default function PlacesPage() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-[2rem] border border-white/20 bg-white/70 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04]">
+        <section className="mt-6 rounded-[2rem] border border-white/20 bg-white/70 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-2xl">
           <SearchField
             value={environmentSearch}
             onChange={setEnvironmentSearch}
@@ -255,25 +255,25 @@ export default function PlacesPage() {
         </section>
 
         {servicesLoading && totalEnvironments === 0 ? (
-          <div className="mt-8 rounded-[2.5rem] border border-white/20 bg-white/70 p-8 text-center shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04]">
-            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-[#30cc36] border-t-transparent" />
-            <p className="mt-4 text-sm font-bold text-zinc-500 dark:text-white/55">
-              Carregando comunidades com serviços publicados...
+          <div className="mt-8 rounded-[2.5rem] border border-white/20 bg-white/70 p-8 text-center shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-2xl">
+            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-[#04193D] border-t-transparent" />
+            <p className="mt-4 text-sm font-bold text-zinc-500">
+              Carregando comunidades...
             </p>
           </div>
         ) : null}
 
         {!servicesLoading && totalEnvironments === 0 ? (
-          <div className="mt-8 rounded-[2.5rem] border border-dashed border-[#30cc36]/30 bg-white/70 p-10 text-center shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-2xl dark:border-[#30cc36]/20 dark:bg-white/[0.04]">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#30cc36]/10 text-[#30cc36]">
+          <div className="mt-8 rounded-[2.5rem] border border-dashed border-[#04193D]/30 bg-white/70 p-10 text-center shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-2xl">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#04193D]/10 text-[#04193D]">
               <Icon icon="domain" size={32} weight={700} />
             </div>
 
-            <h2 className="mt-5 text-2xl font-black tracking-tight text-zinc-950 dark:text-white">
+            <h2 className="mt-5 text-2xl font-black tracking-tight text-zinc-950">
               Ainda não há comunidades com serviços publicados
             </h2>
 
-            <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-zinc-500 dark:text-white/55">
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-zinc-500">
               Assim que alguém publicar um serviço em uma comunidade, ela aparece automaticamente aqui.
             </p>
           </div>
@@ -291,12 +291,12 @@ export default function PlacesPage() {
                   key={environment.id}
                   type="button"
                   onClick={() => openEnvironment(environment.slug)}
-                  className="group relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 p-5 text-left shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-[#30cc36]/30 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.04]"
+                  className="group relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 p-5 text-left shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-[#04193D]/30 hover:shadow-[0_28px_80px_rgba(15,23,42,0.14)] active:scale-[0.98]"
                 >
-                  <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#30cc36]/10 blur-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#04193D]/10 blur-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
                   <div className="relative flex items-start gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-[#30cc36]/15 bg-[#30cc36]/10 text-[#30cc36] shadow-sm transition-all duration-300 group-hover:bg-[#30cc36] group-hover:text-white group-hover:shadow-[0_14px_35px_rgba(48,204,54,0.25)]">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-[#04193D]/15 bg-[#04193D]/10 text-[#04193D] shadow-sm transition-all duration-300 group-hover:bg-[#04193D] group-hover:text-white group-hover:shadow-[0_14px_35px_rgba(48,204,54,0.25)]">
                       <Icon
                         icon={getEnvironmentIcon(
                           environment.type,
@@ -322,17 +322,17 @@ export default function PlacesPage() {
                         )}
                       </div>
 
-                      <h2 className="mt-1 line-clamp-2 text-[1.15rem] font-black tracking-tight text-zinc-950 transition-colors group-hover:text-[#30cc36] dark:text-white">
+                      <h2 className="mt-1 line-clamp-2 text-[1.15rem] font-black tracking-tight text-zinc-950 transition-colors group-hover:text-[#04193D]">
                         {environment.name}
                       </h2>
 
                       {environment.address && (
-                        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-zinc-500 dark:text-white/55">
+                        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-zinc-500">
                           {environment.address}
                         </p>
                       )}
 
-                      {/* <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#30cc36]/15 bg-[#30cc36]/10 px-3 py-1.5 text-[11px] font-black text-[#1eb34b]">
+                      {/* <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#04193D]/15 bg-[#04193D]/10 px-3 py-1.5 text-[11px] font-black text-[#1eb34b]">
                         <Icon icon="storefront" size={14} weight={700} />
                         {environment.serviceCount} serviço
                         {environment.serviceCount === 1 ? "" : "s"} publicado
@@ -340,7 +340,7 @@ export default function PlacesPage() {
                       </div> */}
                     </div>
 
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-400 transition-all duration-300 group-hover:bg-[#30cc36] group-hover:text-white dark:bg-white/10 dark:text-white/45">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-400 transition-all duration-300 group-hover:bg-[#04193D] group-hover:text-white">
                       <Icon icon="chevron_right" size={20} weight={700} />
                     </div>
                   </div>
@@ -353,16 +353,16 @@ export default function PlacesPage() {
         {totalEnvironments > 0 &&
         filteredEnvironments.length === 0 &&
         !servicesLoading ? (
-          <div className="mt-8 rounded-[2.5rem] border border-dashed border-[#30cc36]/30 bg-white/70 p-10 text-center shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-2xl dark:border-[#30cc36]/20 dark:bg-white/[0.04]">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#30cc36]/10 text-[#30cc36]">
+          <div className="mt-8 rounded-[2.5rem] border border-dashed border-[#04193D]/30 bg-white/70 p-10 text-center shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-2xl">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#04193D]/10 text-[#04193D]">
               <Icon icon="search_off" size={32} weight={700} />
             </div>
 
-            <h2 className="mt-5 text-2xl font-black tracking-tight text-zinc-950 dark:text-white">
+            <h2 className="mt-5 text-2xl font-black tracking-tight text-zinc-950">
               Nenhuma comunidade encontrada
             </h2>
 
-            <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-zinc-500 dark:text-white/55">
+            <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-zinc-500">
               Tente outro nome ou limpe a busca para ver todas as comunidades.
             </p>
           </div>

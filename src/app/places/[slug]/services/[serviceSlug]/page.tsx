@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import ServiceDetailClient from './page-client';
-import { createPublicSupabaseClient, getSiteUrl, humanizeSlug } from '@/lib/seo';
+import { createPublicSupabaseClient, getSiteUrl, humanizeSlug, slugify } from '@/lib/seo';
 import { normalizeWebsiteUrl } from '@/lib/website';
 
 export const dynamic = 'force-dynamic';
@@ -13,21 +13,38 @@ async function getServiceContext(placeSlug: string, serviceSlug: string) {
   const supabase = createPublicSupabaseClient();
   if (!supabase) return null;
 
+  const normalizedSlug = slugify(serviceSlug);
+
   try {
     const { data: bySlug } = await supabase
       .from('services')
       .select('title, slug, description, image_url, website_url, status, is_active, environments!service_environment_links(name, slug)')
-      .eq('slug', serviceSlug)
+      .eq('slug', normalizedSlug)
       .maybeSingle();
 
-    const service = bySlug
-      ? bySlug
-      : await supabase
+    let service = bySlug;
+
+    if (!service) {
+      const { data: byId } = await supabase
         .from('services')
+        .select('title, slug, description, image_url, website_url, status, is_active, environments!service_environment_links(name, slug)')
+        .eq('id', serviceSlug)
+        .maybeSingle();
+      service = byId ?? null;
+    }
+
+    if (!service) {
+      const decodedName = serviceSlug.replace(/[-_]+/g, ' ').trim();
+      if (decodedName) {
+        const { data: byName } = await supabase
+          .from('services')
           .select('title, slug, description, image_url, website_url, status, is_active, environments!service_environment_links(name, slug)')
-          .eq('id', serviceSlug)
-          .maybeSingle()
-          .then(({ data }) => data ?? null);
+          .ilike('title', decodedName)
+          .limit(1)
+          .maybeSingle();
+        service = byName ?? null;
+      }
+    }
 
     if (!service) return null;
 

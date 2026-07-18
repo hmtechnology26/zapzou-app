@@ -335,7 +335,7 @@ export default function MyAdsPage() {
       <TopAppBar />
 
       <main className="pt-24 px-4 md:px-8 max-w-7xl mx-auto space-y-12 pb-32">
-        <section className="relative overflow-hidden rounded-[2.5rem] border border-primary/10 bg-gradient-to-br from-surface-container-lowest via-surface-container-lowest to-[#30cc36]/[0.08] p-6 shadow-sm md:p-8">
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-primary/10 bg-gradient-to-br from-surface-container-lowest via-surface-container-lowest to-[#04193D]/[0.08] p-6 shadow-sm md:p-8">
           <div className="pointer-events-none absolute -right-14 -top-14 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-16 left-24 h-32 w-32 rounded-full bg-primary/5 blur-3xl" />
 
@@ -421,7 +421,7 @@ export default function MyAdsPage() {
 
           {loadingContexts || affiliationLoading ? (
             <div className="py-24 flex justify-center flex-col items-center gap-4">
-              <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#30cc36] border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#04193D] border-t-transparent"></div>
               <p className="text-xs font-black uppercase tracking-widest text-primary/40">
                 Carregando seus locais...
               </p>
@@ -500,7 +500,7 @@ export default function MyAdsPage() {
                           <span
                             className={`rounded-lg border px-2 py-0.5 text-[8px] font-black uppercase tracking-widest ${
                               isActive
-                                ? "border-[#30CC36]/20 bg-[#30CC36]/10 text-[#30CC36]"
+                                ? "border-[#04193D]/20 bg-[#04193D]/10 text-[#04193D]"
                                 : isPending
                                   ? "border-amber-500/20 bg-amber-500/10 text-amber-700"
                                   : "border-error/20 bg-error/10 text-error"
@@ -531,7 +531,7 @@ export default function MyAdsPage() {
 
                       <div className="grid gap-3">
                         {isActive && membership?.role && (
-                          <div className="rounded-[1.6rem] border border-outline-variant/30 bg-surface-container-low p-1 shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-[#30cc36]/28 dark:shadow-[0_8px_24px_rgba(48,204,54,0.08)]">
+                          <div className="rounded-[1.6rem] border border-outline-variant/30 bg-surface-container-low p-1 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
                             <div className="flex items-center justify-between px-3 pb-1 pt-2">
                               <span className="text-[9px] font-black uppercase tracking-[0.28em] text-on-surface-variant/60">
                                 Tipo de acesso
@@ -545,7 +545,7 @@ export default function MyAdsPage() {
                               </span>
                             </div>
 
-                            <div className="relative grid grid-cols-2 overflow-hidden rounded-full border border-outline-variant/15 bg-surface-container-high/70 p-1 dark:border-[#30cc36]/15">
+                            <div className="relative grid grid-cols-2 overflow-hidden rounded-full border border-outline-variant/15 bg-surface-container-high/70 p-1">
                               <div
                                 className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-lg shadow-primary/25 transition-transform duration-300 ease-out ${
                                   isServiceProviderRole
@@ -608,7 +608,7 @@ export default function MyAdsPage() {
                         {/* {isActive && (
                           <button
                             onClick={() => router.push(`/meus-comunidades/${env.id}`)}
-                            className="flex h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-outline-variant/35 bg-surface-container-high/80 text-[10px] font-black uppercase text-on-surface shadow-[0_8px_20px_rgba(15,23,42,0.05)] transition-all duration-300 ease-out active:scale-95 hover:border-primary/25 hover:bg-surface-container-high hover:text-primary dark:border-[#30cc36]/28 dark:bg-[#223626] dark:text-[#e8f8ea] dark:shadow-[0_8px_20px_rgba(48,204,54,0.08)] dark:hover:border-[#30cc36]/45 dark:hover:bg-[#2b4a2f] dark:hover:text-white md:text-sm"
+                            className="flex h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-outline-variant/35 bg-surface-container-high/80 text-[10px] font-black uppercase text-on-surface shadow-[0_8px_20px_rgba(15,23,42,0.05)] transition-all duration-300 ease-out active:scale-95 hover:border-primary/25 hover:bg-surface-container-high hover:text-primary md:text-sm"
                           >
                             <Icon icon="store" size={18} />
                             Gerenciar Anúncios
@@ -674,7 +674,7 @@ export default function MyAdsPage() {
 
         {statusNotice && (
           <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-surface-container-lowest px-6 py-3 rounded-full shadow-2xl border border-outline-variant/10 flex items-center gap-2 animate-fade-in z-50">
-            <Icon icon="check_circle" size={18} className="text-[#30cc36]" />
+            <Icon icon="check_circle" size={18} className="text-[#04193D]" />
             <span className="text-sm font-bold text-on-surface">
               {statusNotice}
             </span>

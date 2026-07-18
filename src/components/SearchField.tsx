@@ -32,7 +32,7 @@ export function SearchField({
       <Icon
         icon="search"
         size={iconSize}
-        className={`text-[#30cc36] group-focus-within:scale-110 transition-transform shrink-0 ${iconClassName}`}
+        className={`text-[#04193D] group-focus-within:scale-110 transition-transform shrink-0 ${iconClassName}`}
         weight={500}
       />
       <input

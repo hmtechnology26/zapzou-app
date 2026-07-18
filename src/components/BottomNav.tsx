@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { Icon } from './Icon';
-import { useApp } from '@/hooks/useApp';
-import { useExitModal } from '@/contexts/ExitModalContext';
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Icon } from "./Icon";
+import { useApp } from "@/hooks/useApp";
+import { useExitModal } from "@/contexts/ExitModalContext";
 
 interface NavItem {
   path: string;
@@ -14,11 +14,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { path: '/', label: 'Início', icon: 'home' },
-  { path: '/places', label: 'Comunidades', icon: 'explore' },
-  { path: '/meus-anuncios', label: 'Meus anúncios', icon: 'storefront' },
-  { path: '/meus-ambientes', label: 'Minhas comunidades', icon: 'apartment' },
-  { path: '/favorites', label: 'Favoritos', icon: 'favorite' },
+  { path: "/", label: "Início", icon: "home" },
+  { path: "/places", label: "Comunidades", icon: "explore" },
+  { path: "/meus-anuncios", label: "Meus anúncios", icon: "storefront" },
+  // { path: '/meus-ambientes', label: 'Minhas comunidades', icon: 'apartment' },
+  { path: "/favorites", label: "Favoritos", icon: "favorite" },
 ];
 
 export function BottomNav() {
@@ -29,14 +29,21 @@ export function BottomNav() {
   const { checkAndShowExitModal } = useExitModal();
 
   useEffect(() => {
-    ['/', '/places', '/meus-anuncios', '/meus-ambientes', '/favorites', '/login'].forEach((route) => {
+    [
+      "/",
+      "/places",
+      "/meus-anuncios",
+      "/meus-ambientes",
+      "/favorites",
+      "/login",
+    ].forEach((route) => {
       void router.prefetch(route);
     });
   }, [router]);
 
   const handleNavClick = (
     e: React.MouseEvent<HTMLButtonElement>,
-    item: NavItem
+    item: NavItem,
   ) => {
     if (checkAndShowExitModal(item.path)) return;
 
@@ -46,36 +53,32 @@ export function BottomNav() {
   return (
     <nav
       className="
-        fixed left-4 right-4 z-[60]
-        bottom-[calc(0.2rem+env(safe-area-inset-bottom))]
-        md:hidden
-        overflow-hidden
-        rounded-[2rem]
-        border border-white/20
-        bg-white/[0.08]
-        px-2 py-2
-        shadow-[0_18px_60px_rgba(0,0,0,0.22)]
-        backdrop-blur-3xl
-        supports-[backdrop-filter]:bg-white/[0.10]
-        dark:border-white/10
-        dark:bg-zinc-950/55
-        dark:supports-[backdrop-filter]:bg-zinc-950/45
-      "
+    fixed
+    inset-x-4
+    bottom-[calc(env(safe-area-inset-bottom)+0.75rem)]
+    z-[60]
+    md:hidden
+    overflow-hidden
+    rounded-[28px]
+    border border-white/45
+    dark:border-white/10
+    bg-white/78
+    backdrop-blur-[28px]
+    supports-[backdrop-filter]:bg-white/70
+    shadow-[0_12px_40px_rgba(15,23,42,.08),0_2px_8px_rgba(15,23,42,.04)]
+    px-2
+    py-2
+    transition-all
+    duration-500
+  "
     >
-      {/* brilho/reflexo de vidro */}
-      <div className="pointer-events-none absolute inset-0 rounded-[2rem] bg-gradient-to-b from-white/25 via-white/[0.06] to-transparent dark:from-white/10" />
-
-      {/* borda interna iluminada */}
-      <div className="pointer-events-none absolute inset-[1px] rounded-[1.9rem] border border-white/10" />
-
-      {/* blur glow inferior */}
-      <div className="pointer-events-none absolute -bottom-10 left-1/2 h-16 w-56 -translate-x-1/2 rounded-full bg-primary/20 blur-2xl" />
-
-      <div className="relative flex items-center justify-between gap-1">
+      <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-gradient-to-b from-white/70 via-white/15 to-transparent dark:from-white/10 dark:via-transparent dark:to-transparent" />
+      <div className="pointer-events-none absolute inset-[1px] rounded-[27px] border border-white/30 dark:border-white/5" />
+      <div className="relative flex items-center justify-between gap-2">
         {navItems.map((item) => {
           const isActive =
             pathname === item.path ||
-            (item.path !== '/' && pathname.startsWith(item.path));
+            (item.path !== "/" && pathname.startsWith(item.path));
 
           return (
             <button
@@ -85,57 +88,66 @@ export function BottomNav() {
               title={item.label}
               onClick={(e) => handleNavClick(e, item)}
               className={`
-                group relative flex h-12 min-w-0 flex-1 items-center justify-center
-                rounded-2xl transition-all duration-300
-                active:-translate-y-1 active:scale-95
-                ${
-                  isActive
-                    ? 'text-primary'
-                    : 'text-on-surface-variant hover:bg-white/[0.06]'
-                }
-              `}
+                          group
+                          relative
+                          flex
+                          flex-1
+                          flex-col
+                          items-center
+                          justify-center
+                          gap-1
+                          py-2
+                          rounded-2xl
+                          transition-all
+                          duration-500
+                          active:scale-95
+                          ${!isActive ? "hover:bg-slate-100 dark:hover:bg-white/5" : ""}
+                        `}
             >
-              {isActive && (
-                <>
-                  <span className="absolute -top-1 h-1 w-5 rounded-full bg-primary shadow-[0_0_16px_rgba(48,204,54,0.65)]" />
-                  <span className="absolute inset-0 rounded-2xl bg-primary/[0.10]" />
-                </>
-              )}
-
               <span
                 className={`
-                  relative flex h-10 w-10 items-center justify-center rounded-2xl
-                  transition-all duration-300
-                  ${
-                    isActive
-                      ? 'scale-105 bg-primary text-white shadow-[0_10px_28px_rgba(48,204,54,0.35)]'
-                      : 'bg-white/[0.04] group-active:bg-white/[0.10]'
-                  }
-                `}
+                            relative
+                            flex
+                            h-10
+                            w-10
+                            items-center
+                            justify-center
+                            rounded-full
+                            transition-all
+                            duration-500
+                            ${
+                              isActive
+                                ? "bg-[#04193D] text-white shadow-[0_10px_30px_rgba(4,25,61,.18)]"
+                                : "text-slate-600 dark:text-slate-300"
+                            }
+                          `}
               >
                 {isActive && (
-                  <span className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/25 to-transparent" />
+                  <span className="absolute inset-0 rounded-full bg-gradient-to-b from-white/20 to-transparent" />
                 )}
 
                 <Icon
                   icon={item.icon}
-                  size={23}
-                  weight={isActive ? 700 : 300}
+                  size={20}
+                  weight={isActive ? 700 : 400}
                   grade={isActive ? 0 : -25}
                   className="relative z-10"
                 />
               </span>
 
-              {/* label aparece ao toque */}
               <span
-                className="
-                  pointer-events-none absolute -top-10 whitespace-nowrap rounded-full
-                  border border-white/10
-                  bg-zinc-950/80 px-2.5 py-1
-                  text-[9px] font-black uppercase tracking-wide text-white
-                  opacity-0 shadow-xl backdrop-blur-xl transition-all duration-200
-                  group-active:-translate-y-1 group-active:opacity-100
-                "
+                className={`
+                            text-[10px]
+                            font-medium
+                            leading-none
+                            transition-colors
+                            duration-300
+                            ${
+                              isActive
+                                ? "text-[#04193D] dark:text-white"
+                                : "text-slate-500 dark:text-slate-400"
+                            }
+                          `}
               >
                 {item.label}
               </span>

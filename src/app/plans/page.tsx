@@ -136,21 +136,21 @@ export default function PlansPage() {
 };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(48,204,54,0.16),_transparent_36%),linear-gradient(180deg,_#ffffff_0%,_#f7faf8_100%)] pb-24 dark:bg-[radial-gradient(circle_at_top,_rgba(48,204,54,0.16),_transparent_36%),linear-gradient(180deg,_#080a0c_0%,_#101215_100%)] md:pb-12">
+    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(48,204,54,0.16),_transparent_36%),linear-gradient(180deg,_#ffffff_0%,_#f7faf8_100%)] pb-24 md:pb-12">
       <TopAppBar showBack onBack={() => router.push('/profile')} />
 
       <main className="mx-auto max-w-6xl px-4 pt-20 md:px-8 md:pt-24">
         <section className="relative text-center">
-          <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-[#30cc36]/20 bg-[#30cc36]/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#1eb34b]">
+          <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-[#04193D]/20 bg-[#04193D]/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#1eb34b]">
             <Icon icon="workspace_premium" size={16} weight={700} />
             Planos ConectaE
           </div>
 
-          <h1 className="mx-auto max-w-3xl text-4xl font-black tracking-tight text-zinc-950 dark:text-white md:text-6xl">
+          <h1 className="mx-auto max-w-3xl text-4xl font-black tracking-tight text-zinc-950 md:text-6xl">
             Escolha o plano ideal para crescer com mais confiança
           </h1>
 
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-zinc-500 dark:text-zinc-400 md:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-zinc-500 md:text-lg">
             Tenha mais presença, mais visibilidade e ferramentas para transformar seu serviço em uma operação mais profissional.
           </p>
         </section>
@@ -163,20 +163,20 @@ export default function PlansPage() {
             return (
               <article
                 key={plan.id}
-                className={`relative flex flex-col overflow-hidden rounded-[2rem] border bg-white p-5 shadow-[0_24px_70px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_34px_90px_rgba(15,23,42,0.12)] dark:bg-[#0f1115] dark:shadow-[0_24px_70px_rgba(0,0,0,0.35)] ${
+                className={`relative flex flex-col overflow-hidden rounded-[2rem] border bg-white p-5 shadow-[0_24px_70px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_34px_90px_rgba(15,23,42,0.12)] ${
                   plan.popular
-                    ? 'border-[#30cc36]/40 ring-2 ring-[#30cc36]/20'
-                    : 'border-zinc-200/80 dark:border-white/10'
+                    ? 'border-[#04193D]/40 ring-2 ring-[#04193D]/20'
+                    : 'border-zinc-200/80'
                 }`}
               >
                 {plan.popular && (
-                  <div className="absolute right-4 top-4 rounded-full bg-[#30cc36] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-[0_10px_24px_rgba(48,204,54,0.35)]">
+                  <div className="absolute right-4 top-4 rounded-full bg-[#04193D] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-[0_10px_24px_rgba(48,204,54,0.35)]">
                     Popular
                   </div>
                 )}
 
                 <div className="mb-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#30cc36]/10 text-[#30cc36]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#04193D]/10 text-[#04193D]">
                     <Icon
                       icon={plan.popular ? 'bolt' : plan.id === 'pro' ? 'verified' : 'rocket_launch'}
                       size={24}
@@ -188,21 +188,21 @@ export default function PlansPage() {
                     {plan.highlight}
                   </p>
 
-                  <h2 className="mt-2 text-2xl font-black tracking-tight text-zinc-950 dark:text-white">
+                  <h2 className="mt-2 text-2xl font-black tracking-tight text-zinc-950">
                     {plan.name}
                   </h2>
 
-                  <p className="mt-2 min-h-[44px] text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+                  <p className="mt-2 min-h-[44px] text-sm leading-6 text-zinc-500">
                     {plan.description}
                   </p>
                 </div>
 
                 <div className="mb-6">
                   <div className="flex items-end gap-1">
-                    <span className="text-4xl font-black tracking-tight text-[#30cc36]">
+                    <span className="text-4xl font-black tracking-tight text-[#04193D]">
                       {plan.price}
                     </span>
-                    <span className="mb-1 text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                    <span className="mb-1 text-sm font-medium text-zinc-500">
                       /{plan.period}
                     </span>
                   </div>
@@ -211,10 +211,10 @@ export default function PlansPage() {
                 <div className="flex-1 space-y-3">
                   {plan.features.map((feature) => (
                     <div key={feature} className="flex items-start gap-2.5">
-                      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#30cc36]/10 text-[#30cc36]">
+                      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#04193D]/10 text-[#04193D]">
                         <Icon icon="check" size={14} weight={700} />
                       </div>
-                      <span className="text-sm leading-5 text-zinc-700 dark:text-zinc-300">
+                      <span className="text-sm leading-5 text-zinc-700">
                         {feature}
                       </span>
                     </div>
@@ -226,8 +226,8 @@ export default function PlansPage() {
                   onClick={() => handleSelectPlan(plan.id)}
                   className={`mt-7 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-black transition-all duration-300 ${
                     plan.popular
-                      ? 'bg-[#30cc36] text-white shadow-[0_16px_34px_rgba(48,204,54,0.35)] hover:brightness-110'
-                      : 'border border-zinc-200 bg-zinc-950 text-white hover:border-[#30cc36]/40 hover:bg-[#30cc36] dark:border-white/10 dark:bg-white dark:text-zinc-950 dark:hover:bg-[#30cc36] dark:hover:text-white'
+                      ? 'bg-[#04193D] text-white shadow-[0_16px_34px_rgba(48,204,54,0.35)] hover:brightness-110'
+                      : 'border border-zinc-200 bg-zinc-950 text-white hover:border-[#04193D]/40 hover:bg-[#04193D]'
                   }`}
                 >
                   {ctaLabel}
@@ -238,18 +238,18 @@ export default function PlansPage() {
           })}
         </section>
 
-        <section className="mt-14 rounded-[2rem] border border-zinc-200/80 bg-white/80 p-5 shadow-[0_24px_70px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.03] md:p-8">
+        <section className="mt-14 rounded-[2rem] border border-zinc-200/80 bg-white/80 p-5 shadow-[0_24px_70px_rgba(15,23,42,0.06)] backdrop-blur-xl md:p-8">
           <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#30cc36]">
+              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#04193D]">
                 Prova social
               </p>
-              <h3 className="mt-2 text-2xl font-black tracking-tight text-zinc-950 dark:text-white">
+              <h3 className="mt-2 text-2xl font-black tracking-tight text-zinc-950">
                 Prestadores que já estão crescendo
               </h3>
             </div>
 
-            <div className="flex items-center gap-1 text-[#30cc36]">
+            <div className="flex items-center gap-1 text-[#04193D]">
               {Array.from({ length: 5 }).map((_, index) => (
                 <Icon
                   key={index}
@@ -266,7 +266,7 @@ export default function PlansPage() {
             {testimonials.map((item) => (
               <article
                 key={item.name}
-                className="rounded-3xl border border-zinc-200/70 bg-white p-5 dark:border-white/10 dark:bg-[#0f1115]"
+                className="rounded-3xl border border-zinc-200/70 bg-white p-5"
               >
                 <div className="flex items-center gap-3">
                   <img
@@ -278,16 +278,16 @@ export default function PlansPage() {
                   />
 
                   <div>
-                    <p className="font-black text-zinc-950 dark:text-white">
+                    <p className="font-black text-zinc-950">
                       {item.name}
                     </p>
-                    <p className="text-xs font-bold text-[#30cc36]">
+                    <p className="text-xs font-bold text-[#04193D]">
                       {item.plan} • {item.role}
                     </p>
                   </div>
                 </div>
 
-                <p className="mt-4 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+                <p className="mt-4 text-sm leading-6 text-zinc-500">
                   “{item.text}”
                 </p>
               </article>
@@ -295,7 +295,7 @@ export default function PlansPage() {
           </div>
         </section>
 
-        <section className="mt-8 overflow-hidden rounded-[2rem] border border-[#30cc36]/20 bg-[#30cc36] p-6 text-white shadow-[0_24px_70px_rgba(48,204,54,0.22)] md:p-8">
+        <section className="mt-8 overflow-hidden rounded-[2rem] border border-[#04193D]/20 bg-[#04193D] p-6 text-white shadow-[0_24px_70px_rgba(48,204,54,0.22)] md:p-8">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-white/70">
