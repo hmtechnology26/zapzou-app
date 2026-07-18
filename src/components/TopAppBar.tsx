@@ -154,19 +154,19 @@ export function TopAppBar({
         {/* Logo + Saudação */}
         <div className="flex items-center gap-2 md:gap-8">
           <Link href="/" prefetch>
-            <img src="/conectae_logo.png" className="h-9" />
+            <img src="/conectae_logo.png" className="h-9 hover:transition hover:duration-300 hover:scale-105 transition-transform duration-300" />
           </Link>
-          {mounted && user?.name && (
+          {mounted && (
             <span className="hidden whitespace-nowrap text-xs font-medium text-slate-500 md:inline">
-              Olá, {user.name.split(" ")[0]}!
+              Olá, {user?.name ? user.name.split(" ")[0] : "Visitante"}!
             </span>
           )}
         </div>
 
         {/* Espaço central (mobile: saudação) */}
-        {mounted && user?.name && (
+        {mounted && (
           <span className="truncate whitespace-nowrap text-xs font-medium text-slate-500 md:hidden">
-            Olá, {user.name.split(" ")[0]}!
+            Olá, {user?.name ? user.name.split(" ")[0] : "Visitante"}!
           </span>
         )}
 

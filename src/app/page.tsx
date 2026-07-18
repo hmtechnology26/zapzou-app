@@ -1583,19 +1583,11 @@ export default function HomePage() {
             </div>
           </div>
         </section> */}
+        {(user || otherStoryGroups.length > 0 || storiesLoading) && (
         <section className="relative overflow-visible rounded-[2rem] border border-white/20 bg-white/55 p-4 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur-2xl">
           <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#04193D]/10 blur-3xl" />
           <div className="relative flex items-center justify-between px-1">
             <h2 className="text-sm font-black tracking-[0.2em] uppercase text-on-surface-variant"></h2>
-            {/* {user && (
-              <button
-                type="button"
-                onClick={handleOpenStoryComposer}
-                className="text-xs font-bold px-3 py-1.5 rounded-full bg-[#04193D]/10 text-[#04193D] hover:bg-[#04193D]/20 transition-colors"
-              >
-                Adicionar
-              </button>
-            )} */}
           </div>
 
           {storiesError && (
@@ -1684,15 +1676,12 @@ export default function HomePage() {
               </button>
             ))}
 
-            {!storiesLoading && !user && otherStoryGroups.length === 0 && (
-              <div className="w-full py-4 px-4 rounded-2xltext-center text-xs text-on-surface-variant"></div>
-            )}
-
             {storiesLoading && (
               <div className="w-full py-4 px-4 rounded-2xl text-center text-xs text-on-surface-variant"></div>
             )}
           </div>
         </section>
+        )}
 
         {/* <section className="mb-1 mt-1 text-left md:text-left">
           <h2 className="text-3xl font-black text-on-surface tracking-tighter">
