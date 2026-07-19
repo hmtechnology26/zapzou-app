@@ -156,17 +156,27 @@ export function TopAppBar({
           <Link href="/" prefetch>
             <img src="/conectae_logo.png" className="h-9 hover:transition hover:duration-300 hover:scale-105 transition-transform duration-300" />
           </Link>
-          {mounted && (
+          {mounted && user?.name && (
             <span className="hidden whitespace-nowrap text-xs font-medium text-slate-500 md:inline">
-              Olá, {user?.name ? user.name.split(" ")[0] : "Visitante"}!
+              {(() => {
+                const h = new Date().getHours();
+                if (h < 12) return "Bom dia";
+                if (h < 18) return "Boa tarde";
+                return "Boa noite";
+              })()}, {user.name.split(" ")[0]}!
             </span>
           )}
         </div>
 
         {/* Espaço central (mobile: saudação) */}
-        {mounted && (
+        {mounted && user?.name && (
           <span className="truncate whitespace-nowrap text-xs font-medium text-slate-500 md:hidden">
-            Olá, {user?.name ? user.name.split(" ")[0] : "Visitante"}!
+            {(() => {
+              const h = new Date().getHours();
+              if (h < 12) return "Bom dia";
+              if (h < 18) return "Boa tarde";
+              return "Boa noite";
+            })()}, {user.name.split(" ")[0]}!
           </span>
         )}
 
